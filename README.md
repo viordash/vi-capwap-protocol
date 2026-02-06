@@ -1,6 +1,6 @@
 # vi-capwap-protocol
 
-Header-only C++17 library for CAPWAP protocol (Control and Provisioning of Wireless Access Points) packet definitions according to RFC 5415 and RFC 5416.
+C++17 library for CAPWAP protocol (Control and Provisioning of Wireless Access Points) packet definitions according to RFC 5415 and RFC 5416.
 
 This repository is designed to be included as a git submodule in other projects.
 
