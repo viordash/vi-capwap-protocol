@@ -1,4 +1,4 @@
-name: viCapwap Packets CI
+name: vi-capwap Packets CI
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
       run: make build_tests
 
     - name: Run tests
-      run: ./output/tests/unit_tests/VICapwap-tests
+      run: ./output/tests/unit_tests/vi-capwap-protocol-tests
 
   Benchmarks:
     runs-on: ubuntu-22.04
@@ -60,4 +60,4 @@ jobs:
       run: make build_benchmarks
 
     - name: Run benchmarks
-      run: ./output/tests/benchmarks/VICapwap-benchmarks
+      run: ./output/tests/benchmarks/vi-capwap-protocol-benchmarks

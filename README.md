@@ -1,4 +1,4 @@
-# viCapwap Packets
+# vi-capwap-protocol
 
 Header-only C++17 library for CAPWAP protocol (Control and Provisioning of Wireless Access Points) packet definitions according to RFC 5415 and RFC 5416.
 
@@ -21,14 +21,14 @@ docs/
 ## Usage as Submodule
 
 ```bash
-git submodule add <repository-url> path/to/viCapwapPackets
+git submodule add <repository-url> path/to/vi-capwap-protocol
 git submodule update --init --recursive
 ```
 
 Then include the necessary headers in your project:
 ```cpp
-#include "viCapwapPackets/src/DiscoveryRequest.h"
-#include "viCapwapPackets/src/elements/ACDescriptor.h"
+#include "vi-capwap-protocol/src/DiscoveryRequest.h"
+#include "vi-capwap-protocol/src/elements/ACDescriptor.h"
 ```
 
 ## Building Tests
@@ -36,11 +36,11 @@ Then include the necessary headers in your project:
 ```bash
 # Build and run unit tests
 make build_tests
-./output/tests/unit_tests/VICapwap-tests
+./output/tests/unit_tests/vi-capwap-tests
 
 # Build and run benchmarks
 make build_benchmarks
-./output/tests/benchmarks/VICapwap-benchmarks
+./output/tests/benchmarks/vi-capwap-benchmarks
 ```
 
 ## Code Quality

@@ -1,4 +1,4 @@
-PROJECT_NAME := VICapwapPackets-tests
+PROJECT_NAME := vi-capwap-protocol-tests
 
 SHELL := /bin/bash
 

@@ -1,4 +1,4 @@
-PROJECT_NAME := VICapwapPackets-benchmarks
+PROJECT_NAME := vi-capwap-protocol-benchmarks
 
 SHELL := /bin/bash
 
