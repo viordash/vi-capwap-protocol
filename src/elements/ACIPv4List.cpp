@@ -15,10 +15,8 @@ void WritableACIPv4List::Serialize(RawData *raw_data) const {
     ElementHeader *dst = (ElementHeader *)raw_data->current;
     *dst = *this;
     raw_data->current += sizeof(ElementHeader);
-    for (size_t i = 0; i < addresses.size(); i++) {
-        memcpy(raw_data->current, &addresses[i], sizeof(uint32_t));
-        raw_data->current += sizeof(uint32_t);
-    }
+    memcpy(raw_data->current, addresses.data(), addresses.size() * sizeof(uint32_t));
+    raw_data->current += addresses.size() * sizeof(uint32_t);
 }
 uint16_t WritableACIPv4List::GetTotalLength() const {
     return GetLength() + sizeof(ElementHeader);

@@ -81,7 +81,8 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_deserialize_perf) {
         write_data.Serialize(&raw_data);
         ankerl::nanobench::doNotOptimizeAway(raw_data);
 
-        raw_data = { buffer, buffer + 302 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
+        const auto size = raw_data.current - buffer;
+        raw_data = { buffer, buffer + size };
         ReadableJoinResponse read_data;
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
