@@ -1,0 +1,6 @@
+[submodule "tests/lib/CppUTest"]
+	path = tests/lib/CppUTest
+	url = https://github.com/cpputest/cpputest.git
+[submodule "tests/lib/nanobench"]
+	path = tests/lib/nanobench
+	url = https://github.com/martinus/nanobench.git

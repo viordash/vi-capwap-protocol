@@ -1,0 +1,63 @@
+name: viCapwap Packets CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  Code-Style:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install clang-format
+        pip install clang-format
+
+    - name: Check code format
+      run: make check_format
+
+  Unit-Tests:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install ccache
+
+    - name: Build tests
+      run: make build_tests
+
+    - name: Run tests
+      run: ./output/tests/unit_tests/VICapwap-tests
+
+  Benchmarks:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install ccache
+
+    - name: Build benchmarks
+      run: make build_benchmarks
+
+    - name: Run benchmarks
+      run: ./output/tests/benchmarks/VICapwap-benchmarks

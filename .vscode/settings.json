@@ -1,0 +1,128 @@
+{
+    "files.associations": {
+        "*.Single": "makefile",
+        "iostream": "cpp",
+        "array": "cpp",
+        "atomic": "cpp",
+        "bit": "cpp",
+        "*.tcc": "cpp",
+        "cctype": "cpp",
+        "charconv": "cpp",
+        "chrono": "cpp",
+        "clocale": "cpp",
+        "cmath": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "cstdarg": "cpp",
+        "cstddef": "cpp",
+        "cstdint": "cpp",
+        "cstdio": "cpp",
+        "cstdlib": "cpp",
+        "cstring": "cpp",
+        "ctime": "cpp",
+        "cwchar": "cpp",
+        "cwctype": "cpp",
+        "deque": "cpp",
+        "string": "cpp",
+        "unordered_map": "cpp",
+        "vector": "cpp",
+        "exception": "cpp",
+        "algorithm": "cpp",
+        "functional": "cpp",
+        "iterator": "cpp",
+        "memory": "cpp",
+        "memory_resource": "cpp",
+        "numeric": "cpp",
+        "optional": "cpp",
+        "random": "cpp",
+        "ratio": "cpp",
+        "string_view": "cpp",
+        "system_error": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "initializer_list": "cpp",
+        "iomanip": "cpp",
+        "iosfwd": "cpp",
+        "istream": "cpp",
+        "limits": "cpp",
+        "new": "cpp",
+        "numbers": "cpp",
+        "ostream": "cpp",
+        "semaphore": "cpp",
+        "span": "cpp",
+        "sstream": "cpp",
+        "stdexcept": "cpp",
+        "stop_token": "cpp",
+        "streambuf": "cpp",
+        "thread": "cpp",
+        "cinttypes": "cpp",
+        "typeinfo": "cpp",
+        "variant": "cpp",
+        "format": "cpp",
+        "list": "cpp",
+        "cfenv": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "condition_variable": "cpp",
+        "csignal": "cpp",
+        "map": "cpp",
+        "fstream": "cpp",
+        "mutex": "cpp",
+        "cassert": "cpp",
+        "ranges": "cpp",
+        "codecvt": "cpp",
+        "filesystem": "cpp",
+        "queue": "cpp",
+        "future": "cpp",
+        "forward_list": "cpp",
+        "shared_mutex": "cpp"
+    },
+    "editor.formatOnSave": true,
+    "tabMagnet.rules": [
+        {
+            "left": "$(name).c",
+            "right": "$(name).h"
+        },
+        {
+            "left": "$(name).cpp",
+            "right": "$(name).h"
+        },
+        {
+            "left": "$(name).cpp",
+            "right": "$(name).hpp"
+        },
+        {
+            "left": "*/$(name).c",
+            "right": "*/$(name).h"
+        },
+        {
+            "left": "*/$(name).cpp",
+            "right": "*/$(name).h"
+        },
+        {
+            "left": "*/$(name).cpp",
+            "right": "*/$(name).hpp"
+        },
+        {
+            "left": "$(name).c",
+            "right": "include/$(name).h"
+        },
+        {
+            "left": "$(name).cpp",
+            "right": "include/$(name).h"
+        },
+        {
+            "left": "$(name).cpp",
+            "right": "include/$(name).hpp"
+        },
+        {
+            "left": "**/$(name).cpp",
+            "right": "tests/**/$(name)_tests.cpp"
+        },
+        {
+            "left": "**/$(name).h",
+            "right": "tests/**/$(name)_tests.cpp"
+        }
+    ]
+}
