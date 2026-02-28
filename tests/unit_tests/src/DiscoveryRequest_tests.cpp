@@ -47,7 +47,8 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize) {
         { 3, true, true, false, true },
     };
 
-    WritableDiscoveryRequest write_data(wtpboarddata,
+    WritableDiscoveryRequest write_data(DiscoveryType::Type::DHCP,
+                                        wtpboarddata,
                                         wtpdescriptor,
                                         wtp_frame_tunnel_mode,
                                         WTPMACType::Local_MAC,
@@ -133,7 +134,8 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_VendorSpecificP
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
     vendor_specific_payloads.Add(1, 2, "01234567890A");
 
-    WritableDiscoveryRequest write_data(wtpboarddata,
+    WritableDiscoveryRequest write_data(DiscoveryType::Type::DHCP,
+                                        wtpboarddata,
                                         wtpdescriptor,
                                         wtp_frame_tunnel_mode,
                                         WTPMACType::Local_MAC,
@@ -202,7 +204,8 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_MTUDiscoveryPad
     vendor_specific_payloads.Add(12300, 700, { '0', '1', '2', '3' });
 
     {
-        WritableDiscoveryRequest write_data_1470(wtpboarddata,
+        WritableDiscoveryRequest write_data_1470(DiscoveryType::Type::DHCP,
+                                                 wtpboarddata,
                                                  wtpdescriptor,
                                                  wtp_frame_tunnel_mode,
                                                  WTPMACType::Local_MAC,
@@ -221,7 +224,8 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_MTUDiscoveryPad
     }
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    WritableDiscoveryRequest write_data_300(wtpboarddata,
+    WritableDiscoveryRequest write_data_300(DiscoveryType::Type::DHCP,
+                                            wtpboarddata,
                                             wtpdescriptor,
                                             wtp_frame_tunnel_mode,
                                             WTPMACType::Local_MAC,
