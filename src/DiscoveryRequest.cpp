@@ -6,6 +6,7 @@
 #include "logging.h"
 
 WritableDiscoveryRequest::WritableDiscoveryRequest(
+    const DiscoveryType::Type discovery_type,
     const WritableWTPBoardData &wtp_board_data,
     const WritableWTPDescriptor &wtp_descriptor,
     const WTPFrameTunnelMode &wtp_frame_tunnel_mode,

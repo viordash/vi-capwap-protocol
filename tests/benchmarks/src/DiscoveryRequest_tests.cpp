@@ -51,7 +51,8 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_deserialize_perf) {
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-    WritableDiscoveryRequest write_data(wtpboarddata,
+    WritableDiscoveryRequest write_data(DiscoveryType::Type::DHCP,
+                                        wtpboarddata,
                                         wtpdescriptor,
                                         wtp_frame_tunnel_mode,
                                         WTPMACType::Local_MAC,

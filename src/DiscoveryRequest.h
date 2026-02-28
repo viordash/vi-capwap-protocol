@@ -35,7 +35,8 @@ struct WritableDiscoveryRequest : WritableCapwapRequest {
     static const uint16_t no_probe_mtu_size = std::numeric_limits<uint16_t>::min();
 
     WritableDiscoveryRequest(const WritableDiscoveryRequest &) = delete;
-    WritableDiscoveryRequest(const WritableWTPBoardData &wtp_board_data,
+    WritableDiscoveryRequest(const DiscoveryType::Type discovery_type,
+                             const WritableWTPBoardData &wtp_board_data,
                              const WritableWTPDescriptor &wtp_descriptor,
                              const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
                              const WTPMACType::Type mac_type,
