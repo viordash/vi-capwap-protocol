@@ -14,7 +14,7 @@ WritableDiscoveryRequest::WritableDiscoveryRequest(
     const nonstd::span<const WTPRadioInformation> &wtp_radio_info,
     WritableVendorSpecificPayloadArray &vendor_specific_payloads,
     const uint16_t probe_mtu_size)
-    : discovery_type{ DiscoveryType::Type::DHCP }, wtp_board_data{ wtp_board_data },
+    : discovery_type{ discovery_type }, wtp_board_data{ wtp_board_data },
       wtp_descriptor{ wtp_descriptor }, wtp_frame_tunnel_mode{ wtp_frame_tunnel_mode },
       wtp_mac_type{ mac_type }, wtp_radio_informations{ wtp_radio_info },
       vendor_specific_payloads{ vendor_specific_payloads },
