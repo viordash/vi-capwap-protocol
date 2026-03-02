@@ -140,8 +140,10 @@ WritableACDescriptor::WritableACDescriptor(uint16_t stations,
                                            bool clear_data_chn,
                                            bool dtls_data_chn,
                                            const nonstd::span<const SubElement> &elements)
+    // clang-format off
     : header{ stations,         limit, active_wtp,     max_wtp,       x509_cert,
               preshared_secret, rmac,  clear_data_chn, dtls_data_chn, GetSubElementsSize(elements) },
+      // clang-format on
       sub_elements(elements) {
 }
 

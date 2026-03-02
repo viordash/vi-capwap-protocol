@@ -2,7 +2,7 @@
 #include "ClearHeader.h"
 #include "lassert.h"
 #include "logging.h"
-#include <arpa/inet.h>
+#include "network_utils.h"
 #include <string.h>
 
 DuplicateIPv4Address::DuplicateIPv4Address(uint32_t ipaddress,
@@ -108,12 +108,9 @@ uint16_t WritableDuplicateIPv4AdrArray::GetTotalLength() const {
 
 void WritableDuplicateIPv4AdrArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        struct in_addr paddr;
-        paddr.s_addr = items[i].header.IPAddress;
-
         log_i("ME DuplicateIPv4Address #%lu IP Address:%s, Status:%u",
               i,
-              inet_ntoa(paddr),
+              IpToString(items[i].header.IPAddress).c_str(),
               (unsigned)items[i].header.Status);
         MacAddress::Log(i, items[i].Mac.Length, items[i].Mac.Address);
     }
@@ -150,12 +147,9 @@ nonstd::span<const DuplicateIPv4Address *const> ReadableDuplicateIPv4AdrArray::G
 
 void ReadableDuplicateIPv4AdrArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        struct in_addr paddr;
-        paddr.s_addr = items[i]->IPAddress;
-
         log_i("ME DuplicateIPv4Address #%lu IP Address:%s, Status:%u",
               i,
-              inet_ntoa(paddr),
+              IpToString(items[i]->IPAddress).c_str(),
               items[i]->Status);
         MacAddress::Log(i, items[i]->MACAddress.Length, items[i]->MACAddress.MACAddresses);
     }

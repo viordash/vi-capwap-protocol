@@ -1,7 +1,7 @@
 #include "WTPStaticIPAddressInformation.h"
 #include "lassert.h"
 #include "logging.h"
-#include <arpa/inet.h>
+#include "network_utils.h"
 #include <cstring>
 
 WTPStaticIPAddressInformation::WTPStaticIPAddressInformation(uint32_t ipaddress,
@@ -44,18 +44,9 @@ uint16_t WTPStaticIPAddressInformation::GetTotalLength() const {
 }
 
 void WTPStaticIPAddressInformation::Log() const {
-    struct in_addr paddr;
-    paddr.s_addr = IpAddress;
-
-    struct in_addr pnetmask;
-    pnetmask.s_addr = Netmask;
-
-    struct in_addr pgateway;
-    pgateway.s_addr = Gateway;
-
     log_i("ME WTPStaticIPAddressInformation IP Address:%s, Netmask:%s, Gateway:%s, use static:%u",
-          inet_ntoa(paddr),
-          inet_ntoa(pnetmask),
-          inet_ntoa(pgateway),
+          IpToString(IpAddress).c_str(),
+          IpToString(Netmask).c_str(),
+          IpToString(Gateway).c_str(),
           Static);
 }

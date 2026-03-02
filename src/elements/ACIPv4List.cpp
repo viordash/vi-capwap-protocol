@@ -2,7 +2,7 @@
 #include "ACIPv4List.h"
 #include "lassert.h"
 #include "logging.h"
-#include <arpa/inet.h>
+#include "network_utils.h"
 #include <string.h>
 
 WritableACIPv4List::WritableACIPv4List(const nonstd::span<const uint32_t> &addresses)
@@ -25,9 +25,7 @@ uint16_t WritableACIPv4List::GetTotalLength() const {
 void WritableACIPv4List::Log() const {
     log_i("ME ACIPv4List size:%lu, adrs:", addresses.size());
     for (size_t i = 0; i < addresses.size(); i++) {
-        struct in_addr paddr;
-        paddr.s_addr = addresses[i];
-        log_i("     #%lu, %s", i, inet_ntoa(paddr));
+        log_i("     #%lu, %s", i, IpToString(addresses[i]).c_str());
     }
 }
 
@@ -63,8 +61,6 @@ size_t ReadableACIPv4List::GetCount() const {
 void ReadableACIPv4List::Log() const {
     log_i("ME ACIPv4List size:%lu, adrs:", GetCount());
     for (size_t i = 0; i < GetCount(); i++) {
-        struct in_addr paddr;
-        paddr.s_addr = addresses[i];
-        log_i("     #%lu, %s", i, inet_ntoa(paddr));
+        log_i("     #%lu, %s", i, IpToString(addresses[i]).c_str());
     }
 }
