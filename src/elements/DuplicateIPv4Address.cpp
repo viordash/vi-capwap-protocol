@@ -1,8 +1,8 @@
 #include "DuplicateIPv4Address.h"
 #include "ClearHeader.h"
-#include "network_utils.h"
 #include "lassert.h"
 #include "logging.h"
+#include "network_utils.h"
 #include <string.h>
 
 DuplicateIPv4Address::DuplicateIPv4Address(uint32_t ipaddress,

@@ -1,8 +1,8 @@
 
 #include "ACIPv4List.h"
-#include "network_utils.h"
 #include "lassert.h"
 #include "logging.h"
+#include "network_utils.h"
 #include <string.h>
 
 WritableACIPv4List::WritableACIPv4List(const nonstd::span<const uint32_t> &addresses)
