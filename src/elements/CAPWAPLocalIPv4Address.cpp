@@ -1,7 +1,7 @@
 #include "CAPWAPLocalIPv4Address.h"
+#include "network_utils.h"
 #include "lassert.h"
 #include "logging.h"
-#include <arpa/inet.h>
 
 CAPWAPLocalIPv4Address::CAPWAPLocalIPv4Address(uint32_t ipaddress)
     : ElementHeader(ElementHeader::CAPWAPLocalIPv4Address,
@@ -40,10 +40,7 @@ uint32_t CAPWAPLocalIPv4Address::GetIPAddress() const {
 }
 
 void CAPWAPLocalIPv4Address::Log() const {
-    struct in_addr paddr;
-    paddr.s_addr = GetIPAddress();
-
-    log_i("ME CAPWAPLocalIPv4Address IP Address:%s", inet_ntoa(paddr));
+    log_i("ME CAPWAPLocalIPv4Address IP Address:%s", IpToString(GetIPAddress()).c_str());
 }
 
 WritableCAPWAPLocalIPV4AdrArray::WritableCAPWAPLocalIPV4AdrArray(
@@ -67,10 +64,9 @@ uint16_t WritableCAPWAPLocalIPV4AdrArray::GetTotalLength() const {
 
 void WritableCAPWAPLocalIPV4AdrArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        struct in_addr paddr;
-        paddr.s_addr = items[i].GetIPAddress();
-
-        log_i("ME CAPWAPLocalIPv4Address #%lu IP Address::%s", i, inet_ntoa(paddr));
+        log_i("ME CAPWAPLocalIPv4Address #%lu IP Address::%s",
+              i,
+              IpToString(items[i].GetIPAddress()).c_str());
     }
 }
 
@@ -99,9 +95,8 @@ nonstd::span<const CAPWAPLocalIPv4Address *const> ReadableCAPWAPLocalIPV4AdrArra
 
 void ReadableCAPWAPLocalIPV4AdrArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        struct in_addr paddr;
-        paddr.s_addr = items[i]->GetIPAddress();
-
-        log_i("ME CAPWAPLocalIPv4Address #%lu IP Address::%s", i, inet_ntoa(paddr));
+        log_i("ME CAPWAPLocalIPv4Address #%lu IP Address::%s",
+              i,
+              IpToString(items[i]->GetIPAddress()).c_str());
     }
 }
