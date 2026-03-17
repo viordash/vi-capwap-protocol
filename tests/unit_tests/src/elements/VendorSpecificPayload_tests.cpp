@@ -93,7 +93,7 @@ TEST(VendorSpecificPayloadTestsGroup, VendorSpecificPayloadArray_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 }
 
-TEST(VendorSpecificPayloadTestsGroup, Add_array_of_items_is_unique) {
+TEST(VendorSpecificPayloadTestsGroup, Add_array_of_items_not_unique) {
     uint8_t buffer[4096] = {};
 
     WritableVendorSpecificPayloadArray write_data;
@@ -114,7 +114,11 @@ TEST(VendorSpecificPayloadTestsGroup, Add_array_of_items_is_unique) {
     ReadableVendorSpecificPayloadArray read_data;
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_FALSE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(2, read_data.Get().size());
+    CHECK_EQUAL(6, read_data.Get().size());
 }

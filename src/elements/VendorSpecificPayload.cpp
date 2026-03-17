@@ -76,24 +76,7 @@ void WritableVendorSpecificPayloadArray::Add(uint32_t vendor_identifier,
                                              std::vector<char> val) {
     ASSERT(items.size() + 1 <= ReadableVendorSpecificPayloadArray::max_count);
 
-    auto it_exists = std::find_if(
-        items.begin(),
-        items.end(),
-        [&vendor_identifier, &element_id](const WritableVendorSpecificPayloadArray::Item &item) {
-            return item.header.GetVendorIdentifier() == vendor_identifier
-                && item.header.GetElementId() == element_id;
-        });
-
-    if (it_exists != items.end()) {
-        *it_exists = WritableVendorSpecificPayloadArray::Item{ vendor_identifier,
-                                                               element_id,
-                                                               std::move(val) };
-        log_i("VendorSpecificPayload: replace vendor_identifier: %u, element_id: %u",
-              vendor_identifier,
-              element_id);
-    } else {
-        items.emplace_back(vendor_identifier, element_id, std::move(val));
-    }
+    items.emplace_back(vendor_identifier, element_id, std::move(val));
 }
 
 void WritableVendorSpecificPayloadArray::Add(uint32_t vendor_identifier,
@@ -103,24 +86,7 @@ void WritableVendorSpecificPayloadArray::Add(uint32_t vendor_identifier,
 
     std::vector<char> vec(str.begin(), str.end());
 
-    auto it_exists = std::find_if(
-        items.begin(),
-        items.end(),
-        [&vendor_identifier, &element_id](const WritableVendorSpecificPayloadArray::Item &item) {
-            return item.header.GetVendorIdentifier() == vendor_identifier
-                && item.header.GetElementId() == element_id;
-        });
-
-    if (it_exists != items.end()) {
-        *it_exists = WritableVendorSpecificPayloadArray::Item{ vendor_identifier,
-                                                               element_id,
-                                                               std::move(vec) };
-        log_i("VendorSpecificPayload: replace vendor_identifier: %u, element_id: %u",
-              vendor_identifier,
-              element_id);
-    } else {
-        items.emplace_back(vendor_identifier, element_id, std::move(vec));
-    }
+    items.emplace_back(vendor_identifier, element_id, std::move(vec));
 }
 
 bool WritableVendorSpecificPayloadArray::Empty() const {
