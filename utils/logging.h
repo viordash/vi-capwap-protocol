@@ -30,10 +30,9 @@ typedef enum {
 #else
 #define log_e(format, ...)                                                                         \
     do {                                                                                           \
-        (void)(format);                                                                            \
-        _Pragma("GCC diagnostic push")                                                             \
-            _Pragma("GCC diagnostic ignored \"-Wunused-value\"")(void)(0, ##__VA_ARGS__);          \
-        _Pragma("GCC diagnostic pop")                                                              \
+        if (0) {                                                                                   \
+            fprintf(stderr, format, ##__VA_ARGS__);                                                \
+        }                                                                                          \
     } while (0)
 #endif
 
@@ -42,10 +41,9 @@ typedef enum {
 #else
 #define log_w(format, ...)                                                                         \
     do {                                                                                           \
-        (void)(format);                                                                            \
-        _Pragma("GCC diagnostic push")                                                             \
-            _Pragma("GCC diagnostic ignored \"-Wunused-value\"")(void)(0, ##__VA_ARGS__);          \
-        _Pragma("GCC diagnostic pop")                                                              \
+        if (0) {                                                                                   \
+            fprintf(stderr, format, ##__VA_ARGS__);                                                \
+        }                                                                                          \
     } while (0)
 #endif
 
@@ -54,10 +52,9 @@ typedef enum {
 #else
 #define log_i(format, ...)                                                                         \
     do {                                                                                           \
-        (void)(format);                                                                            \
-        _Pragma("GCC diagnostic push")                                                             \
-            _Pragma("GCC diagnostic ignored \"-Wunused-value\"")(void)(0, ##__VA_ARGS__);          \
-        _Pragma("GCC diagnostic pop")                                                              \
+        if (0) {                                                                                   \
+            fprintf(stdout, format, ##__VA_ARGS__);                                                \
+        }                                                                                          \
     } while (0)
 #endif
 
@@ -66,10 +63,9 @@ typedef enum {
 #else
 #define log_d(format, ...)                                                                         \
     do {                                                                                           \
-        (void)(format);                                                                            \
-        _Pragma("GCC diagnostic push")                                                             \
-            _Pragma("GCC diagnostic ignored \"-Wunused-value\"")(void)(0, ##__VA_ARGS__);          \
-        _Pragma("GCC diagnostic pop")                                                              \
+        if (0) {                                                                                   \
+            fprintf(stdout, format, ##__VA_ARGS__);                                                \
+        }                                                                                          \
     } while (0)
 #endif
 
