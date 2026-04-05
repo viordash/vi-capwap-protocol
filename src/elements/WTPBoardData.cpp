@@ -61,7 +61,10 @@ uint16_t BoardDataSubElementHeader::GetLength() const {
 
 bool BoardDataSubElementHeader::Validate() const {
     static_assert(sizeof(BoardDataSubElementHeader) == 4);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
     return type >= WTPModelNumber && type <= BaseMACAddress && GetLength() < 1024;
+#pragma GCC diagnostic pop
 }
 
 void BoardDataSubElementHeader::Serialize(RawData *raw_data) const {

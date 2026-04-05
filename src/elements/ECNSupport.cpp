@@ -8,9 +8,12 @@ ECNSupport::ECNSupport(Type type)
 }
 bool ECNSupport::Validate() const {
     static_assert(sizeof(ECNSupport) == 5);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
     return ElementHeader::GetElementType() == ElementHeader::ECNSupport
         && ElementHeader::GetLength() == (sizeof(ECNSupport) - sizeof(ElementHeader)) //
         && type >= LimitedECN && type <= FullAndLimitedECN;
+#pragma GCC diagnostic pop
 }
 void ECNSupport::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(ECNSupport) <= raw_data->end);

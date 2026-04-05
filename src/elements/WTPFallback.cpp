@@ -9,14 +9,19 @@ WTPFallback::WTPFallback(Mode mode)
 }
 bool WTPFallback::Validate() const {
     static_assert(sizeof(WTPFallback) == 5);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
     return ElementHeader::GetElementType() == ElementHeader::WTPFallback
         && ElementHeader::GetLength() == (sizeof(WTPFallback) - sizeof(ElementHeader)) //
         && mode >= Reserved && mode <= Disabled;
+#pragma GCC diagnostic pop
 }
 void WTPFallback::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(WTPFallback) <= raw_data->end);
 #pragma GCC diagnostic push
+#if __GNUC__ >= 8
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
     memcpy(raw_data->current, this, sizeof(WTPFallback));
 #pragma GCC diagnostic pop
     raw_data->current += sizeof(WTPFallback);

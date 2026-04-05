@@ -8,9 +8,12 @@ WTPMACType::WTPMACType(Type type)
 }
 bool WTPMACType::Validate() const {
     static_assert(sizeof(WTPMACType) == 5);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
     return ElementHeader::GetElementType() == ElementHeader::WTPMACType
         && ElementHeader::GetLength() == (sizeof(WTPMACType) - sizeof(ElementHeader)) //
         && type >= Local_MAC && type <= Both;
+#pragma GCC diagnostic pop
 }
 void WTPMACType::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(WTPMACType) <= raw_data->end);

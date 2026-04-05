@@ -43,7 +43,9 @@ bool WTPRebootStatistics::Validate() const {
 void WTPRebootStatistics::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(WTPRebootStatistics) <= raw_data->end);
 #pragma GCC diagnostic push
+#if __GNUC__ >= 8
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
     memcpy(raw_data->current, this, sizeof(WTPRebootStatistics));
 #pragma GCC diagnostic pop
     raw_data->current += sizeof(WTPRebootStatistics);

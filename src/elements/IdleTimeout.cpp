@@ -26,7 +26,9 @@ uint16_t IdleTimeout::GetTotalLength() const {
 void IdleTimeout::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(IdleTimeout) <= raw_data->end);
 #pragma GCC diagnostic push
+#if __GNUC__ >= 8
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
     memcpy(raw_data->current, this, sizeof(IdleTimeout));
 #pragma GCC diagnostic pop
     raw_data->current += sizeof(IdleTimeout);

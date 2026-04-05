@@ -22,7 +22,9 @@ bool ACTimestamp::Validate() const {
 void ACTimestamp::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(ACTimestamp) <= raw_data->end);
 #pragma GCC diagnostic push
+#if __GNUC__ >= 8
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
     memcpy(raw_data->current, this, sizeof(ACTimestamp));
 #pragma GCC diagnostic pop
     raw_data->current += sizeof(ACTimestamp);

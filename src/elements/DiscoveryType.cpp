@@ -8,9 +8,12 @@ DiscoveryType::DiscoveryType(Type type)
 }
 bool DiscoveryType::Validate() const {
     static_assert(sizeof(DiscoveryType) == 5);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
     return ElementHeader::GetElementType() == ElementHeader::DiscoveryType
         && ElementHeader::GetLength() == (sizeof(DiscoveryType) - sizeof(ElementHeader)) //
         && type >= Unknown && type <= ACReferral;
+#pragma GCC diagnostic pop
 }
 void DiscoveryType::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(DiscoveryType) <= raw_data->end);
