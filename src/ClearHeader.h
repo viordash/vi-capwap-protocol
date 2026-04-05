@@ -7,11 +7,11 @@
 enum WBIDType { Reserved0 = 0, IEEE_80211 = 1, Reserved2 = 2, EPCGlobal = 3 };
 
 struct __attribute__((packed)) Preamble {
-    enum Version { RFC_5415 = 0 };
-    enum PayloadType { ClearText = 0, DTLSCrypted = 1 };
+    enum Version : uint8_t { RFC_5415 = 0 };
+    enum PayloadType : uint8_t { ClearText = 0, DTLSCrypted = 1 };
 
-    PayloadType type : 4;
-    Version version : 4;
+    uint8_t type : 4;
+    uint8_t version : 4;
 
     bool Validate() const;
     static Preamble *Deserialize(const RawData *raw_data);
