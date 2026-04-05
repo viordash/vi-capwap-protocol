@@ -90,7 +90,7 @@ uint16_t WritableDeleteStationArray::GetTotalLength() const {
 
 void WritableDeleteStationArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME DeleteStation #%lu Radio ID:%u", i, items[i].header.RadioID);
+        log_i("ME DeleteStation #%zu Radio ID:%u", i, items[i].header.RadioID);
         MacAddress::Log(i, items[i].Mac.Length, items[i].Mac.Address);
     }
 }
@@ -126,7 +126,7 @@ nonstd::span<const DeleteStation *const> ReadableDeleteStationArray::Get() const
 
 void ReadableDeleteStationArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME DeleteStation #%lu Radio ID:%u", i, items[i]->RadioID);
+        log_i("ME DeleteStation #%zu Radio ID:%u", i, items[i]->RadioID);
         MacAddress::Log(i, items[i]->MACAddress.Length, items[i]->MACAddress.MACAddresses);
     }
 }

@@ -102,9 +102,9 @@ void WritableACNameWithPriorityArray::Serialize(RawData *raw_data) const {
 }
 
 void WritableACNameWithPriorityArray::Log() const {
-    log_i("ME ACNameWithPriority count:%lu", items.size());
+    log_i("ME ACNameWithPriority count:%zu", items.size());
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("     #%lu: priority: %u, :%.*s",
+        log_i("     #%zu: priority: %u, :%.*s",
               i,
               items[i].header.GetPriority(),
               items[i].header.GetNameLenght(),
@@ -136,9 +136,9 @@ nonstd::span<const ACNameWithPriority *const> ReadableACNameWithPriorityArray::G
 }
 
 void ReadableACNameWithPriorityArray::Log() const {
-    log_i("ME ACNameWithPriority count:%lu", count);
+    log_i("ME ACNameWithPriority count:%zu", count);
     for (size_t i = 0; i < count; i++) {
-        log_i("     #%lu: priority: %u, :%.*s",
+        log_i("     #%zu: priority: %u, :%.*s",
               i,
               items[i]->GetPriority(),
               items[i]->GetNameLenght(),

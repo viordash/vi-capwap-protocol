@@ -125,7 +125,7 @@ uint16_t WritableDecryptionErrorReportArray::GetTotalLength() const {
 
 void WritableDecryptionErrorReportArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME DecryptionErrorReport #%lu RadioID: %u, size:%zu, entries:",
+        log_i("ME DecryptionErrorReport #%zu RadioID: %u, size:%zu, entries:",
               i,
               items[i].header.RadioID,
               items[i].MacAddresses.size());
@@ -196,7 +196,7 @@ ReadableDecryptionErrorReportArray::Get() {
 
 void ReadableDecryptionErrorReportArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME DecryptionErrorReport #%lu RadioID: %u, size:%u, entries:",
+        log_i("ME DecryptionErrorReport #%zu RadioID: %u, size:%u, entries:",
               i,
               items[i].header->RadioID,
               (unsigned)items[i].num_of_entries);

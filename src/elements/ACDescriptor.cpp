@@ -169,7 +169,7 @@ void WritableACDescriptor::Log() const {
     log_i("ME ACDescriptor Stations:%u, Limit:%u, Active WTPs:%u, Max WTPs:%u, X.509:%u, "
           "Pre-shared secret:%u, RMAC:%u, "
           "Clear Text Data Channel Supported:%u, DTLS-Enabled Data Channel Supported:%u"
-          "Sub-Elements count:%lu",
+          "Sub-Elements count:%zu",
           header.GetStations(),
           header.GetLimit(),
           header.GetActiveWTPs(),
@@ -182,7 +182,7 @@ void WritableACDescriptor::Log() const {
           sub_elements.size());
 
     for (size_t i = 0; i < sub_elements.size(); i++) {
-        log_i("    S-E #%lu: VendorId:%u, Type:0x%04X, Data:%.*s",
+        log_i("    S-E #%zu: VendorId:%u, Type:0x%04X, Data:%.*s",
               i,
               sub_elements[i].header.GetVendorIdentifier(),
               sub_elements[i].header.GetType(),
@@ -237,7 +237,7 @@ void ReadableACDescriptor::Log() const {
     log_i("ME ACDescriptor Stations:%u, Limit:%u, Active WTPs:%u, Max WTPs:%u, X.509:%u, "
           "Pre-shared secret:%u, RMAC:%u, "
           "Clear Text Data Channel Supported:%u, DTLS-Enabled Data Channel Supported:%u, "
-          "Sub-Elements count:%lu",
+          "Sub-Elements count:%zu",
           header->GetStations(),
           header->GetLimit(),
           header->GetActiveWTPs(),
@@ -250,7 +250,7 @@ void ReadableACDescriptor::Log() const {
           count);
 
     for (size_t i = 0; i < count; i++) {
-        log_i("    S-E #%lu: VendorId:%u, Type:0x%04X, Data:%.*s",
+        log_i("    S-E #%zu: VendorId:%u, Type:0x%04X, Data:%.*s",
               i,
               items[i]->GetVendorIdentifier(),
               items[i]->GetType(),

@@ -23,9 +23,9 @@ uint16_t WritableACIPv4List::GetTotalLength() const {
 }
 
 void WritableACIPv4List::Log() const {
-    log_i("ME ACIPv4List size:%lu, adrs:", addresses.size());
+    log_i("ME ACIPv4List size:%zu, adrs:", addresses.size());
     for (size_t i = 0; i < addresses.size(); i++) {
-        log_i("     #%lu, %s", i, IpToString(addresses[i]).c_str());
+        log_i("     #%zu, %s", i, IpToString(addresses[i]).c_str());
     }
 }
 
@@ -59,8 +59,8 @@ size_t ReadableACIPv4List::GetCount() const {
 }
 
 void ReadableACIPv4List::Log() const {
-    log_i("ME ACIPv4List size:%lu, adrs:", GetCount());
+    log_i("ME ACIPv4List size:%zu, adrs:", GetCount());
     for (size_t i = 0; i < GetCount(); i++) {
-        log_i("     #%lu, %s", i, IpToString(addresses[i]).c_str());
+        log_i("     #%zu, %s", i, IpToString(addresses[i]).c_str());
     }
 }

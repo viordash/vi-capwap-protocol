@@ -78,7 +78,7 @@ void WritableDecryptionErrorReportPeriodArray::Serialize(RawData *raw_data) cons
 
 void WritableDecryptionErrorReportPeriodArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME DecryptionErrorReportPeriod #%lu RadioID:%u, Report interval:%u",
+        log_i("ME DecryptionErrorReportPeriod #%zu RadioID:%u, Report interval:%u",
               i,
               items[i].RadioID(),
               items[i].ReportInterval());
@@ -111,7 +111,7 @@ ReadableDecryptionErrorReportPeriodArray::Get() const {
 
 void ReadableDecryptionErrorReportPeriodArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME DecryptionErrorReportPeriod #%lu RadioID:%u, Report interval:%u",
+        log_i("ME DecryptionErrorReportPeriod #%zu RadioID:%u, Report interval:%u",
               i,
               items[i]->RadioID(),
               items[i]->ReportInterval());

@@ -89,7 +89,7 @@ void WritableRadioAdministrativeStateArray::Serialize(RawData *raw_data) const {
 
 void WritableRadioAdministrativeStateArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME RadioAdministrativeState #%lu RadioID:%u, AdminState:%u",
+        log_i("ME RadioAdministrativeState #%zu RadioID:%u, AdminState:%u",
               i,
               items[i].RadioID,
               items[i].AdminState);
@@ -122,7 +122,7 @@ ReadableRadioAdministrativeStateArray::Get() const {
 
 void ReadableRadioAdministrativeStateArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME RadioAdministrativeState #%lu RadioID:%u, AdminState:%u",
+        log_i("ME RadioAdministrativeState #%zu RadioID:%u, AdminState:%u",
               i,
               items[i]->RadioID,
               items[i]->AdminState);

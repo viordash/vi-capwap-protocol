@@ -171,19 +171,19 @@ uint16_t WritableWTPDescriptor::GetTotalLength() const {
 }
 
 void WritableWTPDescriptor::Log() const {
-    log_i("ME WTPDescriptor MaxRadios:%u, RadiosInUse:%u, NumEncrypt:%lu, Sub-Elements count:%lu",
+    log_i("ME WTPDescriptor MaxRadios:%u, RadiosInUse:%u, NumEncrypt:%zu, Sub-Elements count:%zu",
           header.MaxRadios,
           header.RadiosInUse,
           encr_items.size(),
           desc_items.size());
     for (size_t i = 0; i < encr_items.size(); i++) {
-        log_i("    Encr S-E #%lu: WBID:%u, Encr-Caps:%u",
+        log_i("    Encr S-E #%zu: WBID:%u, Encr-Caps:%u",
               i,
               encr_items[i].WBID,
               encr_items[i].EncryptionCapabilities);
     }
     for (size_t i = 0; i < desc_items.size(); i++) {
-        log_i("    S-E #%lu: VendorId:%u, Type:0x%04X, Value:%.*s",
+        log_i("    S-E #%zu: VendorId:%u, Type:0x%04X, Value:%.*s",
               i,
               desc_items[i].header.GetVendorIdentifier(),
               desc_items[i].header.GetType(),
@@ -258,19 +258,19 @@ const nonstd::span<const DescriptorSubElementHeader *> ReadableWTPDescriptor::Ge
 }
 
 void ReadableWTPDescriptor::Log() const {
-    log_i("ME WTPDescriptor MaxRadios:%u, RadiosInUse:%u, NumEncrypt:%u, Sub-Elements count:%lu",
+    log_i("ME WTPDescriptor MaxRadios:%u, RadiosInUse:%u, NumEncrypt:%u, Sub-Elements count:%zu",
           header->MaxRadios,
           header->RadiosInUse,
           header->NumEncrypt,
           desc_count);
     for (size_t i = 0; i < header->NumEncrypt; i++) {
-        log_i("    Encr S-E #%lu: WBID:%u, Encr-Caps:%u",
+        log_i("    Encr S-E #%zu: WBID:%u, Encr-Caps:%u",
               i,
               encr_items[i]->WBID,
               encr_items[i]->EncryptionCapabilities);
     }
     for (size_t i = 0; i < desc_count; i++) {
-        log_i("    S-E #%lu: VendorId:%u, Type:0x%04X, Value:%.*s",
+        log_i("    S-E #%zu: VendorId:%u, Type:0x%04X, Value:%.*s",
               i,
               desc_items[i]->GetVendorIdentifier(),
               desc_items[i]->GetType(),

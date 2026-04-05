@@ -98,7 +98,7 @@ void WritableRadioOperationalStateArray::Serialize(RawData *raw_data) const {
 
 void WritableRadioOperationalStateArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME RadioOperationalState #%lu RadioID:%u, State:%u, Cause:%u",
+        log_i("ME RadioOperationalState #%zu RadioID:%u, State:%u, Cause:%u",
               i,
               items[i].RadioID,
               items[i].State,
@@ -131,7 +131,7 @@ nonstd::span<const RadioOperationalState *const> ReadableRadioOperationalStateAr
 
 void ReadableRadioOperationalStateArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME RadioOperationalState #%lu RadioID:%u, State:%u, Cause:%u",
+        log_i("ME RadioOperationalState #%zu RadioID:%u, State:%u, Cause:%u",
               i,
               items[i]->RadioID,
               items[i]->State,

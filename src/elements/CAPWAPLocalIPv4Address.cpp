@@ -64,7 +64,7 @@ uint16_t WritableCAPWAPLocalIPV4AdrArray::GetTotalLength() const {
 
 void WritableCAPWAPLocalIPV4AdrArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME CAPWAPLocalIPv4Address #%lu IP Address::%s",
+        log_i("ME CAPWAPLocalIPv4Address #%zu IP Address::%s",
               i,
               IpToString(items[i].GetIPAddress()).c_str());
     }
@@ -95,7 +95,7 @@ nonstd::span<const CAPWAPLocalIPv4Address *const> ReadableCAPWAPLocalIPV4AdrArra
 
 void ReadableCAPWAPLocalIPV4AdrArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME CAPWAPLocalIPv4Address #%lu IP Address::%s",
+        log_i("ME CAPWAPLocalIPv4Address #%zu IP Address::%s",
               i,
               IpToString(items[i]->GetIPAddress()).c_str());
     }

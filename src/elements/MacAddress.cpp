@@ -35,7 +35,7 @@ MacAddress::MacAddress(const WritableMacAddress &mac_address) {
 void MacAddress::Log(const size_t index, const uint8_t length, const uint8_t *mac_address) {
     switch (length) {
         case RadioMACAddress::mac_EUI48_size:
-            log_i("     #%lu, [EUI48] %02X:%02X:%02X:%02X:%02X:%02X",
+            log_i("     #%zu, [EUI48] %02X:%02X:%02X:%02X:%02X:%02X",
                   index,
                   mac_address[0],
                   mac_address[1],
@@ -46,7 +46,7 @@ void MacAddress::Log(const size_t index, const uint8_t length, const uint8_t *ma
             break;
 
         case RadioMACAddress::mac_EUI64_size:
-            log_i("     #%lu, [EUI64] %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
+            log_i("     #%zu, [EUI64] %02X:%02X:%02X:%02X:%02X:%02X:%02X:%02X",
                   index,
                   mac_address[0],
                   mac_address[1],
@@ -59,7 +59,7 @@ void MacAddress::Log(const size_t index, const uint8_t length, const uint8_t *ma
             break;
 
         default:
-            log_i("     #%lu, [EUIXX] Length: %u", index, length);
+            log_i("     #%zu, [EUIXX] Length: %u", index, length);
             break;
     }
 }

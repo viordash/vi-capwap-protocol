@@ -108,7 +108,7 @@ uint16_t WritableDuplicateIPv4AdrArray::GetTotalLength() const {
 
 void WritableDuplicateIPv4AdrArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME DuplicateIPv4Address #%lu IP Address:%s, Status:%u",
+        log_i("ME DuplicateIPv4Address #%zu IP Address:%s, Status:%u",
               i,
               IpToString(items[i].header.IPAddress).c_str(),
               (unsigned)items[i].header.Status);
@@ -147,7 +147,7 @@ nonstd::span<const DuplicateIPv4Address *const> ReadableDuplicateIPv4AdrArray::G
 
 void ReadableDuplicateIPv4AdrArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME DuplicateIPv4Address #%lu IP Address:%s, Status:%u",
+        log_i("ME DuplicateIPv4Address #%zu IP Address:%s, Status:%u",
               i,
               IpToString(items[i]->IPAddress).c_str(),
               items[i]->Status);

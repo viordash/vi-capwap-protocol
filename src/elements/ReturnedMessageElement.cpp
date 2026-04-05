@@ -129,9 +129,9 @@ bool WritableReturnedMessageElementArray::Validate() const {
 }
 
 void WritableReturnedMessageElementArray::Log() const {
-    log_i("ME ReturnedMessageElement count:%lu", items.size());
+    log_i("ME ReturnedMessageElement count:%zu", items.size());
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("     #%lu: Reason: %u, Length: %u",
+        log_i("     #%zu: Reason: %u, Length: %u",
               i,
               items[i].header.GetReason(),
               items[i].header.GetDataLength());
@@ -168,9 +168,9 @@ nonstd::span<const ReturnedMessageElement *const> ReadableReturnedMessageElement
 }
 
 void ReadableReturnedMessageElementArray::Log() const {
-    log_i("ME ReturnedMessageElement count:%lu", count);
+    log_i("ME ReturnedMessageElement count:%zu", count);
     for (size_t i = 0; i < count; i++) {
-        log_i("     #%lu: Reason: %u, Length: %u",
+        log_i("     #%zu: Reason: %u, Length: %u",
               i,
               items[i]->GetReason(),
               items[i]->GetDataLength());

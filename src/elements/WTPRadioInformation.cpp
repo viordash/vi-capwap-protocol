@@ -74,7 +74,7 @@ void WritableWTPRadioInformationArray::Log() const {
             strcat(info, " N");
         }
 
-        log_i("ME WTPRadioInfo #%lu RadioID:%u, 802.11 (%s )", i, items[i].RadioID, info);
+        log_i("ME WTPRadioInfo #%zu RadioID:%u, 802.11 (%s )", i, items[i].RadioID, info);
     }
 }
 
@@ -118,6 +118,6 @@ void ReadableWTPRadioInformationArray::Log() const {
             strcat(info, " N");
         }
 
-        log_i("ME WTPRadioInfo #%lu RadioID:%u, 802.11 (%s )", i, items[i]->RadioID, info);
+        log_i("ME WTPRadioInfo #%zu RadioID:%u, 802.11 (%s )", i, items[i]->RadioID, info);
     }
 }

@@ -84,7 +84,7 @@ void ReadableConfigurationUpdateResponse::Log() const {
     radio_operational_states.Log();
     vendor_specific_payloads.Log();
     if (unknown_elements > 0) {
-        log_i("  UnknownElements count: %lu", unknown_elements);
+        log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
 }

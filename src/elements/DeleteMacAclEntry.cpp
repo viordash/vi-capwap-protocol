@@ -112,7 +112,7 @@ nonstd::span<const ReadableMacAddress *const> ReadableDeleteMacAclEntry::Get() c
 }
 
 void ReadableDeleteMacAclEntry::Log() const {
-    log_i("ME DeleteMacAclEntry size:%lu, entries:", count);
+    log_i("ME DeleteMacAclEntry size:%zu, entries:", count);
     for (size_t i = 0; i < count; i++) {
         auto &entry = entries[i];
         MacAddress::Log(i, entry->Length, entry->MACAddresses);

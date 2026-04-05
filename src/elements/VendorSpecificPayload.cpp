@@ -116,7 +116,7 @@ uint16_t WritableVendorSpecificPayloadArray::GetTotalLength() const {
 
 void WritableVendorSpecificPayloadArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME VendorSpecificPayload  #%lu VendorId:%u, ElementId:%u, Value:%.*s",
+        log_i("ME VendorSpecificPayload  #%zu VendorId:%u, ElementId:%u, Value:%.*s",
               i,
               items[i].header.GetVendorIdentifier(),
               items[i].header.GetElementId(),
@@ -152,7 +152,7 @@ nonstd::span<const VendorSpecificPayload *const> ReadableVendorSpecificPayloadAr
 void ReadableVendorSpecificPayloadArray::Log() const {
     for (size_t i = 0; i < count; i++) {
         log_i(
-            "ME VendorSpecificPayload  #%lu VendorId:%u, ElementId:%u, Value:%.*s",
+            "ME VendorSpecificPayload  #%zu VendorId:%u, ElementId:%u, Value:%.*s",
             i,
             items[i]->GetVendorIdentifier(),
             items[i]->GetElementId(),

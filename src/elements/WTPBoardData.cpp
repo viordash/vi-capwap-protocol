@@ -113,11 +113,11 @@ uint16_t WritableWTPBoardData::GetTotalLength() const {
 }
 
 void WritableWTPBoardData::Log() const {
-    log_i("ME WTPBoardData VendorId:%u, Sub-Elements count:%lu",
+    log_i("ME WTPBoardData VendorId:%u, Sub-Elements count:%zu",
           header.GetVendorIdentifier(),
           items.size());
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("    S-E #%lu: Type:0x%04X, Value:%.*s",
+        log_i("    S-E #%zu: Type:0x%04X, Value:%.*s",
               i,
               items[i].header.GetType(),
               items[i].header.GetLength(),
@@ -162,11 +162,11 @@ nonstd::span<const BoardDataSubElementHeader *const> ReadableWTPBoardData::Get()
 }
 
 void ReadableWTPBoardData::Log() const {
-    log_i("ME WTPBoardData VendorId:%u, Sub-Elements count:%lu",
+    log_i("ME WTPBoardData VendorId:%u, Sub-Elements count:%zu",
           header->GetVendorIdentifier(),
           count);
     for (size_t i = 0; i < count; i++) {
-        log_i("    S-E #%lu: Type:0x%04X, Value:%.*s",
+        log_i("    S-E #%zu: Type:0x%04X, Value:%.*s",
               i,
               items[i]->GetType(),
               items[i]->GetLength(),

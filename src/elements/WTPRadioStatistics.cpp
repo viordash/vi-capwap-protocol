@@ -173,7 +173,7 @@ uint16_t WritableWTPRadioStatisticsArray::GetTotalLength() const {
 
 void WritableWTPRadioStatisticsArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME WTPRadioStatistics #%lu Radio ID:%u, Last Failure Type:%u, Reset Count:%u, SW "
+        log_i("ME WTPRadioStatistics #%zu Radio ID:%u, Last Failure Type:%u, Reset Count:%u, SW "
               "Failure "
               "Count:%u, HW Failure Count:%u, "
               "Other Failure Count:%u, Unknown Failure "
@@ -219,7 +219,7 @@ nonstd::span<const WTPRadioStatistics *const> ReadableWTPRadioStatisticsArray::G
 
 void ReadableWTPRadioStatisticsArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME WTPRadioStatistics #%lu Radio ID:%u, Last Failure Type:%u, Reset Count:%u, SW "
+        log_i("ME WTPRadioStatistics #%zu Radio ID:%u, Last Failure Type:%u, Reset Count:%u, SW "
               "Failure "
               "Count:%u, HW Failure Count:%u, "
               "Other Failure Count:%u, Unknown Failure "
