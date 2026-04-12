@@ -31,9 +31,9 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
     };
 
     WTPRadioInformation radio_infos[] = {
-        { 10, false, false, false, false },
-        { 1, true, true, false, false },
-        { 2, false, false, false, false },
+        { 10, false, false, false, false, false, false, false },
+        { 1, true, true, false, false, false, false, false },
+        { 2, false, false, false, false, false, false, false },
     };
 
     CAPWAPControlIPv4Address control_ip_addresses[] = { { inet_addr("192.168.100.10"), 19 },
@@ -192,7 +192,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_with_VendorSpecificPayload) 
         true, false, info_elements
     };
 
-    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false } };
+    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false, false, false, false } };
 
     CAPWAPControlIPv4Address control_ip_addresses[] = { { inet_addr("192.168.100.10"), 19 },
                                                         { inet_addr("192.168.100.11"), 20 } };

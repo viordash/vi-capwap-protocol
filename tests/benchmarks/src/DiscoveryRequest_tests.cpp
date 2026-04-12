@@ -46,7 +46,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_deserialize_perf) {
 
     WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
-    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false } };
+    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false, false, false, false } };
 
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");

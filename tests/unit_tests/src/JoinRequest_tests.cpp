@@ -41,10 +41,10 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize) {
                                          wtpdescriptor_descr_elements };
 
     WTPRadioInformation radio_infos[] = {
-        { 0, false, false, false, false },
-        { 1, true, true, false, false },
-        { 2, false, false, false, false },
-        { 3, true, true, false, true },
+        { 0, false, false, false, false , false, false, false},
+        { 1, true, true, false, false, false, false, false },
+        { 2, false, false, false, false, false, false, false },
+        { 3, true, true, false, true , false, false, false},
     };
 
     CAPWAPLocalIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10") } };
@@ -154,7 +154,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_with_VendorSpecificPayload) {
                                          wtpdescriptor_encr_elements,
                                          wtpdescriptor_descr_elements };
 
-    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false } };
+    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false, false, false, false } };
 
     CAPWAPLocalIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10") } };
 

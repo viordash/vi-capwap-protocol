@@ -36,9 +36,9 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_deserialize_perf) {
     };
 
     WTPRadioInformation radio_infos[] = {
-        { 10, false, false, false, false },
-        { 1, true, true, false, false },
-        { 2, false, false, false, false },
+        { 10, false, false, false, false, false, false, false },
+        { 1, true, true, false, false, false, false, false },
+        { 2, false, false, false, false, false, false, false },
     };
 
     CAPWAPControlIPv4Address control_ip_addresses[] = { { inet_addr("192.168.100.10"), 19 },

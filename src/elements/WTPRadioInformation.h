@@ -13,19 +13,24 @@ struct __attribute__((packed)) WTPRadioInformation : ElementHeader {
     uint8_t Reservd_1;
     uint8_t Reservd_2;
 
-    // An IEEE 802.11b radio.
-    uint8_t B : 1;
-    // An IEEE 802.11a radio.
-    uint8_t A : 1;
-    // An IEEE 802.11g radio.
-    uint8_t G : 1;
-    // An IEEE 802.11n radio.
-    uint8_t N : 1;
-
-    uint8_t Reservd_3 : 4;
+    uint8_t B : 1;  // Bit 0: 802.11b (Wi-Fi 1) - 2.4 GHz
+    uint8_t A : 1;  // Bit 1: 802.11a (Wi-Fi 2) - 5 GHz
+    uint8_t G : 1;  // Bit 2: 802.11g (Wi-Fi 3) - 2.4 GHz
+    uint8_t N : 1;  // Bit 3: 802.11n (Wi-Fi 4) - 2.4 / 5 GHz
+    uint8_t AC : 1; // Bit 4: 802.11ac (Wi-Fi 5) - 5 GHz
+    uint8_t AX : 1; // Bit 5: 802.11ax (Wi-Fi 6/6E) - 2.4 / 5 / 6 GHz
+    uint8_t BE : 1; // Bit 6: 802.11be (Wi-Fi 7) - 2.4 / 5 / 6 GHz
+    uint8_t Reservd_3 : 1;
 
     WTPRadioInformation(const WTPRadioInformation &) = delete;
-    WTPRadioInformation(uint8_t radio_id, bool b, bool a, bool g, bool n);
+    WTPRadioInformation(uint8_t radio_id,
+                        bool b,
+                        bool a,
+                        bool g,
+                        bool n,
+                        bool ac,
+                        bool ax,
+                        bool be);
 
     bool Validate() const;
     void Serialize(RawData *raw_data) const;

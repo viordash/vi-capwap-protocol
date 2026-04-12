@@ -43,13 +43,13 @@ TEST(WTPRadioInformationTestsGroup, Deserialize) {
 
 TEST(WTPRadioInformationTestsGroup, Serialize) {
     uint8_t buffer[256] = {};
-    WTPRadioInformation element_0{ 31, true, true, false, false };
+    WTPRadioInformation element_0{ 31, true, true, false, false, false, true, false };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     element_0.Serialize(&raw_data);
     CHECK_EQUAL(&buffer[0] + 9, raw_data.current);
     const uint8_t reference[] = {
-        0x04, 0x18, 0x00, 0x05, 0x1F, 0x00, 0x00, 0x00, 0x03,
+        0x04, 0x18, 0x00, 0x05, 0x1F, 0x00, 0x00, 0x00, 0x23,
     };
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
@@ -63,28 +63,45 @@ TEST(WTPRadioInformationTestsGroup, Serialize) {
     CHECK_TRUE(element->A);
     CHECK_FALSE(element->G);
     CHECK_FALSE(element->N);
+    CHECK_FALSE(element->AC);
+    CHECK_TRUE(element->AX);
+    CHECK_FALSE(element->BE);
 }
 
 TEST(WTPRadioInformationTestsGroup, Serialize_few_elements) {
     uint8_t buffer[2048] = {};
-    WTPRadioInformation elements[] = {
-        { 0, false, false, false, false },  { 1, true, true, false, false },
-        { 2, false, false, false, false },  { 3, true, true, false, true },
-        { 4, false, true, false, false },   { 5, true, true, false, false },
-        { 6, false, false, false, false },  { 7, true, true, false, false },
-        { 8, false, true, false, false },   { 9, false, true, true, false },
-        { 10, false, false, false, false }, { 11, false, true, false, false },
-        { 12, false, true, false, false },  { 13, true, true, false, false },
-        { 14, false, false, false, false }, { 15, true, true, false, false },
-        { 16, false, true, false, true },   { 17, true, false, false, true },
-        { 18, false, false, false, false }, { 19, true, true, false, false },
-        { 20, false, true, true, true },    { 21, true, true, false, false },
-        { 22, false, false, false, false }, { 23, true, true, false, false },
-        { 24, false, true, true, false },   { 25, true, true, false, false },
-        { 26, false, false, false, true },  { 127, true, true, false, false },
-        { 28, false, true, true, false },   { 29, true, true, true, false },
-        { 30, false, false, false, false }, { 31, true, true, false, true }
-    };
+    WTPRadioInformation elements[] = { { 0, false, false, false, false, false, false, false },
+                                       { 1, true, true, false, false, false, false, false },
+                                       { 2, false, false, false, false, false, false, false },
+                                       { 3, true, true, false, true, false, false, false },
+                                       { 4, false, true, false, false, false, false, false },
+                                       { 5, true, true, false, false, false, false, false },
+                                       { 6, false, false, false, false, false, false, false },
+                                       { 7, true, true, false, false, false, false, false },
+                                       { 8, false, true, false, false, false, false, false },
+                                       { 9, false, true, true, false, false, false, false },
+                                       { 10, false, false, false, false, false, false, false },
+                                       { 11, false, true, false, false, false, false, false },
+                                       { 12, false, true, false, false, false, false, false },
+                                       { 13, true, true, false, false, false, false, false },
+                                       { 14, false, false, false, false, false, false, false },
+                                       { 15, true, true, false, false, false, false, false },
+                                       { 16, false, true, false, true, false, false, false },
+                                       { 17, true, false, false, true, false, false, false },
+                                       { 18, false, false, false, false, false, false, false },
+                                       { 19, true, true, false, false, false, false, false },
+                                       { 20, false, true, true, true, false, false, false },
+                                       { 21, true, true, false, false, false, false, false },
+                                       { 22, false, false, false, false, false, false, false },
+                                       { 23, true, true, false, false, false, false, false },
+                                       { 24, false, true, true, false, false, false, false },
+                                       { 25, true, true, false, false, false, false, false },
+                                       { 26, false, false, false, true, false, false, false },
+                                       { 127, true, true, false, false, false, false, false },
+                                       { 28, false, true, true, false, false, false, false },
+                                       { 29, true, true, true, false, false, false, false },
+                                       { 30, false, false, false, false, false, false, false },
+                                       { 31, true, true, false, true, false, false, false } };
 
     WritableWTPRadioInformationArray w_infos{
         nonstd::span<const WTPRadioInformation>(elements),

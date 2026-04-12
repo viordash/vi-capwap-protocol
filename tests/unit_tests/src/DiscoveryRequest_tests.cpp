@@ -41,10 +41,10 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize) {
     WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
     WTPRadioInformation radio_infos[] = {
-        { 0, false, false, false, false },
-        { 1, true, true, false, false },
-        { 2, false, false, false, false },
-        { 3, true, true, false, true },
+        { 0, false, false, false, false, false, false, false },
+        { 1, true, true, false, false, false, false, false },
+        { 2, false, false, false, false, false, false, false },
+        { 3, true, true, false, true, false, false, false },
     };
 
     WritableDiscoveryRequest write_data(DiscoveryType::Type::DHCP,
@@ -128,7 +128,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_VendorSpecificP
 
     WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
-    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false } };
+    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false, false, false, false } };
 
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
@@ -198,7 +198,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_MTUDiscoveryPad
 
     WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
-    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false } };
+    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false, false, false, false } };
 
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(12300, 700, { '0', '1', '2', '3' });
