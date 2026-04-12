@@ -80,7 +80,7 @@ struct WritableWTPDescriptor {
               header{ vendor_identifier, type, (uint16_t)utf8_string.size() } {};
     };
 
-  private:
+  protected:
     WTPDescriptorHeader header;
     const nonstd::span<const EncryptionSubElement> encr_items;
     const nonstd::span<const SubElement> desc_items;
@@ -97,6 +97,7 @@ struct WritableWTPDescriptor {
 
     void Serialize(RawData *raw_data) const;
     uint16_t GetTotalLength() const;
+    const WTPDescriptorHeader &GetHeader() const;
     void Log() const;
 };
 

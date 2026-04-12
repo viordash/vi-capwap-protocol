@@ -148,6 +148,7 @@ WritableWTPDescriptor::WritableWTPDescriptor(
               (uint8_t)encr_items.size(),
               GetSubElementsSize(encr_items, desc_items) },
       encr_items(encr_items), desc_items{ desc_items } {
+    ASSERT(max_radios >= radios_in_use);
 }
 
 void WritableWTPDescriptor::Serialize(RawData *raw_data) const {
@@ -168,6 +169,10 @@ void WritableWTPDescriptor::Serialize(RawData *raw_data) const {
 }
 uint16_t WritableWTPDescriptor::GetTotalLength() const {
     return header.GetLength() + sizeof(ElementHeader);
+}
+
+const WTPDescriptorHeader &WritableWTPDescriptor::GetHeader() const {
+    return header;
 }
 
 void WritableWTPDescriptor::Log() const {
