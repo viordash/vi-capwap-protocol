@@ -30,9 +30,9 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize) {
     };
 
     WTPRadioInformation radio_infos[] = {
-        { 0, false, false, false, false },
-        { 1, true, true, false, false },
-        { 2, false, false, false, false },
+        { 0, false, false, false, false, false, false, false },
+        { 1, true, true, false, false, false, false, false },
+        { 2, false, false, false, false, false, false, false },
     };
 
     CAPWAPControlIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10"), 19 },
@@ -114,7 +114,7 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize_with_VendorSpecifi
 
     const char *ac_name = "Corporate-AC-1";
 
-    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false } };
+    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false, false, false, false } };
 
     CAPWAPControlIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10"), 19 } };
 

@@ -4,11 +4,18 @@
 #include "logging.h"
 #include <string.h>
 
-WTPRadioInformation::WTPRadioInformation(uint8_t radio_id, bool b, bool a, bool g, bool n)
+WTPRadioInformation::WTPRadioInformation(uint8_t radio_id,
+                                         bool b,
+                                         bool a,
+                                         bool g,
+                                         bool n,
+                                         bool ac,
+                                         bool ax,
+                                         bool be)
     : ElementHeader(ElementHeader::WTPRadioInformation,
                     sizeof(WTPRadioInformation) - sizeof(ElementHeader)),
       RadioID{ radio_id }, Reservd_0{ 0 }, Reservd_1{ 0 }, Reservd_2{ 0 }, B{ b }, A{ a }, G{ g },
-      N{ n }, Reservd_3{ 0 } {
+      N{ n }, AC{ ac }, AX{ ax }, BE{ be }, Reservd_3{ 0 } {
 }
 bool WTPRadioInformation::Validate() const {
     static_assert(sizeof(WTPRadioInformation) == 9);
