@@ -41,10 +41,10 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize) {
                                          wtpdescriptor_descr_elements };
 
     WTPRadioInformation radio_infos[] = {
-        { 0, false, false, false, false , false, false, false},
+        { 0, false, false, false, false, false, false, false },
         { 1, true, true, false, false, false, false, false },
         { 2, false, false, false, false, false, false, false },
-        { 3, true, true, false, true , false, false, false},
+        { 3, true, true, false, true, false, false, false },
     };
 
     CAPWAPLocalIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10") } };
@@ -140,13 +140,16 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_with_VendorSpecificPayload) {
 
     WritableWTPBoardData::SubElement wtpboarddata_elements[] = {
         { BoardDataSubElementHeader::Type::WTPModelNumber, "abcd" },
+        { BoardDataSubElementHeader::Type::WTPSerialNumber, "1234" },
     };
     WritableWTPBoardData wtpboarddata{ 1234, wtpboarddata_elements };
 
     EncryptionSubElement wtpdescriptor_encr_elements[] = { { 0 } };
 
     WritableWTPDescriptor::SubElement wtpdescriptor_descr_elements[] = {
-        { 1234, DescriptorSubElementHeader::Type::ActiveSoftwareVersion, "abcd" }
+        { 1234, DescriptorSubElementHeader::Type::HardwareVersion, "0001" },
+        { 1234, DescriptorSubElementHeader::Type::ActiveSoftwareVersion, "abcd" },
+        { 1234, DescriptorSubElementHeader::Type::BootVersion, "1234" }
     };
 
     WritableWTPDescriptor wtpdescriptor{ 10,
@@ -185,27 +188,29 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_with_VendorSpecificPayload) {
                                    vendor_specific_payloads);
 
     write_data.Serialize(&raw_data);
-    CHECK_EQUAL(&buffer[0] + 188 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
+    CHECK_EQUAL(&buffer[0] + 220 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = {
         0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x2A, 0x00, 0xAC,
         0x00, 0x00, 0x1C, 0x00, 0x0D, 0x6C, 0x6F, 0x63, 0x61, 0x74, 0x69, 0x6F, 0x6E, 0x5F, 0x64,
-        0x61, 0x74, 0x61, 0x00, 0x26, 0x00, 0x0C, 0x00, 0x00, 0x04, 0xD2, 0x00, 0x00, 0x00, 0x04,
-        0x61, 0x62, 0x63, 0x64, 0x00, 0x27, 0x00, 0x12, 0x0A, 0x04, 0x01, 0x01, 0x00, 0x00, 0x00,
-        0x00, 0x04, 0xD2, 0x00, 0x01, 0x00, 0x04, 0x61, 0x62, 0x63, 0x64, 0x00, 0x2D, 0x00, 0x08,
-        0x77, 0x74, 0x70, 0x5F, 0x6E, 0x61, 0x6D, 0x65, 0x00, 0x23, 0x00, 0x10, 0x00, 0x01, 0x02,
-        0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x00, 0x29,
-        0x00, 0x01, 0x02, 0x00, 0x2C, 0x00, 0x01, 0x00, 0x04, 0x18, 0x00, 0x05, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x35, 0x00, 0x01, 0x01, 0x00, 0x1E, 0x00, 0x04, 0xC0, 0xA8, 0x64, 0x0A,
-        0x00, 0x25, 0x00, 0x1B, 0x00, 0x01, 0xE2, 0x40, 0x03, 0x15, 0x30, 0x31, 0x32, 0x33, 0x34,
-        0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x30, 0x31, 0x32,
-        0x33, 0x00, 0x25, 0x00, 0x12, 0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x30, 0x31, 0x32, 0x33,
-        0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x41
+        0x61, 0x74, 0x61, 0x00, 0x26, 0x00, 0x14, 0x00, 0x00, 0x04, 0xD2, 0x00, 0x00, 0x00, 0x04,
+        0x61, 0x62, 0x63, 0x64, 0x00, 0x01, 0x00, 0x04, 0x31, 0x32, 0x33, 0x34, 0x00, 0x27, 0x00,
+        0x2A, 0x0A, 0x04, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x04, 0xD2, 0x00, 0x00, 0x00, 0x04,
+        0x30, 0x30, 0x30, 0x31, 0x00, 0x00, 0x04, 0xD2, 0x00, 0x01, 0x00, 0x04, 0x61, 0x62, 0x63,
+        0x64, 0x00, 0x00, 0x04, 0xD2, 0x00, 0x02, 0x00, 0x04, 0x31, 0x32, 0x33, 0x34, 0x00, 0x2D,
+        0x00, 0x08, 0x77, 0x74, 0x70, 0x5F, 0x6E, 0x61, 0x6D, 0x65, 0x00, 0x23, 0x00, 0x10, 0x00,
+        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
+        0x00, 0x29, 0x00, 0x01, 0x02, 0x00, 0x2C, 0x00, 0x01, 0x00, 0x04, 0x18, 0x00, 0x05, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x35, 0x00, 0x01, 0x01, 0x00, 0x1E, 0x00, 0x04, 0xC0, 0xA8,
+        0x64, 0x0A, 0x00, 0x25, 0x00, 0x1B, 0x00, 0x01, 0xE2, 0x40, 0x03, 0x15, 0x30, 0x31, 0x32,
+        0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x30,
+        0x31, 0x32, 0x33, 0x00, 0x25, 0x00, 0x12, 0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x30, 0x31,
+        0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30, 0x41
     };
     MEMCMP_EQUAL(buffer,
                  reference + (sizeof(ClearHeader) + sizeof(ControlHeader)),
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
-    raw_data = { buffer, buffer + 188 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
+    raw_data = { buffer, buffer + 220 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
     ReadableJoinRequest read_data;
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -233,7 +238,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
     //-------------------------------------------------------------------------
     0x00, 0x00, 0x00, 0x03, // Message Type = 3 (Join Request)
     0x01,                   // Sequence Number = 1
-    0x00, 0x69 + 5 + 6 + 19 + 11,             // Message Element Length = 105 байт + 5 + 6 + 19 + 11
+    0x00, 0x69 + 5 + 6 + 19 + 11 + 8+18,             // Message Element Length = 105 байт + 5 + 6 + 19 + 11 + 8+18
     0x00,                   // Flags = 0
 
     //=========================================================================
@@ -247,14 +252,16 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
 
     // -- WTP Board Data (MUST) -- (17 байт)
     0x00, 0x26,             // Type = 38
-    0x00, 0x0D,             // Length = 13 (4 VendorID + 9 Model TLV)
+    0x00, 0x0D+8,             // Length = 13+8 (4 VendorID + 9 Model TLV + 8 Model TLV)
     0x00, 0x00, 0x24, 0x3F, // Vendor ID = 9279 (Вымышленный)
     // Sub-element: Model Number (Type=0), Length=5
     0x00, 0x00, 0x00, 0x05, 'W', 'A', 'P', '-', '1',
+    // Sub-element: Serial Number (Type=0), Length=4
+    0x00, 0x01, 0x00, 0x04, '1', '2', '3', '4',
 
     // -- WTP Descriptor (MUST) -- (19 байт)
     0x00, 0x27,             // Type = 39
-    0x00, 0x0F,             // Length = 15 (1+1+1+3 + (4+4+1))
+    0x00, 0x0F+18,             // Length = 15 + 18 (1+1+1+3 + (4+4+1))
     0x01,                   // Max Radios = 1
     0x01,                   // Radios in use = 1
     0x01,                   // Num Encrypt = 1
@@ -264,6 +271,16 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
     0x00, 0x01,             // Descriptor Type
     0x00, 0x01,             // Descriptor Length
     '1',                    // Value "1"
+    // Sub-element: HW Version (Type=0), Length=1
+    0x00, 0x00, 0x24, 0x3F, // Vendor ID
+    0x00, 0x00,             // Descriptor Type
+    0x00, 0x01,             // Descriptor Length
+    '2',                    // Value "2"
+    // Sub-element: Boot Version (Type=2), Length=1
+    0x00, 0x00, 0x24, 0x3F, // Vendor ID
+    0x00, 0x02,             // Descriptor Type
+    0x00, 0x01,             // Descriptor Length
+    '3',                    // Value "3"
 
     // -- WTP Name (MUST) -- (10 байт)
     0x00, 0x2D,             // Type = 45
@@ -337,12 +354,16 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
 
     STRNCMP_EQUAL("Lab", (char *)read_data.location_data->data, 3);
 
-    CHECK_EQUAL(1, read_data.wtp_board_data.Get().size());
+    CHECK_EQUAL(2, read_data.wtp_board_data.Get().size());
     CHECK_EQUAL(9279, read_data.wtp_board_data.header->GetVendorIdentifier());
     STRNCMP_EQUAL("WAP-1", (char *)read_data.wtp_board_data.Get()[0]->value, 5);
     CHECK_EQUAL(BoardDataSubElementHeader::Type::WTPModelNumber,
                 read_data.wtp_board_data.Get()[0]->GetType());
     CHECK_EQUAL(5, read_data.wtp_board_data.Get()[0]->GetLength());
+    STRNCMP_EQUAL("1234", (char *)read_data.wtp_board_data.Get()[1]->value, 4);
+    CHECK_EQUAL(BoardDataSubElementHeader::Type::WTPSerialNumber,
+                read_data.wtp_board_data.Get()[1]->GetType());
+    CHECK_EQUAL(4, read_data.wtp_board_data.Get()[1]->GetLength());
 
     CHECK_EQUAL(1, read_data.wtp_descriptor.header->MaxRadios);
     CHECK_EQUAL(1, read_data.wtp_descriptor.header->RadiosInUse);
@@ -352,11 +373,19 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
     CHECK_EQUAL(WBIDType::IEEE_80211, read_data.wtp_descriptor.GetEncryptions()[0]->WBID);
     CHECK_EQUAL(0x0100, read_data.wtp_descriptor.GetEncryptions()[0]->EncryptionCapabilities);
 
-    CHECK_EQUAL(1, read_data.wtp_descriptor.GetDescriptors().size());
+    CHECK_EQUAL(3, read_data.wtp_descriptor.GetDescriptors().size());
     STRNCMP_EQUAL("1", (char *)read_data.wtp_descriptor.GetDescriptors()[0]->utf8_value, 1);
     CHECK_EQUAL(DescriptorSubElementHeader::Type::ActiveSoftwareVersion,
                 read_data.wtp_descriptor.GetDescriptors()[0]->GetType());
     CHECK_EQUAL(1, read_data.wtp_descriptor.GetDescriptors()[0]->GetLength());
+    STRNCMP_EQUAL("2", (char *)read_data.wtp_descriptor.GetDescriptors()[1]->utf8_value, 1);
+    CHECK_EQUAL(DescriptorSubElementHeader::Type::HardwareVersion,
+                read_data.wtp_descriptor.GetDescriptors()[1]->GetType());
+    CHECK_EQUAL(1, read_data.wtp_descriptor.GetDescriptors()[1]->GetLength());
+    STRNCMP_EQUAL("3", (char *)read_data.wtp_descriptor.GetDescriptors()[2]->utf8_value, 1);
+    CHECK_EQUAL(DescriptorSubElementHeader::Type::BootVersion,
+                read_data.wtp_descriptor.GetDescriptors()[2]->GetType());
+    CHECK_EQUAL(1, read_data.wtp_descriptor.GetDescriptors()[2]->GetLength());
 
     STRNCMP_EQUAL("WAP-01", (char *)read_data.wtp_name->name, 6);
 
@@ -417,7 +446,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize_handle_unknown_element) {
     //-------------------------------------------------------------------------
     0x00, 0x00, 0x00, 0x03, // Message Type = 3 (Join Request)
     0x01,                   // Sequence Number = 1
-    0x00, 0x69 + 5 + 6 + 19 + 11+5+5,             // Message Element Length = 105 байт + 5 + 6 + 19 + 11+5+5
+    0x00, 0x69 + 5 + 6 + 19 + 11+5+5+8+18,             // Message Element Length = 105 байт + 5 + 6 + 19 + 11+5+5+8+18
     0x00,                   // Flags = 0
 
     //=========================================================================
@@ -431,14 +460,16 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize_handle_unknown_element) {
 
     // -- WTP Board Data (MUST) -- (17 байт)
     0x00, 0x26,             // Type = 38
-    0x00, 0x0D,             // Length = 13 (4 VendorID + 9 Model TLV)
+    0x00, 0x0D+8,             // Length = 13+8 (4 VendorID + 9 Model TLV + 8 Model TLV)
     0x00, 0x00, 0x24, 0x3F, // Vendor ID = 9279 (Вымышленный)
     // Sub-element: Model Number (Type=0), Length=5
     0x00, 0x00, 0x00, 0x05, 'W', 'A', 'P', '-', '1',
+    // Sub-element: Serial Number (Type=0), Length=4
+    0x00, 0x01, 0x00, 0x04, '1', '2', '3', '4',
 
     // -- WTP Descriptor (MUST) -- (19 байт)
     0x00, 0x27,             // Type = 39
-    0x00, 0x0F,             // Length = 15 (1+1+1+3 + (4+4+1))
+    0x00, 0x0F+18,             // Length = 15 (1+1+1+3 + (4+4+1))+18
     0x01,                   // Max Radios = 1
     0x01,                   // Radios in use = 1
     0x01,                   // Num Encrypt = 1
@@ -448,6 +479,16 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize_handle_unknown_element) {
     0x00, 0x01,             // Descriptor Type
     0x00, 0x01,             // Descriptor Length
     '1',                    // Value "1"
+    // Sub-element: HW Version (Type=0), Length=1
+    0x00, 0x00, 0x24, 0x3F, // Vendor ID
+    0x00, 0x00,             // Descriptor Type
+    0x00, 0x01,             // Descriptor Length
+    '2',                    // Value "2"
+    // Sub-element: Boot Version (Type=2), Length=1
+    0x00, 0x00, 0x24, 0x3F, // Vendor ID
+    0x00, 0x02,             // Descriptor Type
+    0x00, 0x01,             // Descriptor Length
+    '3',                    // Value "3"
 
     // -- WTP Name (MUST) -- (10 байт)
     0x00, 0x2D,             // Type = 45

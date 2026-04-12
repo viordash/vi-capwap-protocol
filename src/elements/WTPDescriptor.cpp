@@ -224,6 +224,10 @@ bool ReadableWTPDescriptor::Deserialize(RawData *raw_data) {
         return false;
     }
 
+    bool HardwareVersion_available = false;
+    bool ActiveSoftwareVersion_available = false;
+    bool BootVersion_available = false;
+
     desc_count = 0;
     while (raw_data->current < end) {
         auto sub_element_header = DescriptorSubElementHeader::Deserialize(raw_data);
@@ -238,13 +242,28 @@ bool ReadableWTPDescriptor::Deserialize(RawData *raw_data) {
         desc_items[desc_count] = sub_element_header;
         desc_count++;
         raw_data->current += sub_element_header->GetLength();
+
+        switch (sub_element_header->GetType()) {
+            case DescriptorSubElementHeader::HardwareVersion:
+                HardwareVersion_available = true;
+                break;
+            case DescriptorSubElementHeader::ActiveSoftwareVersion:
+                ActiveSoftwareVersion_available = true;
+                break;
+            case DescriptorSubElementHeader::BootVersion:
+                BootVersion_available = true;
+                break;
+
+            default:
+                break;
+        }
     }
 
     if (raw_data->current > end) {
         log_e("ReadableWTPDescriptor::Deserialize length negative");
         return false;
     }
-    return true;
+    return HardwareVersion_available && ActiveSoftwareVersion_available && BootVersion_available;
 }
 
 const nonstd::span<const EncryptionSubElement *> ReadableWTPDescriptor::GetEncryptions() {
