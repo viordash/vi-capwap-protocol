@@ -36,6 +36,7 @@ struct __attribute__((packed)) WTPRadioInformation : ElementHeader {
     void Serialize(RawData *raw_data) const;
     static WTPRadioInformation *Deserialize(RawData *raw_data);
     uint16_t GetTotalLength() const;
+    std::string ToString() const;
 };
 
 struct WritableWTPRadioInformationArray {

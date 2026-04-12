@@ -68,6 +68,12 @@ TEST(WTPRadioInformationTestsGroup, Serialize) {
     CHECK_FALSE(element->BE);
 }
 
+TEST(WTPRadioInformationTestsGroup, ToString) {
+    WTPRadioInformation element{ 7, true, true, false, true, false, true, false };
+
+    STRCMP_EQUAL(" B A N AX", element.ToString().c_str());
+}
+
 TEST(WTPRadioInformationTestsGroup, Serialize_few_elements) {
     uint8_t buffer[2048] = {};
     WTPRadioInformation elements[] = { { 0, false, false, false, false, false, false, false },
