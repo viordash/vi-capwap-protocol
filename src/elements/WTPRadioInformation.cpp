@@ -2,6 +2,7 @@
 #include "WTPRadioInformation.h"
 #include "lassert.h"
 #include "logging.h"
+#include <sstream>
 #include <string.h>
 
 WTPRadioInformation::WTPRadioInformation(uint8_t radio_id,
@@ -45,6 +46,34 @@ uint16_t WTPRadioInformation::GetTotalLength() const {
     return GetLength() + sizeof(ElementHeader);
 }
 
+std::string WTPRadioInformation::ToString() const {
+    std::stringstream ss;
+
+    if (B) {
+        ss << " B";
+    }
+    if (A) {
+        ss << " A";
+    }
+    if (G) {
+        ss << " G";
+    }
+    if (N) {
+        ss << " N";
+    }
+    if (AC) {
+        ss << " AC";
+    }
+    if (AX) {
+        ss << " AX";
+    }
+    if (BE) {
+        ss << " BE";
+    }
+
+    return ss.str();
+}
+
 WritableWTPRadioInformationArray::WritableWTPRadioInformationArray(
     const nonstd::span<const WTPRadioInformation> &items)
     : items(items) {
@@ -66,22 +95,10 @@ uint16_t WritableWTPRadioInformationArray::GetTotalLength() const {
 
 void WritableWTPRadioInformationArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        char info[512] = "";
-
-        if (items[i].B) {
-            strcat(info, " B");
-        }
-        if (items[i].A) {
-            strcat(info, " A");
-        }
-        if (items[i].G) {
-            strcat(info, " G");
-        }
-        if (items[i].N) {
-            strcat(info, " N");
-        }
-
-        log_i("ME WTPRadioInfo #%zu RadioID:%u, 802.11 (%s )", i, items[i].RadioID, info);
+        log_i("ME WTPRadioInfo #%zu RadioID:%u, 802.11 (%s )",
+              i,
+              items[i].RadioID,
+              items[i].ToString().c_str());
     }
 }
 
@@ -110,21 +127,9 @@ nonstd::span<const WTPRadioInformation *const> ReadableWTPRadioInformationArray:
 
 void ReadableWTPRadioInformationArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        char info[512] = "";
-
-        if (items[i]->B) {
-            strcat(info, " B");
-        }
-        if (items[i]->A) {
-            strcat(info, " A");
-        }
-        if (items[i]->G) {
-            strcat(info, " G");
-        }
-        if (items[i]->N) {
-            strcat(info, " N");
-        }
-
-        log_i("ME WTPRadioInfo #%zu RadioID:%u, 802.11 (%s )", i, items[i]->RadioID, info);
+        log_i("ME WTPRadioInfo #%zu RadioID:%u, 802.11 (%s )",
+              i,
+              items[i]->RadioID,
+              items[i]->ToString().c_str());
     }
 }
