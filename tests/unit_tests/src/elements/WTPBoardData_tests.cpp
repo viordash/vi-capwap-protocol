@@ -202,3 +202,22 @@ TEST(WTPBoardDataTestsGroup, WTPBoardData_deserialize) {
                 wtp_board_data.Get()[1]->GetType());
     CHECK_EQUAL(7, wtp_board_data.Get()[1]->GetLength());
 }
+
+TEST(WTPBoardDataTestsGroup, WTPBoardData_deserialize_error_when_not_all_subelement_presents) {
+    uint8_t buffer[256] = {};
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+
+    WritableWTPBoardData::SubElement elements[] = {
+        { BoardDataSubElementHeader::Type::WTPModelNumber, "abcd" },
+    };
+
+    WritableWTPBoardData write_data{ 1234, elements };
+
+    write_data.Serialize(&raw_data);
+
+    const auto data_size = raw_data.current - buffer;
+
+    raw_data = { buffer, buffer + data_size };
+    ReadableWTPBoardData read_data;
+    CHECK_FALSE(read_data.Deserialize(&raw_data));
+}

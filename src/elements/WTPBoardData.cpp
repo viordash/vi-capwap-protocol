@@ -137,6 +137,9 @@ bool ReadableWTPBoardData::Deserialize(RawData *raw_data) {
         return false;
     }
 
+    bool WTPModelNumber_available = false;
+    bool WTPSerialNumber_available = false;
+
     const uint8_t *end = raw_data->current + header->GetLength()
                        - (sizeof(WTPBoardDataHeader) - sizeof(ElementHeader));
     while (raw_data->current < end) {
@@ -151,12 +154,23 @@ bool ReadableWTPBoardData::Deserialize(RawData *raw_data) {
         items[count] = sub_element_header;
         count++;
         raw_data->current += sub_element_header->GetLength();
+        switch (sub_element_header->GetType()) {
+            case BoardDataSubElementHeader::WTPModelNumber:
+                WTPModelNumber_available = true;
+                break;
+            case BoardDataSubElementHeader::WTPSerialNumber:
+                WTPSerialNumber_available = true;
+                break;
+
+            default:
+                break;
+        }
     }
     if (raw_data->current > end) {
         log_e("ReadableWTPBoardData::Deserialize length negative");
         return false;
     }
-    return true;
+    return WTPModelNumber_available && WTPSerialNumber_available;
 }
 
 nonstd::span<const BoardDataSubElementHeader *const> ReadableWTPBoardData::Get() const {
