@@ -116,21 +116,33 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize) {
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[0]->A);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[0]->G);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[0]->N);
+    CHECK_FALSE(read_data.wtp_radio_informations.Get()[0]->AC);
+    CHECK_FALSE(read_data.wtp_radio_informations.Get()[0]->AX);
+    CHECK_FALSE(read_data.wtp_radio_informations.Get()[0]->BE);
     CHECK_EQUAL(1, read_data.wtp_radio_informations.Get()[1]->RadioID);
     CHECK_TRUE(read_data.wtp_radio_informations.Get()[1]->B);
     CHECK_TRUE(read_data.wtp_radio_informations.Get()[1]->A);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[1]->G);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[1]->N);
+    CHECK_FALSE(read_data.wtp_radio_informations.Get()[1]->AC);
+    CHECK_FALSE(read_data.wtp_radio_informations.Get()[1]->AX);
+    CHECK_FALSE(read_data.wtp_radio_informations.Get()[1]->BE);
     CHECK_EQUAL(2, read_data.wtp_radio_informations.Get()[2]->RadioID);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[2]->B);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[2]->A);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[2]->G);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[2]->N);
+    CHECK_FALSE(read_data.wtp_radio_informations.Get()[2]->AC);
+    CHECK_FALSE(read_data.wtp_radio_informations.Get()[2]->AX);
+    CHECK_FALSE(read_data.wtp_radio_informations.Get()[2]->BE);
     CHECK_EQUAL(3, read_data.wtp_radio_informations.Get()[3]->RadioID);
     CHECK_TRUE(read_data.wtp_radio_informations.Get()[3]->B);
     CHECK_TRUE(read_data.wtp_radio_informations.Get()[3]->A);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[3]->G);
     CHECK_TRUE(read_data.wtp_radio_informations.Get()[3]->N);
+    CHECK_FALSE(read_data.wtp_radio_informations.Get()[3]->AC);
+    CHECK_FALSE(read_data.wtp_radio_informations.Get()[3]->AX);
+    CHECK_FALSE(read_data.wtp_radio_informations.Get()[3]->BE);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -190,7 +202,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_with_VendorSpecificPayload) {
     write_data.Serialize(&raw_data);
     CHECK_EQUAL(&buffer[0] + 220 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = {
-        0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x2A, 0x00, 0xAC,
+        0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x2A, 0x00, 0xB6,
         0x00, 0x00, 0x1C, 0x00, 0x0D, 0x6C, 0x6F, 0x63, 0x61, 0x74, 0x69, 0x6F, 0x6E, 0x5F, 0x64,
         0x61, 0x74, 0x61, 0x00, 0x26, 0x00, 0x14, 0x00, 0x00, 0x04, 0xD2, 0x00, 0x00, 0x00, 0x04,
         0x61, 0x62, 0x63, 0x64, 0x00, 0x01, 0x00, 0x04, 0x31, 0x32, 0x33, 0x34, 0x00, 0x27, 0x00,
