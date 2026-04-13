@@ -28,7 +28,7 @@ WritableJoinRequest::WritableJoinRequest(
       maximum_message_length{ maximum_message_length },
       wtp_reboot_statistics{ wtp_reboot_statistics },
       vendor_specific_payloads{ vendor_specific_payloads } {
-    ASSERT(wtp_descriptor.GetHeader().RadiosInUse == wtp_radio_info.size());
+    ASSERT(wtp_descriptor.GetHeader().RadiosInUse <= wtp_radio_info.size());
 }
 
 ControlHeader::MessageType WritableJoinRequest::GetMessageType() const {
