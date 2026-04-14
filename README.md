@@ -68,7 +68,7 @@ When constructing CAPWAP messages with radio information, the following constrai
 1. **Maximum radios constraint**: `max_radios >= radios_in_use`
    - The maximum number of radios supported by WTP must be greater than or equal to the number of radios currently in use
 
-2. **Radio info array size**: The number of elements in `wtp_radio_info` array must equal `radios_in_use`
-   - Each radio in use must have a corresponding entry in the radio information array
+2. **Radio info array size**: `radios_in_use <= wtp_radio_info.size()`
+   - The `wtp_radio_info` array must contain at least `radios_in_use` elements
 
 These requirements are enforced by runtime assertions in the library.
