@@ -74,10 +74,35 @@ std::string WTPRadioInformation::ToString() const {
     return ss.str();
 }
 
-WritableWTPRadioInformationArray::WritableWTPRadioInformationArray(
-    const nonstd::span<const WTPRadioInformation> &items)
-    : items(items) {
-    ASSERT(items.size() <= ReadableWTPRadioInformationArray::max_count);
+WritableWTPRadioInformationArray::WritableWTPRadioInformationArray() {
+    items.reserve(ReadableWTPRadioInformationArray::max_count);
+}
+
+void WritableWTPRadioInformationArray::Add(WTPRadioInformation radio_info) {
+    ASSERT(items.size() + 1 <= ReadableWTPRadioInformationArray::max_count);
+
+    auto it_exists =
+        std::find_if(items.begin(), items.end(), [&radio_info](const WTPRadioInformation &item) {
+            return item.RadioID == radio_info.RadioID;
+        });
+    if (it_exists != items.end()) {
+        *it_exists = std::move(radio_info);
+        log_i("WTPRadioInformation: replace RadioID: %u", (*it_exists).RadioID);
+    } else {
+        items.emplace_back(std::move(radio_info));
+    }
+}
+
+bool WritableWTPRadioInformationArray::Empty() const {
+    return items.empty();
+}
+
+void WritableWTPRadioInformationArray::Clear() {
+    items.clear();
+}
+
+size_t WritableWTPRadioInformationArray::Size() {
+    return items.size();
 }
 
 void WritableWTPRadioInformationArray::Serialize(RawData *raw_data) const {

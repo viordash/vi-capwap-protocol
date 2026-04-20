@@ -29,18 +29,17 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize) {
         true, false, info_elements
     };
 
-    WTPRadioInformation radio_infos[] = {
-        { 0, false, false, false, false, false, false, false },
-        { 1, true, true, false, false, false, false, false },
-        { 2, false, false, false, false, false, false, false },
-    };
+    WritableWTPRadioInformationArray wtp_radio_informations;
+    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
+    wtp_radio_informations.Add({ 1, true, true, false, false, false, false, false });
+    wtp_radio_informations.Add({ 2, false, false, false, false, false, false, false });
 
     CAPWAPControlIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10"), 19 },
                                                 { inet_addr("192.168.100.11"), 20 } };
 
     WritableDiscoveryResponse write_data(ac_descriptor,
                                          "Corporate-AC-1",
-                                         radio_infos,
+                                         wtp_radio_informations,
                                          ip_addresses,
                                          VendorSpecificPayload::Dummy);
 
@@ -114,7 +113,8 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize_with_VendorSpecifi
 
     const char *ac_name = "Corporate-AC-1";
 
-    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false, false, false, false } };
+    WritableWTPRadioInformationArray wtp_radio_informations;
+    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
 
     CAPWAPControlIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10"), 19 } };
 
@@ -124,7 +124,7 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize_with_VendorSpecifi
 
     WritableDiscoveryResponse write_data(ac_descriptor,
                                          ac_name,
-                                         radio_infos,
+                                         wtp_radio_informations,
                                          ip_addresses,
                                          vendor_specific_payloads);
 

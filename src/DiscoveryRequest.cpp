@@ -11,12 +11,12 @@ WritableDiscoveryRequest::WritableDiscoveryRequest(
     const WritableWTPDescriptor &wtp_descriptor,
     const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
     const WTPMACType::Type mac_type,
-    const nonstd::span<const WTPRadioInformation> &wtp_radio_info,
+    WritableWTPRadioInformationArray &wtp_radio_informations,
     WritableVendorSpecificPayloadArray &vendor_specific_payloads,
     const uint16_t probe_mtu_size)
     : discovery_type{ discovery_type }, wtp_board_data{ wtp_board_data },
       wtp_descriptor{ wtp_descriptor }, wtp_frame_tunnel_mode{ wtp_frame_tunnel_mode },
-      wtp_mac_type{ mac_type }, wtp_radio_informations{ wtp_radio_info },
+      wtp_mac_type{ mac_type }, wtp_radio_informations{ wtp_radio_informations },
       vendor_specific_payloads{ vendor_specific_payloads },
       padding{ CalcMTUPadding(probe_mtu_size) } {
 }

@@ -13,7 +13,7 @@ WritableJoinRequest::WritableJoinRequest(
     const SessionId &session_id,
     const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
     const WTPMACType::Type mac_type,
-    const nonstd::span<const WTPRadioInformation> &wtp_radio_info,
+    WritableWTPRadioInformationArray &wtp_radio_informations,
     const ECNSupport::Type ecn_support,
     const nonstd::span<const CAPWAPLocalIPv4Address> &ip_addresses,
     const CapwapTransportProtocol *capwap_transport_protocol,
@@ -23,12 +23,12 @@ WritableJoinRequest::WritableJoinRequest(
     : location_data{ location_data }, wtp_board_data{ wtp_board_data },
       wtp_descriptor{ wtp_descriptor }, wtp_name{ wtp_name }, session_id{ session_id },
       wtp_frame_tunnel_mode{ wtp_frame_tunnel_mode }, wtp_mac_type{ mac_type },
-      wtp_radio_informations{ wtp_radio_info }, ecn_support{ ecn_support },
+      wtp_radio_informations{ wtp_radio_informations }, ecn_support{ ecn_support },
       ip_addresses{ ip_addresses }, capwap_transport_protocol{ capwap_transport_protocol },
       maximum_message_length{ maximum_message_length },
       wtp_reboot_statistics{ wtp_reboot_statistics },
       vendor_specific_payloads{ vendor_specific_payloads } {
-    ASSERT(wtp_descriptor.GetHeader().RadiosInUse <= wtp_radio_info.size());
+    ASSERT(wtp_descriptor.GetHeader().RadiosInUse <= wtp_radio_informations.Size());
 }
 
 ControlHeader::MessageType WritableJoinRequest::GetMessageType() const {

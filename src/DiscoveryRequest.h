@@ -21,7 +21,7 @@ struct WritableDiscoveryRequest : WritableCapwapRequest {
     const WritableWTPDescriptor &wtp_descriptor;
     const WTPFrameTunnelMode &wtp_frame_tunnel_mode;
     const WTPMACType wtp_mac_type;
-    const WritableWTPRadioInformationArray wtp_radio_informations;
+    WritableWTPRadioInformationArray &wtp_radio_informations;
 
     WritableVendorSpecificPayloadArray &vendor_specific_payloads;
 
@@ -40,7 +40,7 @@ struct WritableDiscoveryRequest : WritableCapwapRequest {
                              const WritableWTPDescriptor &wtp_descriptor,
                              const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
                              const WTPMACType::Type mac_type,
-                             const nonstd::span<const WTPRadioInformation> &wtp_radio_info,
+                             WritableWTPRadioInformationArray &wtp_radio_informations,
                              WritableVendorSpecificPayloadArray &vendor_specific_payloads,
                              const uint16_t probe_mtu_size = no_probe_mtu_size);
 

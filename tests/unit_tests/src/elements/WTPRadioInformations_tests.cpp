@@ -76,42 +76,41 @@ TEST(WTPRadioInformationTestsGroup, ToString) {
 
 TEST(WTPRadioInformationTestsGroup, Serialize_few_elements) {
     uint8_t buffer[2048] = {};
-    WTPRadioInformation elements[] = { { 0, false, false, false, false, false, false, false },
-                                       { 1, true, true, false, false, false, false, false },
-                                       { 2, false, false, false, false, false, false, false },
-                                       { 3, true, true, false, true, false, false, false },
-                                       { 4, false, true, false, false, false, false, false },
-                                       { 5, true, true, false, false, false, false, false },
-                                       { 6, false, false, false, false, false, false, false },
-                                       { 7, true, true, false, false, false, false, false },
-                                       { 8, false, true, false, false, false, false, false },
-                                       { 9, false, true, true, false, false, false, false },
-                                       { 10, false, false, false, false, false, false, false },
-                                       { 11, false, true, false, false, false, false, false },
-                                       { 12, false, true, false, false, false, false, false },
-                                       { 13, true, true, false, false, false, false, false },
-                                       { 14, false, false, false, false, false, false, false },
-                                       { 15, true, true, false, false, false, false, false },
-                                       { 16, false, true, false, true, false, false, false },
-                                       { 17, true, false, false, true, false, false, false },
-                                       { 18, false, false, false, false, false, false, false },
-                                       { 19, true, true, false, false, false, false, false },
-                                       { 20, false, true, true, true, false, false, false },
-                                       { 21, true, true, false, false, false, false, false },
-                                       { 22, false, false, false, false, false, false, false },
-                                       { 23, true, true, false, false, false, false, false },
-                                       { 24, false, true, true, false, false, false, false },
-                                       { 25, true, true, false, false, false, false, false },
-                                       { 26, false, false, false, true, false, false, false },
-                                       { 127, true, true, false, false, false, false, false },
-                                       { 28, false, true, true, false, false, false, false },
-                                       { 29, true, true, true, false, false, false, false },
-                                       { 30, false, false, false, false, false, false, false },
-                                       { 31, true, true, false, true, false, false, false } };
 
-    WritableWTPRadioInformationArray w_infos{
-        nonstd::span<const WTPRadioInformation>(elements),
-    };
+    WritableWTPRadioInformationArray w_infos;
+
+    w_infos.Add({ 0, false, false, false, false, false, false, false });
+    w_infos.Add({ 1, true, true, false, false, false, false, false });
+    w_infos.Add({ 2, false, false, false, false, false, false, false });
+    w_infos.Add({ 3, true, true, false, true, false, false, false });
+    w_infos.Add({ 4, false, true, false, false, false, false, false });
+    w_infos.Add({ 5, true, true, false, false, false, false, false });
+    w_infos.Add({ 6, false, false, false, false, false, false, false });
+    w_infos.Add({ 7, true, true, false, false, false, false, false });
+    w_infos.Add({ 8, false, true, false, false, false, false, false });
+    w_infos.Add({ 9, false, true, true, false, false, false, false });
+    w_infos.Add({ 10, false, false, false, false, false, false, false });
+    w_infos.Add({ 11, false, true, false, false, false, false, false });
+    w_infos.Add({ 12, false, true, false, false, false, false, false });
+    w_infos.Add({ 13, true, true, false, false, false, false, false });
+    w_infos.Add({ 14, false, false, false, false, false, false, false });
+    w_infos.Add({ 15, true, true, false, false, false, false, false });
+    w_infos.Add({ 16, false, true, false, true, false, false, false });
+    w_infos.Add({ 17, true, false, false, true, false, false, false });
+    w_infos.Add({ 18, false, false, false, false, false, false, false });
+    w_infos.Add({ 19, true, true, false, false, false, false, false });
+    w_infos.Add({ 20, false, true, true, true, false, false, false });
+    w_infos.Add({ 21, true, true, false, false, false, false, false });
+    w_infos.Add({ 22, false, false, false, false, false, false, false });
+    w_infos.Add({ 23, true, true, false, false, false, false, false });
+    w_infos.Add({ 24, false, true, true, false, false, false, false });
+    w_infos.Add({ 25, true, true, false, false, false, false, false });
+    w_infos.Add({ 26, false, false, false, true, false, false, false });
+    w_infos.Add({ 127, true, true, false, false, false, false, false });
+    w_infos.Add({ 28, false, true, true, false, false, false, false });
+    w_infos.Add({ 29, true, true, true, false, false, false, false });
+    w_infos.Add({ 30, false, false, false, false, false, false, false });
+    w_infos.Add({ 31, true, true, false, true, false, false, false });
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 

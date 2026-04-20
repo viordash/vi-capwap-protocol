@@ -5,6 +5,7 @@
 #include "span.hpp"
 #include <array>
 #include <cstdint>
+#include <vector>
 
 struct __attribute__((packed)) WTPRadioInformation : ElementHeader {
     //The Radio Identifier, whose value is between one (1) and 31, which typically refers to an interface index on the WTP
@@ -22,7 +23,7 @@ struct __attribute__((packed)) WTPRadioInformation : ElementHeader {
     uint8_t BE : 1; // Bit 6: 802.11be (Wi-Fi 7) - 2.4 / 5 / 6 GHz
     uint8_t Reservd_3 : 1;
 
-    WTPRadioInformation(const WTPRadioInformation &) = delete;
+    WTPRadioInformation(const WTPRadioInformation &) = default;
     WTPRadioInformation(uint8_t radio_id,
                         bool b,
                         bool a,
@@ -41,11 +42,16 @@ struct __attribute__((packed)) WTPRadioInformation : ElementHeader {
 
 struct WritableWTPRadioInformationArray {
   private:
-    const nonstd::span<const WTPRadioInformation> items;
+    std::vector<WTPRadioInformation> items;
 
   public:
     WritableWTPRadioInformationArray(const WritableWTPRadioInformationArray &) = delete;
-    WritableWTPRadioInformationArray(const nonstd::span<const WTPRadioInformation> &items);
+    WritableWTPRadioInformationArray();
+
+    void Add(WTPRadioInformation radio_info);
+    bool Empty() const;
+    void Clear();
+    size_t Size();
 
     void Serialize(RawData *raw_data) const;
     uint16_t GetTotalLength() const;

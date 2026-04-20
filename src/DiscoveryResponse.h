@@ -17,7 +17,7 @@ struct WritableDiscoveryResponse : WritableCapwapResponse {
   private:
     const WritableACDescriptor &ac_descriptor;
     const WritableACName ac_name;
-    const WritableWTPRadioInformationArray wtp_radio_informations;
+    WritableWTPRadioInformationArray &wtp_radio_informations;
     const WritableCAPWAPControlIPV4AdrArray ip_addresses;
 
     WritableVendorSpecificPayloadArray &vendor_specific_payloads;
@@ -28,7 +28,7 @@ struct WritableDiscoveryResponse : WritableCapwapResponse {
     WritableDiscoveryResponse(const WritableDiscoveryResponse &) = delete;
     WritableDiscoveryResponse(const WritableACDescriptor &ac_descriptor,
                               const std::string_view ac_name,
-                              const nonstd::span<const WTPRadioInformation> &wtp_radio_info,
+                              WritableWTPRadioInformationArray &wtp_radio_informations,
                               const nonstd::span<const CAPWAPControlIPv4Address> &ip_addresses,
                               WritableVendorSpecificPayloadArray &vendor_specific_payloads);
 

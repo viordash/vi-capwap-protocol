@@ -28,7 +28,7 @@ struct WritableJoinRequest : WritableCapwapRequest {
     const SessionId &session_id;
     const WTPFrameTunnelMode &wtp_frame_tunnel_mode;
     const WTPMACType wtp_mac_type;
-    const WritableWTPRadioInformationArray wtp_radio_informations;
+    WritableWTPRadioInformationArray &wtp_radio_informations;
     const ECNSupport ecn_support;
     const WritableCAPWAPLocalIPV4AdrArray ip_addresses;
 
@@ -46,7 +46,7 @@ struct WritableJoinRequest : WritableCapwapRequest {
                         const SessionId &session_id,
                         const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
                         const WTPMACType::Type mac_type,
-                        const nonstd::span<const WTPRadioInformation> &wtp_radio_info,
+                        WritableWTPRadioInformationArray &wtp_radio_informations,
                         const ECNSupport::Type ecn_support,
                         const nonstd::span<const CAPWAPLocalIPv4Address> &ip_addresses,
                         const CapwapTransportProtocol *capwap_transport_protocol,
