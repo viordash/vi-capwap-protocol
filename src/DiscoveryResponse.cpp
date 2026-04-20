@@ -8,11 +8,12 @@
 WritableDiscoveryResponse::WritableDiscoveryResponse(
     const WritableACDescriptor &ac_descriptor,
     const std::string_view ac_name,
-    const nonstd::span<const WTPRadioInformation> &wtp_radio_info,
+    WritableWTPRadioInformationArray &wtp_radio_informations,
     const nonstd::span<const CAPWAPControlIPv4Address> &ip_addresses,
     WritableVendorSpecificPayloadArray &vendor_specific_payloads)
-    : ac_descriptor{ ac_descriptor }, ac_name{ ac_name }, wtp_radio_informations{ wtp_radio_info },
-      ip_addresses{ ip_addresses }, vendor_specific_payloads{ vendor_specific_payloads } {
+    : ac_descriptor{ ac_descriptor }, ac_name{ ac_name },
+      wtp_radio_informations{ wtp_radio_informations }, ip_addresses{ ip_addresses },
+      vendor_specific_payloads{ vendor_specific_payloads } {
 }
 
 ControlHeader::MessageType WritableDiscoveryResponse::GetMessageType() const {

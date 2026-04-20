@@ -25,7 +25,7 @@ struct WritableJoinResponse : WritableCapwapResponse {
     const ResultCode result_code;
     const WritableACDescriptor &ac_descriptor;
     const WritableACName ac_name;
-    const WritableWTPRadioInformationArray wtp_radio_informations;
+    WritableWTPRadioInformationArray &wtp_radio_informations;
     const ECNSupport ecn_support;
     const WritableCAPWAPControlIPV4AdrArray control_ip_addresses;
     const WritableCAPWAPLocalIPV4AdrArray local_ip_addresses;
@@ -41,7 +41,7 @@ struct WritableJoinResponse : WritableCapwapResponse {
     WritableJoinResponse(const ResultCode::Type result_code,
                          const WritableACDescriptor &ac_descriptor,
                          const std::string_view ac_name,
-                         const nonstd::span<const WTPRadioInformation> &wtp_radio_info,
+                         WritableWTPRadioInformationArray &wtp_radio_informations,
                          const ECNSupport::Type ecn_support,
                          const nonstd::span<const CAPWAPControlIPv4Address> &control_ip_addresses,
                          const nonstd::span<const CAPWAPLocalIPv4Address> &local_ip_addresses,

@@ -40,19 +40,18 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize) {
 
     WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
-    WTPRadioInformation radio_infos[] = {
-        { 0, false, false, false, false, false, false, false },
-        { 1, true, true, false, false, false, false, false },
-        { 2, false, false, false, false, false, false, false },
-        { 3, true, true, false, true, false, false, false },
-    };
+    WritableWTPRadioInformationArray wtp_radio_informations;
+    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
+    wtp_radio_informations.Add({ 1, true, true, false, false, false, false, false });
+    wtp_radio_informations.Add({ 2, false, false, false, false, false, false, false });
+    wtp_radio_informations.Add({ 3, true, true, false, true, false, false, false });
 
     WritableDiscoveryRequest write_data(DiscoveryType::Type::DHCP,
                                         wtpboarddata,
                                         wtpdescriptor,
                                         wtp_frame_tunnel_mode,
                                         WTPMACType::Local_MAC,
-                                        radio_infos,
+                                        wtp_radio_informations,
                                         VendorSpecificPayload::Dummy);
 
     write_data.Serialize(&raw_data);
@@ -131,7 +130,8 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_VendorSpecificP
 
     WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
-    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false, false, false, false } };
+    WritableWTPRadioInformationArray wtp_radio_informations;
+    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
 
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
@@ -142,7 +142,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_VendorSpecificP
                                         wtpdescriptor,
                                         wtp_frame_tunnel_mode,
                                         WTPMACType::Local_MAC,
-                                        radio_infos,
+                                        wtp_radio_informations,
                                         vendor_specific_payloads);
 
     write_data.Serialize(&raw_data);
@@ -206,7 +206,8 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_MTUDiscoveryPad
 
     WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
-    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false, false, false, false } };
+    WritableWTPRadioInformationArray wtp_radio_informations;
+    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
 
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(12300, 700, { '0', '1', '2', '3' });
@@ -217,7 +218,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_MTUDiscoveryPad
                                                  wtpdescriptor,
                                                  wtp_frame_tunnel_mode,
                                                  WTPMACType::Local_MAC,
-                                                 radio_infos,
+                                                 wtp_radio_informations,
                                                  vendor_specific_payloads,
                                                  1470);
 
@@ -237,7 +238,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_MTUDiscoveryPad
                                             wtpdescriptor,
                                             wtp_frame_tunnel_mode,
                                             WTPMACType::Local_MAC,
-                                            radio_infos,
+                                            wtp_radio_informations,
                                             vendor_specific_payloads,
                                             300);
 

@@ -46,7 +46,8 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_deserialize_perf) {
 
     WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
-    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false, false, false, false } };
+    WritableWTPRadioInformationArray wtp_radio_informations;
+    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
 
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
@@ -56,7 +57,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_deserialize_perf) {
                                         wtpdescriptor,
                                         wtp_frame_tunnel_mode,
                                         WTPMACType::Local_MAC,
-                                        radio_infos,
+                                        wtp_radio_informations,
                                         vendor_specific_payloads,
                                         1500);
 

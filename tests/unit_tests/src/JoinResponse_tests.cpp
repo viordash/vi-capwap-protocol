@@ -30,11 +30,10 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
         true, false, info_elements
     };
 
-    WTPRadioInformation radio_infos[] = {
-        { 10, false, false, false, false, false, false, false },
-        { 1, true, true, false, false, false, false, false },
-        { 2, false, false, false, false, false, false, false },
-    };
+    WritableWTPRadioInformationArray wtp_radio_informations;
+    wtp_radio_informations.Add({ 10, false, false, false, false, false, false, false });
+    wtp_radio_informations.Add({ 1, true, true, false, false, false, false, false });
+    wtp_radio_informations.Add({ 2, false, false, false, false, false, false, false });
 
     CAPWAPControlIPv4Address control_ip_addresses[] = { { inet_addr("192.168.100.10"), 19 },
                                                         { inet_addr("192.168.100.11"), 20 } };
@@ -57,7 +56,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
     WritableJoinResponse write_data(ResultCode::Type::Success,
                                     ac_descriptor,
                                     "Corporate-AC-1",
-                                    radio_infos,
+                                    wtp_radio_informations,
                                     ECNSupport::Type::FullAndLimitedECN,
                                     control_ip_addresses,
                                     local_ip_addresses,
@@ -192,7 +191,8 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_with_VendorSpecificPayload) 
         true, false, info_elements
     };
 
-    WTPRadioInformation radio_infos[] = { { 0, false, false, false, false, false, false, false } };
+    WritableWTPRadioInformationArray wtp_radio_informations;
+    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
 
     CAPWAPControlIPv4Address control_ip_addresses[] = { { inet_addr("192.168.100.10"), 19 },
                                                         { inet_addr("192.168.100.11"), 20 } };
@@ -206,7 +206,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_with_VendorSpecificPayload) 
     WritableJoinResponse write_data(ResultCode::Type::Success,
                                     ac_descriptor,
                                     "Corporate-AC-1",
-                                    radio_infos,
+                                    wtp_radio_informations,
                                     ECNSupport::Type::FullAndLimitedECN,
                                     control_ip_addresses,
                                     local_ip_addresses,
