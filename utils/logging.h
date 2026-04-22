@@ -25,14 +25,8 @@ typedef enum {
 #define LOG_LEVEL LOG_LEVEL_DEBUG
 #endif // !LOG_LEVEL
 
-#ifdef LOG_USE_STDOUT
-#define LOG_ERROR_STREAM stdout
-#else
-#define LOG_ERROR_STREAM stderr
-#endif
-
 #if (LOG_LEVEL <= LOG_LEVEL_ERROR)
-#define log_e(format, ...) fprintf(LOG_ERROR_STREAM, "E (%s) " format "\n", log_time(), ##__VA_ARGS__)
+#define log_e(format, ...) fprintf(stderr, "E (%s) " format "\n", log_time(), ##__VA_ARGS__)
 #else
 #define log_e(format, ...)                                                                         \
     do {                                                                                           \
@@ -43,7 +37,7 @@ typedef enum {
 #endif
 
 #if (LOG_LEVEL <= LOG_LEVEL_WARN)
-#define log_w(format, ...) fprintf(LOG_ERROR_STREAM, "W (%s) " format "\n", log_time(), ##__VA_ARGS__)
+#define log_w(format, ...) fprintf(stderr, "W (%s) " format "\n", log_time(), ##__VA_ARGS__)
 #else
 #define log_w(format, ...)                                                                         \
     do {                                                                                           \

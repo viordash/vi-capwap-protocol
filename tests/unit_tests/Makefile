@@ -16,7 +16,7 @@ CC 				:= g++
 
 CFLAGS := -std=c++17 -Wall -g -O0 -Wno-unused-parameter
 LDFLAGS := -lCppUTest
-CFLAGS += -DLOG_LEVEL=LOG_LEVEL_INFO -DLOG_USE_STDOUT
+CFLAGS += -DLOG_LEVEL=LOG_LEVEL_INFO
 
 MAIN						:= $(PROJECT_NAME)
 SOURCEDIRS					:= $(shell find -L $(SRC) -type d)
