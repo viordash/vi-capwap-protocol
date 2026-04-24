@@ -1,6 +1,6 @@
 #include "DataChannelKeepAlive.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 
 const SessionId &DataChannelKeepAlive::GetSessionId() const {
     return session_id;

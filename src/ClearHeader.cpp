@@ -1,6 +1,6 @@
 #include "ClearHeader.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <cstring>
 
 bool Preamble::Validate() const {

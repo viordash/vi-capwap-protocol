@@ -1,9 +1,9 @@
 
 
 #include "JoinResponse.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableJoinResponse::WritableJoinResponse(
     const ResultCode::Type result_code,

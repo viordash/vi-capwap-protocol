@@ -1,7 +1,7 @@
 
 #include "WTPRadioStatistics.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <string.h>
 
 WTPRadioStatistics::WTPRadioStatistics(uint8_t radio_id,

@@ -1,6 +1,6 @@
 #include "WTPRebootStatistics.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <cstring>
 
 WTPRebootStatistics::WTPRebootStatistics(uint16_t reboot_count,

@@ -1,9 +1,9 @@
 
 
 #include "DiscoveryRequest.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableDiscoveryRequest::WritableDiscoveryRequest(
     const DiscoveryType::Type discovery_type,

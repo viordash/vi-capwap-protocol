@@ -1,6 +1,6 @@
 #include "DiscoveryType.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 
 DiscoveryType::DiscoveryType(Type type)
     : ElementHeader(ElementHeader::DiscoveryType, sizeof(DiscoveryType) - sizeof(ElementHeader)),

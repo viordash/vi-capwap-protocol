@@ -1,6 +1,6 @@
 #include "MaximumMessageLength.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 
 MaximumMessageLength::MaximumMessageLength(uint16_t length)
     : ElementHeader(ElementHeader::MaximumMessageLength,

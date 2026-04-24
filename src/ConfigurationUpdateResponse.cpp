@@ -1,9 +1,9 @@
 
 
 #include "ConfigurationUpdateResponse.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableConfigurationUpdateResponse::WritableConfigurationUpdateResponse(
     const ResultCode::Type result_code,

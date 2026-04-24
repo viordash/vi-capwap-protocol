@@ -1,6 +1,6 @@
 #include "CapwapTransportProtocol.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 
 CapwapTransportProtocol::CapwapTransportProtocol(Type type)
     : ElementHeader(ElementHeader::CAPWAPTransportProtocol,

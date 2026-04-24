@@ -1,5 +1,5 @@
 #include "SessionId.h"
-#include "logging.h"
+#include "Logging.h"
 #include <iomanip>
 #include <sstream>
 #include <string.h>

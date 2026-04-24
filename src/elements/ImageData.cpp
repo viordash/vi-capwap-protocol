@@ -1,7 +1,7 @@
 
 #include "ImageData.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <string.h>
 
 ImageDataHeader::ImageDataHeader(ImageDataHeader::Type type, uint16_t length)

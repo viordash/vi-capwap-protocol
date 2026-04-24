@@ -1,7 +1,7 @@
 
 #include "WTPBoardData.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <string.h>
 
 WTPBoardDataHeader::WTPBoardDataHeader(uint32_t vendor_identifier, uint16_t sub_elements_size)

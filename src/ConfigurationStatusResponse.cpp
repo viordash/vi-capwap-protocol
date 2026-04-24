@@ -1,9 +1,9 @@
 
 
 #include "ConfigurationStatusResponse.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableConfigurationStatusResponse::WritableConfigurationStatusResponse(
     const CAPWAPTimers &capwap_timers,

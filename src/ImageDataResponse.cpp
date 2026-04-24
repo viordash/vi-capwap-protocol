@@ -1,9 +1,9 @@
 
 
 #include "ImageDataResponse.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableImageDataResponse::WritableImageDataResponse(
     const ResultCode::Type result_code,

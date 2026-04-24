@@ -1,6 +1,6 @@
 #include "MTUDiscoveryPadding.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <string.h>
 
 MTUDiscoveryPadding::MTUDiscoveryPadding(uint16_t size)

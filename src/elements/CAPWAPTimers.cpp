@@ -1,6 +1,6 @@
 #include "CAPWAPTimers.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <string.h>
 
 CAPWAPTimers::CAPWAPTimers(uint8_t discovery, uint8_t echo_interval)

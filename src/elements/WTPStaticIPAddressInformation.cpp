@@ -1,7 +1,7 @@
 #include "WTPStaticIPAddressInformation.h"
+#include "Logging.h"
+#include "NetworkUtils.h"
 #include "lassert.h"
-#include "logging.h"
-#include "network_utils.h"
 #include <cstring>
 
 WTPStaticIPAddressInformation::WTPStaticIPAddressInformation(uint32_t ipaddress,

@@ -1,7 +1,7 @@
 
 #include "ACDescriptor.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <string.h>
 
 ACDescriptorHeader::ACDescriptorHeader(uint16_t stations,

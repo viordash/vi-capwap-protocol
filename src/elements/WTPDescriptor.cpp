@@ -1,7 +1,7 @@
 
 #include "WTPDescriptor.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <string.h>
 
 WTPDescriptorHeader::WTPDescriptorHeader(uint8_t max_radios,

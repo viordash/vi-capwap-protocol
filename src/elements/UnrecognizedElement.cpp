@@ -1,6 +1,6 @@
 #include "UnrecognizedElement.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 
 UnrecognizedElement *UnrecognizedElement::Deserialize(RawData *raw_data) {
     if (raw_data->current + sizeof(UnrecognizedElement) > raw_data->end) {

@@ -1,7 +1,7 @@
 #include "DeleteStation.h"
 #include "ClearHeader.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <string.h>
 
 DeleteStation::DeleteStation(uint8_t radio_id, uint8_t mac_length)

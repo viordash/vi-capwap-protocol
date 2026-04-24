@@ -1,9 +1,9 @@
 
 
 #include "ResetResponse.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableResetResponse::WritableResetResponse(
     const ResultCode::Type result_code,

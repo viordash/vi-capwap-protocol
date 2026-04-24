@@ -1,7 +1,7 @@
 #include "CAPWAPControlIPv4Address.h"
+#include "Logging.h"
+#include "NetworkUtils.h"
 #include "lassert.h"
-#include "logging.h"
-#include "network_utils.h"
 
 CAPWAPControlIPv4Address::CAPWAPControlIPv4Address(uint32_t ipaddress, uint16_t wtp_count)
     : ElementHeader(ElementHeader::CAPWAPControlIPv4Address,

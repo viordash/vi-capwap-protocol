@@ -1,9 +1,9 @@
 
 
 #include "WTPEventResponse.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableWTPEventResponse::WritableWTPEventResponse(
     WritableVendorSpecificPayloadArray &vendor_specific_payloads)

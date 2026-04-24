@@ -1,9 +1,9 @@
 
 
 #include "WTPEventRequest.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableWTPEventRequest::WritableWTPEventRequest(
     WritableDecryptionErrorReportArray &decryption_error_report,

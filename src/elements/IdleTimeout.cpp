@@ -1,7 +1,7 @@
 
 #include "IdleTimeout.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <string.h>
 
 IdleTimeout::IdleTimeout(uint32_t timeout)

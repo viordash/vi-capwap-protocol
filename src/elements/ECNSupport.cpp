@@ -1,6 +1,6 @@
 #include "ECNSupport.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 
 ECNSupport::ECNSupport(Type type)
     : ElementHeader(ElementHeader::ECNSupport, sizeof(ECNSupport) - sizeof(ElementHeader)),

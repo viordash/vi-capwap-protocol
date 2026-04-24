@@ -1,7 +1,7 @@
 
 #include "ACTimestamp.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <string.h>
 
 ACTimestamp::ACTimestamp(uint32_t timestamp)

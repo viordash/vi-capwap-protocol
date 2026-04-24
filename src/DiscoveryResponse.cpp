@@ -1,9 +1,9 @@
 
 
 #include "DiscoveryResponse.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableDiscoveryResponse::WritableDiscoveryResponse(
     const WritableACDescriptor &ac_descriptor,

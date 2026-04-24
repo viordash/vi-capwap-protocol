@@ -1,7 +1,7 @@
 #include "CAPWAPLocalIPv4Address.h"
+#include "Logging.h"
+#include "NetworkUtils.h"
 #include "lassert.h"
-#include "logging.h"
-#include "network_utils.h"
 
 CAPWAPLocalIPv4Address::CAPWAPLocalIPv4Address(uint32_t ipaddress)
     : ElementHeader(ElementHeader::CAPWAPLocalIPv4Address,

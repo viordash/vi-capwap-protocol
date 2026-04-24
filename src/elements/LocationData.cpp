@@ -1,7 +1,7 @@
 
 #include "LocationData.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <string.h>
 
 WritableLocationData::WritableLocationData(std::string_view str) : data{ str.begin(), str.end() } {

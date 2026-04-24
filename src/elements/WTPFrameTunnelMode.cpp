@@ -1,6 +1,6 @@
 #include "WTPFrameTunnelMode.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 
 WTPFrameTunnelMode::WTPFrameTunnelMode(bool l, bool e, bool n)
     : ElementHeader(ElementHeader::WTPFrameTunnelMode,

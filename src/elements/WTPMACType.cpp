@@ -1,6 +1,6 @@
 #include "WTPMACType.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 
 WTPMACType::WTPMACType(Type type)
     : ElementHeader(ElementHeader::WTPMACType, sizeof(WTPMACType) - sizeof(ElementHeader)),

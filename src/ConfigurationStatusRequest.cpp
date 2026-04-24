@@ -1,9 +1,9 @@
 
 
 #include "ConfigurationStatusRequest.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableConfigurationStatusRequest::WritableConfigurationStatusRequest(
     const std::string_view ac_name,

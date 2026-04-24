@@ -1,6 +1,6 @@
 #include "DecryptionErrorReportPeriod.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <algorithm>
 
 DecryptionErrorReportPeriod::DecryptionErrorReportPeriod(uint8_t radio_id, uint16_t report_interval)

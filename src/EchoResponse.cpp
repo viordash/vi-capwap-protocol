@@ -1,9 +1,9 @@
 
 
 #include "EchoResponse.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableEchoResponse::WritableEchoResponse(
     WritableVendorSpecificPayloadArray &vendor_specific_payloads)

@@ -1,9 +1,9 @@
 
 
 #include "ConfigurationUpdateRequest.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableConfigurationUpdateRequest::WritableConfigurationUpdateRequest(
     WritableACNameWithPriorityArray &ac_names_with_priority,

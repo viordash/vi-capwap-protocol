@@ -1,7 +1,7 @@
 
 #include "WTPRadioInformation.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <sstream>
 #include <string.h>
 

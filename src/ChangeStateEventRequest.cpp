@@ -1,9 +1,9 @@
 
 
 #include "ChangeStateEventRequest.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableChangeStateEventRequest::WritableChangeStateEventRequest(
     WritableRadioOperationalStateArray &radio_operational_states,

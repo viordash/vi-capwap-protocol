@@ -1,9 +1,9 @@
 
 
 #include "JoinRequest.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableJoinRequest::WritableJoinRequest(
     const std::string_view location_data,

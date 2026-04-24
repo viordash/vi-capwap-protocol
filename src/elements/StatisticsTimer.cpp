@@ -1,6 +1,6 @@
 #include "StatisticsTimer.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <cstring>
 
 StatisticsTimer::StatisticsTimer(uint16_t time)

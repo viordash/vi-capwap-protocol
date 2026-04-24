@@ -1,6 +1,6 @@
 #include "ResultCode.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 
 ResultCode::ResultCode(Type type)
     : ElementHeader(ElementHeader::ResultCode, sizeof(ResultCode) - sizeof(ElementHeader)),

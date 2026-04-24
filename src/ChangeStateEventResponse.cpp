@@ -1,9 +1,9 @@
 
 
 #include "ChangeStateEventResponse.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableChangeStateEventResponse::WritableChangeStateEventResponse(
     WritableVendorSpecificPayloadArray &vendor_specific_payloads)

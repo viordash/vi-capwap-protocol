@@ -1,6 +1,6 @@
 #include "ControlHeader.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 
 ControlHeader::MessageType ControlHeader::GetType() const {
     return type;

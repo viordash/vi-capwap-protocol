@@ -1,6 +1,6 @@
 #include "DTLSHeader.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 
 DTLSHeader::DTLSHeader() : preamble{ Preamble::DTLSCrypted, Preamble::RFC_5415 }, reserved{} {};
 

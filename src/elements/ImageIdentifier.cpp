@@ -1,7 +1,7 @@
 
 #include "ImageIdentifier.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <string.h>
 
 ImageIdentifierHeader::ImageIdentifierHeader(uint32_t vendor_identifier, uint16_t length)

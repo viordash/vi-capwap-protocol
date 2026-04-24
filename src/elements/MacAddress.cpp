@@ -1,7 +1,7 @@
 #include "elements/MacAddress.h"
 #include "ClearHeader.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <arpa/inet.h>
 #include <string.h>
 

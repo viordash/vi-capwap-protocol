@@ -1,9 +1,9 @@
 
 
 #include "ImageDataRequest.h"
+#include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
-#include "logging.h"
 
 WritableImageDataRequest::WritableImageDataRequest(
     const CapwapTransportProtocol *capwap_transport_protocol,

@@ -1,7 +1,7 @@
 
 #include "WTPName.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <string.h>
 
 WritableWTPName::WritableWTPName(std::string_view str) : name{ str.begin(), str.end() } {

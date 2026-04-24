@@ -1,6 +1,6 @@
 #include "RadioAdministrativeState.h"
+#include "Logging.h"
 #include "lassert.h"
-#include "logging.h"
 #include <algorithm>
 #include <arpa/inet.h>
 #include <cstring>

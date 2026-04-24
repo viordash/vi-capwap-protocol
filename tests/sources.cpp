@@ -17,6 +17,7 @@
 #include "ImageDataResponse.cpp"
 #include "JoinRequest.cpp"
 #include "JoinResponse.cpp"
+#include "Logging.cpp"
 #include "ResetRequest.cpp"
 #include "ResetResponse.cpp"
 #include "WTPEventRequest.cpp"
@@ -67,4 +68,3 @@
 #include "elements/WTPRadioStatistics.cpp"
 #include "elements/WTPRebootStatistics.cpp"
 #include "elements/WTPStaticIPAddressInformation.cpp"
-#include "logging.cpp"
