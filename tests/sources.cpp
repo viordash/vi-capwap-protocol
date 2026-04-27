@@ -28,6 +28,7 @@
 #include "elements/ACNameWithPriority.cpp"
 #include "elements/ACTimestamp.cpp"
 #include "elements/AddMacAclEntry.cpp"
+#include "elements/AssignedWtpBssid.cpp"
 #include "elements/CAPWAPControlIPv4Address.cpp"
 #include "elements/CAPWAPLocalIPv4Address.cpp"
 #include "elements/CAPWAPTimers.cpp"

@@ -59,7 +59,8 @@ struct __attribute__((packed)) ElementHeader {
         CAPWAPTransportProtocol = 0x3300,       // 51
         MTUDiscoveryPadding = 0x3400,           // 52
         ECNSupport = 0x3500,                    // 53
-        WTPRadioInformation = 0x1804            // 1048
+        WTPRadioInformation = 0x1804,           // 1048
+        AssignedWtpBssid = 0x0204               // 1026
     };
 
   private:

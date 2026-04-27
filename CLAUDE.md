@@ -36,6 +36,10 @@ docs/
 └── rfc5416.txt         # CAPWAP Binding for IEEE 802.11
 ```
 
+## CAPWAP Protocol Notes
+
+- **RadioID**: Per RFC 5415, valid range is 1-31. In this implementation, RadioID = 0 is also allowed.
+
 ## Build
 
 ```bash
