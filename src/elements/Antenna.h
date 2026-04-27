@@ -13,12 +13,7 @@ struct __attribute__((packed)) Antenna : ElementHeader {
 
     enum Diversity : uint8_t { DiversityDisabled = 0, DiversityEnabled = 1 };
 
-    enum Combiner : uint8_t {
-        SectorizedLeft = 1,
-        SectorizedRight = 2,
-        Omni = 3,
-        MIMO = 4
-    };
+    enum Combiner : uint8_t { SectorizedLeft = 1, SectorizedRight = 2, Omni = 3, MIMO = 4 };
 
     enum AntennaSelection : uint8_t { Internal = 1, External = 2 };
 

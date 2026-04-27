@@ -134,8 +134,7 @@ void WritableAntennaArray::Clear() {
 void WritableAntennaArray::Serialize(RawData *raw_data) const {
     for (const auto &elem : items) {
         elem.header.Serialize(raw_data);
-        auto selection_count =
-            elem.header.GetLength() - (sizeof(Antenna) - sizeof(ElementHeader));
+        auto selection_count = elem.header.GetLength() - (sizeof(Antenna) - sizeof(ElementHeader));
         memcpy(raw_data->current, elem.selections.data(), selection_count);
         raw_data->current += selection_count;
     }
