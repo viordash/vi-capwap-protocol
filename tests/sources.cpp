@@ -39,6 +39,7 @@
 #include "elements/DecryptionErrorReportPeriod.cpp"
 #include "elements/DeleteMacAclEntry.cpp"
 #include "elements/DeleteStation.cpp"
+#include "elements/DeleteWlan.cpp"
 #include "elements/DiscoveryType.cpp"
 #include "elements/DuplicateIPv4Address.cpp"
 #include "elements/ECNSupport.cpp"

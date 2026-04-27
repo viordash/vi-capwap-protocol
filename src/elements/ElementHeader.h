@@ -62,7 +62,8 @@ struct __attribute__((packed)) ElementHeader {
         WTPRadioInformation = 0x1804,           // 1048
         AddWlan = 0x0004,                       // 1024
         Antenna = 0x0104,                       // 1025
-        AssignedWtpBssid = 0x0204               // 1026
+        AssignedWtpBssid = 0x0204,              // 1026
+        DeleteWlan = 0x0304                     // 1027
     };
 
   private:
