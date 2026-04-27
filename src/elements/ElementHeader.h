@@ -60,6 +60,7 @@ struct __attribute__((packed)) ElementHeader {
         MTUDiscoveryPadding = 0x3400,           // 52
         ECNSupport = 0x3500,                    // 53
         WTPRadioInformation = 0x1804,           // 1048
+        AddWlan = 0x0004,                       // 1024
         Antenna = 0x0104,                       // 1025
         AssignedWtpBssid = 0x0204               // 1026
     };
