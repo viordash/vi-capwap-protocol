@@ -67,6 +67,7 @@
 #include "elements/SupportedRates.cpp"
 #include "elements/TxPower.cpp"
 #include "elements/TxPowerLevel.cpp"
+#include "elements/UpdateStationQoS.cpp"
 #include "elements/UnrecognizedElement.cpp"
 #include "elements/VendorSpecificPayload.cpp"
 #include "elements/WTPBoardData.cpp"
