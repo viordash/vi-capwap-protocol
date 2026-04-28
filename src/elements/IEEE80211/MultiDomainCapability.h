@@ -5,6 +5,7 @@
 #include "span.hpp"
 #include <array>
 #include <cstdint>
+#include <vector>
 
 // RFC 5416 Section 6.9 - IEEE 802.11 Multi-Domain Capability
 //
