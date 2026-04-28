@@ -11,7 +11,7 @@ struct __attribute__((packed)) Antenna : ElementHeader {
   public:
     static const size_t max_antenna_count = 255;
 
-    enum Diversity : uint8_t { DiversityDisabled = 0, DiversityEnabled = 1 };
+    enum Diversity : uint8_t { Disabled = 0, Enabled = 1 };
 
     enum Combiner : uint8_t { SectorizedLeft = 1, SectorizedRight = 2, Omni = 3, MIMO = 4 };
 

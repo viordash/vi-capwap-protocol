@@ -36,7 +36,7 @@ TEST(AntennaTestsGroup, Deserialize) {
     CHECK_EQUAL(ElementHeader::ElementType::Antenna, element->GetElementType());
 
     CHECK_EQUAL(1, element->GetRadioID());
-    CHECK_EQUAL(Antenna::Diversity::DiversityEnabled, element->GetDiversity());
+    CHECK_EQUAL(Antenna::Diversity::Enabled, element->GetDiversity());
     CHECK_EQUAL(Antenna::Combiner::Omni, element->GetCombiner());
     CHECK_EQUAL(2, element->GetAntennaCount());
     CHECK_EQUAL(Antenna::AntennaSelection::Internal, element->antenna_selection[0]);
@@ -50,7 +50,7 @@ TEST(AntennaTestsGroup, Serialize) {
                                                           Antenna::AntennaSelection::External };
 
     WritableAntennaArray w_antennas;
-    w_antennas.Add(5, Antenna::Diversity::DiversityDisabled, Antenna::Combiner::MIMO, selections);
+    w_antennas.Add(5, Antenna::Diversity::Disabled, Antenna::Combiner::MIMO, selections);
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
@@ -76,7 +76,7 @@ TEST(AntennaTestsGroup, Serialize) {
     CHECK_EQUAL(&buffer[0] + 11, raw_data.current);
     CHECK_EQUAL(ElementHeader::ElementType::Antenna, element->GetElementType());
     CHECK_EQUAL(5, element->GetRadioID());
-    CHECK_EQUAL(Antenna::Diversity::DiversityDisabled, element->GetDiversity());
+    CHECK_EQUAL(Antenna::Diversity::Disabled, element->GetDiversity());
     CHECK_EQUAL(Antenna::Combiner::MIMO, element->GetCombiner());
     CHECK_EQUAL(3, element->GetAntennaCount());
 }
@@ -87,15 +87,15 @@ TEST(AntennaTestsGroup, Serialize_Deserialize_few_elements) {
     WritableAntennaArray w_antennas;
 
     w_antennas.Add(1,
-                   Antenna::Diversity::DiversityEnabled,
+                   Antenna::Diversity::Enabled,
                    Antenna::Combiner::SectorizedLeft,
                    { Antenna::AntennaSelection::Internal });
     w_antennas.Add(2,
-                   Antenna::Diversity::DiversityDisabled,
+                   Antenna::Diversity::Disabled,
                    Antenna::Combiner::SectorizedRight,
                    { Antenna::AntennaSelection::External, Antenna::AntennaSelection::External });
     w_antennas.Add(3,
-                   Antenna::Diversity::DiversityEnabled,
+                   Antenna::Diversity::Enabled,
                    Antenna::Combiner::Omni,
                    { Antenna::AntennaSelection::Internal,
                      Antenna::AntennaSelection::External,
@@ -118,17 +118,17 @@ TEST(AntennaTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(3, r_antennas.Get().size());
 
     CHECK_EQUAL(1, r_antennas.Get()[0]->GetRadioID());
-    CHECK_EQUAL(Antenna::Diversity::DiversityEnabled, r_antennas.Get()[0]->GetDiversity());
+    CHECK_EQUAL(Antenna::Diversity::Enabled, r_antennas.Get()[0]->GetDiversity());
     CHECK_EQUAL(Antenna::Combiner::SectorizedLeft, r_antennas.Get()[0]->GetCombiner());
     CHECK_EQUAL(1, r_antennas.Get()[0]->GetAntennaCount());
 
     CHECK_EQUAL(2, r_antennas.Get()[1]->GetRadioID());
-    CHECK_EQUAL(Antenna::Diversity::DiversityDisabled, r_antennas.Get()[1]->GetDiversity());
+    CHECK_EQUAL(Antenna::Diversity::Disabled, r_antennas.Get()[1]->GetDiversity());
     CHECK_EQUAL(Antenna::Combiner::SectorizedRight, r_antennas.Get()[1]->GetCombiner());
     CHECK_EQUAL(2, r_antennas.Get()[1]->GetAntennaCount());
 
     CHECK_EQUAL(3, r_antennas.Get()[2]->GetRadioID());
-    CHECK_EQUAL(Antenna::Diversity::DiversityEnabled, r_antennas.Get()[2]->GetDiversity());
+    CHECK_EQUAL(Antenna::Diversity::Enabled, r_antennas.Get()[2]->GetDiversity());
     CHECK_EQUAL(Antenna::Combiner::Omni, r_antennas.Get()[2]->GetCombiner());
     CHECK_EQUAL(3, r_antennas.Get()[2]->GetAntennaCount());
 }
@@ -140,19 +140,19 @@ TEST(AntennaTestsGroup, Add_array_of_items_is_unique_by_radio_id) {
 
     // Add same RadioID multiple times - should replace
     w_antennas.Add(1,
-                   Antenna::Diversity::DiversityEnabled,
+                   Antenna::Diversity::Enabled,
                    Antenna::Combiner::Omni,
                    { Antenna::AntennaSelection::Internal });
     w_antennas.Add(1,
-                   Antenna::Diversity::DiversityDisabled,
+                   Antenna::Diversity::Disabled,
                    Antenna::Combiner::MIMO,
                    { Antenna::AntennaSelection::External });
     w_antennas.Add(2,
-                   Antenna::Diversity::DiversityEnabled,
+                   Antenna::Diversity::Enabled,
                    Antenna::Combiner::SectorizedLeft,
                    { Antenna::AntennaSelection::Internal });
     w_antennas.Add(2,
-                   Antenna::Diversity::DiversityDisabled,
+                   Antenna::Diversity::Disabled,
                    Antenna::Combiner::SectorizedRight,
                    { Antenna::AntennaSelection::External });
 
@@ -174,11 +174,11 @@ TEST(AntennaTestsGroup, Add_array_of_items_is_unique_by_radio_id) {
 
     // Should have the last values for each RadioID
     CHECK_EQUAL(1, r_antennas.Get()[0]->GetRadioID());
-    CHECK_EQUAL(Antenna::Diversity::DiversityDisabled, r_antennas.Get()[0]->GetDiversity());
+    CHECK_EQUAL(Antenna::Diversity::Disabled, r_antennas.Get()[0]->GetDiversity());
     CHECK_EQUAL(Antenna::Combiner::MIMO, r_antennas.Get()[0]->GetCombiner());
 
     CHECK_EQUAL(2, r_antennas.Get()[1]->GetRadioID());
-    CHECK_EQUAL(Antenna::Diversity::DiversityDisabled, r_antennas.Get()[1]->GetDiversity());
+    CHECK_EQUAL(Antenna::Diversity::Disabled, r_antennas.Get()[1]->GetDiversity());
     CHECK_EQUAL(Antenna::Combiner::SectorizedRight, r_antennas.Get()[1]->GetCombiner());
 }
 

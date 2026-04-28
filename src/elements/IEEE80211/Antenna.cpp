@@ -45,8 +45,8 @@ bool Antenna::Validate() const {
         return false;
     }
     switch (diversity) {
-        case Antenna::Diversity::DiversityDisabled:
-        case Antenna::Diversity::DiversityEnabled:
+        case Antenna::Diversity::Disabled:
+        case Antenna::Diversity::Enabled:
             break;
         default:
             return false;
