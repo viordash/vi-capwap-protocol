@@ -103,10 +103,10 @@ TEST(StationSessionKeyTestsGroup, Serialize_with_key) {
     uint8_t mac[6] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
     uint8_t tsc[6] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x01 };
     uint8_t rsc[6] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x02 };
-    std::vector<uint8_t> key = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B,
-                                 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
+    std::vector<uint8_t> key = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                                 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
 
-    WritableStationSessionKeyArray::Item item{ mac, 0x8000, tsc, rsc, std::move(key) };
+    WritableStationSessionKeyArray::Item item{ mac, 0x8000, tsc, rsc, key };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     item.header.Serialize(&raw_data);
@@ -152,8 +152,8 @@ TEST(StationSessionKeyTestsGroup, Serialize_Deserialize_array) {
     std::vector<uint8_t> key2 = { 0x10, 0x20, 0x30, 0x40, 0x50, 0x60, 0x70, 0x80 };
 
     WritableStationSessionKeyArray w_keys;
-    w_keys.Add({ mac1, 0x8000, tsc1, rsc1, std::move(key1) });
-    w_keys.Add({ mac2, 0x4000, tsc2, rsc2, std::move(key2) });
+    w_keys.Add({ mac1, 0x8000, tsc1, rsc1, key1 });
+    w_keys.Add({ mac2, 0x4000, tsc2, rsc2, key2 });
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
     w_keys.Serialize(&raw_data);
@@ -233,10 +233,10 @@ TEST(StationSessionKeyTestsGroup, CCMP_key_128bit) {
     uint8_t rsc[6] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x02 };
 
     // 128-bit CCMP key
-    std::vector<uint8_t> ccmp_key = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A,
-                                      0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
+    std::vector<uint8_t> ccmp_key = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                                      0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10 };
 
-    WritableStationSessionKeyArray::Item item{ mac, 0x0000, tsc, rsc, std::move(ccmp_key) };
+    WritableStationSessionKeyArray::Item item{ mac, 0x0000, tsc, rsc, ccmp_key };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     item.header.Serialize(&raw_data);
@@ -262,7 +262,7 @@ TEST(StationSessionKeyTestsGroup, TKIP_key_256bit) {
                                       0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
                                       0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20 };
 
-    WritableStationSessionKeyArray::Item item{ mac, 0x0000, tsc, rsc, std::move(tkip_key) };
+    WritableStationSessionKeyArray::Item item{ mac, 0x0000, tsc, rsc, tkip_key };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     item.header.Serialize(&raw_data);

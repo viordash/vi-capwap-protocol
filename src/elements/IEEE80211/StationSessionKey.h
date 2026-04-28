@@ -79,7 +79,7 @@ struct __attribute__((packed)) StationSessionKey : ElementHeader {
 struct WritableStationSessionKeyArray {
   public:
     struct Item {
-        std::vector<uint8_t> key_data;
+        nonstd::span<const uint8_t> key_data;
         StationSessionKey header;
 
         Item(const Item &) = default;
@@ -87,7 +87,7 @@ struct WritableStationSessionKeyArray {
              uint16_t flags,
              const uint8_t *pairwise_tsc,
              const uint8_t *pairwise_rsc,
-             std::vector<uint8_t> &&key);
+             nonstd::span<const uint8_t> key);
 
         const uint8_t *GetMACAddress() const;
     };

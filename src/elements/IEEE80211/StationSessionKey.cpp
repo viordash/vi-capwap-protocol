@@ -94,8 +94,8 @@ WritableStationSessionKeyArray::Item::Item(const uint8_t *mac_address,
                                            uint16_t flags,
                                            const uint8_t *pairwise_tsc,
                                            const uint8_t *pairwise_rsc,
-                                           std::vector<uint8_t> &&key)
-    : key_data{ std::move(key) },
+                                           nonstd::span<const uint8_t> key)
+    : key_data{ key },
       header{ mac_address, flags, pairwise_tsc, pairwise_rsc, (uint16_t)key_data.size() } {
 }
 
