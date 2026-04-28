@@ -33,6 +33,33 @@ Then include the necessary headers in your project:
 #include "vi-capwap-protocol/src/elements/ACDescriptor.h"
 ```
 
+## Data Lifetime Management
+
+**Important**: This library is designed for zero-copy operation. CAPWAP messages and elements do **not** take ownership of the data passed to them.
+
+When passing data via `nonstd::span<const uint8_t>` to writable arrays (e.g., `WritableRateSetArray`, `WritableStationArray`), the caller must ensure that the referenced data remains valid until `Serialize()` is called.
+
+### Example - Correct Usage
+
+```cpp
+std::vector<uint8_t> rate_set_data = { 0x82, 0x84, 0x8B, 0x96 };
+
+WritableRateSetArray rate_sets;
+rate_sets.Add(1, rate_set_data);  // span references rate_set_data
+rate_sets.Serialize(&raw_data);   // rate_set_data must still be valid here
+```
+
+### Example - Incorrect Usage
+
+```cpp
+WritableRateSetArray rate_sets;
+{
+    std::vector<uint8_t> rate_set_data = { 0x82, 0x84, 0x8B, 0x96 };
+    rate_sets.Add(1, rate_set_data);
+}  // rate_set_data destroyed - span now points to invalid memory!
+rate_sets.Serialize(&raw_data);  // Undefined behavior
+```
+
 ## Building Tests
 
 ```bash
