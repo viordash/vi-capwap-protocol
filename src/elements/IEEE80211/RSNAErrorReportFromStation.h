@@ -5,6 +5,7 @@
 #include "span.hpp"
 #include <array>
 #include <cstdint>
+#include <vector>
 
 // RFC 5416 Section 6.12 - IEEE 802.11 RSNA Error Report From Station
 //
@@ -38,6 +39,7 @@
 struct __attribute__((packed)) RSNAErrorReportFromStation : ElementHeader {
   public:
     static const size_t mac_address_size = 6;
+    static const size_t bssid_size = 6;
     static const uint8_t min_wlan_id = 1;
     static const uint8_t max_wlan_id = 16;
 
@@ -46,7 +48,7 @@ struct __attribute__((packed)) RSNAErrorReportFromStation : ElementHeader {
     uint8_t client_mac_address[mac_address_size];
 
     // BSSID: The BSSID
-    uint8_t bssid[mac_address_size];
+    uint8_t bssid[bssid_size];
 
     // Radio ID: An 8-bit value representing the radio, whose value is between 0 and 31.
     uint8_t radio_id;
