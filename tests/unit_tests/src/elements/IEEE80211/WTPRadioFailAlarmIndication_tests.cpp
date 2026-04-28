@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/WTPRadioFailAlarmIndication.h"
+#include "elements/IEEE80211/WTPRadioFailAlarmIndication.h"
 
 #include "CppUTest/TestHarness.h"
 

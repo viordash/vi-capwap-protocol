@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/WTPRadioConfiguration.h"
+#include "elements/IEEE80211/WTPRadioConfiguration.h"
 
 #include "CppUTest/TestHarness.h"
 

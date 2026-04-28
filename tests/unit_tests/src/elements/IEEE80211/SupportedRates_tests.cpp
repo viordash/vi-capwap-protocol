@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/SupportedRates.h"
+#include "elements/IEEE80211/SupportedRates.h"
 
 #include "CppUTest/TestHarness.h"
 

@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/DeleteWlan.h"
+#include "elements/IEEE80211/DeleteWlan.h"
 
 #include "CppUTest/TestHarness.h"
 

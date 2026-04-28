@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/AddWlan.h"
+#include "elements/IEEE80211/AddWlan.h"
 
 #include "CppUTest/TestHarness.h"
 
@@ -327,43 +327,153 @@ TEST(AddWlanTestsGroup, All_enum_values) {
     WritableAddWlanArray w_wlans;
 
     // All KeyStatus values
-    w_wlans.Add({ 1, 1, 0, 0, AddWlanHeader::KeyStatus::PerStationKeys, {}, group_tsc,
-                  AddWlanHeader::QoS::BestEffort, AddWlanHeader::AuthType::OpenSystem,
-                  AddWlanHeader::MACMode::LocalMAC, AddWlanHeader::TunnelMode::LocalBridging, 0, "KS0" });
-    w_wlans.Add({ 1, 2, 0, 0, AddWlanHeader::KeyStatus::StaticWep, {}, group_tsc,
-                  AddWlanHeader::QoS::BestEffort, AddWlanHeader::AuthType::OpenSystem,
-                  AddWlanHeader::MACMode::LocalMAC, AddWlanHeader::TunnelMode::LocalBridging, 0, "KS1" });
-    w_wlans.Add({ 1, 3, 0, 0, AddWlanHeader::KeyStatus::BeginRekeying, {}, group_tsc,
-                  AddWlanHeader::QoS::BestEffort, AddWlanHeader::AuthType::OpenSystem,
-                  AddWlanHeader::MACMode::LocalMAC, AddWlanHeader::TunnelMode::LocalBridging, 0, "KS2" });
-    w_wlans.Add({ 1, 4, 0, 0, AddWlanHeader::KeyStatus::CompletedRekeying, {}, group_tsc,
-                  AddWlanHeader::QoS::BestEffort, AddWlanHeader::AuthType::OpenSystem,
-                  AddWlanHeader::MACMode::LocalMAC, AddWlanHeader::TunnelMode::LocalBridging, 0, "KS3" });
+    w_wlans.Add({ 1,
+                  1,
+                  0,
+                  0,
+                  AddWlanHeader::KeyStatus::PerStationKeys,
+                  {},
+                  group_tsc,
+                  AddWlanHeader::QoS::BestEffort,
+                  AddWlanHeader::AuthType::OpenSystem,
+                  AddWlanHeader::MACMode::LocalMAC,
+                  AddWlanHeader::TunnelMode::LocalBridging,
+                  0,
+                  "KS0" });
+    w_wlans.Add({ 1,
+                  2,
+                  0,
+                  0,
+                  AddWlanHeader::KeyStatus::StaticWep,
+                  {},
+                  group_tsc,
+                  AddWlanHeader::QoS::BestEffort,
+                  AddWlanHeader::AuthType::OpenSystem,
+                  AddWlanHeader::MACMode::LocalMAC,
+                  AddWlanHeader::TunnelMode::LocalBridging,
+                  0,
+                  "KS1" });
+    w_wlans.Add({ 1,
+                  3,
+                  0,
+                  0,
+                  AddWlanHeader::KeyStatus::BeginRekeying,
+                  {},
+                  group_tsc,
+                  AddWlanHeader::QoS::BestEffort,
+                  AddWlanHeader::AuthType::OpenSystem,
+                  AddWlanHeader::MACMode::LocalMAC,
+                  AddWlanHeader::TunnelMode::LocalBridging,
+                  0,
+                  "KS2" });
+    w_wlans.Add({ 1,
+                  4,
+                  0,
+                  0,
+                  AddWlanHeader::KeyStatus::CompletedRekeying,
+                  {},
+                  group_tsc,
+                  AddWlanHeader::QoS::BestEffort,
+                  AddWlanHeader::AuthType::OpenSystem,
+                  AddWlanHeader::MACMode::LocalMAC,
+                  AddWlanHeader::TunnelMode::LocalBridging,
+                  0,
+                  "KS3" });
 
     // All QoS values
-    w_wlans.Add({ 2, 1, 0, 0, AddWlanHeader::KeyStatus::PerStationKeys, {}, group_tsc,
-                  AddWlanHeader::QoS::BestEffort, AddWlanHeader::AuthType::OpenSystem,
-                  AddWlanHeader::MACMode::LocalMAC, AddWlanHeader::TunnelMode::LocalBridging, 0, "Q0" });
-    w_wlans.Add({ 2, 2, 0, 0, AddWlanHeader::KeyStatus::PerStationKeys, {}, group_tsc,
-                  AddWlanHeader::QoS::Video, AddWlanHeader::AuthType::OpenSystem,
-                  AddWlanHeader::MACMode::LocalMAC, AddWlanHeader::TunnelMode::LocalBridging, 0, "Q1" });
-    w_wlans.Add({ 2, 3, 0, 0, AddWlanHeader::KeyStatus::PerStationKeys, {}, group_tsc,
-                  AddWlanHeader::QoS::Voice, AddWlanHeader::AuthType::OpenSystem,
-                  AddWlanHeader::MACMode::LocalMAC, AddWlanHeader::TunnelMode::LocalBridging, 0, "Q2" });
-    w_wlans.Add({ 2, 4, 0, 0, AddWlanHeader::KeyStatus::PerStationKeys, {}, group_tsc,
-                  AddWlanHeader::QoS::Background, AddWlanHeader::AuthType::OpenSystem,
-                  AddWlanHeader::MACMode::LocalMAC, AddWlanHeader::TunnelMode::LocalBridging, 0, "Q3" });
+    w_wlans.Add({ 2,
+                  1,
+                  0,
+                  0,
+                  AddWlanHeader::KeyStatus::PerStationKeys,
+                  {},
+                  group_tsc,
+                  AddWlanHeader::QoS::BestEffort,
+                  AddWlanHeader::AuthType::OpenSystem,
+                  AddWlanHeader::MACMode::LocalMAC,
+                  AddWlanHeader::TunnelMode::LocalBridging,
+                  0,
+                  "Q0" });
+    w_wlans.Add({ 2,
+                  2,
+                  0,
+                  0,
+                  AddWlanHeader::KeyStatus::PerStationKeys,
+                  {},
+                  group_tsc,
+                  AddWlanHeader::QoS::Video,
+                  AddWlanHeader::AuthType::OpenSystem,
+                  AddWlanHeader::MACMode::LocalMAC,
+                  AddWlanHeader::TunnelMode::LocalBridging,
+                  0,
+                  "Q1" });
+    w_wlans.Add({ 2,
+                  3,
+                  0,
+                  0,
+                  AddWlanHeader::KeyStatus::PerStationKeys,
+                  {},
+                  group_tsc,
+                  AddWlanHeader::QoS::Voice,
+                  AddWlanHeader::AuthType::OpenSystem,
+                  AddWlanHeader::MACMode::LocalMAC,
+                  AddWlanHeader::TunnelMode::LocalBridging,
+                  0,
+                  "Q2" });
+    w_wlans.Add({ 2,
+                  4,
+                  0,
+                  0,
+                  AddWlanHeader::KeyStatus::PerStationKeys,
+                  {},
+                  group_tsc,
+                  AddWlanHeader::QoS::Background,
+                  AddWlanHeader::AuthType::OpenSystem,
+                  AddWlanHeader::MACMode::LocalMAC,
+                  AddWlanHeader::TunnelMode::LocalBridging,
+                  0,
+                  "Q3" });
 
     // All TunnelMode values
-    w_wlans.Add({ 3, 1, 0, 0, AddWlanHeader::KeyStatus::PerStationKeys, {}, group_tsc,
-                  AddWlanHeader::QoS::BestEffort, AddWlanHeader::AuthType::OpenSystem,
-                  AddWlanHeader::MACMode::LocalMAC, AddWlanHeader::TunnelMode::LocalBridging, 0, "T0" });
-    w_wlans.Add({ 3, 2, 0, 0, AddWlanHeader::KeyStatus::PerStationKeys, {}, group_tsc,
-                  AddWlanHeader::QoS::BestEffort, AddWlanHeader::AuthType::OpenSystem,
-                  AddWlanHeader::MACMode::LocalMAC, AddWlanHeader::TunnelMode::Tunnel8023, 0, "T1" });
-    w_wlans.Add({ 3, 3, 0, 0, AddWlanHeader::KeyStatus::PerStationKeys, {}, group_tsc,
-                  AddWlanHeader::QoS::BestEffort, AddWlanHeader::AuthType::OpenSystem,
-                  AddWlanHeader::MACMode::LocalMAC, AddWlanHeader::TunnelMode::Tunnel80211, 0, "T2" });
+    w_wlans.Add({ 3,
+                  1,
+                  0,
+                  0,
+                  AddWlanHeader::KeyStatus::PerStationKeys,
+                  {},
+                  group_tsc,
+                  AddWlanHeader::QoS::BestEffort,
+                  AddWlanHeader::AuthType::OpenSystem,
+                  AddWlanHeader::MACMode::LocalMAC,
+                  AddWlanHeader::TunnelMode::LocalBridging,
+                  0,
+                  "T0" });
+    w_wlans.Add({ 3,
+                  2,
+                  0,
+                  0,
+                  AddWlanHeader::KeyStatus::PerStationKeys,
+                  {},
+                  group_tsc,
+                  AddWlanHeader::QoS::BestEffort,
+                  AddWlanHeader::AuthType::OpenSystem,
+                  AddWlanHeader::MACMode::LocalMAC,
+                  AddWlanHeader::TunnelMode::Tunnel8023,
+                  0,
+                  "T1" });
+    w_wlans.Add({ 3,
+                  3,
+                  0,
+                  0,
+                  AddWlanHeader::KeyStatus::PerStationKeys,
+                  {},
+                  group_tsc,
+                  AddWlanHeader::QoS::BestEffort,
+                  AddWlanHeader::AuthType::OpenSystem,
+                  AddWlanHeader::MACMode::LocalMAC,
+                  AddWlanHeader::TunnelMode::Tunnel80211,
+                  0,
+                  "T2" });
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
     w_wlans.Serialize(&raw_data);
@@ -381,7 +491,8 @@ TEST(AddWlanTestsGroup, All_enum_values) {
     CHECK_EQUAL(AddWlanHeader::KeyStatus::PerStationKeys, r_wlans.Get()[0].header->GetKeyStatus());
     CHECK_EQUAL(AddWlanHeader::KeyStatus::StaticWep, r_wlans.Get()[1].header->GetKeyStatus());
     CHECK_EQUAL(AddWlanHeader::KeyStatus::BeginRekeying, r_wlans.Get()[2].header->GetKeyStatus());
-    CHECK_EQUAL(AddWlanHeader::KeyStatus::CompletedRekeying, r_wlans.Get()[3].header->GetKeyStatus());
+    CHECK_EQUAL(AddWlanHeader::KeyStatus::CompletedRekeying,
+                r_wlans.Get()[3].header->GetKeyStatus());
 
     // Verify QoS
     CHECK_EQUAL(AddWlanHeader::QoS::BestEffort, r_wlans.Get()[4].tail->qos);

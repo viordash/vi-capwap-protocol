@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/WTPQualityOfService.h"
+#include "elements/IEEE80211/WTPQualityOfService.h"
 
 #include "CppUTest/TestHarness.h"
 
@@ -136,12 +136,12 @@ TEST(WTPQualityOfServiceTestsGroup, Serialize) {
     CHECK_EQUAL(0x04, buffer[5]); // D bit set (DSCP enabled)
 
     // Verify Voice QoS
-    CHECK_EQUAL(4, buffer[6]);    // Queue Depth
-    CHECK_EQUAL(0x00, buffer[7]); // CWMin high byte
-    CHECK_EQUAL(0x0F, buffer[8]); // CWMin low byte (15)
-    CHECK_EQUAL(0x00, buffer[9]); // CWMax high byte
+    CHECK_EQUAL(4, buffer[6]);     // Queue Depth
+    CHECK_EQUAL(0x00, buffer[7]);  // CWMin high byte
+    CHECK_EQUAL(0x0F, buffer[8]);  // CWMin low byte (15)
+    CHECK_EQUAL(0x00, buffer[9]);  // CWMax high byte
     CHECK_EQUAL(0x1F, buffer[10]); // CWMax low byte (31)
-    CHECK_EQUAL(2, buffer[11]);   // AIFS
+    CHECK_EQUAL(2, buffer[11]);    // AIFS
 
     raw_data = { buffer, buffer + sizeof(buffer) };
     auto deserialized = WTPQualityOfService::Deserialize(&raw_data);

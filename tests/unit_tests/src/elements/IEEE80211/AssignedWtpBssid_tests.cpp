@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/AssignedWtpBssid.h"
+#include "elements/IEEE80211/AssignedWtpBssid.h"
 
 #include "CppUTest/TestHarness.h"
 

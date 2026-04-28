@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/Antenna.h"
+#include "elements/IEEE80211/Antenna.h"
 
 #include "CppUTest/TestHarness.h"
 

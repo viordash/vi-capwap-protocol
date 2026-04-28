@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/TxPowerLevel.h"
+#include "elements/IEEE80211/TxPowerLevel.h"
 
 #include "CppUTest/TestHarness.h"
 
@@ -230,7 +230,8 @@ TEST(TxPowerLevelTestsGroup, Validate_length_mismatch) {
     };
     // clang-format on
 
-    RawData raw_data = { data_length_mismatch, data_length_mismatch + sizeof(data_length_mismatch) };
+    RawData raw_data = { data_length_mismatch,
+                         data_length_mismatch + sizeof(data_length_mismatch) };
     CHECK(TxPowerLevel::Deserialize(&raw_data) == nullptr);
 }
 

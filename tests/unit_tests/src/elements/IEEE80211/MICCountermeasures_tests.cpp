@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/MICCountermeasures.h"
+#include "elements/IEEE80211/MICCountermeasures.h"
 
 #include "CppUTest/TestHarness.h"
 

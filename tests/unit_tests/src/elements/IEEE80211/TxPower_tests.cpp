@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/TxPower.h"
+#include "elements/IEEE80211/TxPower.h"
 
 #include "CppUTest/TestHarness.h"
 

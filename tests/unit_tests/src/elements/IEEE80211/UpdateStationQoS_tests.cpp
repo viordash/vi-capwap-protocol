@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/UpdateStationQoS.h"
+#include "elements/IEEE80211/UpdateStationQoS.h"
 
 #include "CppUTest/TestHarness.h"
 
