@@ -71,7 +71,7 @@ TEST(UpdateWlanTestsGroup, Serialize) {
     WritableUpdateWlanArray w_wlans;
 
     std::vector<uint8_t> key = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88 };
-    w_wlans.Add({ 5, 3, 0x0421, 2, UpdateWlan::BeginRekeying, std::move(key) });
+    w_wlans.Add({ 5, 3, 0x0421, 2, UpdateWlan::BeginRekeying, key });
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
     w_wlans.Serialize(&raw_data);
@@ -107,7 +107,7 @@ TEST(UpdateWlanTestsGroup, Serialize_no_key) {
     WritableUpdateWlanArray w_wlans;
 
     std::vector<uint8_t> empty_key;
-    w_wlans.Add({ 1, 1, 0x0000, 0, UpdateWlan::PerStation, std::move(empty_key) });
+    w_wlans.Add({ 1, 1, 0x0000, 0, UpdateWlan::PerStation, empty_key });
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
     w_wlans.Serialize(&raw_data);
@@ -137,9 +137,9 @@ TEST(UpdateWlanTestsGroup, Serialize_Deserialize_few_elements) {
     std::vector<uint8_t> key_1 = {};
     std::vector<uint8_t> key_2 = { 0xAA, 0xBB };
 
-    w_wlans.Add({ 1, 1, 0x0001, 1, UpdateWlan::BeginRekeying, std::move(key_0) });
-    w_wlans.Add({ 1, 2, 0x0002, 0, UpdateWlan::PerStation, std::move(key_1) });
-    w_wlans.Add({ 2, 1, 0x0003, 2, UpdateWlan::CompletedRekeying, std::move(key_2) });
+    w_wlans.Add({ 1, 1, 0x0001, 1, UpdateWlan::BeginRekeying, key_0 });
+    w_wlans.Add({ 1, 2, 0x0002, 0, UpdateWlan::PerStation, key_1 });
+    w_wlans.Add({ 2, 1, 0x0003, 2, UpdateWlan::CompletedRekeying, key_2 });
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 

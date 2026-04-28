@@ -80,7 +80,7 @@ struct __attribute__((packed)) UpdateWlan : ElementHeader {
 struct WritableUpdateWlanArray {
   public:
     struct Item {
-        std::vector<uint8_t> key_data;
+        nonstd::span<const uint8_t> key_data;
         uint8_t radio_id;
         uint8_t wlan_id;
         uint16_t capability;
@@ -93,7 +93,7 @@ struct WritableUpdateWlanArray {
              uint16_t capability,
              uint8_t key_index,
              UpdateWlan::KeyStatus key_status,
-             std::vector<uint8_t> &&key);
+             nonstd::span<const uint8_t> key);
 
         uint8_t GetRadioID() const;
         uint8_t GetWlanID() const;

@@ -107,8 +107,8 @@ WritableUpdateWlanArray::Item::Item(uint8_t radio_id,
                                     uint16_t capability,
                                     uint8_t key_index,
                                     UpdateWlan::KeyStatus key_status,
-                                    std::vector<uint8_t> &&key)
-    : key_data(std::move(key)), radio_id(radio_id), wlan_id(wlan_id), capability(capability),
+                                    nonstd::span<const uint8_t> key)
+    : key_data(key), radio_id(radio_id), wlan_id(wlan_id), capability(capability),
       key_index(key_index), key_status(key_status) {
 }
 
