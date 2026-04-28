@@ -100,15 +100,14 @@ WritableStationArray::Item::Item(uint8_t radio_id,
                                  const uint8_t *mac_address,
                                  uint16_t capabilities,
                                  uint8_t wlan_id,
-                                 std::vector<uint8_t> &&supported_rates)
-    : supported_rates_data{ std::move(supported_rates) },
-      header{ radio_id,
-              association_id,
-              flags,
-              mac_address,
-              capabilities,
-              wlan_id,
-              (uint16_t)supported_rates_data.size() } {
+                                 nonstd::span<const uint8_t> supported_rates)
+    : supported_rates_data{ supported_rates }, header{ radio_id,
+                                                       association_id,
+                                                       flags,
+                                                       mac_address,
+                                                       capabilities,
+                                                       wlan_id,
+                                                       (uint16_t)supported_rates_data.size() } {
 }
 
 const uint8_t *WritableStationArray::Item::GetMACAddress() const {

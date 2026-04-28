@@ -79,7 +79,7 @@ struct __attribute__((packed)) Station : ElementHeader {
 struct WritableStationArray {
   public:
     struct Item {
-        std::vector<uint8_t> supported_rates_data;
+        nonstd::span<const uint8_t> supported_rates_data;
         Station header;
 
         Item(const Item &) = default;
@@ -89,7 +89,7 @@ struct WritableStationArray {
              const uint8_t *mac_address,
              uint16_t capabilities,
              uint8_t wlan_id,
-             std::vector<uint8_t> &&supported_rates);
+             nonstd::span<const uint8_t> supported_rates);
 
         const uint8_t *GetMACAddress() const;
         uint8_t GetRadioID() const;

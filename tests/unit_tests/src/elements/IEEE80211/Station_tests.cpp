@@ -54,7 +54,7 @@ TEST(StationTestsGroup, Serialize) {
     uint8_t mac[6] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
     std::vector<uint8_t> rates = { 0x82, 0x84, 0x8B, 0x96 };
 
-    WritableStationArray::Item item{ 2, 200, 0x00, mac, 0x1234, 10, std::move(rates) };
+    WritableStationArray::Item item{ 2, 200, 0x00, mac, 0x1234, 10, rates };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     item.header.Serialize(&raw_data);
@@ -98,8 +98,8 @@ TEST(StationTestsGroup, Serialize_Deserialize_array) {
     std::vector<uint8_t> rates2 = { 0x8B, 0x96, 0x8C, 0x98, 0xB0, 0xC8 };
 
     WritableStationArray w_stations;
-    w_stations.Add({ 1, 100, 0x00, mac1, 0x1234, 5, std::move(rates1) });
-    w_stations.Add({ 2, 200, 0x01, mac2, 0x5678, 10, std::move(rates2) });
+    w_stations.Add({ 1, 100, 0x00, mac1, 0x1234, 5, rates1 });
+    w_stations.Add({ 2, 200, 0x01, mac2, 0x5678, 10, rates2 });
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
     w_stations.Serialize(&raw_data);
@@ -226,7 +226,7 @@ TEST(StationTestsGroup, Minimum_supported_rates) {
     uint8_t mac[6] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
     std::vector<uint8_t> rates = { 0x82 };
 
-    WritableStationArray::Item item{ 1, 100, 0x00, mac, 0x1234, 5, std::move(rates) };
+    WritableStationArray::Item item{ 1, 100, 0x00, mac, 0x1234, 5, rates };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     item.header.Serialize(&raw_data);
@@ -249,12 +249,12 @@ TEST(StationTestsGroup, Association_ID_values) {
 
     for (auto assoc_id : assoc_ids) {
         std::vector<uint8_t> rates_copy = { 0x82, 0x84 };
-        WritableStationArray::Item item{ 1, assoc_id, 0x00, mac, 0x1234, 5,
-                                         std::move(rates_copy) };
+        WritableStationArray::Item item{ 1, assoc_id, 0x00, mac, 0x1234, 5, rates_copy };
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
         item.header.Serialize(&raw_data);
-        memcpy(raw_data.current, item.supported_rates_data.data(),
+        memcpy(raw_data.current,
+               item.supported_rates_data.data(),
                item.supported_rates_data.size());
         raw_data.current += item.supported_rates_data.size();
 
