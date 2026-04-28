@@ -69,6 +69,7 @@ struct __attribute__((packed)) ElementHeader {
         MACOperation = 0x0604,                  // 1030
         SupportedRates = 0x1004,                // 1040
         TxPower = 0x1104,                       // 1041
+        TxPowerLevel = 0x1204,                  // 1042
     };
 
   private:
