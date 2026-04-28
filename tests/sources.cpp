@@ -53,6 +53,7 @@
 #include "elements/InitiateDownload.cpp"
 #include "elements/LocationData.cpp"
 #include "elements/MACOperation.cpp"
+#include "elements/MICCountermeasures.cpp"
 #include "elements/MTUDiscoveryPadding.cpp"
 #include "elements/MacAclEntriesHeader.cpp"
 #include "elements/MacAddress.cpp"
