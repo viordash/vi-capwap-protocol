@@ -50,11 +50,11 @@ struct __attribute__((packed)) TxPowerLevel : ElementHeader {
 struct WritableTxPowerLevelArray {
   public:
     struct Item {
-        std::vector<int16_t> levels_data;
+        nonstd::span<const int16_t> levels_data;
         TxPowerLevel header;
 
         Item(const Item &) = default;
-        Item(uint8_t radio_id, std::vector<int16_t> &&levels);
+        Item(uint8_t radio_id, nonstd::span<const int16_t> levels);
 
         uint8_t GetRadioID() const;
     };

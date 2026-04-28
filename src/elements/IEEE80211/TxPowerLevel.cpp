@@ -66,8 +66,8 @@ TxPowerLevel *TxPowerLevel::Deserialize(RawData *raw_data) {
     return res;
 }
 
-WritableTxPowerLevelArray::Item::Item(uint8_t radio_id, std::vector<int16_t> &&levels)
-    : levels_data(std::move(levels)), header(radio_id, levels_data.size()) {
+WritableTxPowerLevelArray::Item::Item(uint8_t radio_id, nonstd::span<const int16_t> levels)
+    : levels_data(levels), header(radio_id, levels_data.size()) {
 }
 
 uint8_t WritableTxPowerLevelArray::Item::GetRadioID() const {

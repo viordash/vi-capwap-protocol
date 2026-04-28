@@ -65,7 +65,7 @@ TEST(TxPowerLevelTestsGroup, Serialize) {
     WritableTxPowerLevelArray w_levels;
 
     std::vector<int16_t> levels = { 20, 17, 14, 11 };
-    w_levels.Add({ 5, std::move(levels) });
+    w_levels.Add({ 5, levels });
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
     w_levels.Serialize(&raw_data);
@@ -99,7 +99,7 @@ TEST(TxPowerLevelTestsGroup, Serialize_negative_power) {
     WritableTxPowerLevelArray w_levels;
 
     std::vector<int16_t> levels = { -5, -10 };
-    w_levels.Add({ 1, std::move(levels) });
+    w_levels.Add({ 1, levels });
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
     w_levels.Serialize(&raw_data);
@@ -126,9 +126,9 @@ TEST(TxPowerLevelTestsGroup, Serialize_Deserialize_few_elements) {
     std::vector<int16_t> levels_1 = { 17, 14, 11 };
     std::vector<int16_t> levels_2 = { 23, 20, 17, 14, 11 };
 
-    w_levels.Add({ 1, std::move(levels_0) });
-    w_levels.Add({ 1, std::move(levels_1) });
-    w_levels.Add({ 2, std::move(levels_2) });
+    w_levels.Add({ 1, levels_0 });
+    w_levels.Add({ 1, levels_1 });
+    w_levels.Add({ 2, levels_2 });
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
