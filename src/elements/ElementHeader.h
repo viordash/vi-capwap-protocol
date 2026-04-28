@@ -67,12 +67,14 @@ struct __attribute__((packed)) ElementHeader {
         DirectSequenceControl = 0x0404,         // 1028
         InformationElement = 0x0504,            // 1029
         MACOperation = 0x0604,                  // 1030
+        MICCountermeasures = 0x0704,            // 1031
         SupportedRates = 0x1004,                // 1040
         TxPower = 0x1104,                       // 1041
         TxPowerLevel = 0x1204,                  // 1042
         UpdateStationQoS = 0x1304,              // 1043
         UpdateWlan = 0x1404,                    // 1044
         WTPRadioConfiguration = 0x1604,         // 1046
+        WTPRadioFailAlarmIndication = 0x1704    // 1047
     };
 
   private:

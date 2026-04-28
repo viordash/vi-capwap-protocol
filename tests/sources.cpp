@@ -78,6 +78,7 @@
 #include "elements/WTPMACType.cpp"
 #include "elements/WTPName.cpp"
 #include "elements/WTPRadioConfiguration.cpp"
+#include "elements/WTPRadioFailAlarmIndication.cpp"
 #include "elements/WTPRadioInformation.cpp"
 #include "elements/WTPRadioStatistics.cpp"
 #include "elements/WTPRebootStatistics.cpp"
