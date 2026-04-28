@@ -69,8 +69,8 @@ bool RSNAErrorReportFromStation::Validate() const {
     if (ElementHeader::GetElementType() != ElementHeader::RSNAErrorReportFromStation) {
         return false;
     }
-    if (ElementHeader::GetLength() !=
-        (sizeof(RSNAErrorReportFromStation) - sizeof(ElementHeader))) {
+    if (ElementHeader::GetLength()
+        != (sizeof(RSNAErrorReportFromStation) - sizeof(ElementHeader))) {
         return false;
     }
     if (radio_id > 31) {
@@ -152,8 +152,7 @@ void WritableRSNAErrorReportFromStationArray::Log() const {
     }
 }
 
-ReadableRSNAErrorReportFromStationArray::ReadableRSNAErrorReportFromStationArray()
-    : count{ 0 } {
+ReadableRSNAErrorReportFromStationArray::ReadableRSNAErrorReportFromStationArray() : count{ 0 } {
 }
 
 bool ReadableRSNAErrorReportFromStationArray::Deserialize(RawData *raw_data) {

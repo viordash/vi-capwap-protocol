@@ -51,7 +51,10 @@ struct __attribute__((packed)) UpdateStationQoS : ElementHeader {
     NetworkU16 QoSSubElement;
 
     UpdateStationQoS(const UpdateStationQoS &) = default;
-    UpdateStationQoS(uint8_t radio_id, const uint8_t *mac_address, uint8_t priority_8021p, uint8_t dscp_tag);
+    UpdateStationQoS(uint8_t radio_id,
+                     const uint8_t *mac_address,
+                     uint8_t priority_8021p,
+                     uint8_t dscp_tag);
 
     uint8_t Get8021pTag() const;
     uint8_t GetDscpTag() const;

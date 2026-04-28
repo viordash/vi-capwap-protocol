@@ -122,8 +122,7 @@ bool ReadableMultiDomainCapabilityArray::Deserialize(RawData *raw_data) {
     return true;
 }
 
-nonstd::span<const MultiDomainCapability *const>
-ReadableMultiDomainCapabilityArray::Get() const {
+nonstd::span<const MultiDomainCapability *const> ReadableMultiDomainCapabilityArray::Get() const {
     nonstd::span span(items.begin(), count);
     return span;
 }

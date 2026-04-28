@@ -40,8 +40,8 @@ bool RateSet::Validate() const {
 }
 
 void RateSet::Serialize(RawData *raw_data) const {
-    size_t total_size = sizeof(RateSet) - sizeof(ElementHeader) +
-                        (ElementHeader::GetLength() - (sizeof(RateSet) - sizeof(ElementHeader)));
+    size_t total_size = sizeof(RateSet) - sizeof(ElementHeader)
+                      + (ElementHeader::GetLength() - (sizeof(RateSet) - sizeof(ElementHeader)));
     ASSERT(raw_data->current + sizeof(ElementHeader) + total_size <= raw_data->end);
 
 #pragma GCC diagnostic push
@@ -117,7 +117,9 @@ void WritableRateSetArray::Serialize(RawData *raw_data) const {
 
 void WritableRateSetArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME RateSet #%zu RadioID:%u, RateSet size:%zu", i, items[i].radio_id,
+        log_i("ME RateSet #%zu RadioID:%u, RateSet size:%zu",
+              i,
+              items[i].radio_id,
               items[i].rate_set_data.size());
     }
 }
@@ -147,7 +149,9 @@ nonstd::span<const RateSet *const> ReadableRateSetArray::Get() const {
 
 void ReadableRateSetArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME RateSet #%zu RadioID:%u, RateSet size:%zu", i, items[i]->GetRadioID(),
+        log_i("ME RateSet #%zu RadioID:%u, RateSet size:%zu",
+              i,
+              items[i]->GetRadioID(),
               items[i]->GetRateSetData().size());
     }
 }

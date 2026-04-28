@@ -71,7 +71,10 @@ void WritableTxPowerArray::Serialize(RawData *raw_data) const {
 
 void WritableTxPowerArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME TxPower #%zu RadioID:%u, CurrentTxPower:%u", i, items[i].RadioID, items[i].CurrentTxPower.Get());
+        log_i("ME TxPower #%zu RadioID:%u, CurrentTxPower:%u",
+              i,
+              items[i].RadioID,
+              items[i].CurrentTxPower.Get());
     }
 }
 
@@ -100,6 +103,9 @@ nonstd::span<const TxPower *const> ReadableTxPowerArray::Get() const {
 
 void ReadableTxPowerArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME TxPower #%zu RadioID:%u, CurrentTxPower:%u", i, items[i]->RadioID, items[i]->CurrentTxPower.Get());
+        log_i("ME TxPower #%zu RadioID:%u, CurrentTxPower:%u",
+              i,
+              items[i]->RadioID,
+              items[i]->CurrentTxPower.Get());
     }
 }

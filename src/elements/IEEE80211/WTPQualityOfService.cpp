@@ -26,8 +26,10 @@ void QoSSubElement::SetDscpTag(uint8_t tag) {
 }
 
 WTPQualityOfService::WTPQualityOfService(uint8_t radio_id, uint8_t tagging_policy)
-    : ElementHeader(ElementHeader::WTPQualityOfService, sizeof(WTPQualityOfService) - sizeof(ElementHeader)),
-      RadioID{ radio_id }, TaggingPolicy{ tagging_policy }, Voice{}, Video{}, BestEffort{}, Background{} {
+    : ElementHeader(ElementHeader::WTPQualityOfService,
+                    sizeof(WTPQualityOfService) - sizeof(ElementHeader)),
+      RadioID{ radio_id }, TaggingPolicy{ tagging_policy }, Voice{}, Video{}, BestEffort{},
+      Background{} {
 }
 
 bool WTPQualityOfService::GetP() const {
@@ -158,7 +160,10 @@ void WritableWTPQualityOfServiceArray::Serialize(RawData *raw_data) const {
 
 void WritableWTPQualityOfServiceArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME WTPQualityOfService #%zu RadioID:%u, TaggingPolicy:0x%02X", i, items[i].RadioID, items[i].TaggingPolicy);
+        log_i("ME WTPQualityOfService #%zu RadioID:%u, TaggingPolicy:0x%02X",
+              i,
+              items[i].RadioID,
+              items[i].TaggingPolicy);
     }
 }
 
@@ -187,6 +192,9 @@ nonstd::span<const WTPQualityOfService *const> ReadableWTPQualityOfServiceArray:
 
 void ReadableWTPQualityOfServiceArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME WTPQualityOfService #%zu RadioID:%u, TaggingPolicy:0x%02X", i, items[i]->RadioID, items[i]->TaggingPolicy);
+        log_i("ME WTPQualityOfService #%zu RadioID:%u, TaggingPolicy:0x%02X",
+              i,
+              items[i]->RadioID,
+              items[i]->TaggingPolicy);
     }
 }

@@ -91,10 +91,10 @@ StationSessionKey *StationSessionKey::Deserialize(RawData *raw_data) {
 }
 
 WritableStationSessionKeyArray::Item::Item(const uint8_t *mac_address,
-                                            uint16_t flags,
-                                            const uint8_t *pairwise_tsc,
-                                            const uint8_t *pairwise_rsc,
-                                            std::vector<uint8_t> &&key)
+                                           uint16_t flags,
+                                           const uint8_t *pairwise_tsc,
+                                           const uint8_t *pairwise_rsc,
+                                           std::vector<uint8_t> &&key)
     : key_data{ std::move(key) },
       header{ mac_address, flags, pairwise_tsc, pairwise_rsc, (uint16_t)key_data.size() } {
 }

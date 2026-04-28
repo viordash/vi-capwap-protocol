@@ -83,15 +83,15 @@ struct __attribute__((packed)) WTPQualityOfService : ElementHeader {
     WTPQualityOfService(uint8_t radio_id, uint8_t tagging_policy);
 
     // Tagging Policy bit field accessors
-    bool GetP() const;    // 802.1p priority tag enable
+    bool GetP() const; // 802.1p priority tag enable
     void SetP(bool value);
-    bool GetQ() const;    // 802.1p priority tag queue depth behavior
+    bool GetQ() const; // 802.1p priority tag queue depth behavior
     void SetQ(bool value);
-    bool GetD() const;    // DSCP tag enable
+    bool GetD() const; // DSCP tag enable
     void SetD(bool value);
-    bool GetO() const;    // DSCP tag on outer IP header
+    bool GetO() const; // DSCP tag on outer IP header
     void SetO(bool value);
-    bool GetI() const;    // DSCP tag on inner IP header
+    bool GetI() const; // DSCP tag on inner IP header
     void SetI(bool value);
 
     bool Validate() const;

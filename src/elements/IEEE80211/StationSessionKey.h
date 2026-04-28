@@ -36,8 +36,8 @@ struct __attribute__((packed)) StationSessionKey : ElementHeader {
     static const size_t max_key_length = 256;
 
     // Flags bit positions
-    static const uint16_t FLAG_AKM_ONLY = 0x8000;      // A: AKM-Only (bit 15)
-    static const uint16_t FLAG_AC_CRYPTO = 0x4000;     // C: AC provides encryption (bit 14)
+    static const uint16_t FLAG_AKM_ONLY = 0x8000;  // A: AKM-Only (bit 15)
+    static const uint16_t FLAG_AC_CRYPTO = 0x4000; // C: AC provides encryption (bit 14)
 
   protected:
     // MAC Address: The station's MAC Address

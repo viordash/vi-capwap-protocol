@@ -59,8 +59,13 @@ struct __attribute__((packed)) WTPRadioConfiguration : ElementHeader {
     uint8_t CountryString[country_string_size];
 
     WTPRadioConfiguration(const WTPRadioConfiguration &) = default;
-    WTPRadioConfiguration(uint8_t radio_id, uint8_t short_preamble, uint8_t num_bssids, uint8_t dtim_period,
-                          const uint8_t *bssid, uint16_t beacon_period, const char *country);
+    WTPRadioConfiguration(uint8_t radio_id,
+                          uint8_t short_preamble,
+                          uint8_t num_bssids,
+                          uint8_t dtim_period,
+                          const uint8_t *bssid,
+                          uint16_t beacon_period,
+                          const char *country);
 
     bool Validate() const;
     void Serialize(RawData *raw_data) const;

@@ -4,9 +4,12 @@
 #include <algorithm>
 #include <cstring>
 
-UpdateStationQoS::UpdateStationQoS(uint8_t radio_id, const uint8_t *mac_address, uint8_t priority_8021p,
+UpdateStationQoS::UpdateStationQoS(uint8_t radio_id,
+                                   const uint8_t *mac_address,
+                                   uint8_t priority_8021p,
                                    uint8_t dscp_tag)
-    : ElementHeader(ElementHeader::UpdateStationQoS, sizeof(UpdateStationQoS) - sizeof(ElementHeader)),
+    : ElementHeader(ElementHeader::UpdateStationQoS,
+                    sizeof(UpdateStationQoS) - sizeof(ElementHeader)),
       RadioID{ radio_id } {
     memcpy(MACAddress, mac_address, mac_address_size);
     // QoS Sub-Element layout (16 bits, network byte order):
@@ -101,9 +104,17 @@ void WritableUpdateStationQoSArray::Serialize(RawData *raw_data) const {
 
 void WritableUpdateStationQoSArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME UpdateStationQoS #%zu RadioID:%u, MAC:%02X:%02X:%02X:%02X:%02X:%02X, 8021p:%u, DSCP:%u", i,
-              items[i].RadioID, items[i].MACAddress[0], items[i].MACAddress[1], items[i].MACAddress[2],
-              items[i].MACAddress[3], items[i].MACAddress[4], items[i].MACAddress[5], items[i].Get8021pTag(),
+        log_i("ME UpdateStationQoS #%zu RadioID:%u, MAC:%02X:%02X:%02X:%02X:%02X:%02X, 8021p:%u, "
+              "DSCP:%u",
+              i,
+              items[i].RadioID,
+              items[i].MACAddress[0],
+              items[i].MACAddress[1],
+              items[i].MACAddress[2],
+              items[i].MACAddress[3],
+              items[i].MACAddress[4],
+              items[i].MACAddress[5],
+              items[i].Get8021pTag(),
               items[i].GetDscpTag());
     }
 }
@@ -133,9 +144,17 @@ nonstd::span<const UpdateStationQoS *const> ReadableUpdateStationQoSArray::Get()
 
 void ReadableUpdateStationQoSArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME UpdateStationQoS #%zu RadioID:%u, MAC:%02X:%02X:%02X:%02X:%02X:%02X, 8021p:%u, DSCP:%u", i,
-              items[i]->RadioID, items[i]->MACAddress[0], items[i]->MACAddress[1], items[i]->MACAddress[2],
-              items[i]->MACAddress[3], items[i]->MACAddress[4], items[i]->MACAddress[5], items[i]->Get8021pTag(),
+        log_i("ME UpdateStationQoS #%zu RadioID:%u, MAC:%02X:%02X:%02X:%02X:%02X:%02X, 8021p:%u, "
+              "DSCP:%u",
+              i,
+              items[i]->RadioID,
+              items[i]->MACAddress[0],
+              items[i]->MACAddress[1],
+              items[i]->MACAddress[2],
+              items[i]->MACAddress[3],
+              items[i]->MACAddress[4],
+              items[i]->MACAddress[5],
+              items[i]->Get8021pTag(),
               items[i]->GetDscpTag());
     }
 }

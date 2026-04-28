@@ -55,7 +55,8 @@ bool Station::Validate() const {
         return false;
     }
     if (GetSupportedRatesLength() > max_supported_rates_length) {
-        log_e("Station: supported rates length exceeds limit: %u", (unsigned)max_supported_rates_length);
+        log_e("Station: supported rates length exceeds limit: %u",
+              (unsigned)max_supported_rates_length);
         return false;
     }
     if (radio_id > 31) {
@@ -94,14 +95,19 @@ Station *Station::Deserialize(RawData *raw_data) {
 }
 
 WritableStationArray::Item::Item(uint8_t radio_id,
-                                  uint16_t association_id,
-                                  uint8_t flags,
-                                  const uint8_t *mac_address,
-                                  uint16_t capabilities,
-                                  uint8_t wlan_id,
-                                  std::vector<uint8_t> &&supported_rates)
+                                 uint16_t association_id,
+                                 uint8_t flags,
+                                 const uint8_t *mac_address,
+                                 uint16_t capabilities,
+                                 uint8_t wlan_id,
+                                 std::vector<uint8_t> &&supported_rates)
     : supported_rates_data{ std::move(supported_rates) },
-      header{ radio_id, association_id, flags, mac_address, capabilities, wlan_id,
+      header{ radio_id,
+              association_id,
+              flags,
+              mac_address,
+              capabilities,
+              wlan_id,
               (uint16_t)supported_rates_data.size() } {
 }
 
@@ -134,8 +140,7 @@ void WritableStationArray::Clear() {
 void WritableStationArray::Serialize(RawData *raw_data) const {
     for (const auto &elem : items) {
         elem.header.Serialize(raw_data);
-        uint16_t rates_size =
-            elem.header.GetLength() - (sizeof(Station) - sizeof(ElementHeader));
+        uint16_t rates_size = elem.header.GetLength() - (sizeof(Station) - sizeof(ElementHeader));
         memcpy(raw_data->current, elem.supported_rates_data.data(), rates_size);
         raw_data->current += rates_size;
     }
