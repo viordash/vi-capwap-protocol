@@ -9,7 +9,9 @@ This repository is designed to be included as a git submodule in other projects.
 ```
 src/
 ├── *.h, *.cpp          # CAPWAP message types (DiscoveryRequest, JoinRequest, etc.)
-└── elements/           # CAPWAP message elements (ACDescriptor, WTPDescriptor, etc.)
+└── elements/           # CAPWAP message elements
+    ├── *.h, *.cpp      # Generic elements (ACDescriptor, WTPDescriptor, etc.)
+    └── IEEE80211/      # IEEE 802.11 binding elements (RFC 5416)
 tests/
 ├── unit_tests/         # Unit tests
 └── benchmarks/         # Performance benchmarks
