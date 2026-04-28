@@ -62,8 +62,8 @@ SupportedRates *SupportedRates::Deserialize(RawData *raw_data) {
     return res;
 }
 
-WritableSupportedRatesArray::Item::Item(uint8_t radio_id, std::vector<uint8_t> &&rates)
-    : rates_data(std::move(rates)), header(radio_id, rates_data.size()) {
+WritableSupportedRatesArray::Item::Item(uint8_t radio_id, nonstd::span<const uint8_t> rates)
+    : rates_data(rates), header(radio_id, rates_data.size()) {
 }
 
 uint8_t WritableSupportedRatesArray::Item::GetRadioID() const {

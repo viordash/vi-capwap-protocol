@@ -47,7 +47,7 @@ TEST(SupportedRatesTestsGroup, Serialize) {
     WritableSupportedRatesArray w_rates;
 
     std::vector<uint8_t> rates = { 0x82, 0x84, 0x8B, 0x96 };
-    w_rates.Add({ 5, std::move(rates) });
+    w_rates.Add({ 5, rates });
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
     w_rates.Serialize(&raw_data);
@@ -81,9 +81,9 @@ TEST(SupportedRatesTestsGroup, Serialize_Deserialize_few_elements) {
     std::vector<uint8_t> rates_1 = { 0x0C, 0x12, 0x18, 0x24 };
     std::vector<uint8_t> rates_2 = { 0x30, 0x48, 0x60, 0x6C, 0x8C, 0x98 };
 
-    w_rates.Add({ 1, std::move(rates_0) });
-    w_rates.Add({ 1, std::move(rates_1) });
-    w_rates.Add({ 2, std::move(rates_2) });
+    w_rates.Add({ 1, rates_0 });
+    w_rates.Add({ 1, rates_1 });
+    w_rates.Add({ 2, rates_2 });
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 

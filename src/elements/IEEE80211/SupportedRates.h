@@ -51,11 +51,11 @@ struct __attribute__((packed)) SupportedRates : ElementHeader {
 struct WritableSupportedRatesArray {
   public:
     struct Item {
-        std::vector<uint8_t> rates_data;
+        nonstd::span<const uint8_t> rates_data;
         SupportedRates header;
 
         Item(const Item &) = default;
-        Item(uint8_t radio_id, std::vector<uint8_t> &&rates);
+        Item(uint8_t radio_id, nonstd::span<const uint8_t> rates);
 
         uint8_t GetRadioID() const;
     };
