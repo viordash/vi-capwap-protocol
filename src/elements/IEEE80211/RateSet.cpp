@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cstring>
 
-RateSet::RateSet(uint8_t radio_id, const std::vector<uint8_t> &rate_set_data)
+RateSet::RateSet(uint8_t radio_id, nonstd::span<const uint8_t> rate_set_data)
     : ElementHeader(ElementHeader::RateSet,
                     sizeof(RateSet) - sizeof(ElementHeader) + rate_set_data.size()),
       radio_id{ radio_id } {
@@ -79,7 +79,7 @@ WritableRateSetArray::WritableRateSetArray() {
     items.reserve(ReadableRateSetArray::max_count);
 }
 
-void WritableRateSetArray::Add(uint8_t radio_id, const std::vector<uint8_t> &rate_set_data) {
+void WritableRateSetArray::Add(uint8_t radio_id, nonstd::span<const uint8_t> rate_set_data) {
     ASSERT(items.size() + 1 <= ReadableRateSetArray::max_count);
     ASSERT(rate_set_data.size() >= RateSet::min_rate_set_length);
     ASSERT(rate_set_data.size() <= RateSet::max_rate_set_length);

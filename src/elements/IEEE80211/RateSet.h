@@ -34,7 +34,7 @@ struct __attribute__((packed)) RateSet : ElementHeader {
     uint8_t rate_set_data[];
 
     RateSet(const RateSet &) = default;
-    RateSet(uint8_t radio_id, const std::vector<uint8_t> &rate_set_data);
+    RateSet(uint8_t radio_id, nonstd::span<const uint8_t> rate_set_data);
 
     uint8_t GetRadioID() const;
     nonstd::span<const uint8_t> GetRateSetData() const;
@@ -48,7 +48,7 @@ struct WritableRateSetArray {
   public:
     struct Item {
         uint8_t radio_id;
-        std::vector<uint8_t> rate_set_data;
+        nonstd::span<const uint8_t> rate_set_data;
     };
 
   protected:
@@ -58,7 +58,7 @@ struct WritableRateSetArray {
     WritableRateSetArray(const WritableRateSetArray &) = delete;
     WritableRateSetArray();
 
-    void Add(uint8_t radio_id, const std::vector<uint8_t> &rate_set_data);
+    void Add(uint8_t radio_id, nonstd::span<const uint8_t> rate_set_data);
     bool Empty() const;
     void Clear();
 
