@@ -77,6 +77,7 @@
 #include "elements/WTPFrameTunnelMode.cpp"
 #include "elements/WTPMACType.cpp"
 #include "elements/WTPName.cpp"
+#include "elements/WTPQualityOfService.cpp"
 #include "elements/WTPRadioConfiguration.cpp"
 #include "elements/WTPRadioFailAlarmIndication.cpp"
 #include "elements/WTPRadioInformation.cpp"
