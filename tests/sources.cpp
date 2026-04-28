@@ -48,6 +48,7 @@
 #include "elements/IEEE80211/InformationElement.cpp"
 #include "elements/IEEE80211/MACOperation.cpp"
 #include "elements/IEEE80211/MICCountermeasures.cpp"
+#include "elements/IEEE80211/OFDMControl.cpp"
 #include "elements/IEEE80211/RateSet.cpp"
 #include "elements/IEEE80211/RSNAErrorReportFromStation.cpp"
 #include "elements/IEEE80211/Statistics.cpp"

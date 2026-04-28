@@ -71,6 +71,7 @@ struct __attribute__((packed)) ElementHeader {
         SupportedRates = 0x1004,                // 1040
         TxPower = 0x1104,                       // 1041
         TxPowerLevel = 0x1204,                  // 1042
+        OFDMControl = 0x0904,                   // 1033
         RateSet = 0x0A04,                       // 1034
         RSNAErrorReportFromStation = 0x0B04,    // 1035
         Station = 0x0C04,                       // 1036
