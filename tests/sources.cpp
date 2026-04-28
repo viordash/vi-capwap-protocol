@@ -40,6 +40,7 @@
 #include "elements/DeleteMacAclEntry.cpp"
 #include "elements/DeleteStation.cpp"
 #include "elements/DeleteWlan.cpp"
+#include "elements/DirectSequenceControl.cpp"
 #include "elements/DiscoveryType.cpp"
 #include "elements/DuplicateIPv4Address.cpp"
 #include "elements/ECNSupport.cpp"

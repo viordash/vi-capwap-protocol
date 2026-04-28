@@ -63,7 +63,8 @@ struct __attribute__((packed)) ElementHeader {
         AddWlan = 0x0004,                       // 1024
         Antenna = 0x0104,                       // 1025
         AssignedWtpBssid = 0x0204,              // 1026
-        DeleteWlan = 0x0304                     // 1027
+        DeleteWlan = 0x0304,                    // 1027
+        DirectSequenceControl = 0x0404          // 1028
     };
 
   private:
