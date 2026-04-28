@@ -64,7 +64,8 @@ struct __attribute__((packed)) ElementHeader {
         Antenna = 0x0104,                       // 1025
         AssignedWtpBssid = 0x0204,              // 1026
         DeleteWlan = 0x0304,                    // 1027
-        DirectSequenceControl = 0x0404          // 1028
+        DirectSequenceControl = 0x0404,         // 1028
+        InformationElement = 0x0504             // 1029
     };
 
   private:

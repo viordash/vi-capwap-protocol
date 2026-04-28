@@ -48,6 +48,7 @@
 #include "elements/IdleTimeout.cpp"
 #include "elements/ImageData.cpp"
 #include "elements/ImageIdentifier.cpp"
+#include "elements/InformationElement.cpp"
 #include "elements/ImageInformation.cpp"
 #include "elements/InitiateDownload.cpp"
 #include "elements/LocationData.cpp"
