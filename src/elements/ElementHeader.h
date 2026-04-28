@@ -68,6 +68,7 @@ struct __attribute__((packed)) ElementHeader {
         InformationElement = 0x0504,            // 1029
         MACOperation = 0x0604,                  // 1030
         SupportedRates = 0x1004,                // 1040
+        TxPower = 0x1104,                       // 1041
     };
 
   private:
