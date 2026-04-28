@@ -59,6 +59,7 @@ make clean
 ## Tests
 
 - Testing framework: CppUTest
+- Source files from the project that need to be included in tests should be added via `#include` in `tests/sources.cpp`
 - If a code module is in a separate file, its tests must be in a separate test file (e.g., `ACName.h` → `ACName_tests.cpp`)
 - All tests in one test file must belong to a single TEST_GROUP
 - Use this pattern for TEST_GROUP:
@@ -97,6 +98,7 @@ make apply_format
 
 - Do NOT run `git commit` automatically — only suggest commit message text
 - User will commit manually
+- Do not check code formatting
 
 ## Commit Messages
 
