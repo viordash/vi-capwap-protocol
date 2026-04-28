@@ -8,7 +8,7 @@
 #include "elements/WTPDescriptor.h"
 #include "elements/WTPFrameTunnelMode.h"
 #include "elements/WTPMACType.h"
-#include "elements/WTPRadioInformation.h"
+#include "elements/IEEE80211/WTPRadioInformation.h"
 #include "span.hpp"
 #include <limits>
 #include <vector>

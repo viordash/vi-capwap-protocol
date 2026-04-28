@@ -6,7 +6,7 @@
 #include "elements/CAPWAPControlIPv4Address.h"
 #include "elements/ElementHeader.h"
 #include "elements/VendorSpecificPayload.h"
-#include "elements/WTPRadioInformation.h"
+#include "elements/IEEE80211/WTPRadioInformation.h"
 #include "span.hpp"
 #include <limits>
 #include <string_view>
