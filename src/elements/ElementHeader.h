@@ -71,6 +71,7 @@ struct __attribute__((packed)) ElementHeader {
         SupportedRates = 0x1004,                // 1040
         TxPower = 0x1104,                       // 1041
         TxPowerLevel = 0x1204,                  // 1042
+        Station = 0x0C04,                       // 1036
         StationQoSProfile = 0x0D04,             // 1037
         StationSessionKey = 0x0E04,             // 1038
         Statistics = 0x0F04,                    // 1039
