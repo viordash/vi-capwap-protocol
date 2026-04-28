@@ -67,7 +67,7 @@ struct __attribute__((packed)) ElementHeader {
         DirectSequenceControl = 0x0404,         // 1028
         InformationElement = 0x0504,            // 1029
         MACOperation = 0x0604,                  // 1030
-        MICCountermeasures = 0x0704             // 1031
+        SupportedRates = 0x1004,                // 1040
     };
 
   private:
