@@ -49,6 +49,7 @@
 #include "elements/IEEE80211/MACOperation.cpp"
 #include "elements/IEEE80211/MICCountermeasures.cpp"
 #include "elements/IEEE80211/Statistics.cpp"
+#include "elements/IEEE80211/StationSessionKey.cpp"
 #include "elements/IEEE80211/SupportedRates.cpp"
 #include "elements/IEEE80211/TxPower.cpp"
 #include "elements/IEEE80211/TxPowerLevel.cpp"
