@@ -72,6 +72,7 @@ struct __attribute__((packed)) ElementHeader {
         TxPowerLevel = 0x1204,                  // 1042
         UpdateStationQoS = 0x1304,              // 1043
         UpdateWlan = 0x1404,                    // 1044
+        WTPRadioConfiguration = 0x1604,         // 1046
     };
 
   private:
