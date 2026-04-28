@@ -65,7 +65,8 @@ struct __attribute__((packed)) ElementHeader {
         AssignedWtpBssid = 0x0204,              // 1026
         DeleteWlan = 0x0304,                    // 1027
         DirectSequenceControl = 0x0404,         // 1028
-        InformationElement = 0x0504             // 1029
+        InformationElement = 0x0504,            // 1029
+        MACOperation = 0x0604                   // 1030
     };
 
   private:
