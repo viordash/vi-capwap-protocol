@@ -1,6 +1,7 @@
 #include "CapwapTransportProtocol.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <cstring>
 
 CapwapTransportProtocol::CapwapTransportProtocol(Type type)
     : ElementHeader(ElementHeader::CAPWAPTransportProtocol,
@@ -14,12 +15,6 @@ bool CapwapTransportProtocol::Validate() const {
                == (sizeof(CapwapTransportProtocol) - sizeof(ElementHeader)) //
         && type >= UDPLite && type <= UDP;
 }
-void CapwapTransportProtocol::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(CapwapTransportProtocol) <= raw_data->end);
-    CapwapTransportProtocol *dst = (CapwapTransportProtocol *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(CapwapTransportProtocol);
-}
 CapwapTransportProtocol *CapwapTransportProtocol::Deserialize(RawData *raw_data) {
     if (raw_data->current + sizeof(CapwapTransportProtocol) > raw_data->end) {
         return nullptr;
@@ -32,10 +27,26 @@ CapwapTransportProtocol *CapwapTransportProtocol::Deserialize(RawData *raw_data)
     raw_data->current += sizeof(CapwapTransportProtocol);
     return res;
 }
-uint16_t CapwapTransportProtocol::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
-}
 
 void CapwapTransportProtocol::Log() const {
     log_i("ME CapwapTransportProtocol Type:%u", (unsigned)type);
+}
+
+WritableCapwapTransportProtocol::WritableCapwapTransportProtocol(CapwapTransportProtocol::Type type)
+    : element{ type } {
+}
+
+void WritableCapwapTransportProtocol::Serialize(RawData *raw_data) const {
+    ASSERT(raw_data->current + sizeof(CapwapTransportProtocol) <= raw_data->end);
+#pragma GCC diagnostic push
+#if __GNUC__ >= 8
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
+    std::memcpy(raw_data->current, &element, sizeof(CapwapTransportProtocol));
+#pragma GCC diagnostic pop
+    raw_data->current += sizeof(CapwapTransportProtocol);
+}
+
+void WritableCapwapTransportProtocol::Log() const {
+    log_i("ME CapwapTransportProtocol Type:%u", (unsigned)element.type);
 }

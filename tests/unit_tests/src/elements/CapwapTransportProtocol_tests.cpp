@@ -29,7 +29,7 @@ TEST(CapwapTransportProtocolTestsGroup, CapwapTransportProtocol_deserialize) {
 
 TEST(CapwapTransportProtocolTestsGroup, CapwapTransportProtocol_serialize) {
     uint8_t buffer[256] = {};
-    CapwapTransportProtocol element_0{ CapwapTransportProtocol::Type::UDP };
+    WritableCapwapTransportProtocol element_0{ CapwapTransportProtocol::Type::UDP };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     element_0.Serialize(&raw_data);
