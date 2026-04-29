@@ -105,7 +105,7 @@ WritableAntennaArray::WritableAntennaArray() {
 void WritableAntennaArray::Add(uint8_t radio_id,
                                Antenna::Diversity diversity,
                                Antenna::Combiner combiner,
-                               std::vector<Antenna::AntennaSelection> selections) {
+                               nonstd::span<const Antenna::AntennaSelection> selections) {
     ASSERT(items.size() + 1 <= ReadableAntennaArray::max_count);
 
     auto it_exists = std::find_if(items.begin(),
@@ -115,11 +115,10 @@ void WritableAntennaArray::Add(uint8_t radio_id,
                                   });
 
     if (it_exists != items.end()) {
-        *it_exists =
-            WritableAntennaArray::Item{ radio_id, diversity, combiner, std::move(selections) };
+        *it_exists = WritableAntennaArray::Item{ radio_id, diversity, combiner, selections };
         log_i("Antenna: replace RadioID: %u", radio_id);
     } else {
-        items.emplace_back(radio_id, diversity, combiner, std::move(selections));
+        items.emplace_back(radio_id, diversity, combiner, selections);
     }
 }
 

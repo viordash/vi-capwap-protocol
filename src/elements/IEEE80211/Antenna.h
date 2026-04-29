@@ -49,14 +49,14 @@ struct __attribute__((packed)) Antenna : ElementHeader {
 struct WritableAntennaArray {
   public:
     struct Item {
-        std::vector<Antenna::AntennaSelection> selections;
+        nonstd::span<const Antenna::AntennaSelection> selections;
         Antenna header;
         Item(const Item &) = default;
         Item(uint8_t radio_id,
              Antenna::Diversity diversity,
              Antenna::Combiner combiner,
-             std::vector<Antenna::AntennaSelection> &&sel)
-            : selections{ std::move(sel) },
+             nonstd::span<const Antenna::AntennaSelection> sel)
+            : selections{ sel },
               header{ radio_id, diversity, combiner, (uint8_t)selections.size() } {};
     };
 
@@ -70,7 +70,7 @@ struct WritableAntennaArray {
     void Add(uint8_t radio_id,
              Antenna::Diversity diversity,
              Antenna::Combiner combiner,
-             std::vector<Antenna::AntennaSelection> selections);
+             nonstd::span<const Antenna::AntennaSelection> selections);
     bool Empty() const;
     void Clear();
 

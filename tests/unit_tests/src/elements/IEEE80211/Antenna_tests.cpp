@@ -86,20 +86,20 @@ TEST(AntennaTestsGroup, Serialize_Deserialize_few_elements) {
 
     WritableAntennaArray w_antennas;
 
-    w_antennas.Add(1,
-                   Antenna::Diversity::Enabled,
-                   Antenna::Combiner::SectorizedLeft,
-                   { Antenna::AntennaSelection::Internal });
+    std::vector<Antenna::AntennaSelection> selection_0 = { Antenna::AntennaSelection::Internal };
+    w_antennas.Add(1, Antenna::Diversity::Enabled, Antenna::Combiner::SectorizedLeft, selection_0);
+
+    std::vector<Antenna::AntennaSelection> selection_1 = { Antenna::AntennaSelection::External,
+                                                           Antenna::AntennaSelection::External };
     w_antennas.Add(2,
                    Antenna::Diversity::Disabled,
                    Antenna::Combiner::SectorizedRight,
-                   { Antenna::AntennaSelection::External, Antenna::AntennaSelection::External });
-    w_antennas.Add(3,
-                   Antenna::Diversity::Enabled,
-                   Antenna::Combiner::Omni,
-                   { Antenna::AntennaSelection::Internal,
-                     Antenna::AntennaSelection::External,
-                     Antenna::AntennaSelection::Internal });
+                   selection_1);
+
+    std::vector<Antenna::AntennaSelection> selection_2 = { Antenna::AntennaSelection::Internal,
+                                                           Antenna::AntennaSelection::External,
+                                                           Antenna::AntennaSelection::Internal };
+    w_antennas.Add(3, Antenna::Diversity::Enabled, Antenna::Combiner::Omni, selection_2);
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
@@ -139,22 +139,21 @@ TEST(AntennaTestsGroup, Add_array_of_items_is_unique_by_radio_id) {
     WritableAntennaArray w_antennas;
 
     // Add same RadioID multiple times - should replace
-    w_antennas.Add(1,
-                   Antenna::Diversity::Enabled,
-                   Antenna::Combiner::Omni,
-                   { Antenna::AntennaSelection::Internal });
-    w_antennas.Add(1,
-                   Antenna::Diversity::Disabled,
-                   Antenna::Combiner::MIMO,
-                   { Antenna::AntennaSelection::External });
-    w_antennas.Add(2,
-                   Antenna::Diversity::Enabled,
-                   Antenna::Combiner::SectorizedLeft,
-                   { Antenna::AntennaSelection::Internal });
+
+    std::vector<Antenna::AntennaSelection> selection_0 = { Antenna::AntennaSelection::Internal };
+    w_antennas.Add(1, Antenna::Diversity::Enabled, Antenna::Combiner::Omni, selection_0);
+
+    std::vector<Antenna::AntennaSelection> selection_1 = { Antenna::AntennaSelection::External };
+    w_antennas.Add(1, Antenna::Diversity::Disabled, Antenna::Combiner::MIMO, selection_1);
+
+    std::vector<Antenna::AntennaSelection> selection_2 = { Antenna::AntennaSelection::Internal };
+    w_antennas.Add(2, Antenna::Diversity::Enabled, Antenna::Combiner::SectorizedLeft, selection_2);
+
+    std::vector<Antenna::AntennaSelection> selection_3 = { Antenna::AntennaSelection::External };
     w_antennas.Add(2,
                    Antenna::Diversity::Disabled,
                    Antenna::Combiner::SectorizedRight,
-                   { Antenna::AntennaSelection::External });
+                   selection_3);
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
