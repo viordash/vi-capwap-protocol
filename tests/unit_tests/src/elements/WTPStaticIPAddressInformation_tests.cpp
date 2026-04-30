@@ -36,6 +36,7 @@ TEST(WTPStaticIPAddressInformationTestsGroup, Deserialize) {
 
     RawData raw_data{ data, data + sizeof(data) };
     ReadableWTPStaticIPAddressInformation read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(ElementHeader::ElementType::WTPStaticIPAddressInformation,
@@ -45,6 +46,7 @@ TEST(WTPStaticIPAddressInformationTestsGroup, Deserialize) {
     CHECK_EQUAL(inet_addr("255.255.255.0"), read_data.Get()->Netmask);
     CHECK_EQUAL(inet_addr("192.168.1.1"), read_data.Get()->Gateway);
     CHECK_EQUAL(1, read_data.Get()->Static);
+    CHECK_TRUE(read_data.IsPresent());
 }
 
 TEST(WTPStaticIPAddressInformationTestsGroup, Serialize) {

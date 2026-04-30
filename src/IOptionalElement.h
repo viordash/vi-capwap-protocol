@@ -13,6 +13,7 @@ struct IWritableOptionalElement : IOptionalElement {
 struct IReadableOptionalElement : IOptionalElement {
     virtual bool Deserialize(RawData *raw_data) = 0;
     virtual ElementHeader::ElementType GetElementType() const = 0;
+    virtual bool IsPresent() const = 0;
 };
 
 struct IWritableConfigurationStatusRequestOptionalElement : IWritableOptionalElement {};

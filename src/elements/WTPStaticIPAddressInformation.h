@@ -47,10 +47,12 @@ struct WritableWTPStaticIPAddressInformation : IWritableConfigurationStatusReque
 struct ReadableWTPStaticIPAddressInformation : IReadableConfigurationStatusRequestOptionalElement {
   protected:
     WTPStaticIPAddressInformation *element = nullptr;
+    bool is_present = false;
 
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
     const WTPStaticIPAddressInformation *const Get() const;
     ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

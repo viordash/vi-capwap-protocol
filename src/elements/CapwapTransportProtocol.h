@@ -31,10 +31,12 @@ struct WritableCapwapTransportProtocol : IWritableConfigurationStatusRequestOpti
 struct ReadableCapwapTransportProtocol : IReadableConfigurationStatusRequestOptionalElement {
   protected:
     CapwapTransportProtocol *element = nullptr;
+    bool is_present = false;
 
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
     const CapwapTransportProtocol *const Get() const;
     ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

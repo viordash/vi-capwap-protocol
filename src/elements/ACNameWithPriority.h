@@ -71,4 +71,5 @@ struct ReadableACNameWithPriorityArray : IReadableConfigurationStatusRequestOpti
     nonstd::span<const ACNameWithPriority *const> Get() const;
     void Log() const override final;
     ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

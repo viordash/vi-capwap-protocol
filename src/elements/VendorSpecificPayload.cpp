@@ -164,3 +164,7 @@ void ReadableVendorSpecificPayloadArray::Log() const {
 ElementHeader::ElementType ReadableVendorSpecificPayloadArray::GetElementType() const {
     return ElementHeader::VendorSpecificPayload;
 }
+
+bool ReadableVendorSpecificPayloadArray::IsPresent() const {
+    return count > 0;
+}

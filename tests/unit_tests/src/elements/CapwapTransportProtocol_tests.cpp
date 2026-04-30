@@ -20,11 +20,13 @@ TEST(CapwapTransportProtocolTestsGroup, CapwapTransportProtocol_deserialize) {
     };
     RawData raw_data{ data, data + sizeof(data) };
     ReadableCapwapTransportProtocol read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(ElementHeader::ElementType::CAPWAPTransportProtocol, read_data.GetElementType());
     CHECK_EQUAL(CapwapTransportProtocol::Type::UDPLite, read_data.Get()->type);
+    CHECK_TRUE(read_data.IsPresent());
 }
 
 TEST(CapwapTransportProtocolTestsGroup, CapwapTransportProtocol_serialize) {

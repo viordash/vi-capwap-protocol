@@ -61,7 +61,7 @@ bool ReadableWTPStaticIPAddressInformation::Deserialize(RawData *raw_data) {
     }
     element = res;
     raw_data->current += sizeof(WTPStaticIPAddressInformation);
-
+    is_present = true;
     return true;
 }
 
@@ -76,4 +76,8 @@ void ReadableWTPStaticIPAddressInformation::Log() const {
 
 ElementHeader::ElementType ReadableWTPStaticIPAddressInformation::GetElementType() const {
     return ElementHeader::WTPStaticIPAddressInformation;
+}
+
+bool ReadableWTPStaticIPAddressInformation::IsPresent() const {
+    return is_present;
 }

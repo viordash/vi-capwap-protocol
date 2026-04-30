@@ -114,6 +114,7 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize)
     CHECK_EQUAL(WTPRebootStatistics::LastFailureType::HardwareFailure,
                 read_data.wtp_reboot_statistics->GetLastFailureType());
 
+    CHECK_TRUE(ac_names_with_priority.IsPresent());
     CHECK_EQUAL(2, ac_names_with_priority.Get().size());
     CHECK_EQUAL(1, ac_names_with_priority.Get()[0]->GetPriority());
     STRNCMP_EQUAL("ACNameWithPriority", (char *)ac_names_with_priority.Get()[0]->name, 18);
@@ -122,13 +123,16 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize)
     STRNCMP_EQUAL("ACNameWithPriority2", (char *)ac_names_with_priority.Get()[1]->name, 19);
     CHECK_EQUAL(19, ac_names_with_priority.Get()[1]->GetNameLenght());
 
+    CHECK_TRUE(capwap_transport_protocol.IsPresent());
     CHECK_EQUAL(CapwapTransportProtocol::Type::UDP, capwap_transport_protocol.Get()->type);
 
+    CHECK_TRUE(wtp_static_ipaddress.IsPresent());
     CHECK_EQUAL(inet_addr("192.168.100.10"), wtp_static_ipaddress.Get()->IpAddress);
     CHECK_EQUAL(inet_addr("255.255.255.0"), wtp_static_ipaddress.Get()->Netmask);
     CHECK_EQUAL(inet_addr("192.168.1.1"), wtp_static_ipaddress.Get()->Gateway);
     CHECK_EQUAL(1, wtp_static_ipaddress.Get()->Static);
 
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
     CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
     CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
     CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());

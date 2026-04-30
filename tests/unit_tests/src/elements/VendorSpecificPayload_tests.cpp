@@ -112,6 +112,7 @@ TEST(VendorSpecificPayloadTestsGroup, Add_array_of_items_not_unique) {
     raw_data = { buffer, buffer + data_size };
 
     ReadableVendorSpecificPayloadArray read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_TRUE(read_data.Deserialize(&raw_data));
@@ -121,4 +122,5 @@ TEST(VendorSpecificPayloadTestsGroup, Add_array_of_items_not_unique) {
     CHECK_FALSE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(6, read_data.Get().size());
+    CHECK_TRUE(read_data.IsPresent());
 }

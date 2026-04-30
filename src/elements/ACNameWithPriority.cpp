@@ -149,3 +149,7 @@ void ReadableACNameWithPriorityArray::Log() const {
 ElementHeader::ElementType ReadableACNameWithPriorityArray::GetElementType() const {
     return ElementHeader::ACNameWithPriority;
 }
+
+bool ReadableACNameWithPriorityArray::IsPresent() const {
+    return count > 0;
+}

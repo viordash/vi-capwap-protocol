@@ -76,6 +76,7 @@ struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestO
 
     bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const VendorSpecificPayload *const> Get() const;
-    void Log() const  override final;
+    void Log() const override final;
     ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

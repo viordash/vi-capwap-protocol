@@ -50,7 +50,7 @@ bool ReadableCapwapTransportProtocol::Deserialize(RawData *raw_data) {
     }
     element = res;
     raw_data->current += sizeof(CapwapTransportProtocol);
-
+    is_present = true;
     return true;
 }
 
@@ -65,4 +65,8 @@ void ReadableCapwapTransportProtocol::Log() const {
 
 ElementHeader::ElementType ReadableCapwapTransportProtocol::GetElementType() const {
     return ElementHeader::CAPWAPTransportProtocol;
+}
+
+bool ReadableCapwapTransportProtocol::IsPresent() const {
+    return is_present;
 }
