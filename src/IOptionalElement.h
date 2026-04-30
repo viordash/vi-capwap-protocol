@@ -1,5 +1,6 @@
 #pragma once
 #include "Helpers.h"
+#include "elements/ElementHeader.h"
 
 struct IOptionalElement {
     virtual void Log() const = 0;
@@ -11,8 +12,8 @@ struct IWritableOptionalElement : IOptionalElement {
 
 struct IReadableOptionalElement : IOptionalElement {
     virtual bool Deserialize(RawData *raw_data) = 0;
+    virtual ElementHeader::ElementType GetElementType() const = 0;
 };
 
 struct IWritableConfigurationStatusRequestOptionalElement : IWritableOptionalElement {};
-
 struct IReadableConfigurationStatusRequestOptionalElement : IReadableOptionalElement {};
