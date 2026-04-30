@@ -2,6 +2,7 @@
 #include "ClearHeader.h"
 #include "ControlHeader.h"
 #include "Helpers.h"
+#include "IOptionalElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -29,7 +30,7 @@ struct __attribute__((packed)) ACNameWithPriority : ElementHeader {
     static ACNameWithPriority *Deserialize(RawData *raw_data);
 };
 
-struct WritableACNameWithPriorityArray {
+struct WritableACNameWithPriorityArray : IWritableConfigurationStatusRequestOptionalElement {
   public:
     struct Item {
         std::vector<char> name;
@@ -50,12 +51,12 @@ struct WritableACNameWithPriorityArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
+    void Serialize(RawData *raw_data) const override final;
 
-    void Log() const;
+    void Log() const override final;
 };
 
-struct ReadableACNameWithPriorityArray {
+struct ReadableACNameWithPriorityArray : IReadableConfigurationStatusRequestOptionalElement {
     static const size_t max_count = 32;
 
   protected:
@@ -66,7 +67,8 @@ struct ReadableACNameWithPriorityArray {
     ReadableACNameWithPriorityArray(const ReadableACNameWithPriorityArray &) = delete;
     ReadableACNameWithPriorityArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const ACNameWithPriority *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
 };

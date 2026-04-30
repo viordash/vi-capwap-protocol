@@ -145,3 +145,7 @@ void ReadableACNameWithPriorityArray::Log() const {
               (char *)items[i]->name);
     }
 }
+
+ElementHeader::ElementType ReadableACNameWithPriorityArray::GetElementType() const {
+    return ElementHeader::ACNameWithPriority;
+}
