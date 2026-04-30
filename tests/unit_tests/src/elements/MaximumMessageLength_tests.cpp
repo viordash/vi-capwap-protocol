@@ -29,17 +29,19 @@ TEST(MaximumMessageLengthTestsGroup, MaximumMessageLength_deserialize) {
         0x00 // Value = 16384 (в Big Endian)
     };
     RawData raw_data{ data, data + sizeof(data) };
-    auto element = MaximumMessageLength::Deserialize(&raw_data);
+    ReadableMaximumMessageLength read_data;
+    CHECK_FALSE(read_data.IsPresent());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK(element != nullptr);
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::MaximumMessageLength, element->GetElementType());
-    CHECK_EQUAL(16384, element->GetValue());
+    CHECK_EQUAL(ElementHeader::ElementType::MaximumMessageLength, read_data.GetElementType());
+    CHECK_EQUAL(16384, read_data.Get()->GetValue());
+    CHECK_TRUE(read_data.IsPresent());
 }
 
 TEST(MaximumMessageLengthTestsGroup, MaximumMessageLength_serialize) {
     uint8_t buffer[256] = {};
-    MaximumMessageLength element_0{ 12345 };
+    WritableMaximumMessageLength element_0{ 12345 };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     element_0.Serialize(&raw_data);
@@ -48,9 +50,11 @@ TEST(MaximumMessageLengthTestsGroup, MaximumMessageLength_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = MaximumMessageLength::Deserialize(&raw_data);
-    CHECK(element != nullptr);
+    ReadableMaximumMessageLength read_data;
+    CHECK_FALSE(read_data.IsPresent());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    
     CHECK_EQUAL(&buffer[0] + 6, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::MaximumMessageLength, element->GetElementType());
-    CHECK_EQUAL(12345, element->GetValue());
+    CHECK_EQUAL(ElementHeader::ElementType::MaximumMessageLength, read_data.GetElementType());
+    CHECK_EQUAL(12345, read_data.Get()->GetValue());
 }
