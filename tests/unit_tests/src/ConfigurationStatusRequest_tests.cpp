@@ -43,18 +43,14 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize)
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-        IWritableConfigurationStatusRequestOptionalElement *optional_writable_elements[] = {
-            &ac_names_with_priority,
-            &capwap_transport_protocol,
-            &wtp_static_ipaddress,
-            &vendor_specific_payloads
-        };
-
         WritableConfigurationStatusRequest write_data("abcdefабвгд",
                                                       radio_states,
                                                       12345,
                                                       wtp_reboot_statistics,
-                                                      optional_writable_elements);
+                                                      { &ac_names_with_priority,
+                                                        &capwap_transport_protocol,
+                                                        &wtp_static_ipaddress,
+                                                        &vendor_specific_payloads });
 
         write_data.Serialize(&raw_data);
     }
@@ -370,15 +366,7 @@ TEST(ConfigurationStatusRequestTestsGroup,
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableACNameWithPriorityArray ac_names_with_priority;
-    ReadableCapwapTransportProtocol capwap_transport_protocol;
-    ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
-    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-
-    ReadableConfigurationStatusRequest read_data({ &ac_names_with_priority,
-                                                   &capwap_transport_protocol,
-                                                   &wtp_static_ipaddress,
-                                                   &vendor_specific_payloads });
+    ReadableConfigurationStatusRequest read_data({});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

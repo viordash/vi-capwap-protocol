@@ -32,7 +32,8 @@ struct __attribute__((packed)) VendorSpecificPayload : ElementHeader {
     static WritableVendorSpecificPayloadArray Dummy;
 };
 
-struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestOptionalElement {
+struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestOptionalElement,
+                                            IWritableConfigurationStatusResponseOptionalElement {
   public:
     struct Item {
         std::vector<char> value;
@@ -61,7 +62,8 @@ struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestO
     void Log() const override final;
 };
 
-struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestOptionalElement {
+struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestOptionalElement,
+                                            IReadableConfigurationStatusResponseOptionalElement {
   public:
     static const size_t max_data_size = 2048;
     static const size_t max_count = 16;

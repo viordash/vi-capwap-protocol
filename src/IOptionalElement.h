@@ -18,3 +18,6 @@ struct IReadableOptionalElement : IOptionalElement {
 
 struct IWritableConfigurationStatusRequestOptionalElement : IWritableOptionalElement {};
 struct IReadableConfigurationStatusRequestOptionalElement : IReadableOptionalElement {};
+
+struct IWritableConfigurationStatusResponseOptionalElement : IWritableOptionalElement {};
+struct IReadableConfigurationStatusResponseOptionalElement : IReadableOptionalElement {};

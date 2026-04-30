@@ -18,40 +18,42 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_serializ
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
-    CAPWAPTimers capwap_timers{ 42, 19 };
+    {
+        CAPWAPTimers capwap_timers{ 42, 19 };
 
-    WritableDecryptionErrorReportPeriodArray decryption_error_report_periods;
-    decryption_error_report_periods.Add({ 0, 10 });
-    decryption_error_report_periods.Add({ 1, 100 });
-    decryption_error_report_periods.Add({ 31, 65535 });
+        WritableDecryptionErrorReportPeriodArray decryption_error_report_periods;
+        decryption_error_report_periods.Add({ 0, 10 });
+        decryption_error_report_periods.Add({ 1, 100 });
+        decryption_error_report_periods.Add({ 31, 65535 });
 
-    uint32_t idle_timeout = 1234;
+        uint32_t idle_timeout = 1234;
 
-    WTPFallback::Mode wtp_fallback = WTPFallback::Mode::Enabled;
+        WTPFallback::Mode wtp_fallback = WTPFallback::Mode::Enabled;
 
-    uint32_t ac_ipv4_list[] = {
-        { inet_addr("192.168.1.110") },
-        { inet_addr("192.168.1.111") },
-        { inet_addr("192.168.1.112") },
-    };
+        uint32_t ac_ipv4_list[] = {
+            { inet_addr("192.168.1.110") },
+            { inet_addr("192.168.1.111") },
+            { inet_addr("192.168.1.112") },
+        };
 
-    WTPStaticIPAddressInformation wtp_static_ipaddress{ inet_addr("192.168.100.10"),
-                                                        inet_addr("255.255.255.0"),
-                                                        inet_addr("192.168.1.1"),
-                                                        true };
+        WritableWTPStaticIPAddressInformation wtp_static_ipaddress{ inet_addr("192.168.100.10"),
+                                                                    inet_addr("255.255.255.0"),
+                                                                    inet_addr("192.168.1.1"),
+                                                                    true };
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-    WritableConfigurationStatusResponse write_data(capwap_timers,
-                                                   decryption_error_report_periods,
-                                                   idle_timeout,
-                                                   wtp_fallback,
-                                                   ac_ipv4_list,
-                                                   &wtp_static_ipaddress,
-                                                   vendor_specific_payloads);
+        WritableConfigurationStatusResponse write_data(
+            capwap_timers,
+            decryption_error_report_periods,
+            idle_timeout,
+            wtp_fallback,
+            ac_ipv4_list,
+            { &wtp_static_ipaddress, &vendor_specific_payloads });
 
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 120 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = {
         0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x2A, 0x00, 0x68,
@@ -69,7 +71,12 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_serializ
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 120 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableConfigurationStatusResponse read_data;
+
+    ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableConfigurationStatusResponse read_data{ &wtp_static_ipaddress,
+                                                   &vendor_specific_payloads };
+
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(42, read_data.capwap_timers->Discovery);
@@ -91,17 +98,17 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_serializ
     CHECK_EQUAL(inet_addr("192.168.1.111"), read_data.ac_ipv4_list->addresses[1]);
     CHECK_EQUAL(inet_addr("192.168.1.112"), read_data.ac_ipv4_list->addresses[2]);
 
-    CHECK_EQUAL(inet_addr("192.168.100.10"), read_data.wtp_static_ipaddress->IpAddress);
-    CHECK_EQUAL(inet_addr("255.255.255.0"), read_data.wtp_static_ipaddress->Netmask);
-    CHECK_EQUAL(inet_addr("192.168.1.1"), read_data.wtp_static_ipaddress->Gateway);
-    CHECK_EQUAL(1, read_data.wtp_static_ipaddress->Static);
+    CHECK_TRUE(wtp_static_ipaddress.IsPresent());
+    CHECK_EQUAL(inet_addr("192.168.100.10"), wtp_static_ipaddress.Get()->IpAddress);
+    CHECK_EQUAL(inet_addr("255.255.255.0"), wtp_static_ipaddress.Get()->Netmask);
+    CHECK_EQUAL(inet_addr("192.168.1.1"), wtp_static_ipaddress.Get()->Gateway);
+    CHECK_EQUAL(1, wtp_static_ipaddress.Get()->Static);
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -165,12 +172,15 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_deserial
         0xC0, 0xA8, 0x0A, 0x32, // IP: 192.168.10.50
         0xFF, 0xFF, 0xFF, 0x00, // Mask: 255.255.255.0
         0xC0, 0xA8, 0x0A, 0x01, // Gateway: 192.168.10.1
-        0x01                    // Static: 1 (Enabled)        
+        0x01                    // Static: 1 (Enabled)
     };
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableConfigurationStatusResponse read_data;
+    ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableConfigurationStatusResponse read_data{ &wtp_static_ipaddress,
+                                                   &vendor_specific_payloads };
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -190,12 +200,14 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_deserial
     CHECK_EQUAL(inet_addr("10.10.0.1"), read_data.ac_ipv4_list->addresses[0]);
     CHECK_EQUAL(inet_addr("10.10.0.2"), read_data.ac_ipv4_list->addresses[1]);
 
-    CHECK_EQUAL(inet_addr("192.168.10.50"), read_data.wtp_static_ipaddress->IpAddress);
-    CHECK_EQUAL(inet_addr("255.255.255.0"), read_data.wtp_static_ipaddress->Netmask);
-    CHECK_EQUAL(inet_addr("192.168.10.1"), read_data.wtp_static_ipaddress->Gateway);
-    CHECK_EQUAL(1, read_data.wtp_static_ipaddress->Static);
+    CHECK_TRUE(wtp_static_ipaddress.IsPresent());
+    CHECK_EQUAL(inet_addr("192.168.10.50"), wtp_static_ipaddress.Get()->IpAddress);
+    CHECK_EQUAL(inet_addr("255.255.255.0"), wtp_static_ipaddress.Get()->Netmask);
+    CHECK_EQUAL(inet_addr("192.168.10.1"), wtp_static_ipaddress.Get()->Gateway);
+    CHECK_EQUAL(1, wtp_static_ipaddress.Get()->Static);
 
-    CHECK_EQUAL(0, read_data.vendor_specific_payloads.Get().size());
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(0, vendor_specific_payloads.Get().size());
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -254,7 +266,6 @@ TEST(ConfigurationStatusResponseTestsGroup,
         0x0A, 0x0A, 0x00, 0x01, // AC IP Address[0]: 10.10.0.1
         0x0A, 0x0A, 0x00, 0x02, // AC IP Address[1]: 10.10.0.2
 
-
         // 6. Unknown (5 байт)
         0xFF, 0xFF, 0x00, 0x01, 0x00,
         // 7. Unknown (5 байт)
@@ -263,7 +274,7 @@ TEST(ConfigurationStatusResponseTestsGroup,
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableConfigurationStatusResponse read_data;
+    ReadableConfigurationStatusResponse read_data({});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

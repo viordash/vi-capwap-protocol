@@ -30,7 +30,8 @@ struct __attribute__((packed)) WTPStaticIPAddressInformation : ElementHeader {
     void Log() const;
 };
 
-struct WritableWTPStaticIPAddressInformation : IWritableConfigurationStatusRequestOptionalElement {
+struct WritableWTPStaticIPAddressInformation : IWritableConfigurationStatusRequestOptionalElement,
+                                               IWritableConfigurationStatusResponseOptionalElement {
   protected:
     WTPStaticIPAddressInformation element;
 
@@ -44,7 +45,8 @@ struct WritableWTPStaticIPAddressInformation : IWritableConfigurationStatusReque
     void Log() const override final;
 };
 
-struct ReadableWTPStaticIPAddressInformation : IReadableConfigurationStatusRequestOptionalElement {
+struct ReadableWTPStaticIPAddressInformation : IReadableConfigurationStatusRequestOptionalElement,
+                                               IReadableConfigurationStatusResponseOptionalElement {
   protected:
     WTPStaticIPAddressInformation *element = nullptr;
     bool is_present = false;

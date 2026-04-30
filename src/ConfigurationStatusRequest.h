@@ -13,7 +13,6 @@
 #include "span.hpp"
 #include <limits>
 #include <unordered_map>
-#include <vector>
 
 struct WritableConfigurationStatusRequest : WritableCapwapRequest {
   private:
