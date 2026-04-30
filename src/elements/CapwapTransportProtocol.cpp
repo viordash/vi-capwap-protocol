@@ -15,18 +15,6 @@ bool CapwapTransportProtocol::Validate() const {
                == (sizeof(CapwapTransportProtocol) - sizeof(ElementHeader)) //
         && type >= UDPLite && type <= UDP;
 }
-CapwapTransportProtocol *CapwapTransportProtocol::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(CapwapTransportProtocol) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (CapwapTransportProtocol *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(CapwapTransportProtocol);
-    return res;
-}
 
 void CapwapTransportProtocol::Log() const {
     log_i("ME CapwapTransportProtocol Type:%u", (unsigned)type);
@@ -48,5 +36,33 @@ void WritableCapwapTransportProtocol::Serialize(RawData *raw_data) const {
 }
 
 void WritableCapwapTransportProtocol::Log() const {
-    log_i("ME CapwapTransportProtocol Type:%u", (unsigned)element.type);
+    element.Log();
+}
+
+bool ReadableCapwapTransportProtocol::Deserialize(RawData *raw_data) {
+    if (raw_data->current + sizeof(CapwapTransportProtocol) > raw_data->end) {
+        return false;
+    }
+
+    auto res = (CapwapTransportProtocol *)raw_data->current;
+    if (!res->Validate()) {
+        return false;
+    }
+    element = res;
+    raw_data->current += sizeof(CapwapTransportProtocol);
+
+    return true;
+}
+
+const CapwapTransportProtocol *const ReadableCapwapTransportProtocol::Get() const {
+    return element;
+}
+
+void ReadableCapwapTransportProtocol::Log() const {
+    ASSERT(element != nullptr);
+    element->Log();
+}
+
+ElementHeader::ElementType ReadableCapwapTransportProtocol::GetElementType() const {
+    return ElementHeader::CAPWAPTransportProtocol;
 }

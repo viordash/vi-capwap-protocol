@@ -19,12 +19,12 @@ TEST(CapwapTransportProtocolTestsGroup, CapwapTransportProtocol_deserialize) {
         0x00, 0x33, 0x00, 0x01, 0x01,
     };
     RawData raw_data{ data, data + sizeof(data) };
-    auto element = CapwapTransportProtocol::Deserialize(&raw_data);
+    ReadableCapwapTransportProtocol read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK(element != nullptr);
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::CAPWAPTransportProtocol, element->GetElementType());
-    CHECK_EQUAL(CapwapTransportProtocol::Type::UDPLite, element->type);
+    CHECK_EQUAL(ElementHeader::ElementType::CAPWAPTransportProtocol, read_data.GetElementType());
+    CHECK_EQUAL(CapwapTransportProtocol::Type::UDPLite, read_data.Get()->type);
 }
 
 TEST(CapwapTransportProtocolTestsGroup, CapwapTransportProtocol_serialize) {
@@ -40,9 +40,9 @@ TEST(CapwapTransportProtocolTestsGroup, CapwapTransportProtocol_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = CapwapTransportProtocol::Deserialize(&raw_data);
-    CHECK(element != nullptr);
+    ReadableCapwapTransportProtocol read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(&buffer[0] + 5, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::CAPWAPTransportProtocol, element->GetElementType());
-    CHECK_EQUAL(CapwapTransportProtocol::Type::UDP, element->type);
+    CHECK_EQUAL(ElementHeader::ElementType::CAPWAPTransportProtocol, read_data.GetElementType());
+    CHECK_EQUAL(CapwapTransportProtocol::Type::UDP, read_data.Get()->type);
 }

@@ -14,8 +14,6 @@ struct __attribute__((packed)) CapwapTransportProtocol : ElementHeader {
     CapwapTransportProtocol(Type type);
 
     bool Validate() const;
-    static CapwapTransportProtocol *Deserialize(RawData *raw_data);
-
     void Log() const;
 };
 
@@ -28,4 +26,15 @@ struct WritableCapwapTransportProtocol : IWritableConfigurationStatusRequestOpti
 
     void Serialize(RawData *raw_data) const override final;
     void Log() const override final;
+};
+
+struct ReadableCapwapTransportProtocol : IReadableConfigurationStatusRequestOptionalElement {
+  protected:
+    CapwapTransportProtocol *element = nullptr;
+
+  public:
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
+    const CapwapTransportProtocol *const Get() const;
+    ElementHeader::ElementType GetElementType() const override final;
 };
