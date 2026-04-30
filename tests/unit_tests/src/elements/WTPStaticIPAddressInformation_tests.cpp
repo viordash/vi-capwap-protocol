@@ -35,24 +35,24 @@ TEST(WTPStaticIPAddressInformationTestsGroup, Deserialize) {
     // clang-format on
 
     RawData raw_data{ data, data + sizeof(data) };
-    auto element = WTPStaticIPAddressInformation::Deserialize(&raw_data);
-    CHECK(element != nullptr);
+    ReadableWTPStaticIPAddressInformation read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(ElementHeader::ElementType::WTPStaticIPAddressInformation,
-                element->GetElementType());
+                read_data.GetElementType());
 
-    CHECK_EQUAL(inet_addr("192.168.1.100"), element->IpAddress);
-    CHECK_EQUAL(inet_addr("255.255.255.0"), element->Netmask);
-    CHECK_EQUAL(inet_addr("192.168.1.1"), element->Gateway);
-    CHECK_EQUAL(1, element->Static);
+    CHECK_EQUAL(inet_addr("192.168.1.100"), read_data.Get()->IpAddress);
+    CHECK_EQUAL(inet_addr("255.255.255.0"), read_data.Get()->Netmask);
+    CHECK_EQUAL(inet_addr("192.168.1.1"), read_data.Get()->Gateway);
+    CHECK_EQUAL(1, read_data.Get()->Static);
 }
 
 TEST(WTPStaticIPAddressInformationTestsGroup, Serialize) {
     uint8_t buffer[256] = {};
-    WTPStaticIPAddressInformation element_0{ inet_addr("192.168.100.10"),
-                                             inet_addr("255.255.255.0"),
-                                             inet_addr("192.168.1.1"),
-                                             true };
+    WritableWTPStaticIPAddressInformation element_0{ inet_addr("192.168.100.10"),
+                                                     inet_addr("255.255.255.0"),
+                                                     inet_addr("192.168.1.1"),
+                                                     true };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     element_0.Serialize(&raw_data);
@@ -62,13 +62,13 @@ TEST(WTPStaticIPAddressInformationTestsGroup, Serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = WTPStaticIPAddressInformation::Deserialize(&raw_data);
-    CHECK(element != nullptr);
+    ReadableWTPStaticIPAddressInformation read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(&buffer[0] + 17, raw_data.current);
     CHECK_EQUAL(ElementHeader::ElementType::WTPStaticIPAddressInformation,
-                element->GetElementType());
-    CHECK_EQUAL(inet_addr("192.168.100.10"), element->IpAddress);
-    CHECK_EQUAL(inet_addr("255.255.255.0"), element->Netmask);
-    CHECK_EQUAL(inet_addr("192.168.1.1"), element->Gateway);
-    CHECK_EQUAL(1, element->Static);
+                read_data.GetElementType());
+    CHECK_EQUAL(inet_addr("192.168.100.10"), read_data.Get()->IpAddress);
+    CHECK_EQUAL(inet_addr("255.255.255.0"), read_data.Get()->Netmask);
+    CHECK_EQUAL(inet_addr("192.168.1.1"), read_data.Get()->Gateway);
+    CHECK_EQUAL(1, read_data.Get()->Static);
 }

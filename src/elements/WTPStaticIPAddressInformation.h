@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IOptionalElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -26,8 +27,30 @@ struct __attribute__((packed)) WTPStaticIPAddressInformation : ElementHeader {
                                   bool use_static);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static WTPStaticIPAddressInformation *Deserialize(RawData *raw_data);
-    uint16_t GetTotalLength() const;
     void Log() const;
+};
+
+struct WritableWTPStaticIPAddressInformation : IWritableConfigurationStatusRequestOptionalElement {
+  protected:
+    WTPStaticIPAddressInformation element;
+
+  public:
+    WritableWTPStaticIPAddressInformation(uint32_t ipaddress,
+                                          uint32_t netmask,
+                                          uint32_t gateway,
+                                          bool use_static);
+
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
+};
+
+struct ReadableWTPStaticIPAddressInformation : IReadableConfigurationStatusRequestOptionalElement {
+  protected:
+    WTPStaticIPAddressInformation *element = nullptr;
+
+  public:
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
+    const WTPStaticIPAddressInformation *const Get() const;
+    ElementHeader::ElementType GetElementType() const override final;
 };

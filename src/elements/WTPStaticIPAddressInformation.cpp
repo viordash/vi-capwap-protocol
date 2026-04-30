@@ -19,31 +19,6 @@ bool WTPStaticIPAddressInformation::Validate() const {
         && ElementHeader::GetLength()
                == (sizeof(WTPStaticIPAddressInformation) - sizeof(ElementHeader));
 }
-void WTPStaticIPAddressInformation::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(WTPStaticIPAddressInformation) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(WTPStaticIPAddressInformation));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(WTPStaticIPAddressInformation);
-}
-WTPStaticIPAddressInformation *WTPStaticIPAddressInformation::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(WTPStaticIPAddressInformation) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (WTPStaticIPAddressInformation *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(WTPStaticIPAddressInformation);
-    return res;
-}
-uint16_t WTPStaticIPAddressInformation::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
-}
 
 void WTPStaticIPAddressInformation::Log() const {
     log_i("ME WTPStaticIPAddressInformation IP Address:%s, Netmask:%s, Gateway:%s, use static:%u",
@@ -51,4 +26,54 @@ void WTPStaticIPAddressInformation::Log() const {
           IpToString(Netmask).c_str(),
           IpToString(Gateway).c_str(),
           Static);
+}
+
+WritableWTPStaticIPAddressInformation::WritableWTPStaticIPAddressInformation(uint32_t ipaddress,
+                                                                             uint32_t netmask,
+                                                                             uint32_t gateway,
+                                                                             bool use_static)
+    : element{ ipaddress, netmask, gateway, use_static } {
+}
+
+void WritableWTPStaticIPAddressInformation::Serialize(RawData *raw_data) const {
+    ASSERT(raw_data->current + sizeof(WTPStaticIPAddressInformation) <= raw_data->end);
+#pragma GCC diagnostic push
+#if __GNUC__ >= 8
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
+    memcpy(raw_data->current, &element, sizeof(WTPStaticIPAddressInformation));
+#pragma GCC diagnostic pop
+    raw_data->current += sizeof(WTPStaticIPAddressInformation);
+}
+
+void WritableWTPStaticIPAddressInformation::Log() const {
+    element.Log();
+}
+
+bool ReadableWTPStaticIPAddressInformation::Deserialize(RawData *raw_data) {
+    if (raw_data->current + sizeof(WTPStaticIPAddressInformation) > raw_data->end) {
+        return false;
+    }
+
+    auto res = (WTPStaticIPAddressInformation *)raw_data->current;
+    if (!res->Validate()) {
+        return false;
+    }
+    element = res;
+    raw_data->current += sizeof(WTPStaticIPAddressInformation);
+
+    return true;
+}
+
+const WTPStaticIPAddressInformation *const ReadableWTPStaticIPAddressInformation::Get() const {
+    return element;
+}
+
+void ReadableWTPStaticIPAddressInformation::Log() const {
+    ASSERT(element != nullptr);
+    element->Log();
+}
+
+ElementHeader::ElementType ReadableWTPStaticIPAddressInformation::GetElementType() const {
+    return ElementHeader::WTPStaticIPAddressInformation;
 }
