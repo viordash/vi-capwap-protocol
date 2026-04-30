@@ -1,9 +1,11 @@
 #pragma once
 
 #include "CapwapMessage.h"
+#include "IOptionalElement.h"
 #include "elements/CAPWAPLocalIPv4Address.h"
 #include "elements/CapwapTransportProtocol.h"
 #include "elements/ECNSupport.h"
+#include "elements/IEEE80211/WTPRadioInformation.h"
 #include "elements/LocationData.h"
 #include "elements/MaximumMessageLength.h"
 #include "elements/SessionId.h"
@@ -13,11 +15,9 @@
 #include "elements/WTPFrameTunnelMode.h"
 #include "elements/WTPMACType.h"
 #include "elements/WTPName.h"
-#include "elements/IEEE80211/WTPRadioInformation.h"
 #include "elements/WTPRebootStatistics.h"
 #include "span.hpp"
-#include <limits>
-#include <vector>
+#include <unordered_map>
 
 struct WritableJoinRequest : WritableCapwapRequest {
   private:
@@ -32,10 +32,7 @@ struct WritableJoinRequest : WritableCapwapRequest {
     const ECNSupport ecn_support;
     const WritableCAPWAPLocalIPV4AdrArray ip_addresses;
 
-    const CapwapTransportProtocol *capwap_transport_protocol;
-    const MaximumMessageLength *maximum_message_length;
-    const WTPRebootStatistics *wtp_reboot_statistics;
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads;
+    nonstd::span<IWritableJoinRequestOptionalElement *const> optional_elements;
 
   public:
     WritableJoinRequest(const WritableJoinRequest &) = delete;
@@ -49,10 +46,20 @@ struct WritableJoinRequest : WritableCapwapRequest {
                         WritableWTPRadioInformationArray &wtp_radio_informations,
                         const ECNSupport::Type ecn_support,
                         const nonstd::span<const CAPWAPLocalIPv4Address> &ip_addresses,
-                        const CapwapTransportProtocol *capwap_transport_protocol,
-                        const MaximumMessageLength *maximum_message_length,
-                        const WTPRebootStatistics *wtp_reboot_statistics,
-                        WritableVendorSpecificPayloadArray &vendor_specific_payloads);
+                        nonstd::span<IWritableJoinRequestOptionalElement *const> optional_elements);
+
+    WritableJoinRequest(
+        const std::string_view location_data,
+        const WritableWTPBoardData &wtp_board_data,
+        const WritableWTPDescriptor &wtp_descriptor,
+        const std::string_view wtp_name,
+        const SessionId &session_id,
+        const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
+        const WTPMACType::Type mac_type,
+        WritableWTPRadioInformationArray &wtp_radio_informations,
+        const ECNSupport::Type ecn_support,
+        const nonstd::span<const CAPWAPLocalIPv4Address> &ip_addresses,
+        std::initializer_list<IWritableJoinRequestOptionalElement *> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
@@ -60,6 +67,15 @@ struct WritableJoinRequest : WritableCapwapRequest {
 };
 
 struct ReadableJoinRequest : ReadableCapwapRequest {
+  protected:
+    std::unordered_map<ElementHeader::ElementType, IReadableJoinRequestOptionalElement *const>
+        key_optional_elements;
+
+    std::unordered_map<ElementHeader::ElementType, IReadableJoinRequestOptionalElement *const>
+    MapOptionalsElements(
+        nonstd::span<IReadableJoinRequestOptionalElement *const> optional_elements);
+
+  public:
     ReadableLocationData *location_data;
     ReadableWTPBoardData wtp_board_data;
     ReadableWTPDescriptor wtp_descriptor;
@@ -71,16 +87,13 @@ struct ReadableJoinRequest : ReadableCapwapRequest {
     ECNSupport *ecn_support;
     ReadableCAPWAPLocalIPV4AdrArray ip_addresses;
 
-    CapwapTransportProtocol *capwap_transport_protocol;
-    MaximumMessageLength *maximum_message_length;
-    WTPRebootStatistics *wtp_reboot_statistics;
-
-    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-
     size_t unknown_elements;
 
     ReadableJoinRequest(const ReadableJoinRequest &) = delete;
-    ReadableJoinRequest();
+    ReadableJoinRequest(nonstd::span<IReadableJoinRequestOptionalElement *const> optional_elements);
+
+    ReadableJoinRequest(
+        std::initializer_list<IReadableJoinRequestOptionalElement *> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

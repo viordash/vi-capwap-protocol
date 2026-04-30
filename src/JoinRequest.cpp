@@ -16,19 +16,40 @@ WritableJoinRequest::WritableJoinRequest(
     WritableWTPRadioInformationArray &wtp_radio_informations,
     const ECNSupport::Type ecn_support,
     const nonstd::span<const CAPWAPLocalIPv4Address> &ip_addresses,
-    const CapwapTransportProtocol *capwap_transport_protocol,
-    const MaximumMessageLength *maximum_message_length,
-    const WTPRebootStatistics *wtp_reboot_statistics,
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads)
+    nonstd::span<IWritableJoinRequestOptionalElement *const> optional_elements)
     : location_data{ location_data }, wtp_board_data{ wtp_board_data },
       wtp_descriptor{ wtp_descriptor }, wtp_name{ wtp_name }, session_id{ session_id },
       wtp_frame_tunnel_mode{ wtp_frame_tunnel_mode }, wtp_mac_type{ mac_type },
       wtp_radio_informations{ wtp_radio_informations }, ecn_support{ ecn_support },
-      ip_addresses{ ip_addresses }, capwap_transport_protocol{ capwap_transport_protocol },
-      maximum_message_length{ maximum_message_length },
-      wtp_reboot_statistics{ wtp_reboot_statistics },
-      vendor_specific_payloads{ vendor_specific_payloads } {
+      ip_addresses{ ip_addresses }, optional_elements{ optional_elements } {
     ASSERT(wtp_descriptor.GetHeader().RadiosInUse <= wtp_radio_informations.Size());
+}
+
+WritableJoinRequest::WritableJoinRequest(
+    const std::string_view location_data,
+    const WritableWTPBoardData &wtp_board_data,
+    const WritableWTPDescriptor &wtp_descriptor,
+    const std::string_view wtp_name,
+    const SessionId &session_id,
+    const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
+    const WTPMACType::Type mac_type,
+    WritableWTPRadioInformationArray &wtp_radio_informations,
+    const ECNSupport::Type ecn_support,
+    const nonstd::span<const CAPWAPLocalIPv4Address> &ip_addresses,
+    std::initializer_list<IWritableJoinRequestOptionalElement *> optional_elements)
+    : WritableJoinRequest(
+          location_data,
+          wtp_board_data,
+          wtp_descriptor,
+          wtp_name,
+          session_id,
+          wtp_frame_tunnel_mode,
+          mac_type,
+          wtp_radio_informations,
+          ecn_support,
+          ip_addresses,
+          nonstd::span<IWritableJoinRequestOptionalElement *const>(optional_elements.begin(),
+                                                                   optional_elements.size())) {
 }
 
 ControlHeader::MessageType WritableJoinRequest::GetMessageType() const {
@@ -50,29 +71,27 @@ void WritableJoinRequest::Serialize(RawData *raw_data) const {
     wtp_radio_informations.Serialize(raw_data);
     ecn_support.Serialize(raw_data);
     ip_addresses.Serialize(raw_data);
-    if (capwap_transport_protocol != nullptr) {
-        capwap_transport_protocol->Serialize(raw_data);
+
+    for (auto *elem : optional_elements) {
+        elem->Serialize(raw_data);
     }
-    if (maximum_message_length != nullptr) {
-        maximum_message_length->Serialize(raw_data);
-    }
-    if (wtp_reboot_statistics != nullptr) {
-        wtp_reboot_statistics->Serialize(raw_data);
-    }
-    vendor_specific_payloads.Serialize(raw_data);
 }
 
-ReadableJoinRequest::ReadableJoinRequest() : unknown_elements{} {
+ReadableJoinRequest::ReadableJoinRequest(
+    nonstd::span<IReadableJoinRequestOptionalElement *const> optional_elements)
+    : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
     location_data = nullptr;
     wtp_name = nullptr;
     session_id = nullptr;
     wtp_frame_tunnel_mode = nullptr;
     wtp_mac_type = nullptr;
+}
 
-    ecn_support = nullptr;
-    capwap_transport_protocol = nullptr;
-    maximum_message_length = nullptr;
-    wtp_reboot_statistics = nullptr;
+ReadableJoinRequest::ReadableJoinRequest(
+    std::initializer_list<IReadableJoinRequestOptionalElement *> optional_elements)
+    : ReadableJoinRequest(
+          nonstd::span<IReadableJoinRequestOptionalElement *const>(optional_elements.begin(),
+                                                                   optional_elements.size())) {
 }
 
 ControlHeader::MessageType ReadableJoinRequest::GetMessageType() const {
@@ -142,31 +161,16 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
                     return false;
                 }
                 break;
-            case ElementHeader::ElementType::CAPWAPTransportProtocol:
-                capwap_transport_protocol = CapwapTransportProtocol::Deserialize(raw_data);
-                if (capwap_transport_protocol == nullptr) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::MaximumMessageLength:
-                maximum_message_length = MaximumMessageLength::Deserialize(raw_data);
-                if (maximum_message_length == nullptr) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::WTPRebootStatistics:
-                wtp_reboot_statistics = WTPRebootStatistics::Deserialize(raw_data);
-                if (wtp_reboot_statistics == nullptr) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::VendorSpecificPayload:
-                if (!vendor_specific_payloads.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
 
             default: {
+                auto it = key_optional_elements.find(element->GetElementType());
+                if (it != key_optional_elements.end()) {
+                    if (!it->second->Deserialize(raw_data)) {
+                        return false;
+                    }
+                    break;
+                }
+
                 auto unknownElement = UnrecognizedElement::Deserialize(raw_data);
                 if (unknownElement == nullptr) {
                     return false;
@@ -216,19 +220,25 @@ void ReadableJoinRequest::Log() const {
 
     ip_addresses.Log();
 
-    if (capwap_transport_protocol != nullptr) {
-        capwap_transport_protocol->Log();
+    for (const auto &[_, value] : key_optional_elements) {
+        value->Log();
     }
-    if (maximum_message_length != nullptr) {
-        maximum_message_length->Log();
-    }
-    if (wtp_reboot_statistics != nullptr) {
-        wtp_reboot_statistics->Log();
-    }
-    vendor_specific_payloads.Log();
 
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
+}
+
+std::unordered_map<ElementHeader::ElementType, IReadableJoinRequestOptionalElement *const>
+ReadableJoinRequest::MapOptionalsElements(
+    nonstd::span<IReadableJoinRequestOptionalElement *const> optional_elements) {
+
+    std::unordered_map<ElementHeader::ElementType, IReadableJoinRequestOptionalElement *const> map;
+
+    for (auto *elem : optional_elements) {
+        map.emplace(elem->GetElementType(), elem);
+    }
+
+    return map;
 }
