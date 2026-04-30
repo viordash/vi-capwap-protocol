@@ -1,6 +1,7 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IOptionalElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -31,7 +32,7 @@ struct __attribute__((packed)) VendorSpecificPayload : ElementHeader {
     static WritableVendorSpecificPayloadArray Dummy;
 };
 
-struct WritableVendorSpecificPayloadArray {
+struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestOptionalElement {
   public:
     struct Item {
         std::vector<char> value;
@@ -55,12 +56,12 @@ struct WritableVendorSpecificPayloadArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
+    void Serialize(RawData *raw_data) const override final;
     uint16_t GetTotalLength() const;
-    void Log() const;
+    void Log() const override final;
 };
 
-struct ReadableVendorSpecificPayloadArray {
+struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestOptionalElement {
   public:
     static const size_t max_data_size = 2048;
     static const size_t max_count = 16;
@@ -73,7 +74,8 @@ struct ReadableVendorSpecificPayloadArray {
     ReadableVendorSpecificPayloadArray(const ReadableVendorSpecificPayloadArray &) = delete;
     ReadableVendorSpecificPayloadArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const VendorSpecificPayload *const> Get() const;
-    void Log() const;
+    void Log() const  override final;
+    ElementHeader::ElementType GetElementType() const override final;
 };

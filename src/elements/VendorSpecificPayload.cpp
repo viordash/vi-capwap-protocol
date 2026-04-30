@@ -160,3 +160,7 @@ void ReadableVendorSpecificPayloadArray::Log() const {
             (char *)items[i]->value);
     }
 }
+
+ElementHeader::ElementType ReadableVendorSpecificPayloadArray::GetElementType() const {
+    return ElementHeader::VendorSpecificPayload;
+}
