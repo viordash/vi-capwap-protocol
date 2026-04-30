@@ -14,6 +14,30 @@ bool MaximumMessageLength::Validate() const {
         && ElementHeader::GetLength() == (sizeof(MaximumMessageLength) - sizeof(ElementHeader));
 }
 
+void MaximumMessageLength::Serialize(RawData *raw_data) const {
+    ASSERT(raw_data->current + sizeof(MaximumMessageLength) <= raw_data->end);
+#pragma GCC diagnostic push
+#if __GNUC__ >= 8
+#pragma GCC diagnostic ignored "-Wclass-memaccess"
+#endif
+    std::memcpy(raw_data->current, this, sizeof(MaximumMessageLength));
+#pragma GCC diagnostic pop
+    raw_data->current += sizeof(MaximumMessageLength);
+}
+
+MaximumMessageLength *MaximumMessageLength::Deserialize(RawData *raw_data) {
+    if (raw_data->current + sizeof(MaximumMessageLength) > raw_data->end) {
+        return nullptr;
+    }
+
+    auto res = (MaximumMessageLength *)raw_data->current;
+    if (!res->Validate()) {
+        return nullptr;
+    }
+    raw_data->current += sizeof(MaximumMessageLength);
+    return res;
+}
+
 uint16_t MaximumMessageLength::GetValue() const {
     return length.Get();
 }
@@ -26,14 +50,7 @@ WritableMaximumMessageLength::WritableMaximumMessageLength(uint16_t length) : el
 }
 
 void WritableMaximumMessageLength::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(MaximumMessageLength) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    std::memcpy(raw_data->current, &element, sizeof(MaximumMessageLength));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(MaximumMessageLength);
+    element.Serialize(raw_data);
 }
 
 void WritableMaximumMessageLength::Log() const {
@@ -41,18 +58,9 @@ void WritableMaximumMessageLength::Log() const {
 }
 
 bool ReadableMaximumMessageLength::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(MaximumMessageLength) > raw_data->end) {
-        return false;
-    }
-
-    auto res = (MaximumMessageLength *)raw_data->current;
-    if (!res->Validate()) {
-        return false;
-    }
-    element = res;
-    raw_data->current += sizeof(MaximumMessageLength);
-    is_present = true;
-    return true;
+    element = MaximumMessageLength::Deserialize(raw_data);
+    is_present = element != nullptr;
+    return is_present;
 }
 
 const MaximumMessageLength *const ReadableMaximumMessageLength::Get() const {

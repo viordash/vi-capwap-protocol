@@ -14,10 +14,14 @@ struct __attribute__((packed)) CapwapTransportProtocol : ElementHeader {
     CapwapTransportProtocol(Type type);
 
     bool Validate() const;
+    void Serialize(RawData *raw_data) const;
+    static CapwapTransportProtocol *Deserialize(RawData *raw_data);
+
     void Log() const;
 };
 
-struct WritableCapwapTransportProtocol : IWritableConfigurationStatusRequestOptionalElement {
+struct WritableCapwapTransportProtocol : IWritableConfigurationStatusRequestOptionalElement,
+                                         IWritableJoinRequestOptionalElement {
   protected:
     CapwapTransportProtocol element;
 
@@ -28,7 +32,8 @@ struct WritableCapwapTransportProtocol : IWritableConfigurationStatusRequestOpti
     void Log() const override final;
 };
 
-struct ReadableCapwapTransportProtocol : IReadableConfigurationStatusRequestOptionalElement {
+struct ReadableCapwapTransportProtocol : IReadableConfigurationStatusRequestOptionalElement,
+                                         IReadableJoinRequestOptionalElement {
   protected:
     CapwapTransportProtocol *element = nullptr;
     bool is_present = false;

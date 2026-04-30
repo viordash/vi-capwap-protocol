@@ -13,6 +13,9 @@ struct __attribute__((packed)) MaximumMessageLength : ElementHeader {
     MaximumMessageLength(uint16_t length);
 
     bool Validate() const;
+    void Serialize(RawData *raw_data) const;
+    static MaximumMessageLength *Deserialize(RawData *raw_data);
+
     uint16_t GetValue() const;
     void Log() const;
 };

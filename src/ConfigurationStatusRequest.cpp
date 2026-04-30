@@ -141,7 +141,7 @@ void ReadableConfigurationStatusRequest::Log() const {
     ASSERT(wtp_reboot_statistics != nullptr);
     wtp_reboot_statistics->Log();
 
-    for (const auto &[key, value] : key_optional_elements) {
+    for (const auto &[_, value] : key_optional_elements) {
         value->Log();
     }
 

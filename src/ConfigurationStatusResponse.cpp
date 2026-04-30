@@ -155,7 +155,7 @@ void ReadableConfigurationStatusResponse::Log() const {
     ASSERT(ac_ipv4_list != nullptr);
     ac_ipv4_list->Log();
 
-    for (const auto &[key, value] : key_optional_elements) {
+    for (const auto &[_, value] : key_optional_elements) {
         value->Log();
     }
 

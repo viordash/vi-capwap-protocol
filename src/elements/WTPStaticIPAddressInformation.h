@@ -27,6 +27,8 @@ struct __attribute__((packed)) WTPStaticIPAddressInformation : ElementHeader {
                                   bool use_static);
 
     bool Validate() const;
+    void Serialize(RawData *raw_data) const;
+    static WTPStaticIPAddressInformation *Deserialize(RawData *raw_data);
     void Log() const;
 };
 
