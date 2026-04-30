@@ -21,3 +21,6 @@ struct IReadableConfigurationStatusRequestOptionalElement : IReadableOptionalEle
 
 struct IWritableConfigurationStatusResponseOptionalElement : IWritableOptionalElement {};
 struct IReadableConfigurationStatusResponseOptionalElement : IReadableOptionalElement {};
+
+struct IWritableJoinRequestOptionalElement : IWritableOptionalElement {};
+struct IReadableJoinRequestOptionalElement : IReadableOptionalElement {};

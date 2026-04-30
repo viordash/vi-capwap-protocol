@@ -112,3 +112,47 @@ void WTPRebootStatistics::Log() const {
           GetUnknownFailureCount(),
           (unsigned)GetLastFailureType());
 }
+
+WritableWTPRebootStatistics::WritableWTPRebootStatistics(
+    uint16_t reboot_count,
+    uint16_t ac_initiated_count,
+    uint16_t link_failure_count,
+    uint16_t sw_failure_count,
+    uint16_t hw_failure_count,
+    uint16_t other_failure_count,
+    uint16_t unknown_failure_count,
+    WTPRebootStatistics::LastFailureType last_failure_type)
+    : element{ reboot_count,     ac_initiated_count,  link_failure_count,    sw_failure_count,
+               hw_failure_count, other_failure_count, unknown_failure_count, last_failure_type } {
+}
+
+void WritableWTPRebootStatistics::Serialize(RawData *raw_data) const {
+    element.Serialize(raw_data);
+}
+
+void WritableWTPRebootStatistics::Log() const {
+    element.Log();
+}
+
+bool ReadableWTPRebootStatistics::Deserialize(RawData *raw_data) {
+    element = WTPRebootStatistics::Deserialize(raw_data);
+    is_present = element != nullptr;
+    return is_present;
+}
+
+const WTPRebootStatistics *const ReadableWTPRebootStatistics::Get() const {
+    return element;
+}
+
+void ReadableWTPRebootStatistics::Log() const {
+    ASSERT(element != nullptr);
+    element->Log();
+}
+
+ElementHeader::ElementType ReadableWTPRebootStatistics::GetElementType() const {
+    return ElementHeader::WTPRebootStatistics;
+}
+
+bool ReadableWTPRebootStatistics::IsPresent() const {
+    return is_present;
+}
