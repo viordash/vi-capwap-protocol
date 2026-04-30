@@ -9,11 +9,11 @@
 #include "elements/CapwapTransportProtocol.h"
 #include "elements/ECNSupport.h"
 #include "elements/ElementHeader.h"
+#include "elements/IEEE80211/WTPRadioInformation.h"
 #include "elements/ImageIdentifier.h"
 #include "elements/MaximumMessageLength.h"
 #include "elements/ResultCode.h"
 #include "elements/VendorSpecificPayload.h"
-#include "elements/IEEE80211/WTPRadioInformation.h"
 #include "span.hpp"
 #include <limits>
 #include <string_view>
@@ -30,7 +30,7 @@ struct WritableJoinResponse : WritableCapwapResponse {
     const WritableCAPWAPControlIPV4AdrArray control_ip_addresses;
     const WritableCAPWAPLocalIPV4AdrArray local_ip_addresses;
 
-    const WritableACIPv4List *ac_ipv4_list;
+    const ACIPv4ListWritePacket *ac_ipv4_list;
     const CapwapTransportProtocol *capwap_transport_protocol;
     const WritableImageIdentifier *image_identifier;
     const MaximumMessageLength *maximum_message_length;
@@ -45,7 +45,7 @@ struct WritableJoinResponse : WritableCapwapResponse {
                          const ECNSupport::Type ecn_support,
                          const nonstd::span<const CAPWAPControlIPv4Address> &control_ip_addresses,
                          const nonstd::span<const CAPWAPLocalIPv4Address> &local_ip_addresses,
-                         const WritableACIPv4List *ac_ipv4_list,
+                         const ACIPv4ListWritePacket *ac_ipv4_list,
                          const CapwapTransportProtocol *capwap_transport_protocol,
                          const WritableImageIdentifier *image_identifier,
                          const MaximumMessageLength *maximum_message_length,
@@ -65,7 +65,7 @@ struct ReadableJoinResponse : ReadableCapwapResponse {
     ReadableCAPWAPControlIPV4AdrArray control_ip_addresses;
     ReadableCAPWAPLocalIPV4AdrArray local_ip_addresses;
 
-    ReadableACIPv4List *ac_ipv4_list;
+    ACIPv4ListReadPacket *ac_ipv4_list;
     CapwapTransportProtocol *capwap_transport_protocol;
     ReadableImageIdentifier image_identifier;
     MaximumMessageLength *maximum_message_length;

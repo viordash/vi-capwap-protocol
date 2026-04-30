@@ -13,7 +13,7 @@ WritableJoinResponse::WritableJoinResponse(
     const ECNSupport::Type ecn_support,
     const nonstd::span<const CAPWAPControlIPv4Address> &control_ip_addresses,
     const nonstd::span<const CAPWAPLocalIPv4Address> &local_ip_addresses,
-    const WritableACIPv4List *ac_ipv4_list,
+    const ACIPv4ListWritePacket *ac_ipv4_list,
     const CapwapTransportProtocol *capwap_transport_protocol,
     const WritableImageIdentifier *image_identifier,
     const MaximumMessageLength *maximum_message_length,
@@ -115,7 +115,7 @@ bool ReadableJoinResponse::Deserialize(RawData *raw_data) {
                 break;
 
             case ElementHeader::ElementType::ACIPv4List:
-                ac_ipv4_list = ReadableACIPv4List::Deserialize(raw_data);
+                ac_ipv4_list = ACIPv4ListReadPacket::Deserialize(raw_data);
                 if (ac_ipv4_list == nullptr) {
                     return false;
                 }

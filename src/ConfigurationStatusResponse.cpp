@@ -106,7 +106,7 @@ bool ReadableConfigurationStatusResponse::Deserialize(RawData *raw_data) {
                 }
                 break;
             case ElementHeader::ElementType::ACIPv4List:
-                ac_ipv4_list = ReadableACIPv4List::Deserialize(raw_data);
+                ac_ipv4_list = ACIPv4ListReadPacket::Deserialize(raw_data);
                 if (ac_ipv4_list == nullptr) {
                     return false;
                 }
