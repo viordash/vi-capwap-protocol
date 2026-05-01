@@ -118,3 +118,11 @@ void ReadableDeleteMacAclEntry::Log() const {
         MacAddress::Log(i, entry->Length, entry->MACAddresses);
     }
 }
+
+ElementHeader::ElementType ReadableDeleteMacAclEntry::GetElementType() const {
+    return ElementHeader::DeleteMACACLEntry;
+}
+
+bool ReadableDeleteMacAclEntry::IsPresent() const {
+    return count > 0;
+}
