@@ -10,7 +10,7 @@
 #include <string_view>
 #include <vector>
 
-struct __attribute__((packed)) ACNameWithPriority : ElementHeader {
+struct __attribute__((packed)) ACNameWithPriorityHeader : ElementHeader {
     static const size_t max_data_size = 512;
 
   protected:
@@ -20,24 +20,24 @@ struct __attribute__((packed)) ACNameWithPriority : ElementHeader {
   public:
     char name[];
 
-    ACNameWithPriority(const ACNameWithPriority &) = default;
-    ACNameWithPriority(uint8_t priority, uint16_t length);
+    ACNameWithPriorityHeader(const ACNameWithPriorityHeader &) = default;
+    ACNameWithPriorityHeader(uint8_t priority, uint16_t length);
 
     uint8_t GetPriority() const;
     uint16_t GetNameLenght() const;
     bool Validate() const;
     void Serialize(RawData *raw_data) const;
-    static ACNameWithPriority *Deserialize(RawData *raw_data);
+    static ACNameWithPriorityHeader *Deserialize(RawData *raw_data);
 };
 
 struct WritableACNameWithPriorityArray : IWritableConfigurationStatusRequestOptionalElement {
   public:
     struct Item {
-        std::vector<char> name;
-        ACNameWithPriority header;
+        std::string_view name;
+        ACNameWithPriorityHeader header;
         Item(const Item &) = default;
-        Item(uint8_t priority, std::vector<char> &&val)
-            : name{ std::move(val) }, header{ priority, (uint16_t)name.size() } {};
+        Item(uint8_t priority, const std::string_view ac_name)
+            : name{ ac_name }, header{ priority, (uint16_t)name.size() } {};
     };
 
   private:
@@ -60,7 +60,7 @@ struct ReadableACNameWithPriorityArray : IReadableConfigurationStatusRequestOpti
     static const size_t max_count = 32;
 
   protected:
-    std::array<const ACNameWithPriority *, max_count> items;
+    std::array<const ACNameWithPriorityHeader *, max_count> items;
     size_t count;
 
   public:
@@ -68,7 +68,7 @@ struct ReadableACNameWithPriorityArray : IReadableConfigurationStatusRequestOpti
     ReadableACNameWithPriorityArray();
 
     bool Deserialize(RawData *raw_data) override final;
-    nonstd::span<const ACNameWithPriority *const> Get() const;
+    nonstd::span<const ACNameWithPriorityHeader *const> Get() const;
     void Log() const override final;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
