@@ -59,7 +59,6 @@ void WritableConfigurationStatusResponse::Serialize(RawData *raw_data) const {
 ReadableConfigurationStatusResponse::ReadableConfigurationStatusResponse(
     nonstd::span<IReadableConfigurationStatusResponseOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
-    idle_timeout = nullptr;
     wtp_fallback = nullptr;
 }
 
@@ -91,8 +90,7 @@ bool ReadableConfigurationStatusResponse::Deserialize(RawData *raw_data) {
                 }
                 break;
             case ElementHeader::ElementType::IdleTimeout:
-                idle_timeout = IdleTimeout::Deserialize(raw_data);
-                if (idle_timeout == nullptr) {
+                if (!idle_timeout.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -131,7 +129,7 @@ bool ReadableConfigurationStatusResponse::Deserialize(RawData *raw_data) {
         }
     }
     return capwap_timers.IsPresent() && decryption_error_report_periods.Get().size() > 0
-        && idle_timeout != nullptr && wtp_fallback != nullptr && ac_ipv4_list.IsPresent();
+        && idle_timeout.IsPresent() && wtp_fallback != nullptr && ac_ipv4_list.IsPresent();
 }
 
 void ReadableConfigurationStatusResponse::Log() const {
@@ -141,8 +139,7 @@ void ReadableConfigurationStatusResponse::Log() const {
 
     decryption_error_report_periods.Log();
 
-    ASSERT(idle_timeout != nullptr);
-    idle_timeout->Log();
+    idle_timeout.Log();
 
     ASSERT(wtp_fallback != nullptr);
     wtp_fallback->Log();

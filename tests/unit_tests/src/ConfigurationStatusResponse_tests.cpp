@@ -90,7 +90,8 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_serializ
     CHECK_EQUAL(31, read_data.decryption_error_report_periods.Get()[2]->RadioID());
     CHECK_EQUAL(65535, read_data.decryption_error_report_periods.Get()[2]->ReportInterval());
 
-    CHECK_EQUAL(1234, read_data.idle_timeout->GetTimeout());
+    CHECK_TRUE(read_data.idle_timeout.IsPresent());
+    CHECK_EQUAL(1234, read_data.idle_timeout.Get()->GetTimeout());
     CHECK_EQUAL(WTPFallback::Mode::Enabled, read_data.wtp_fallback->mode);
 
     CHECK_TRUE(read_data.ac_ipv4_list.IsPresent());
@@ -194,7 +195,8 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_deserial
     CHECK_EQUAL(1, read_data.decryption_error_report_periods.Get()[0]->RadioID());
     CHECK_EQUAL(120, read_data.decryption_error_report_periods.Get()[0]->ReportInterval());
 
-    CHECK_EQUAL(300, read_data.idle_timeout->GetTimeout());
+    CHECK_TRUE(read_data.idle_timeout.IsPresent());
+    CHECK_EQUAL(300, read_data.idle_timeout.Get()->GetTimeout());
     CHECK_EQUAL(WTPFallback::Mode::Enabled, read_data.wtp_fallback->mode);
 
     CHECK_TRUE(read_data.ac_ipv4_list.IsPresent());

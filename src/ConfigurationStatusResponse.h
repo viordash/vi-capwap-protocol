@@ -17,7 +17,7 @@ struct WritableConfigurationStatusResponse : WritableCapwapResponse {
   private:
     const WritableCAPWAPTimers &capwap_timers;
     WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods;
-    const IdleTimeout idle_timeout;
+    const WritableIdleTimeout idle_timeout;
     const WTPFallback wtp_fallback;
     const WritableACIPv4List ac_ipv4_list;
 
@@ -61,7 +61,7 @@ struct ReadableConfigurationStatusResponse : ReadableCapwapResponse {
   public:
     ReadableCAPWAPTimers capwap_timers;
     ReadableDecryptionErrorReportPeriodArray decryption_error_report_periods;
-    IdleTimeout *idle_timeout;
+    ReadableIdleTimeout idle_timeout;
     WTPFallback *wtp_fallback;
     ReadableACIPv4List ac_ipv4_list;
 

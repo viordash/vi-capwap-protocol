@@ -1,4 +1,5 @@
 #pragma once
+#include "IOptionalElement.h"
 #include "ClearHeader.h"
 #include "ControlHeader.h"
 #include "elements/ElementHeader.h"
@@ -18,8 +19,29 @@ struct __attribute__((packed)) IdleTimeout : ElementHeader {
 
     uint32_t GetTimeout() const;
     bool Validate() const;
-    uint16_t GetTotalLength() const;
-    void Serialize(RawData *raw_data) const;
-    static IdleTimeout *Deserialize(RawData *raw_data);
     void Log() const;
+};
+
+struct WritableIdleTimeout : IWritableOptionalElement {
+  protected:
+    IdleTimeout element;
+
+  public:
+    WritableIdleTimeout(uint32_t timeout);
+
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
+};
+
+struct ReadableIdleTimeout : IReadableOptionalElement {
+  protected:
+    IdleTimeout *element = nullptr;
+    bool is_present = false;
+
+  public:
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
+    const IdleTimeout *const Get() const;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };
