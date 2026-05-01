@@ -390,7 +390,8 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    STRNCMP_EQUAL("Lab", (char *)read_data.location_data->data, 3);
+    CHECK_TRUE(read_data.location_data.IsPresent());
+    STRNCMP_EQUAL("Lab", (char *)read_data.location_data.Get()->data, 3);
 
     CHECK_EQUAL(2, read_data.wtp_board_data.Get().size());
     CHECK_EQUAL(9279, read_data.wtp_board_data.header->GetVendorIdentifier());

@@ -76,7 +76,7 @@ struct ReadableJoinRequest : ReadableCapwapRequest {
         nonstd::span<IReadableJoinRequestOptionalElement *const> optional_elements);
 
   public:
-    ReadableLocationData *location_data;
+    ReadableLocationData location_data;
     ReadableWTPBoardData wtp_board_data;
     ReadableWTPDescriptor wtp_descriptor;
     ReadableWTPName *wtp_name;

@@ -80,7 +80,6 @@ void WritableJoinRequest::Serialize(RawData *raw_data) const {
 ReadableJoinRequest::ReadableJoinRequest(
     nonstd::span<IReadableJoinRequestOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
-    location_data = nullptr;
     wtp_name = nullptr;
     session_id = nullptr;
     wtp_frame_tunnel_mode = nullptr;
@@ -104,8 +103,7 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
 
         switch (element->GetElementType()) {
             case ElementHeader::ElementType::LocationData:
-                location_data = ReadableLocationData::Deserialize(raw_data);
-                if (location_data == nullptr) {
+                if (!location_data.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -184,7 +182,7 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
         }
     }
 
-    return location_data != nullptr && wtp_board_data.header != nullptr
+    return location_data.IsPresent() && wtp_board_data.header != nullptr
         && wtp_descriptor.header != nullptr && wtp_name != nullptr && session_id != nullptr
         && wtp_frame_tunnel_mode != nullptr && wtp_mac_type != nullptr
         && wtp_radio_informations.Get().size() > 0 && ecn_support != nullptr
@@ -195,8 +193,7 @@ void ReadableJoinRequest::Log() const {
     log_i("----------------------------------");
     log_i("ME JoinRequest:");
 
-    ASSERT(location_data != nullptr);
-    location_data->Log();
+    location_data.Log();
 
     wtp_board_data.Log();
     wtp_descriptor.Log();

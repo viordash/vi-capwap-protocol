@@ -1,29 +1,48 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IOptionalElement.h"
 #include "elements/ElementHeader.h"
 #include <string_view>
-#include <vector>
 
-struct WritableLocationData {
-    std::vector<char> data;
-
-    WritableLocationData(const WritableLocationData &) = default;
-    WritableLocationData(WritableLocationData &&) = default;
-    WritableLocationData(std::string_view str);
-
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
-};
-
-struct __attribute__((packed)) ReadableLocationData : ElementHeader {
+struct __attribute__((packed)) LocationData : ElementHeader {
     static const size_t max_data_size = 1024;
-    char data[];
 
-    ReadableLocationData(const ReadableLocationData &) = delete;
-    ReadableLocationData();
+    LocationData(const LocationData &) = delete;
+    LocationData(uint16_t length);
+    uint16_t GetDataLenght() const;
 
     bool Validate() const;
-    static ReadableLocationData *Deserialize(RawData *raw_data);
-    void Log() const;
+};
+
+struct WritableLocationData : IWritableOptionalElement {
+  protected:
+    LocationData element;
+    const std::string_view data;
+
+  public:
+    WritableLocationData(const WritableLocationData &) = delete;
+    WritableLocationData(const std::string_view location);
+
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
+};
+
+struct ReadableLocationData : IReadableOptionalElement {
+  public:
+    struct Element : LocationData {
+        char data[];
+        Element(const Element &) = delete;
+    };
+
+  protected:
+    Element *element = nullptr;
+    bool is_present = false;
+
+  public:
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
+    const ReadableLocationData::Element *const Get() const;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };
