@@ -27,7 +27,7 @@ TEST(ImageDataRequestTestsGroup, ImageDataRequest_serialize_deserialize_perf) {
     const uint8_t data[] = { 0xF8, 0x1D, 0x4F, 0xAE, 0x7D, 0xEC, 0x11, 0xD0,
                              0xA7, 0x65, 0x00, 0xA0, 0xC9, 0x1E, 0x6B, 0xF6 };
 
-    WritableImageData image_data{ ImageDataHeader::Type::ImageDataIsIncluded, data };
+    WritableImageData image_data{ ImageData::Type::ImageDataIsIncluded, data };
 
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");

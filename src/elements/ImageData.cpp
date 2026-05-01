@@ -5,22 +5,21 @@
 #include <cstring>
 #include <string.h>
 
-ImageDataHeader::ImageDataHeader(ImageDataHeader::Type type, uint16_t length)
-    : ElementHeader(ElementHeader::ImageData,
-                    (sizeof(ImageDataHeader) - sizeof(ElementHeader)) + length),
+ImageData::ImageData(ImageData::Type type, uint16_t length)
+    : ElementHeader(ElementHeader::ImageData, (sizeof(ImageData) - sizeof(ElementHeader)) + length),
       type{ type } {
 }
 
-uint16_t ImageDataHeader::GetDataLenght() const {
-    return GetLength() - (sizeof(ImageDataHeader) - sizeof(ElementHeader));
+uint16_t ImageData::GetDataLenght() const {
+    return GetLength() - (sizeof(ImageData) - sizeof(ElementHeader));
 }
 
-bool ImageDataHeader::Validate() const {
-    static_assert(sizeof(ImageDataHeader) == 5);
+bool ImageData::Validate() const {
+    static_assert(sizeof(ImageData) == 5);
     if (ElementHeader::GetElementType() != ElementHeader::ImageData) {
         return false;
     }
-    if (GetDataLenght() > ImageDataHeader::max_data_size) {
+    if (GetDataLenght() > ImageData::max_data_size) {
         return false;
     }
 
@@ -36,15 +35,15 @@ bool ImageDataHeader::Validate() const {
     return false;
 }
 
-WritableImageData::WritableImageData(ImageDataHeader::Type type,
+WritableImageData::WritableImageData(ImageData::Type type,
                                      const nonstd::span<const uint8_t> image_data)
     : element{ type, (uint16_t)image_data.size() }, data{ image_data } {
     static_assert(sizeof(element) == 5);
-    ASSERT(image_data.size() <= ImageDataHeader::max_data_size);
+    ASSERT(image_data.size() <= ImageData::max_data_size);
 }
 
 void WritableImageData::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(ImageDataHeader) <= raw_data->end);
+    ASSERT(raw_data->current + sizeof(ImageData) <= raw_data->end);
     std::memcpy(raw_data->current, &element, sizeof(element));
     raw_data->current += sizeof(element);
 

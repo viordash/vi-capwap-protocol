@@ -5,14 +5,14 @@
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 
-struct __attribute__((packed)) ImageDataHeader : ElementHeader {
+struct __attribute__((packed)) ImageData : ElementHeader {
     static const size_t max_data_size = 1024;
     enum Type : uint8_t { ImageDataIsIncluded = 1, LastImageDataIsIncluded = 2, ErrorOccured = 5 };
 
     Type type;
 
-    ImageDataHeader(const ImageDataHeader &) = delete;
-    ImageDataHeader(ImageDataHeader::Type type, uint16_t length);
+    ImageData(const ImageData &) = delete;
+    ImageData(ImageData::Type type, uint16_t length);
     uint16_t GetDataLenght() const;
 
     bool Validate() const;
@@ -20,12 +20,12 @@ struct __attribute__((packed)) ImageDataHeader : ElementHeader {
 
 struct WritableImageData : IWritableImageDataRequestOptionalElement {
   protected:
-    ImageDataHeader element;
+    ImageData element;
     const nonstd::span<const uint8_t> data;
 
   public:
     WritableImageData(const WritableImageData &) = delete;
-    WritableImageData(ImageDataHeader::Type type, const nonstd::span<const uint8_t> image_data);
+    WritableImageData(ImageData::Type type, const nonstd::span<const uint8_t> image_data);
 
     void Serialize(RawData *raw_data) const override final;
     void Log() const override final;
@@ -33,7 +33,7 @@ struct WritableImageData : IWritableImageDataRequestOptionalElement {
 
 struct ReadableImageData : IReadableImageDataRequestOptionalElement {
   public:
-    struct Element : ImageDataHeader {
+    struct Element : ImageData {
         uint8_t data[];
         Element(const Element &) = delete;
     };

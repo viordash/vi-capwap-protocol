@@ -23,8 +23,7 @@ TEST(ImageDataRequestTestsGroup, ImageDataRequest_serialize) {
             CapwapTransportProtocol::Type::UDP
         };
 
-        WritableImageData image_data{ ImageDataHeader::Type::ImageDataIsIncluded,
-                                      reference_image_data };
+        WritableImageData image_data{ ImageData::Type::ImageDataIsIncluded, reference_image_data };
 
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
@@ -74,7 +73,7 @@ TEST(ImageDataRequestTestsGroup, ImageDataRequest_serialize) {
 
     CHECK_TRUE(image_data.IsPresent());
     CHECK_EQUAL(17, image_data.Get()->GetLength());
-    CHECK_EQUAL(ImageDataHeader::Type::ImageDataIsIncluded, image_data.Get()->type);
+    CHECK_EQUAL(ImageData::Type::ImageDataIsIncluded, image_data.Get()->type);
     MEMCMP_EQUAL(reference_image_data, image_data.Get()->data, 16);
 
     CHECK_TRUE(image_data.IsPresent());
@@ -207,7 +206,7 @@ TEST(ImageDataRequestTestsGroup, ImageDataRequest_deserialize_image_data) {
 
     CHECK_TRUE(image_data.IsPresent());
     CHECK_EQUAL(27, image_data.Get()->GetLength());
-    CHECK_EQUAL(ImageDataHeader::Type::ImageDataIsIncluded, image_data.Get()->type);
+    CHECK_EQUAL(ImageData::Type::ImageDataIsIncluded, image_data.Get()->type);
     const uint8_t reference_image_data[] = { 0x54, 0x68, 0x69, 0x73, 0x20, 0x69, 0x73, 0x20, 0x61,
                                              0x20, 0x74, 0x65, 0x73, 0x74, 0x20, 0x64, 0x61, 0x74,
                                              0x61, 0x20, 0x63, 0x68, 0x75, 0x6E, 0x6B, 0x2E };
