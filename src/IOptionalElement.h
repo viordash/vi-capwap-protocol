@@ -27,3 +27,6 @@ struct IReadableJoinRequestOptionalElement : IReadableOptionalElement {};
 
 struct IWritableJoinResponseOptionalElement : IWritableOptionalElement {};
 struct IReadableJoinResponseOptionalElement : IReadableOptionalElement {};
+
+struct IWritableImageDataRequestOptionalElement : IWritableOptionalElement {};
+struct IReadableImageDataRequestOptionalElement : IReadableOptionalElement {};
