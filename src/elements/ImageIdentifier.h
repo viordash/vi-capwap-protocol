@@ -24,7 +24,8 @@ struct __attribute__((packed)) ImageIdentifierHeader : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableImageIdentifier : IWritableJoinResponseOptionalElement {
+struct WritableImageIdentifier : IWritableJoinResponseOptionalElement,
+                                 IWritableImageDataRequestOptionalElement {
   protected:
     ImageIdentifierHeader element;
     std::vector<char> data;
@@ -36,7 +37,8 @@ struct WritableImageIdentifier : IWritableJoinResponseOptionalElement {
     void Log() const override final;
 };
 
-struct ReadableImageIdentifier : IReadableJoinResponseOptionalElement {
+struct ReadableImageIdentifier : IReadableJoinResponseOptionalElement,
+                                 IReadableImageDataRequestOptionalElement {
   public:
     struct Element : ImageIdentifierHeader {
         char data[];
