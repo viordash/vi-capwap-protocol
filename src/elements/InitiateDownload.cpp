@@ -30,10 +30,38 @@ InitiateDownload *InitiateDownload::Deserialize(RawData *raw_data) {
     raw_data->current += sizeof(InitiateDownload);
     return res;
 }
-uint16_t InitiateDownload::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
-}
 
 void InitiateDownload::Log() const {
     log_i("ME InitiateDownload");
+}
+
+void WritableInitiateDownload::Serialize(RawData *raw_data) const {
+    element.Serialize(raw_data);
+}
+
+void WritableInitiateDownload::Log() const {
+    element.Log();
+}
+
+bool ReadableInitiateDownload::Deserialize(RawData *raw_data) {
+    element = InitiateDownload::Deserialize(raw_data);
+    is_present = element != nullptr;
+    return is_present;
+}
+
+const InitiateDownload *const ReadableInitiateDownload::Get() const {
+    return element;
+}
+
+void ReadableInitiateDownload::Log() const {
+    ASSERT(element != nullptr);
+    element->Log();
+}
+
+ElementHeader::ElementType ReadableInitiateDownload::GetElementType() const {
+    return ElementHeader::InitiateDownload;
+}
+
+bool ReadableInitiateDownload::IsPresent() const {
+    return is_present;
 }
