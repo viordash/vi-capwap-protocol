@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IOptionalElement.h"
 #include "elements/ElementHeader.h"
 #include <cstdint>
 
@@ -12,9 +13,29 @@ struct __attribute__((packed)) CAPWAPTimers : ElementHeader {
     CAPWAPTimers(uint8_t discovery, uint8_t echo_interval);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static CAPWAPTimers *Deserialize(RawData *raw_data);
-
-    uint16_t GetTotalLength() const;
     void Log() const;
+};
+
+struct WritableCAPWAPTimers : IWritableOptionalElement {
+  protected:
+    CAPWAPTimers element;
+
+  public:
+    WritableCAPWAPTimers(uint8_t discovery, uint8_t echo_interval);
+
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
+};
+
+struct ReadableCAPWAPTimers : IReadableOptionalElement {
+  protected:
+    CAPWAPTimers *element = nullptr;
+    bool is_present = false;
+
+  public:
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
+    const CAPWAPTimers *const Get() const;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };
