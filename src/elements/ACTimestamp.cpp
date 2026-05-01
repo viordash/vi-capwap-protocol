@@ -5,24 +5,23 @@
 #include <cstring>
 #include <string.h>
 
-ACTimestampHeader::ACTimestampHeader(uint32_t timestamp)
-    : ElementHeader(ElementHeader::ACTimestamp,
-                    (sizeof(ACTimestampHeader) - sizeof(ElementHeader))),
+ACTimestamp::ACTimestamp(uint32_t timestamp)
+    : ElementHeader(ElementHeader::ACTimestamp, (sizeof(ACTimestamp) - sizeof(ElementHeader))),
       timestamp{ timestamp } {
 }
 
-uint32_t ACTimestampHeader::GetTimestamp() const {
+uint32_t ACTimestamp::GetTimestamp() const {
     return timestamp.Get();
 }
 
-bool ACTimestampHeader::Validate() const {
-    static_assert(sizeof(ACTimestampHeader) == 8);
+bool ACTimestamp::Validate() const {
+    static_assert(sizeof(ACTimestamp) == 8);
     return GetElementType() == ElementHeader::ACTimestamp
-        && GetLength() == (sizeof(ACTimestampHeader) - sizeof(ElementHeader));
+        && GetLength() == (sizeof(ACTimestamp) - sizeof(ElementHeader));
 }
 
-void ACTimestampHeader::Log() const {
-    log_i("ME ACTimestampHeader timestamp: %u", GetTimestamp());
+void ACTimestamp::Log() const {
+    log_i("ME ACTimestamp timestamp: %u", GetTimestamp());
 }
 
 WritableACTimestamp::WritableACTimestamp(uint32_t timestamp) : element{ timestamp } {
@@ -30,7 +29,7 @@ WritableACTimestamp::WritableACTimestamp(uint32_t timestamp) : element{ timestam
 }
 
 void WritableACTimestamp::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(ACTimestampHeader) <= raw_data->end);
+    ASSERT(raw_data->current + sizeof(ACTimestamp) <= raw_data->end);
     std::memcpy(raw_data->current, &element, sizeof(element));
     raw_data->current += sizeof(element);
 }
@@ -40,22 +39,22 @@ void WritableACTimestamp::Log() const {
 }
 
 bool ReadableACTimestamp::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(ACTimestampHeader) > raw_data->end) {
+    if (raw_data->current + sizeof(ACTimestamp) > raw_data->end) {
         return false;
     }
 
-    auto res = (ACTimestampHeader *)raw_data->current;
+    auto res = (ACTimestamp *)raw_data->current;
     if (!res->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(ACTimestampHeader);
+    raw_data->current += sizeof(ACTimestamp);
 
     element = res;
     is_present = true;
     return true;
 }
 
-const ACTimestampHeader *const ReadableACTimestamp::Get() const {
+const ACTimestamp *const ReadableACTimestamp::Get() const {
     return element;
 }
 

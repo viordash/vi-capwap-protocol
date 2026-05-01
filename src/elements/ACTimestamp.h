@@ -8,14 +8,14 @@
 #include <cstdint>
 #include <string_view>
 
-struct __attribute__((packed)) ACTimestampHeader : ElementHeader {
+struct __attribute__((packed)) ACTimestamp : ElementHeader {
   protected:
     NetworkU32 timestamp;
 
   public:
-    ACTimestampHeader(const ACTimestampHeader &) = default;
-    ACTimestampHeader(ACTimestampHeader &&) = default;
-    ACTimestampHeader(uint32_t timestamp);
+    ACTimestamp(const ACTimestamp &) = default;
+    ACTimestamp(ACTimestamp &&) = default;
+    ACTimestamp(uint32_t timestamp);
 
     uint32_t GetTimestamp() const;
     bool Validate() const;
@@ -24,7 +24,7 @@ struct __attribute__((packed)) ACTimestampHeader : ElementHeader {
 
 struct WritableACTimestamp : IWritableConfigurationStatusRequestOptionalElement {
   protected:
-    ACTimestampHeader element;
+    ACTimestamp element;
 
   public:
     WritableACTimestamp(uint32_t timestamp);
@@ -35,13 +35,13 @@ struct WritableACTimestamp : IWritableConfigurationStatusRequestOptionalElement 
 
 struct ReadableACTimestamp : IReadableConfigurationStatusRequestOptionalElement {
   protected:
-    ACTimestampHeader *element = nullptr;
+    ACTimestamp *element = nullptr;
     bool is_present = false;
 
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    const ACTimestampHeader *const Get() const;
+    const ACTimestamp *const Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };
