@@ -117,3 +117,11 @@ void ReadableDecryptionErrorReportPeriodArray::Log() const {
               items[i]->ReportInterval());
     }
 }
+
+ElementHeader::ElementType ReadableDecryptionErrorReportPeriodArray::GetElementType() const {
+    return ElementHeader::DecryptionErrorReportPeriod;
+}
+
+bool ReadableDecryptionErrorReportPeriodArray::IsPresent() const {
+    return count > 0;
+}

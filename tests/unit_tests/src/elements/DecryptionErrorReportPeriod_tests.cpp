@@ -81,6 +81,7 @@ TEST(DecryptionErrorReportPeriodTestsGroup, Serialize_Deserialize_few_elements) 
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     ReadableDecryptionErrorReportPeriodArray periods;
+    CHECK_FALSE(periods.IsPresent());
 
     raw_data = { reference, reference + sizeof(reference) };
 
@@ -101,6 +102,7 @@ TEST(DecryptionErrorReportPeriodTestsGroup, Serialize_Deserialize_few_elements) 
     CHECK_EQUAL(10000, periods.Get()[3]->ReportInterval());
     CHECK_EQUAL(31, periods.Get()[4]->RadioID());
     CHECK_EQUAL(65535, periods.Get()[4]->ReportInterval());
+    CHECK_TRUE(periods.IsPresent());
 }
 
 TEST(DecryptionErrorReportPeriodTestsGroup, Add_array_of_items_is_unique) {
