@@ -31,8 +31,7 @@ struct WritableImageData : IWritableImageDataRequestOptionalElement {
     void Log() const override final;
 };
 
-struct ReadableImageData : IReadableJoinResponseOptionalElement,
-                           IReadableImageDataRequestOptionalElement {
+struct ReadableImageData : IReadableImageDataRequestOptionalElement {
   public:
     struct Element : ImageDataHeader {
         uint8_t data[];
@@ -50,4 +49,3 @@ struct ReadableImageData : IReadableJoinResponseOptionalElement,
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };
-
