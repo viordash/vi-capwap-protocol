@@ -21,7 +21,8 @@ struct __attribute__((packed)) CapwapTransportProtocol : ElementHeader {
 };
 
 struct WritableCapwapTransportProtocol : IWritableConfigurationStatusRequestOptionalElement,
-                                         IWritableJoinRequestOptionalElement {
+                                         IWritableJoinRequestOptionalElement,
+                                         IWritableJoinResponseOptionalElement {
   protected:
     CapwapTransportProtocol element;
 
@@ -33,7 +34,8 @@ struct WritableCapwapTransportProtocol : IWritableConfigurationStatusRequestOpti
 };
 
 struct ReadableCapwapTransportProtocol : IReadableConfigurationStatusRequestOptionalElement,
-                                         IReadableJoinRequestOptionalElement {
+                                         IReadableJoinRequestOptionalElement,
+                                         IReadableJoinResponseOptionalElement {
   protected:
     CapwapTransportProtocol *element = nullptr;
     bool is_present = false;

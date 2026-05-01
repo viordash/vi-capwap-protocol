@@ -34,7 +34,8 @@ struct __attribute__((packed)) VendorSpecificPayload : ElementHeader {
 
 struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestOptionalElement,
                                             IWritableConfigurationStatusResponseOptionalElement,
-                                            IWritableJoinRequestOptionalElement {
+                                            IWritableJoinRequestOptionalElement,
+                                            IWritableJoinResponseOptionalElement {
   public:
     struct Item {
         std::vector<char> value;
@@ -65,7 +66,8 @@ struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestO
 
 struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestOptionalElement,
                                             IReadableConfigurationStatusResponseOptionalElement,
-                                            IReadableJoinRequestOptionalElement {
+                                            IReadableJoinRequestOptionalElement,
+                                            IReadableJoinResponseOptionalElement {
   public:
     static const size_t max_data_size = 2048;
     static const size_t max_count = 16;

@@ -20,7 +20,8 @@ struct __attribute__((packed)) MaximumMessageLength : ElementHeader {
     void Log() const;
 };
 
-struct WritableMaximumMessageLength : IWritableJoinRequestOptionalElement {
+struct WritableMaximumMessageLength : IWritableJoinRequestOptionalElement,
+                                      IWritableJoinResponseOptionalElement {
   protected:
     MaximumMessageLength element;
 
@@ -31,7 +32,8 @@ struct WritableMaximumMessageLength : IWritableJoinRequestOptionalElement {
     void Log() const override final;
 };
 
-struct ReadableMaximumMessageLength : IReadableJoinRequestOptionalElement {
+struct ReadableMaximumMessageLength : IReadableJoinRequestOptionalElement,
+                                      IReadableJoinResponseOptionalElement {
   protected:
     MaximumMessageLength *element = nullptr;
     bool is_present = false;

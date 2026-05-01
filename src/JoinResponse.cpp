@@ -13,17 +13,32 @@ WritableJoinResponse::WritableJoinResponse(
     const ECNSupport::Type ecn_support,
     const nonstd::span<const CAPWAPControlIPv4Address> &control_ip_addresses,
     const nonstd::span<const CAPWAPLocalIPv4Address> &local_ip_addresses,
-    const WritableACIPv4List *ac_ipv4_list,
-    const CapwapTransportProtocol *capwap_transport_protocol,
-    const WritableImageIdentifier *image_identifier,
-    const MaximumMessageLength *maximum_message_length,
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads)
+    nonstd::span<IWritableJoinResponseOptionalElement *const> optional_elements)
     : result_code{ result_code }, ac_descriptor{ ac_descriptor }, ac_name{ ac_name },
       wtp_radio_informations{ wtp_radio_informations }, ecn_support{ ecn_support },
       control_ip_addresses{ control_ip_addresses }, local_ip_addresses{ local_ip_addresses },
-      ac_ipv4_list{ ac_ipv4_list }, capwap_transport_protocol{ capwap_transport_protocol },
-      image_identifier{ image_identifier }, maximum_message_length{ maximum_message_length },
-      vendor_specific_payloads{ vendor_specific_payloads } {
+      optional_elements{ optional_elements } {
+}
+
+WritableJoinResponse::WritableJoinResponse(
+    const ResultCode::Type result_code,
+    const WritableACDescriptor &ac_descriptor,
+    const std::string_view ac_name,
+    WritableWTPRadioInformationArray &wtp_radio_informations,
+    const ECNSupport::Type ecn_support,
+    const nonstd::span<const CAPWAPControlIPv4Address> &control_ip_addresses,
+    const nonstd::span<const CAPWAPLocalIPv4Address> &local_ip_addresses,
+    std::initializer_list<IWritableJoinResponseOptionalElement *const> optional_elements)
+    : WritableJoinResponse(
+          result_code,
+          ac_descriptor,
+          ac_name,
+          wtp_radio_informations,
+          ecn_support,
+          control_ip_addresses,
+          local_ip_addresses,
+          nonstd::span<IWritableJoinResponseOptionalElement *const>(optional_elements.begin(),
+                                                                    optional_elements.size())) {
 }
 
 ControlHeader::MessageType WritableJoinResponse::GetMessageType() const {
@@ -42,28 +57,25 @@ void WritableJoinResponse::Serialize(RawData *raw_data) const {
     ecn_support.Serialize(raw_data);
     control_ip_addresses.Serialize(raw_data);
     local_ip_addresses.Serialize(raw_data);
-    if (ac_ipv4_list != nullptr) {
-        ac_ipv4_list->Serialize(raw_data);
+
+    for (auto *elem : optional_elements) {
+        elem->Serialize(raw_data);
     }
-    if (capwap_transport_protocol != nullptr) {
-        capwap_transport_protocol->Serialize(raw_data);
-    }
-    if (image_identifier != nullptr) {
-        image_identifier->Serialize(raw_data);
-    }
-    if (maximum_message_length != nullptr) {
-        maximum_message_length->Serialize(raw_data);
-    }
-    vendor_specific_payloads.Serialize(raw_data);
 }
 
-ReadableJoinResponse::ReadableJoinResponse() : unknown_elements{} {
+ReadableJoinResponse::ReadableJoinResponse(
+    nonstd::span<IReadableJoinResponseOptionalElement *const> optional_elements)
+    : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
     result_code = nullptr;
     ac_name = nullptr;
     ecn_support = nullptr;
-    ac_ipv4_list = nullptr;
-    capwap_transport_protocol = nullptr;
-    maximum_message_length = nullptr;
+}
+
+ReadableJoinResponse::ReadableJoinResponse(
+    std::initializer_list<IReadableJoinResponseOptionalElement *> optional_elements)
+    : ReadableJoinResponse(
+          nonstd::span<IReadableJoinResponseOptionalElement *const>(optional_elements.begin(),
+                                                                    optional_elements.size())) {
 }
 
 ControlHeader::MessageType ReadableJoinResponse::GetMessageType() const {
@@ -114,36 +126,15 @@ bool ReadableJoinResponse::Deserialize(RawData *raw_data) {
                 }
                 break;
 
-            case ElementHeader::ElementType::ACIPv4List:
-                ac_ipv4_list = ACIPv4ListReadPacket::Deserialize(raw_data);
-                if (ac_ipv4_list == nullptr) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::CAPWAPTransportProtocol:
-                capwap_transport_protocol = CapwapTransportProtocol::Deserialize(raw_data);
-                if (capwap_transport_protocol == nullptr) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::ImageIdentifier:
-                if (!image_identifier.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::MaximumMessageLength:
-                maximum_message_length = MaximumMessageLength::Deserialize(raw_data);
-                if (maximum_message_length == nullptr) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::VendorSpecificPayload:
-                if (!vendor_specific_payloads.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-
             default: {
+                auto it = key_optional_elements.find(element->GetElementType());
+                if (it != key_optional_elements.end()) {
+                    if (!it->second->Deserialize(raw_data)) {
+                        return false;
+                    }
+                    break;
+                }
+
                 auto unknownElement = UnrecognizedElement::Deserialize(raw_data);
                 if (unknownElement == nullptr) {
                     return false;
@@ -181,21 +172,25 @@ void ReadableJoinResponse::Log() const {
     control_ip_addresses.Log();
     local_ip_addresses.Log();
 
-    if (ac_ipv4_list != nullptr) {
-        ac_ipv4_list->Log();
+    for (const auto &[_, value] : key_optional_elements) {
+        value->Log();
     }
-    if (capwap_transport_protocol != nullptr) {
-        capwap_transport_protocol->Log();
-    }
-    image_identifier.Log();
-
-    if (maximum_message_length != nullptr) {
-        maximum_message_length->Log();
-    }
-    vendor_specific_payloads.Log();
 
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
+}
+
+std::unordered_map<ElementHeader::ElementType, IReadableJoinResponseOptionalElement *const>
+ReadableJoinResponse::MapOptionalsElements(
+    nonstd::span<IReadableJoinResponseOptionalElement *const> optional_elements) {
+
+    std::unordered_map<ElementHeader::ElementType, IReadableJoinResponseOptionalElement *const> map;
+
+    for (auto *elem : optional_elements) {
+        map.emplace(elem->GetElementType(), elem);
+    }
+
+    return map;
 }
