@@ -22,7 +22,7 @@ struct __attribute__((packed)) ACTimestamp : ElementHeader {
     void Log() const;
 };
 
-struct WritableACTimestamp : IWritableConfigurationStatusRequestOptionalElement {
+struct WritableACTimestamp : IWritableOptionalElement {
   protected:
     ACTimestamp element;
 
@@ -33,7 +33,7 @@ struct WritableACTimestamp : IWritableConfigurationStatusRequestOptionalElement 
     void Log() const override final;
 };
 
-struct ReadableACTimestamp : IReadableConfigurationStatusRequestOptionalElement {
+struct ReadableACTimestamp : IReadableOptionalElement {
   protected:
     ACTimestamp *element = nullptr;
     bool is_present = false;
