@@ -14,9 +14,6 @@ struct __attribute__((packed)) CapwapTransportProtocol : ElementHeader {
     CapwapTransportProtocol(Type type);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static CapwapTransportProtocol *Deserialize(RawData *raw_data);
-
     void Log() const;
 };
 

@@ -15,39 +15,20 @@ bool CapwapTransportProtocol::Validate() const {
                == (sizeof(CapwapTransportProtocol) - sizeof(ElementHeader)) //
         && type >= UDPLite && type <= UDP;
 }
-void CapwapTransportProtocol::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(CapwapTransportProtocol) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    std::memcpy(raw_data->current, this, sizeof(CapwapTransportProtocol));
-#pragma GCC diagnostic pop
 
-    raw_data->current += sizeof(CapwapTransportProtocol);
-}
-CapwapTransportProtocol *CapwapTransportProtocol::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(CapwapTransportProtocol) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (CapwapTransportProtocol *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(CapwapTransportProtocol);
-    return res;
-}
 void CapwapTransportProtocol::Log() const {
     log_i("ME CapwapTransportProtocol Type:%u", (unsigned)type);
 }
 
 WritableCapwapTransportProtocol::WritableCapwapTransportProtocol(CapwapTransportProtocol::Type type)
     : element{ type } {
+    static_assert(sizeof(element) == 5);
 }
 
 void WritableCapwapTransportProtocol::Serialize(RawData *raw_data) const {
-    element.Serialize(raw_data);
+    ASSERT(raw_data->current + sizeof(CapwapTransportProtocol) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
 }
 
 void WritableCapwapTransportProtocol::Log() const {
@@ -55,9 +36,19 @@ void WritableCapwapTransportProtocol::Log() const {
 }
 
 bool ReadableCapwapTransportProtocol::Deserialize(RawData *raw_data) {
-    element = CapwapTransportProtocol::Deserialize(raw_data);
-    is_present = element != nullptr;
-    return is_present;
+    if (raw_data->current + sizeof(CapwapTransportProtocol) > raw_data->end) {
+        return false;
+    }
+
+    auto res = (CapwapTransportProtocol *)raw_data->current;
+    if (!res->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(CapwapTransportProtocol);
+
+    element = res;
+    is_present = true;
+    return true;
 }
 
 const CapwapTransportProtocol *const ReadableCapwapTransportProtocol::Get() const {
