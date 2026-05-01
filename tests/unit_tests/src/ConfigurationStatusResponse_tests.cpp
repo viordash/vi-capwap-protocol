@@ -93,10 +93,11 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_serializ
     CHECK_EQUAL(1234, read_data.idle_timeout->GetTimeout());
     CHECK_EQUAL(WTPFallback::Mode::Enabled, read_data.wtp_fallback->mode);
 
-    CHECK_EQUAL(3, read_data.ac_ipv4_list->GetCount());
-    CHECK_EQUAL(inet_addr("192.168.1.110"), read_data.ac_ipv4_list->addresses[0]);
-    CHECK_EQUAL(inet_addr("192.168.1.111"), read_data.ac_ipv4_list->addresses[1]);
-    CHECK_EQUAL(inet_addr("192.168.1.112"), read_data.ac_ipv4_list->addresses[2]);
+    CHECK_TRUE(read_data.ac_ipv4_list.IsPresent());
+    CHECK_EQUAL(3, read_data.ac_ipv4_list.Get()->GetCount());
+    CHECK_EQUAL(inet_addr("192.168.1.110"), read_data.ac_ipv4_list.Get()->addresses[0]);
+    CHECK_EQUAL(inet_addr("192.168.1.111"), read_data.ac_ipv4_list.Get()->addresses[1]);
+    CHECK_EQUAL(inet_addr("192.168.1.112"), read_data.ac_ipv4_list.Get()->addresses[2]);
 
     CHECK_TRUE(wtp_static_ipaddress.IsPresent());
     CHECK_EQUAL(inet_addr("192.168.100.10"), wtp_static_ipaddress.Get()->IpAddress);
@@ -196,9 +197,10 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_deserial
     CHECK_EQUAL(300, read_data.idle_timeout->GetTimeout());
     CHECK_EQUAL(WTPFallback::Mode::Enabled, read_data.wtp_fallback->mode);
 
-    CHECK_EQUAL(2, read_data.ac_ipv4_list->GetCount());
-    CHECK_EQUAL(inet_addr("10.10.0.1"), read_data.ac_ipv4_list->addresses[0]);
-    CHECK_EQUAL(inet_addr("10.10.0.2"), read_data.ac_ipv4_list->addresses[1]);
+    CHECK_TRUE(read_data.ac_ipv4_list.IsPresent());
+    CHECK_EQUAL(2, read_data.ac_ipv4_list.Get()->GetCount());
+    CHECK_EQUAL(inet_addr("10.10.0.1"), read_data.ac_ipv4_list.Get()->addresses[0]);
+    CHECK_EQUAL(inet_addr("10.10.0.2"), read_data.ac_ipv4_list.Get()->addresses[1]);
 
     CHECK_TRUE(wtp_static_ipaddress.IsPresent());
     CHECK_EQUAL(inet_addr("192.168.10.50"), wtp_static_ipaddress.Get()->IpAddress);

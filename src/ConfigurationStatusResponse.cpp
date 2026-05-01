@@ -62,7 +62,6 @@ ReadableConfigurationStatusResponse::ReadableConfigurationStatusResponse(
     capwap_timers = nullptr;
     idle_timeout = nullptr;
     wtp_fallback = nullptr;
-    ac_ipv4_list = nullptr;
 }
 
 ReadableConfigurationStatusResponse::ReadableConfigurationStatusResponse(
@@ -106,10 +105,7 @@ bool ReadableConfigurationStatusResponse::Deserialize(RawData *raw_data) {
                 }
                 break;
             case ElementHeader::ElementType::ACIPv4List:
-                ac_ipv4_list = ACIPv4ListReadPacket::Deserialize(raw_data);
-                if (ac_ipv4_list == nullptr) {
-                    return false;
-                }
+                ac_ipv4_list.Deserialize(raw_data);
                 break;
 
             default: {
@@ -135,7 +131,7 @@ bool ReadableConfigurationStatusResponse::Deserialize(RawData *raw_data) {
         }
     }
     return capwap_timers != nullptr && decryption_error_report_periods.Get().size() > 0
-        && idle_timeout != nullptr && wtp_fallback != nullptr && ac_ipv4_list != nullptr;
+        && idle_timeout != nullptr && wtp_fallback != nullptr && ac_ipv4_list.IsPresent();
 }
 
 void ReadableConfigurationStatusResponse::Log() const {
@@ -152,8 +148,7 @@ void ReadableConfigurationStatusResponse::Log() const {
     ASSERT(wtp_fallback != nullptr);
     wtp_fallback->Log();
 
-    ASSERT(ac_ipv4_list != nullptr);
-    ac_ipv4_list->Log();
+    ac_ipv4_list.Log();
 
     for (const auto &[_, value] : key_optional_elements) {
         value->Log();

@@ -30,7 +30,7 @@ struct WritableJoinResponse : WritableCapwapResponse {
     const WritableCAPWAPControlIPV4AdrArray control_ip_addresses;
     const WritableCAPWAPLocalIPV4AdrArray local_ip_addresses;
 
-    const ACIPv4ListWritePacket *ac_ipv4_list;
+    const WritableACIPv4List *ac_ipv4_list;
     const CapwapTransportProtocol *capwap_transport_protocol;
     const WritableImageIdentifier *image_identifier;
     const MaximumMessageLength *maximum_message_length;
@@ -45,7 +45,7 @@ struct WritableJoinResponse : WritableCapwapResponse {
                          const ECNSupport::Type ecn_support,
                          const nonstd::span<const CAPWAPControlIPv4Address> &control_ip_addresses,
                          const nonstd::span<const CAPWAPLocalIPv4Address> &local_ip_addresses,
-                         const ACIPv4ListWritePacket *ac_ipv4_list,
+                         const WritableACIPv4List *ac_ipv4_list,
                          const CapwapTransportProtocol *capwap_transport_protocol,
                          const WritableImageIdentifier *image_identifier,
                          const MaximumMessageLength *maximum_message_length,
@@ -65,7 +65,7 @@ struct ReadableJoinResponse : ReadableCapwapResponse {
     ReadableCAPWAPControlIPV4AdrArray control_ip_addresses;
     ReadableCAPWAPLocalIPV4AdrArray local_ip_addresses;
 
-    ACIPv4ListReadPacket *ac_ipv4_list;
+    ReadableACIPv4List *ac_ipv4_list;
     CapwapTransportProtocol *capwap_transport_protocol;
     ReadableImageIdentifier image_identifier;
     MaximumMessageLength *maximum_message_length;

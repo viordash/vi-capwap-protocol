@@ -50,7 +50,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_deserialize_perf) {
         { inet_addr("192.168.1.111") },
     };
 
-    ACIPv4ListWritePacket ac_ipv4_list{
+    WritableACIPv4List ac_ipv4_list{
         addresses,
     };
     WritableImageIdentifier image_identifier{ 1232344, "1232344" };
