@@ -35,6 +35,7 @@ TEST(ACNameWithPriorityTestsGroup, ACNameWithPriority_serialize) {
     ReadableACNameWithPriorityArray read_data;
     CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -54,7 +55,6 @@ TEST(ACNameWithPriorityTestsGroup, ACNameWithPriority_serialize) {
     CHECK_EQUAL(2, read_data.Get()[2]->GetPriority());
     STRNCMP_EQUAL("01234567890", (char *)read_data.Get()[2]->name, 11);
     CHECK_EQUAL(11, read_data.Get()[2]->GetNameLenght());
-    CHECK_TRUE(read_data.IsPresent());
 }
 
 TEST(ACNameWithPriorityTestsGroup, ACNameWithPriority_deserialize) {

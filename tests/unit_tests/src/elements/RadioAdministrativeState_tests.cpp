@@ -78,10 +78,12 @@ TEST(RadioAdministrativeStateTestsGroup, Serialize_Deserialize_few_elements) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     ReadableRadioAdministrativeStateArray r_states;
+    CHECK_FALSE(r_states.IsPresent());
 
     raw_data = { reference, reference + sizeof(reference) };
 
     CHECK_TRUE(r_states.Deserialize(&raw_data));
+    CHECK_TRUE(r_states.IsPresent());
     CHECK_TRUE(r_states.Deserialize(&raw_data));
     CHECK_TRUE(r_states.Deserialize(&raw_data));
     CHECK_TRUE(r_states.Deserialize(&raw_data));

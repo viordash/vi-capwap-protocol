@@ -130,3 +130,11 @@ void ReadableRadioAdministrativeStateArray::Log() const {
               items[i]->AdminState);
     }
 }
+
+ElementHeader::ElementType ReadableRadioAdministrativeStateArray::GetElementType() const {
+    return ElementHeader::ACNameWithPriority;
+}
+
+bool ReadableRadioAdministrativeStateArray::IsPresent() const {
+    return count > 0;
+}
