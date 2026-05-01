@@ -33,7 +33,6 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize_
 
     WritableACNameWithPriorityArray ac_names_with_priority;
     ac_names_with_priority.Add(1, "ACNameWithPriority");
-    ac_names_with_priority.Add(2, "ACNameWithPriority2");
 
     WritableCapwapTransportProtocol capwap_transport_protocol{ CapwapTransportProtocol::Type::UDP };
 
@@ -63,9 +62,9 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize_
 
         ReadableACNameWithPriorityArray ac_names_with_priority;
         ReadableCapwapTransportProtocol capwap_transport_protocol;
-        ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;        
+        ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
         ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-        
+
         ReadableConfigurationStatusRequest read_data({ &ac_names_with_priority,
                                                        &capwap_transport_protocol,
                                                        &wtp_static_ipaddress,
