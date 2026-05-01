@@ -24,7 +24,7 @@ TEST(ConfigurationStatusResponseTestsGroup,
 
     uint8_t buffer[4096] = {};
 
-    CAPWAPTimers capwap_timers{ 42, 19 };
+    WritableCAPWAPTimers capwap_timers{ 42, 19 };
 
     WritableDecryptionErrorReportPeriodArray decryption_error_report_periods;
     decryption_error_report_periods.Add({ 0, 10 });

@@ -15,7 +15,7 @@
 
 struct WritableConfigurationStatusResponse : WritableCapwapResponse {
   private:
-    const CAPWAPTimers &capwap_timers;
+    const WritableCAPWAPTimers &capwap_timers;
     WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods;
     const IdleTimeout idle_timeout;
     const WTPFallback wtp_fallback;
@@ -26,7 +26,7 @@ struct WritableConfigurationStatusResponse : WritableCapwapResponse {
   public:
     WritableConfigurationStatusResponse(const WritableConfigurationStatusResponse &) = delete;
     WritableConfigurationStatusResponse(
-        const CAPWAPTimers &capwap_timers,
+        const WritableCAPWAPTimers &capwap_timers,
         WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods,
         const uint32_t idle_timeout,
         const WTPFallback::Mode wtp_fallback,
@@ -34,7 +34,7 @@ struct WritableConfigurationStatusResponse : WritableCapwapResponse {
         nonstd::span<IWritableConfigurationStatusResponseOptionalElement *const> optional_elements);
 
     WritableConfigurationStatusResponse(
-        const CAPWAPTimers &capwap_timers,
+        const WritableCAPWAPTimers &capwap_timers,
         WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods,
         const uint32_t idle_timeout,
         const WTPFallback::Mode wtp_fallback,
@@ -59,7 +59,7 @@ struct ReadableConfigurationStatusResponse : ReadableCapwapResponse {
         nonstd::span<IReadableConfigurationStatusResponseOptionalElement *const> optional_elements);
 
   public:
-    CAPWAPTimers *capwap_timers;
+    ReadableCAPWAPTimers capwap_timers;
     ReadableDecryptionErrorReportPeriodArray decryption_error_report_periods;
     IdleTimeout *idle_timeout;
     WTPFallback *wtp_fallback;

@@ -19,7 +19,7 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_serializ
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     {
-        CAPWAPTimers capwap_timers{ 42, 19 };
+        WritableCAPWAPTimers capwap_timers{ 42, 19 };
 
         WritableDecryptionErrorReportPeriodArray decryption_error_report_periods;
         decryption_error_report_periods.Add({ 0, 10 });
@@ -79,8 +79,8 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_serializ
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(42, read_data.capwap_timers->Discovery);
-    CHECK_EQUAL(19, read_data.capwap_timers->EchoInterval);
+    CHECK_EQUAL(42, read_data.capwap_timers.Get()->Discovery);
+    CHECK_EQUAL(19, read_data.capwap_timers.Get()->EchoInterval);
 
     CHECK_EQUAL(3, read_data.decryption_error_report_periods.Get().size());
     CHECK_EQUAL(0, read_data.decryption_error_report_periods.Get()[0]->RadioID());
@@ -187,8 +187,8 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_deserial
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    CHECK_EQUAL(20, read_data.capwap_timers->Discovery);
-    CHECK_EQUAL(30, read_data.capwap_timers->EchoInterval);
+    CHECK_EQUAL(20, read_data.capwap_timers.Get()->Discovery);
+    CHECK_EQUAL(30, read_data.capwap_timers.Get()->EchoInterval);
 
     CHECK_EQUAL(1, read_data.decryption_error_report_periods.Get().size());
     CHECK_EQUAL(1, read_data.decryption_error_report_periods.Get()[0]->RadioID());

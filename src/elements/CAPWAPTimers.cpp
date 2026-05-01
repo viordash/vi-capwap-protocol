@@ -1,8 +1,8 @@
 #include "CAPWAPTimers.h"
 #include "Logging.h"
 #include "lassert.h"
-#include <string.h>
 #include <cstring>
+#include <string.h>
 
 CAPWAPTimers::CAPWAPTimers(uint8_t discovery, uint8_t echo_interval)
     : ElementHeader(ElementHeader::CAPWAPTimers, sizeof(CAPWAPTimers) - sizeof(ElementHeader)),
@@ -59,7 +59,7 @@ void ReadableCAPWAPTimers::Log() const {
 }
 
 ElementHeader::ElementType ReadableCAPWAPTimers::GetElementType() const {
-    return ElementHeader::CAPWAPTransportProtocol;
+    return ElementHeader::CAPWAPTimers;
 }
 
 bool ReadableCAPWAPTimers::IsPresent() const {
