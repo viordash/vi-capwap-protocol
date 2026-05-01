@@ -18,7 +18,7 @@ struct WritableConfigurationStatusRequest : WritableCapwapRequest {
   private:
     const WritableACName ac_name;
     WritableRadioAdministrativeStateArray &radio_states;
-    const StatisticsTimer statistics_timer;
+    const WritableStatisticsTimer statistics_timer;
     const WTPRebootStatistics &wtp_reboot_statistics;
 
     nonstd::span<IWritableConfigurationStatusRequestOptionalElement *const> optional_elements;
@@ -59,7 +59,7 @@ struct ReadableConfigurationStatusRequest : ReadableCapwapRequest {
   public:
     ReadableACName *ac_name;
     ReadableRadioAdministrativeStateArray radio_states;
-    StatisticsTimer *statistics_timer;
+    ReadableStatisticsTimer statistics_timer;
     WTPRebootStatistics *wtp_reboot_statistics;
 
     size_t unknown_elements;

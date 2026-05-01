@@ -55,7 +55,6 @@ ReadableConfigurationStatusRequest::ReadableConfigurationStatusRequest(
     nonstd::span<IReadableConfigurationStatusRequestOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
     ac_name = nullptr;
-    statistics_timer = nullptr;
     wtp_reboot_statistics = nullptr;
 }
 
@@ -88,8 +87,7 @@ bool ReadableConfigurationStatusRequest::Deserialize(RawData *raw_data) {
                 }
                 break;
             case ElementHeader::ElementType::StatisticsTimer:
-                statistics_timer = StatisticsTimer::Deserialize(raw_data);
-                if (statistics_timer == nullptr) {
+                if (!statistics_timer.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -122,7 +120,7 @@ bool ReadableConfigurationStatusRequest::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return ac_name != nullptr && radio_states.Get().size() > 0 && statistics_timer != nullptr
+    return ac_name != nullptr && radio_states.IsPresent() > 0 && statistics_timer.IsPresent()
         && wtp_reboot_statistics != nullptr;
 }
 
@@ -135,8 +133,7 @@ void ReadableConfigurationStatusRequest::Log() const {
 
     radio_states.Log();
 
-    ASSERT(statistics_timer != nullptr);
-    statistics_timer->Log();
+    statistics_timer.Log();
 
     ASSERT(wtp_reboot_statistics != nullptr);
     wtp_reboot_statistics->Log();

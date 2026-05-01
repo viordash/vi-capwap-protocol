@@ -98,7 +98,8 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize)
     CHECK_EQUAL(RadioAdministrativeState::States::Disabled,
                 read_data.radio_states.Get()[1]->AdminState);
 
-    CHECK_EQUAL(12345, read_data.statistics_timer->GetValue());
+    CHECK_TRUE(read_data.statistics_timer.IsPresent());
+    CHECK_EQUAL(12345, read_data.statistics_timer.Get()->GetValue());
 
     CHECK_EQUAL(21, read_data.wtp_reboot_statistics->GetRebootCount());
     CHECK_EQUAL(22, read_data.wtp_reboot_statistics->GetACInitiatedCount());
@@ -262,7 +263,8 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_deserializ
     CHECK_EQUAL(RadioAdministrativeState::States::Disabled,
                 read_data.radio_states.Get()[2]->AdminState);
 
-    CHECK_EQUAL(120, read_data.statistics_timer->GetValue());
+    CHECK_TRUE(read_data.statistics_timer.IsPresent());
+    CHECK_EQUAL(120, read_data.statistics_timer.Get()->GetValue());
 
     CHECK_EQUAL(5, read_data.wtp_reboot_statistics->GetRebootCount());
     CHECK_EQUAL(2, read_data.wtp_reboot_statistics->GetACInitiatedCount());
