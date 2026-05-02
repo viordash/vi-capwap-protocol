@@ -108,17 +108,18 @@ TEST(CapwapElementTestsGroup, MTUDiscoveryPadding_deserialize) {
                        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
     };
     RawData raw_data{ data, data + sizeof(data) };
-    auto element = MTUDiscoveryPadding::Deserialize(&raw_data);
+    ReadableMTUDiscoveryPadding element;
+    CHECK_TRUE(element.Deserialize(&raw_data));
 
-    CHECK(element != nullptr);
+    CHECK_TRUE(element.IsPresent());
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::MTUDiscoveryPadding, element->GetElementType());
-    CHECK_EQUAL(93, element->GetLength());
+    CHECK_EQUAL(ElementHeader::ElementType::MTUDiscoveryPadding, element.Get()->GetElementType());
+    CHECK_EQUAL(93, element.Get()->GetLength());
 }
 
 TEST(CapwapElementTestsGroup, MTUDiscoveryPadding_serialize) {
     uint8_t buffer[2048] = {};
-    MTUDiscoveryPadding element_0{ 42 };
+    WritableMTUDiscoveryPadding element_0{ 42 };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     element_0.Serialize(&raw_data);
@@ -131,9 +132,10 @@ TEST(CapwapElementTestsGroup, MTUDiscoveryPadding_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = MTUDiscoveryPadding::Deserialize(&raw_data);
-    CHECK(element != nullptr);
+    ReadableMTUDiscoveryPadding element;
+    CHECK_TRUE(element.Deserialize(&raw_data));
+    CHECK_TRUE(element.IsPresent());
     CHECK_EQUAL(&buffer[0] + 46, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::MTUDiscoveryPadding, element->GetElementType());
-    CHECK_EQUAL(42, element->GetLength());
+    CHECK_EQUAL(ElementHeader::ElementType::MTUDiscoveryPadding, element.Get()->GetElementType());
+    CHECK_EQUAL(42, element.Get()->GetLength());
 }

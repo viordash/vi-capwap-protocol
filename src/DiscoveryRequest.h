@@ -25,7 +25,7 @@ struct WritableDiscoveryRequest : WritableCapwapRequest {
 
     WritableVendorSpecificPayloadArray &vendor_specific_payloads;
 
-    const MTUDiscoveryPadding padding;
+    const WritableMTUDiscoveryPadding padding;
 
     uint16_t CalcTotalSize();
     uint16_t CalcMessageLength(uint16_t probe_mtu_size);
@@ -58,7 +58,7 @@ struct ReadableDiscoveryRequest : ReadableCapwapRequest {
     ReadableWTPRadioInformationArray wtp_radio_informations;
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    MTUDiscoveryPadding *padding;
+    ReadableMTUDiscoveryPadding padding;
 
     size_t unknown_elements;
 

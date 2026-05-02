@@ -79,7 +79,6 @@ void WritableDiscoveryRequest::Serialize(RawData *raw_data) const {
 }
 
 ReadableDiscoveryRequest::ReadableDiscoveryRequest() : unknown_elements{} {
-    padding = nullptr;
 }
 
 ControlHeader::MessageType ReadableDiscoveryRequest::GetMessageType() const {
@@ -128,8 +127,7 @@ bool ReadableDiscoveryRequest::Deserialize(RawData *raw_data) {
                 break;
 
             case ElementHeader::ElementType::MTUDiscoveryPadding:
-                padding = MTUDiscoveryPadding::Deserialize(raw_data);
-                if (padding == nullptr) {
+                if (!padding.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -147,9 +145,9 @@ bool ReadableDiscoveryRequest::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return discovery_type.IsPresent() && wtp_board_data.IsPresent()
-        && wtp_descriptor.IsPresent() && wtp_frame_tunnel_mode.IsPresent()
-        && wtp_mac_type.IsPresent() && wtp_radio_informations.Get().size() > 0;
+    return discovery_type.IsPresent() && wtp_board_data.IsPresent() && wtp_descriptor.IsPresent()
+        && wtp_frame_tunnel_mode.IsPresent() && wtp_mac_type.IsPresent()
+        && wtp_radio_informations.Get().size() > 0;
 }
 
 void ReadableDiscoveryRequest::Log() const {
@@ -168,9 +166,7 @@ void ReadableDiscoveryRequest::Log() const {
     wtp_radio_informations.Log();
 
     vendor_specific_payloads.Log();
-    if (padding != nullptr) {
-        padding->Log();
-    }
+    padding.Log();
 
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
