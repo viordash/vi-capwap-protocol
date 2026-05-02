@@ -68,7 +68,6 @@ ReadableJoinResponse::ReadableJoinResponse(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
     result_code = nullptr;
     ac_name = nullptr;
-    ecn_support = nullptr;
 }
 
 ReadableJoinResponse::ReadableJoinResponse(
@@ -110,8 +109,7 @@ bool ReadableJoinResponse::Deserialize(RawData *raw_data) {
                 }
                 break;
             case ElementHeader::ElementType::ECNSupport:
-                ecn_support = ECNSupport::Deserialize(raw_data);
-                if (ecn_support == nullptr) {
+                if (!ecn_support.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -148,7 +146,7 @@ bool ReadableJoinResponse::Deserialize(RawData *raw_data) {
         }
     }
     return result_code != nullptr && ac_descriptor.Get().size() > 0 && ac_name != nullptr
-        && wtp_radio_informations.Get().size() && ecn_support != nullptr
+        && wtp_radio_informations.Get().size() && ecn_support.IsPresent()
         && control_ip_addresses.Get().size() > 0 && local_ip_addresses.Get().size() > 0;
 }
 
@@ -166,8 +164,7 @@ void ReadableJoinResponse::Log() const {
 
     wtp_radio_informations.Log();
 
-    ASSERT(ecn_support != nullptr);
-    ecn_support->Log();
+    ecn_support.Log();
 
     control_ip_addresses.Log();
     local_ip_addresses.Log();

@@ -445,7 +445,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
     CHECK_TRUE(read_data.wtp_radio_informations.Get()[0]->G);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[0]->N);
 
-    CHECK_EQUAL(ECNSupport::Type::LimitedECN, read_data.ecn_support->type);
+    CHECK_EQUAL(ECNSupport::Type::LimitedECN, read_data.ecn_support.Get()->type);
 
     CHECK_EQUAL(1, read_data.ip_addresses.Get().size());
     CHECK_EQUAL(inet_addr("172.16.1.10"), read_data.ip_addresses.Get()[0]->GetIPAddress());

@@ -149,8 +149,7 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
                 break;
 
             case ElementHeader::ElementType::ECNSupport:
-                ecn_support = ECNSupport::Deserialize(raw_data);
-                if (ecn_support == nullptr) {
+                if (!ecn_support.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -185,7 +184,7 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
     return location_data.IsPresent() && wtp_board_data.header != nullptr
         && wtp_descriptor.header != nullptr && wtp_name != nullptr && session_id != nullptr
         && wtp_frame_tunnel_mode != nullptr && wtp_mac_type != nullptr
-        && wtp_radio_informations.Get().size() > 0 && ecn_support != nullptr
+        && wtp_radio_informations.Get().size() > 0 && ecn_support.IsPresent()
         && ip_addresses.Get().size() > 0;
 }
 
@@ -212,8 +211,7 @@ void ReadableJoinRequest::Log() const {
 
     wtp_radio_informations.Log();
 
-    ASSERT(ecn_support != nullptr);
-    ecn_support->Log();
+    ecn_support.Log();
 
     ip_addresses.Log();
 

@@ -26,7 +26,7 @@ struct WritableJoinResponse : WritableCapwapResponse {
     const WritableACDescriptor &ac_descriptor;
     const WritableACName ac_name;
     WritableWTPRadioInformationArray &wtp_radio_informations;
-    const ECNSupport ecn_support;
+    const WritableECNSupport ecn_support;
     const WritableCAPWAPControlIPV4AdrArray control_ip_addresses;
     const WritableCAPWAPLocalIPV4AdrArray local_ip_addresses;
 
@@ -73,7 +73,7 @@ struct ReadableJoinResponse : ReadableCapwapResponse {
     ReadableACDescriptor ac_descriptor;
     ReadableACName *ac_name;
     ReadableWTPRadioInformationArray wtp_radio_informations;
-    ECNSupport *ecn_support;
+    ReadableECNSupport ecn_support;
     ReadableCAPWAPControlIPV4AdrArray control_ip_addresses;
     ReadableCAPWAPLocalIPV4AdrArray local_ip_addresses;
 

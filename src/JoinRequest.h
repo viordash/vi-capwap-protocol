@@ -29,7 +29,7 @@ struct WritableJoinRequest : WritableCapwapRequest {
     const WTPFrameTunnelMode &wtp_frame_tunnel_mode;
     const WTPMACType wtp_mac_type;
     WritableWTPRadioInformationArray &wtp_radio_informations;
-    const ECNSupport ecn_support;
+    const WritableECNSupport ecn_support;
     const WritableCAPWAPLocalIPV4AdrArray ip_addresses;
 
     nonstd::span<IWritableJoinRequestOptionalElement *const> optional_elements;
@@ -84,7 +84,7 @@ struct ReadableJoinRequest : ReadableCapwapRequest {
     WTPFrameTunnelMode *wtp_frame_tunnel_mode;
     WTPMACType *wtp_mac_type;
     ReadableWTPRadioInformationArray wtp_radio_informations;
-    ECNSupport *ecn_support;
+    ReadableECNSupport ecn_support;
     ReadableCAPWAPLocalIPV4AdrArray ip_addresses;
 
     size_t unknown_elements;

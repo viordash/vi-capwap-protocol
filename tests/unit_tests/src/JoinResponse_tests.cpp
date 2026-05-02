@@ -157,7 +157,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[2]->G);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[2]->N);
 
-    CHECK_EQUAL(ECNSupport::Type::FullAndLimitedECN, read_data.ecn_support->type);
+    CHECK_EQUAL(ECNSupport::Type::FullAndLimitedECN, read_data.ecn_support.Get()->type);
 
     CHECK_EQUAL(2, read_data.control_ip_addresses.Get().size());
     CHECK_EQUAL(inet_addr("192.168.100.10"),
