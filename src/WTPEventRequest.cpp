@@ -31,7 +31,16 @@ void WritableWTPEventRequest::Serialize(RawData *raw_data) const {
     duplicate_ipv4_address.Serialize(raw_data);
     wtp_radio_statistics.Serialize(raw_data);
     if (wtp_reboot_statistics.has_value()) {
-        wtp_reboot_statistics.value().Serialize(raw_data);
+        const auto &stats = wtp_reboot_statistics.value();
+        WritableWTPRebootStatistics{ stats.GetRebootCount(),
+                                     stats.GetACInitiatedCount(),
+                                     stats.GetLinkFailureCount(),
+                                     stats.GetSWFailureCount(),
+                                     stats.GetHWFailureCount(),
+                                     stats.GetOtherFailureCount(),
+                                     stats.GetUnknownFailureCount(),
+                                     stats.GetLastFailureType() }
+            .Serialize(raw_data);
     }
     delete_station.Serialize(raw_data);
     vendor_specific_payloads.Serialize(raw_data);
@@ -69,7 +78,6 @@ bool WritableWTPEventRequest::Validate() {
 }
 
 ReadableWTPEventRequest::ReadableWTPEventRequest() : unknown_elements{} {
-    wtp_reboot_statistics = nullptr;
 }
 
 ControlHeader::MessageType ReadableWTPEventRequest::GetMessageType() const {
@@ -97,8 +105,7 @@ bool ReadableWTPEventRequest::Deserialize(RawData *raw_data) {
                 }
                 break;
             case ElementHeader::ElementType::WTPRebootStatistics:
-                wtp_reboot_statistics = WTPRebootStatistics::Deserialize(raw_data);
-                if (wtp_reboot_statistics == nullptr) {
+                if (!wtp_reboot_statistics.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -130,7 +137,7 @@ bool ReadableWTPEventRequest::Deserialize(RawData *raw_data) {
     return decryption_error_report.Get().size() > 0  //
         || duplicate_ipv4_address.Get().size() > 0   //
         || wtp_radio_statistics.Get().size() > 0     //
-        || wtp_reboot_statistics != nullptr          //
+        || wtp_reboot_statistics.IsPresent()         //
         || delete_station.Get().size() > 0           //
         || vendor_specific_payloads.Get().size() > 0 //
         ;
@@ -143,8 +150,8 @@ void ReadableWTPEventRequest::Log() const {
     decryption_error_report.Log();
     duplicate_ipv4_address.Log();
     wtp_radio_statistics.Log();
-    if (wtp_reboot_statistics != nullptr) {
-        wtp_reboot_statistics->Log();
+    if (wtp_reboot_statistics.IsPresent()) {
+        wtp_reboot_statistics.Log();
     }
     delete_station.Log();
     vendor_specific_payloads.Log();

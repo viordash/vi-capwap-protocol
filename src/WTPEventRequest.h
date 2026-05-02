@@ -41,7 +41,7 @@ struct ReadableWTPEventRequest : ReadableCapwapRequest {
     ReadableDecryptionErrorReportArray decryption_error_report;
     ReadableDuplicateIPv4AdrArray duplicate_ipv4_address;
     ReadableWTPRadioStatisticsArray wtp_radio_statistics;
-    WTPRebootStatistics *wtp_reboot_statistics;
+    ReadableWTPRebootStatistics wtp_reboot_statistics;
     ReadableDeleteStationArray delete_station;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 

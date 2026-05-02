@@ -133,16 +133,16 @@ TEST(WTPEventRequestTestsGroup, WTPEventRequest_serialize) {
     CHECK_EQUAL(47, read_data.wtp_radio_statistics.Get()[0]->GetBandChangeCount());
     CHECK_EQUAL(-48, read_data.wtp_radio_statistics.Get()[0]->GetCurrentNoiseFloor());
 
-    CHECK(read_data.wtp_reboot_statistics != nullptr);
-    CHECK_EQUAL(12340, read_data.wtp_reboot_statistics->GetRebootCount());
-    CHECK_EQUAL(12341, read_data.wtp_reboot_statistics->GetACInitiatedCount());
-    CHECK_EQUAL(12342, read_data.wtp_reboot_statistics->GetLinkFailureCount());
-    CHECK_EQUAL(12343, read_data.wtp_reboot_statistics->GetSWFailureCount());
-    CHECK_EQUAL(12344, read_data.wtp_reboot_statistics->GetHWFailureCount());
-    CHECK_EQUAL(12345, read_data.wtp_reboot_statistics->GetOtherFailureCount());
-    CHECK_EQUAL(12346, read_data.wtp_reboot_statistics->GetUnknownFailureCount());
+    CHECK(read_data.wtp_reboot_statistics.IsPresent());
+    CHECK_EQUAL(12340, read_data.wtp_reboot_statistics.Get()->GetRebootCount());
+    CHECK_EQUAL(12341, read_data.wtp_reboot_statistics.Get()->GetACInitiatedCount());
+    CHECK_EQUAL(12342, read_data.wtp_reboot_statistics.Get()->GetLinkFailureCount());
+    CHECK_EQUAL(12343, read_data.wtp_reboot_statistics.Get()->GetSWFailureCount());
+    CHECK_EQUAL(12344, read_data.wtp_reboot_statistics.Get()->GetHWFailureCount());
+    CHECK_EQUAL(12345, read_data.wtp_reboot_statistics.Get()->GetOtherFailureCount());
+    CHECK_EQUAL(12346, read_data.wtp_reboot_statistics.Get()->GetUnknownFailureCount());
     CHECK_EQUAL(WTPRebootStatistics::LastFailureType::LinkFailure,
-                read_data.wtp_reboot_statistics->GetLastFailureType());
+                read_data.wtp_reboot_statistics.Get()->GetLastFailureType());
 
     CHECK_EQUAL(2, read_data.delete_station.Get().size());
     CHECK_EQUAL(7, read_data.delete_station.Get()[0]->RadioID);
@@ -264,7 +264,7 @@ TEST(WTPEventRequestTestsGroup, WTPEventRequest_deserialize_image_data) {
     CHECK_EQUAL(0, read_data.wtp_radio_statistics.Get()[0]->GetBandChangeCount());
     CHECK_EQUAL(-95, read_data.wtp_radio_statistics.Get()[0]->GetCurrentNoiseFloor());
 
-    CHECK(read_data.wtp_reboot_statistics == nullptr);
+    CHECK_FALSE(read_data.wtp_reboot_statistics.IsPresent());
 
     CHECK_EQUAL(1, read_data.delete_station.Get().size());
     CHECK_EQUAL(1, read_data.delete_station.Get()[0]->RadioID);
@@ -446,7 +446,7 @@ TEST(WTPEventRequestTestsGroup, One_or_more_serialize) {
 
     CHECK_EQUAL(0, read_data.duplicate_ipv4_address.Get().size());
     CHECK_EQUAL(0, read_data.wtp_radio_statistics.Get().size());
-    CHECK_EQUAL(nullptr, read_data.wtp_reboot_statistics);
+    CHECK_FALSE(read_data.wtp_reboot_statistics.IsPresent());
     CHECK_EQUAL(0, read_data.delete_station.Get().size());
     CHECK_EQUAL(0, read_data.vendor_specific_payloads.Get().size());
     CHECK_EQUAL(0, read_data.unknown_elements);

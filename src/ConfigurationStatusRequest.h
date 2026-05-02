@@ -60,7 +60,7 @@ struct ReadableConfigurationStatusRequest : ReadableCapwapRequest {
     ReadableACName *ac_name;
     ReadableRadioAdministrativeStateArray radio_states;
     ReadableStatisticsTimer statistics_timer;
-    WTPRebootStatistics *wtp_reboot_statistics;
+    ReadableWTPRebootStatistics wtp_reboot_statistics;
 
     size_t unknown_elements;
 

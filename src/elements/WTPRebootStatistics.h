@@ -56,7 +56,6 @@ struct __attribute__((packed)) WTPRebootStatistics : ElementHeader {
 
   public:
     WTPRebootStatistics(const WTPRebootStatistics &) = default;
-    WTPRebootStatistics(WTPRebootStatistics &&) = default;
     WTPRebootStatistics(uint16_t reboot_count,
                         uint16_t ac_initiated_count,
                         uint16_t link_failure_count,
@@ -67,8 +66,6 @@ struct __attribute__((packed)) WTPRebootStatistics : ElementHeader {
                         LastFailureType last_failure_type);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static WTPRebootStatistics *Deserialize(RawData *raw_data);
 
     uint16_t GetRebootCount() const;
     uint16_t GetACInitiatedCount() const;
@@ -78,7 +75,6 @@ struct __attribute__((packed)) WTPRebootStatistics : ElementHeader {
     uint16_t GetOtherFailureCount() const;
     uint16_t GetUnknownFailureCount() const;
     LastFailureType GetLastFailureType() const;
-    uint16_t GetTotalLength() const;
     void Log() const;
 };
 

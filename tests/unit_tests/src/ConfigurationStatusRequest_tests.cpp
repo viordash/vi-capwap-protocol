@@ -101,15 +101,16 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize)
     CHECK_TRUE(read_data.statistics_timer.IsPresent());
     CHECK_EQUAL(12345, read_data.statistics_timer.Get()->GetValue());
 
-    CHECK_EQUAL(21, read_data.wtp_reboot_statistics->GetRebootCount());
-    CHECK_EQUAL(22, read_data.wtp_reboot_statistics->GetACInitiatedCount());
-    CHECK_EQUAL(23, read_data.wtp_reboot_statistics->GetLinkFailureCount());
-    CHECK_EQUAL(24, read_data.wtp_reboot_statistics->GetSWFailureCount());
-    CHECK_EQUAL(25, read_data.wtp_reboot_statistics->GetHWFailureCount());
-    CHECK_EQUAL(26, read_data.wtp_reboot_statistics->GetOtherFailureCount());
-    CHECK_EQUAL(27, read_data.wtp_reboot_statistics->GetUnknownFailureCount());
+    CHECK_TRUE(read_data.wtp_reboot_statistics.IsPresent());
+    CHECK_EQUAL(21, read_data.wtp_reboot_statistics.Get()->GetRebootCount());
+    CHECK_EQUAL(22, read_data.wtp_reboot_statistics.Get()->GetACInitiatedCount());
+    CHECK_EQUAL(23, read_data.wtp_reboot_statistics.Get()->GetLinkFailureCount());
+    CHECK_EQUAL(24, read_data.wtp_reboot_statistics.Get()->GetSWFailureCount());
+    CHECK_EQUAL(25, read_data.wtp_reboot_statistics.Get()->GetHWFailureCount());
+    CHECK_EQUAL(26, read_data.wtp_reboot_statistics.Get()->GetOtherFailureCount());
+    CHECK_EQUAL(27, read_data.wtp_reboot_statistics.Get()->GetUnknownFailureCount());
     CHECK_EQUAL(WTPRebootStatistics::LastFailureType::HardwareFailure,
-                read_data.wtp_reboot_statistics->GetLastFailureType());
+                read_data.wtp_reboot_statistics.Get()->GetLastFailureType());
 
     CHECK_TRUE(ac_names_with_priority.IsPresent());
     CHECK_EQUAL(2, ac_names_with_priority.Get().size());
@@ -266,15 +267,16 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_deserializ
     CHECK_TRUE(read_data.statistics_timer.IsPresent());
     CHECK_EQUAL(120, read_data.statistics_timer.Get()->GetValue());
 
-    CHECK_EQUAL(5, read_data.wtp_reboot_statistics->GetRebootCount());
-    CHECK_EQUAL(2, read_data.wtp_reboot_statistics->GetACInitiatedCount());
-    CHECK_EQUAL(1, read_data.wtp_reboot_statistics->GetLinkFailureCount());
-    CHECK_EQUAL(1, read_data.wtp_reboot_statistics->GetSWFailureCount());
-    CHECK_EQUAL(0, read_data.wtp_reboot_statistics->GetHWFailureCount());
-    CHECK_EQUAL(1, read_data.wtp_reboot_statistics->GetOtherFailureCount());
-    CHECK_EQUAL(0, read_data.wtp_reboot_statistics->GetUnknownFailureCount());
+    CHECK_TRUE(read_data.wtp_reboot_statistics.IsPresent());
+    CHECK_EQUAL(5, read_data.wtp_reboot_statistics.Get()->GetRebootCount());
+    CHECK_EQUAL(2, read_data.wtp_reboot_statistics.Get()->GetACInitiatedCount());
+    CHECK_EQUAL(1, read_data.wtp_reboot_statistics.Get()->GetLinkFailureCount());
+    CHECK_EQUAL(1, read_data.wtp_reboot_statistics.Get()->GetSWFailureCount());
+    CHECK_EQUAL(0, read_data.wtp_reboot_statistics.Get()->GetHWFailureCount());
+    CHECK_EQUAL(1, read_data.wtp_reboot_statistics.Get()->GetOtherFailureCount());
+    CHECK_EQUAL(0, read_data.wtp_reboot_statistics.Get()->GetUnknownFailureCount());
     CHECK_EQUAL(WTPRebootStatistics::LastFailureType::SoftwareFailure,
-                read_data.wtp_reboot_statistics->GetLastFailureType());
+                read_data.wtp_reboot_statistics.Get()->GetLastFailureType());
 
     CHECK_EQUAL(2, ac_names_with_priority.Get().size());
     CHECK_EQUAL(1, ac_names_with_priority.Get()[0]->GetPriority());

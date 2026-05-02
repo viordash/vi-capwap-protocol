@@ -44,7 +44,15 @@ void WritableConfigurationStatusRequest::Serialize(RawData *raw_data) const {
     ac_name.Serialize(raw_data);
     radio_states.Serialize(raw_data);
     statistics_timer.Serialize(raw_data);
-    wtp_reboot_statistics.Serialize(raw_data);
+    WritableWTPRebootStatistics{ wtp_reboot_statistics.GetRebootCount(),
+                                 wtp_reboot_statistics.GetACInitiatedCount(),
+                                 wtp_reboot_statistics.GetLinkFailureCount(),
+                                 wtp_reboot_statistics.GetSWFailureCount(),
+                                 wtp_reboot_statistics.GetHWFailureCount(),
+                                 wtp_reboot_statistics.GetOtherFailureCount(),
+                                 wtp_reboot_statistics.GetUnknownFailureCount(),
+                                 wtp_reboot_statistics.GetLastFailureType() }
+        .Serialize(raw_data);
 
     for (auto *elem : optional_elements) {
         elem->Serialize(raw_data);
@@ -55,7 +63,6 @@ ReadableConfigurationStatusRequest::ReadableConfigurationStatusRequest(
     nonstd::span<IReadableConfigurationStatusRequestOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
     ac_name = nullptr;
-    wtp_reboot_statistics = nullptr;
 }
 
 ReadableConfigurationStatusRequest::ReadableConfigurationStatusRequest(
@@ -92,8 +99,7 @@ bool ReadableConfigurationStatusRequest::Deserialize(RawData *raw_data) {
                 }
                 break;
             case ElementHeader::ElementType::WTPRebootStatistics:
-                wtp_reboot_statistics = WTPRebootStatistics::Deserialize(raw_data);
-                if (wtp_reboot_statistics == nullptr) {
+                if (!wtp_reboot_statistics.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -121,7 +127,7 @@ bool ReadableConfigurationStatusRequest::Deserialize(RawData *raw_data) {
         }
     }
     return ac_name != nullptr && radio_states.IsPresent() > 0 && statistics_timer.IsPresent()
-        && wtp_reboot_statistics != nullptr;
+        && wtp_reboot_statistics.IsPresent();
 }
 
 void ReadableConfigurationStatusRequest::Log() const {
@@ -135,8 +141,7 @@ void ReadableConfigurationStatusRequest::Log() const {
 
     statistics_timer.Log();
 
-    ASSERT(wtp_reboot_statistics != nullptr);
-    wtp_reboot_statistics->Log();
+    wtp_reboot_statistics.Log();
 
     for (const auto &[_, value] : key_optional_elements) {
         value->Log();
