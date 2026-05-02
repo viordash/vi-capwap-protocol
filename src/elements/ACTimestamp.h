@@ -1,7 +1,7 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
-#include "IOptionalElement.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -22,7 +22,7 @@ struct __attribute__((packed)) ACTimestamp : ElementHeader {
     void Log() const;
 };
 
-struct WritableACTimestamp : IWritableOptionalElement {
+struct WritableACTimestamp : IWritableElement {
   protected:
     ACTimestamp element;
 
@@ -33,7 +33,7 @@ struct WritableACTimestamp : IWritableOptionalElement {
     void Log() const override final;
 };
 
-struct ReadableACTimestamp : IReadableOptionalElement {
+struct ReadableACTimestamp : IReadableElement {
   protected:
     ACTimestamp *element = nullptr;
     bool is_present = false;

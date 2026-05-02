@@ -1,0 +1,35 @@
+#pragma once
+#include "Helpers.h"
+#include "elements/ElementHeader.h"
+
+struct IElement {
+    virtual void Log() const = 0;
+};
+
+struct IWritableElement : IElement {
+    virtual void Serialize(RawData *raw_data) const = 0;
+};
+
+struct IReadableElement : IElement {
+    virtual bool Deserialize(RawData *raw_data) = 0;
+    virtual ElementHeader::ElementType GetElementType() const = 0;
+    virtual bool IsPresent() const = 0;
+};
+
+struct IWritableConfigurationStatusRequestOptionalElement : IWritableElement {};
+struct IReadableConfigurationStatusRequestOptionalElement : IReadableElement {};
+
+struct IWritableConfigurationStatusResponseOptionalElement : IWritableElement {};
+struct IReadableConfigurationStatusResponseOptionalElement : IReadableElement {};
+
+struct IWritableJoinRequestOptionalElement : IWritableElement {};
+struct IReadableJoinRequestOptionalElement : IReadableElement {};
+
+struct IWritableJoinResponseOptionalElement : IWritableElement {};
+struct IReadableJoinResponseOptionalElement : IReadableElement {};
+
+struct IWritableImageDataRequestOptionalElement : IWritableElement {};
+struct IReadableImageDataRequestOptionalElement : IReadableElement {};
+
+struct IWritableConfigurationUpdateRequestOptionalElement : IWritableElement {};
+struct IReadableConfigurationUpdateRequestOptionalElement : IReadableElement {};

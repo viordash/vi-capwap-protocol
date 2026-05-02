@@ -1,7 +1,7 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
-#include "IOptionalElement.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include <string_view>
 
@@ -15,7 +15,7 @@ struct __attribute__((packed)) LocationData : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableLocationData : IWritableOptionalElement {
+struct WritableLocationData : IWritableElement {
   protected:
     LocationData element;
     const std::string_view data;
@@ -28,7 +28,7 @@ struct WritableLocationData : IWritableOptionalElement {
     void Log() const override final;
 };
 
-struct ReadableLocationData : IReadableOptionalElement {
+struct ReadableLocationData : IReadableElement {
   public:
     struct Element : LocationData {
         char data[];

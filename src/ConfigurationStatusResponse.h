@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CapwapMessage.h"
-#include "IOptionalElement.h"
+#include "IElement.h"
 #include "elements/ACIPv4List.h"
 #include "elements/CAPWAPTimers.h"
 #include "elements/DecryptionErrorReportPeriod.h"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IOptionalElement.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include <cstdint>
 
@@ -20,7 +20,7 @@ struct __attribute__((packed)) StatisticsTimer : ElementHeader {
     void Log() const;
 };
 
-struct WritableStatisticsTimer : IWritableOptionalElement {
+struct WritableStatisticsTimer : IWritableElement {
   protected:
     StatisticsTimer element;
 
@@ -31,7 +31,7 @@ struct WritableStatisticsTimer : IWritableOptionalElement {
     void Log() const override final;
 };
 
-struct ReadableStatisticsTimer : IReadableOptionalElement {
+struct ReadableStatisticsTimer : IReadableElement {
   protected:
     StatisticsTimer *element = nullptr;
     bool is_present = false;

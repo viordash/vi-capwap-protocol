@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CapwapMessage.h"
-#include "IOptionalElement.h"
+#include "IElement.h"
 #include "elements/ACName.h"
 #include "elements/ACNameWithPriority.h"
 #include "elements/CapwapTransportProtocol.h"

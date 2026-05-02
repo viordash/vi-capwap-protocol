@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IOptionalElement.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -27,7 +27,7 @@ struct __attribute__((packed)) DecryptionErrorReportPeriod : ElementHeader {
     uint16_t ReportInterval() const;
 };
 
-struct WritableDecryptionErrorReportPeriodArray: IWritableOptionalElement  {
+struct WritableDecryptionErrorReportPeriodArray : IWritableElement {
   private:
     std::vector<DecryptionErrorReportPeriod> items;
 
@@ -44,7 +44,7 @@ struct WritableDecryptionErrorReportPeriodArray: IWritableOptionalElement  {
     void Log() const override final;
 };
 
-struct ReadableDecryptionErrorReportPeriodArray : IReadableOptionalElement  {
+struct ReadableDecryptionErrorReportPeriodArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 

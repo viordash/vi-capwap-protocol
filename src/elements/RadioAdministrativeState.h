@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IOptionalElement.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -24,7 +24,7 @@ struct __attribute__((packed)) RadioAdministrativeState : ElementHeader {
     static RadioAdministrativeState *Deserialize(RawData *raw_data);
 };
 
-struct WritableRadioAdministrativeStateArray : IWritableOptionalElement {
+struct WritableRadioAdministrativeStateArray : IWritableElement {
   private:
     std::vector<RadioAdministrativeState> items;
 
@@ -40,7 +40,7 @@ struct WritableRadioAdministrativeStateArray : IWritableOptionalElement {
     void Log() const override final;
 };
 
-struct ReadableRadioAdministrativeStateArray : IReadableOptionalElement {
+struct ReadableRadioAdministrativeStateArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 

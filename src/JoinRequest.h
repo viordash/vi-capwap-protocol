@@ -1,7 +1,7 @@
 #pragma once
 
 #include "CapwapMessage.h"
-#include "IOptionalElement.h"
+#include "IElement.h"
 #include "elements/CAPWAPLocalIPv4Address.h"
 #include "elements/CapwapTransportProtocol.h"
 #include "elements/ECNSupport.h"

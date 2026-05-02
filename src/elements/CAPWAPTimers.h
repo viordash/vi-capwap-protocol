@@ -1,6 +1,6 @@
 #pragma once
 
-#include "IOptionalElement.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include <cstdint>
 
@@ -16,7 +16,7 @@ struct __attribute__((packed)) CAPWAPTimers : ElementHeader {
     void Log() const;
 };
 
-struct WritableCAPWAPTimers : IWritableOptionalElement {
+struct WritableCAPWAPTimers : IWritableElement {
   protected:
     CAPWAPTimers element;
 
@@ -27,7 +27,7 @@ struct WritableCAPWAPTimers : IWritableOptionalElement {
     void Log() const override final;
 };
 
-struct ReadableCAPWAPTimers : IReadableOptionalElement {
+struct ReadableCAPWAPTimers : IReadableElement {
   protected:
     CAPWAPTimers *element = nullptr;
     bool is_present = false;

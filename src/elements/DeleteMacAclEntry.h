@@ -1,14 +1,14 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
-#include "IOptionalElement.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "elements/MacAclEntriesHeader.h"
 #include "elements/MacAddress.h"
 #include "span.hpp"
 #include <vector>
 
-struct WritableDeleteMacAclEntry : IWritableOptionalElement {
+struct WritableDeleteMacAclEntry : IWritableElement {
 
   protected:
     std::vector<MacAddress> items;
@@ -25,7 +25,7 @@ struct WritableDeleteMacAclEntry : IWritableOptionalElement {
     void Log() const override final;
 };
 
-struct ReadableDeleteMacAclEntry : IReadableOptionalElement {
+struct ReadableDeleteMacAclEntry : IReadableElement {
   public:
     MacAclEntriesHeader *header;
 

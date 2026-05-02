@@ -1,7 +1,7 @@
 #pragma once
-#include "IOptionalElement.h"
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -22,7 +22,7 @@ struct __attribute__((packed)) IdleTimeout : ElementHeader {
     void Log() const;
 };
 
-struct WritableIdleTimeout : IWritableOptionalElement {
+struct WritableIdleTimeout : IWritableElement {
   protected:
     IdleTimeout element;
 
@@ -33,7 +33,7 @@ struct WritableIdleTimeout : IWritableOptionalElement {
     void Log() const override final;
 };
 
-struct ReadableIdleTimeout : IReadableOptionalElement {
+struct ReadableIdleTimeout : IReadableElement {
   protected:
     IdleTimeout *element = nullptr;
     bool is_present = false;
