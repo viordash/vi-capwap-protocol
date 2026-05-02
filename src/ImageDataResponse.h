@@ -15,13 +15,13 @@ struct WritableImageDataResponse : WritableCapwapResponse {
   private:
     const WritableResultCode result_code;
     WritableVendorSpecificPayloadArray &vendor_specific_payloads;
-    const ImageInformation *image_information;
+    const WritableImageInformation *image_information;
 
   public:
     WritableImageDataResponse(const WritableImageDataResponse &) = delete;
     WritableImageDataResponse(const ResultCode::Type result_code,
                               WritableVendorSpecificPayloadArray &vendor_specific_payloads,
-                              const ImageInformation *image_information);
+                              const WritableImageInformation *image_information);
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -31,7 +31,7 @@ struct WritableImageDataResponse : WritableCapwapResponse {
 struct ReadableImageDataResponse : ReadableCapwapResponse {
     ReadableResultCode result_code;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ImageInformation *image_information;
+    ReadableImageInformation image_information;
 
     size_t unknown_elements;
 

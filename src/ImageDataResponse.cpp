@@ -8,7 +8,7 @@
 WritableImageDataResponse::WritableImageDataResponse(
     const ResultCode::Type result_code,
     WritableVendorSpecificPayloadArray &vendor_specific_payloads,
-    const ImageInformation *image_information)
+    const WritableImageInformation *image_information)
     : result_code{ result_code }, vendor_specific_payloads{ vendor_specific_payloads },
       image_information{ image_information } {
 }
@@ -30,7 +30,6 @@ void WritableImageDataResponse::Serialize(RawData *raw_data) const {
 }
 
 ReadableImageDataResponse::ReadableImageDataResponse() : unknown_elements{} {
-    image_information = nullptr;
 }
 
 ControlHeader::MessageType ReadableImageDataResponse::GetMessageType() const {
@@ -55,8 +54,7 @@ bool ReadableImageDataResponse::Deserialize(RawData *raw_data) {
                 break;
 
             case ElementHeader::ElementType::ImageInformation:
-                image_information = ImageInformation::Deserialize(raw_data);
-                if (image_information == nullptr) {
+                if (!image_information.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -84,8 +82,8 @@ void ReadableImageDataResponse::Log() const {
     result_code.Log();
 
     vendor_specific_payloads.Log();
-    if (image_information != nullptr) {
-        image_information->Log();
+    if (image_information.IsPresent()) {
+        image_information.Log();
     }
 
     if (unknown_elements > 0) {

@@ -22,7 +22,7 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_serialize) {
 
     const uint8_t hash[] = { 0xF8, 0x1D, 0x4F, 0xAE, 0x7D, 0xEC, 0x11, 0xD0,
                              0xA7, 0x65, 0x00, 0xA0, 0xC9, 0x1E, 0x6B, 0xF6 };
-    ImageInformation image_information{ 12345, hash };
+    WritableImageInformation image_information{ 12345, hash };
 
     WritableImageDataResponse write_data(ResultCode::Type::Success,
                                          vendor_specific_payloads,
@@ -56,9 +56,9 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_serialize) {
                   (char *)read_data.vendor_specific_payloads.Get()[0]->value,
                   21);
 
-    CHECK(read_data.image_information != nullptr);
-    CHECK_EQUAL(12345, read_data.image_information->GetFileSize());
-    MEMCMP_EQUAL(hash, read_data.image_information->file_hash, 16);
+    CHECK(read_data.image_information.IsPresent());
+    CHECK_EQUAL(12345, read_data.image_information.Get()->GetFileSize());
+    MEMCMP_EQUAL(hash, read_data.image_information.Get()->file_hash, 16);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -106,10 +106,10 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_deserialize_after_initiate_d
 
     CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code.Get()->type);
 
-    CHECK(read_data.image_information != nullptr);
-    CHECK_EQUAL(1048576, read_data.image_information->GetFileSize());
-    CHECK_EQUAL(0xf1, read_data.image_information->file_hash[0]);
-    CHECK_EQUAL(0x60, read_data.image_information->file_hash[1]);
+    CHECK(read_data.image_information.IsPresent());
+    CHECK_EQUAL(1048576, read_data.image_information.Get()->GetFileSize());
+    CHECK_EQUAL(0xf1, read_data.image_information.Get()->file_hash[0]);
+    CHECK_EQUAL(0x60, read_data.image_information.Get()->file_hash[1]);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 

@@ -1,6 +1,7 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -14,14 +15,35 @@ struct __attribute__((packed)) ImageInformation : ElementHeader {
   public:
     uint8_t file_hash[16];
 
-    ImageInformation(const ImageInformation &) = delete;
+    ImageInformation(const ImageInformation &) = default;
     ImageInformation();
     ImageInformation(uint32_t file_size, const nonstd::span<const uint8_t> &hash);
 
     uint32_t GetFileSize() const;
     bool Validate() const;
-    uint16_t GetTotalLength() const;
-    void Serialize(RawData *raw_data) const;
-    static ImageInformation *Deserialize(RawData *raw_data);
     void Log() const;
+};
+
+struct WritableImageInformation : IWritableElement {
+  protected:
+    ImageInformation element;
+
+  public:
+    WritableImageInformation(uint32_t file_size, const nonstd::span<const uint8_t> &hash);
+
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
+};
+
+struct ReadableImageInformation : IReadableElement {
+  protected:
+    ImageInformation *element = nullptr;
+    bool is_present = false;
+
+  public:
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
+    const ImageInformation *const Get() const;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };
