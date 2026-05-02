@@ -13,7 +13,7 @@
 struct WritableImageDataResponse : WritableCapwapResponse {
 
   private:
-    const ResultCode result_code;
+    const WritableResultCode result_code;
     WritableVendorSpecificPayloadArray &vendor_specific_payloads;
     const ImageInformation *image_information;
 
@@ -29,7 +29,7 @@ struct WritableImageDataResponse : WritableCapwapResponse {
 };
 
 struct ReadableImageDataResponse : ReadableCapwapResponse {
-    ResultCode *result_code;
+    ReadableResultCode result_code;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
     ImageInformation *image_information;
 

@@ -54,7 +54,7 @@ TEST(ConfigurationUpdateResponseTestsGroup, ConfigurationUpdateResponse_serializ
     ReadableConfigurationUpdateResponse read_data;
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(ResultCode::MessageUnexpected_InvalidInCurrentState, read_data.result_code->type);
+    CHECK_EQUAL(ResultCode::MessageUnexpected_InvalidInCurrentState, read_data.result_code.Get()->type);
 
     CHECK_EQUAL(3, read_data.radio_operational_states.Get().size());
     CHECK_EQUAL(0, read_data.radio_operational_states.Get()[0]->RadioID);
@@ -149,7 +149,7 @@ TEST(ConfigurationUpdateResponseTestsGroup, ConfigurationUpdateResponse_deserial
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    CHECK_EQUAL(ResultCode::Success, read_data.result_code->type);
+    CHECK_EQUAL(ResultCode::Success, read_data.result_code.Get()->type);
 
     CHECK_EQUAL(2, read_data.radio_operational_states.Get().size());
     CHECK_EQUAL(1, read_data.radio_operational_states.Get()[0]->RadioID);

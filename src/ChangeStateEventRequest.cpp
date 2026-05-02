@@ -32,7 +32,7 @@ ControlHeader::MessageType WritableChangeStateEventRequest::GetResponseMessageTy
 
 void WritableChangeStateEventRequest::Serialize(RawData *raw_data) const {
     radio_operational_states.Serialize(raw_data);
-    result_code.Serialize(raw_data);
+    WritableResultCode{ result_code.type }.Serialize(raw_data);
     returned_message_elements.Serialize(raw_data);
     vendor_specific_payloads.Serialize(raw_data);
 }
@@ -58,7 +58,6 @@ bool WritableChangeStateEventRequest::Validate() {
 }
 
 ReadableChangeStateEventRequest::ReadableChangeStateEventRequest() : unknown_elements{} {
-    result_code = nullptr;
 }
 
 ControlHeader::MessageType ReadableChangeStateEventRequest::GetMessageType() const {
@@ -76,8 +75,7 @@ bool ReadableChangeStateEventRequest::Deserialize(RawData *raw_data) {
                 }
                 break;
             case ElementHeader::ElementType::ResultCode:
-                result_code = ResultCode::Deserialize(raw_data);
-                if (result_code == nullptr) {
+                if (!result_code.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -107,7 +105,7 @@ bool ReadableChangeStateEventRequest::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return radio_operational_states.Get().size() > 0 && result_code != nullptr;
+    return radio_operational_states.Get().size() > 0 && result_code.IsPresent();
 }
 
 void ReadableChangeStateEventRequest::Log() const {
@@ -116,8 +114,7 @@ void ReadableChangeStateEventRequest::Log() const {
 
     radio_operational_states.Log();
 
-    ASSERT(result_code != nullptr);
-    result_code->Log();
+    result_code.Log();
 
     returned_message_elements.Log();
 

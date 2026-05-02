@@ -28,7 +28,6 @@ void WritableConfigurationUpdateResponse::Serialize(RawData *raw_data) const {
 }
 
 ReadableConfigurationUpdateResponse::ReadableConfigurationUpdateResponse() : unknown_elements{} {
-    result_code = nullptr;
 }
 
 ControlHeader::MessageType ReadableConfigurationUpdateResponse::GetMessageType() const {
@@ -41,8 +40,7 @@ bool ReadableConfigurationUpdateResponse::Deserialize(RawData *raw_data) {
 
         switch (element->GetElementType()) {
             case ElementHeader::ElementType::ResultCode:
-                result_code = ResultCode::Deserialize(raw_data);
-                if (result_code == nullptr) {
+                if (!result_code.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -71,15 +69,14 @@ bool ReadableConfigurationUpdateResponse::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return result_code != nullptr;
+    return result_code.IsPresent();
 }
 
 void ReadableConfigurationUpdateResponse::Log() const {
     log_i("----------------------------------");
     log_i("ME ConfigurationUpdateResponse:");
 
-    ASSERT(result_code != nullptr);
-    result_code->Log();
+    result_code.Log();
 
     radio_operational_states.Log();
     vendor_specific_payloads.Log();

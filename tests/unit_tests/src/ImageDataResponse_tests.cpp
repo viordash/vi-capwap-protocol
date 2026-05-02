@@ -47,7 +47,7 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_serialize) {
     ReadableImageDataResponse read_data;
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code->type);
+    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code.Get()->type);
 
     CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
     CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
@@ -104,7 +104,7 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_deserialize_after_initiate_d
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code->type);
+    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code.Get()->type);
 
     CHECK(read_data.image_information != nullptr);
     CHECK_EQUAL(1048576, read_data.image_information->GetFileSize());

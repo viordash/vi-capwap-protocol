@@ -108,7 +108,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
                                      &vendor_specific_payloads });
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code->type);
+    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code.Get()->type);
 
     CHECK_EQUAL(100, read_data.ac_descriptor.header->GetStations());
     CHECK_EQUAL(200, read_data.ac_descriptor.header->GetLimit());

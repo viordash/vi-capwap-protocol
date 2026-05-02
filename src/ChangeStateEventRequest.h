@@ -37,7 +37,7 @@ struct WritableChangeStateEventRequest : WritableCapwapRequest {
 
 struct ReadableChangeStateEventRequest : ReadableCapwapRequest {
     ReadableRadioOperationalStateArray radio_operational_states;
-    ResultCode *result_code;
+    ReadableResultCode result_code;
 
     ReadableReturnedMessageElementArray returned_message_elements;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;

@@ -83,7 +83,7 @@ TEST(ChangeStateEventRequestTestsGroup, ChangeStateEventRequest_serialize) {
     CHECK_EQUAL(RadioOperationalState::Causes::RadioFailure,
                 read_data.radio_operational_states.Get()[2]->Cause);
 
-    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code->type);
+    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code.Get()->type);
 
     CHECK_EQUAL(2, read_data.returned_message_elements.Get().size());
     CHECK_EQUAL(ReturnedMessageElement::Reasons::UnknownMessageElement,
@@ -172,6 +172,7 @@ TEST(ChangeStateEventRequestTestsGroup,
                                                VendorSpecificPayload::Dummy);
 
     CHECK_EQUAL(ResultCode::Type::Failure_UnrecognizedMessageElement, write_data.GetResultCode());
+    CHECK_EQUAL(ResultCode::Type::Failure_UnrecognizedMessageElement, result_code.type);
 
     write_data.Serialize(&raw_data);
     CHECK_EQUAL(&buffer[0] + 31 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
@@ -252,7 +253,7 @@ TEST(ChangeStateEventRequestTestsGroup, ChangeStateEventRequest_deserialize) {
                 read_data.radio_operational_states.Get()[0]->Cause);
 
     CHECK_EQUAL(ResultCode::Type::ConfigurationFailure_ServiceProvided,
-                read_data.result_code->type);
+                read_data.result_code.Get()->type);
 
     CHECK_EQUAL(1, read_data.returned_message_elements.Get().size());
     CHECK_EQUAL(ReturnedMessageElement::Reasons::UnknownMessageElementValue,

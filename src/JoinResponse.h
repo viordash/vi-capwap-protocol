@@ -22,7 +22,7 @@
 struct WritableJoinResponse : WritableCapwapResponse {
 
   private:
-    const ResultCode result_code;
+    const WritableResultCode result_code;
     const WritableACDescriptor &ac_descriptor;
     const WritableACName ac_name;
     WritableWTPRadioInformationArray &wtp_radio_informations;
@@ -69,7 +69,7 @@ struct ReadableJoinResponse : ReadableCapwapResponse {
         nonstd::span<IReadableJoinResponseOptionalElement *const> optional_elements);
 
   public:
-    ResultCode *result_code;
+    ReadableResultCode result_code;
     ReadableACDescriptor ac_descriptor;
     ReadableACName *ac_name;
     ReadableWTPRadioInformationArray wtp_radio_informations;

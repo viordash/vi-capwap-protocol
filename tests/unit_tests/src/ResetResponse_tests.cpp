@@ -37,7 +37,7 @@ TEST(ResetResponseTestsGroup, ResetResponse_serialize) {
     ReadableResetResponse read_data;
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(ResultCode::MessageUnexpected_InvalidInCurrentState, read_data.result_code->type);
+    CHECK_EQUAL(ResultCode::MessageUnexpected_InvalidInCurrentState, read_data.result_code.Get()->type);
 
     CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
     CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
@@ -99,7 +99,7 @@ TEST(ResetResponseTestsGroup, ResetResponse_deserialize_image_data) {
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    CHECK_EQUAL(ResultCode::Success, read_data.result_code->type);
+    CHECK_EQUAL(ResultCode::Success, read_data.result_code.Get()->type);
 
     CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
     CHECK_EQUAL(14823, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());

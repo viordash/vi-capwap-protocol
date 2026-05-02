@@ -11,7 +11,7 @@
 struct WritableConfigurationUpdateResponse : WritableCapwapResponse {
 
   private:
-    const ResultCode result_code;
+    const WritableResultCode result_code;
 
     WritableRadioOperationalStateArray &radio_operational_states;
     WritableVendorSpecificPayloadArray &vendor_specific_payloads;
@@ -29,7 +29,7 @@ struct WritableConfigurationUpdateResponse : WritableCapwapResponse {
 };
 
 struct ReadableConfigurationUpdateResponse : ReadableCapwapResponse {
-    ResultCode *result_code;
+    ReadableResultCode result_code;
 
     ReadableRadioOperationalStateArray radio_operational_states;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;

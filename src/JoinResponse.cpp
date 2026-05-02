@@ -66,7 +66,6 @@ void WritableJoinResponse::Serialize(RawData *raw_data) const {
 ReadableJoinResponse::ReadableJoinResponse(
     nonstd::span<IReadableJoinResponseOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
-    result_code = nullptr;
     ac_name = nullptr;
 }
 
@@ -87,8 +86,7 @@ bool ReadableJoinResponse::Deserialize(RawData *raw_data) {
 
         switch (element->GetElementType()) {
             case ElementHeader::ElementType::ResultCode:
-                result_code = ResultCode::Deserialize(raw_data);
-                if (result_code == nullptr) {
+                if (!result_code.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -145,7 +143,7 @@ bool ReadableJoinResponse::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return result_code != nullptr && ac_descriptor.Get().size() > 0 && ac_name != nullptr
+    return result_code.IsPresent() && ac_descriptor.Get().size() > 0 && ac_name != nullptr
         && wtp_radio_informations.Get().size() && ecn_support.IsPresent()
         && control_ip_addresses.Get().size() > 0 && local_ip_addresses.Get().size() > 0;
 }
@@ -154,8 +152,7 @@ void ReadableJoinResponse::Log() const {
     log_i("----------------------------------");
     log_i("ME JoinResponse:");
 
-    ASSERT(result_code != nullptr);
-    result_code->Log();
+    result_code.Log();
 
     ac_descriptor.Log();
 
