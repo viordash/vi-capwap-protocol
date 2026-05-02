@@ -3,6 +3,7 @@
 #include "Logging.h"
 #include "lassert.h"
 #include <algorithm>
+#include <cstring>
 #include <string.h>
 
 ReturnedMessageElement::ReturnedMessageElement(Reasons reason, uint16_t data_length)
@@ -47,6 +48,7 @@ bool ReturnedMessageElement::Validate() const {
 WritableReturnedMessageElementArray::WritableReturnedMessageElementArray(
     const nonstd::span<const Item> &items)
     : items(items.begin(), items.end()) {
+    static_assert(sizeof(Item::header) == 6);
     ASSERT(items.size() <= ReadableReturnedMessageElementArray::max_count);
 }
 
@@ -85,14 +87,13 @@ void WritableReturnedMessageElementArray::Clear() {
 
 void WritableReturnedMessageElementArray::Serialize(RawData *raw_data) const {
     for (const auto &elem : items) {
-        ASSERT(raw_data->current + sizeof(ReturnedMessageElement) <= raw_data->end);
-        ReturnedMessageElement *dst = (ReturnedMessageElement *)raw_data->current;
-        *dst = elem.header;
-        raw_data->current += sizeof(ReturnedMessageElement);
+        ASSERT(raw_data->current + sizeof(elem.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &elem.header, sizeof(elem.header));
+        raw_data->current += sizeof(elem.header);
 
         uint16_t data_size =
             elem.header.GetLength() - (sizeof(ReturnedMessageElement) - sizeof(ElementHeader));
-        memcpy(raw_data->current, elem.data.data(), data_size);
+        std::memcpy(raw_data->current, elem.data.data(), data_size);
         raw_data->current += data_size;
     }
 }
@@ -133,15 +134,13 @@ bool ReadableReturnedMessageElementArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
-    if (last > raw_data->end) {
+    if (raw_data->current + sizeof(ElementHeader) + item->GetLength() > raw_data->end) {
         return false;
     }
-
+    raw_data->current += sizeof(ElementHeader) + item->GetLength();
     items[count] = item;
+
     count++;
-    raw_data->current = last;
     return true;
 }
 

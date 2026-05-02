@@ -80,7 +80,7 @@ void WritableVendorSpecificPayloadArray::Serialize(RawData *raw_data) const {
         raw_data->current += sizeof(elem.header);
         uint16_t data_size =
             elem.header.GetLength() - (sizeof(VendorSpecificPayload) - sizeof(ElementHeader));
-        memcpy(raw_data->current, elem.value.data(), data_size);
+        std::memcpy(raw_data->current, elem.value.data(), data_size);
         raw_data->current += data_size;
     }
 }

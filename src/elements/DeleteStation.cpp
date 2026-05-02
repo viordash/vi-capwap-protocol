@@ -2,6 +2,7 @@
 #include "ClearHeader.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <cstring>
 #include <string.h>
 
 DeleteStation::DeleteStation(uint8_t radio_id, uint8_t mac_length)
@@ -38,6 +39,7 @@ bool DeleteStation::Validate() const {
 }
 
 WritableDeleteStationArray::WritableDeleteStationArray() {
+    static_assert(sizeof(Item::header) == 6);
     items.reserve(ReadableDeleteStationArray::max_count);
 }
 
@@ -69,13 +71,12 @@ void WritableDeleteStationArray::Serialize(RawData *raw_data) const {
     ASSERT(items.size() <= ReadableDeleteStationArray::max_count);
 
     for (const auto &elem : items) {
-        ASSERT(raw_data->current + sizeof(DeleteStation) + elem.header.GetLength()
+        ASSERT(raw_data->current + sizeof(elem.header) + elem.header.GetLength()
                <= raw_data->end);
-        DeleteStation *dst = (DeleteStation *)raw_data->current;
-        *dst = elem.header;
-        raw_data->current += sizeof(DeleteStation);
+        std::memcpy(raw_data->current, &elem.header, sizeof(elem.header));
+        raw_data->current += sizeof(elem.header);
 
-        memcpy(raw_data->current, elem.Mac.Address, elem.header.MACAddress.Length);
+        std::memcpy(raw_data->current, elem.Mac.Address, elem.header.MACAddress.Length);
         raw_data->current +=
             elem.header.GetLength() - (sizeof(DeleteStation) - sizeof(ElementHeader));
     }
@@ -105,9 +106,12 @@ bool ReadableDeleteStationArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += item->GetLength() + sizeof(ElementHeader);
-
+    if (raw_data->current + sizeof(ElementHeader) + item->GetLength() > raw_data->end) {
+        return false;
+    }
+    raw_data->current += sizeof(ElementHeader) + item->GetLength();
     items[count] = item;
+
     count++;
     return true;
 }

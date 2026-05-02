@@ -3,6 +3,7 @@
 #include "Logging.h"
 #include "lassert.h"
 #include <arpa/inet.h>
+#include <cstring>
 #include <string.h>
 
 DecryptionErrorHeader::DecryptionErrorHeader(uint16_t element_length,
@@ -43,6 +44,7 @@ uint16_t WritableDecryptionErrorReportArray::Item::CalcEntriesSize(
 }
 
 WritableDecryptionErrorReportArray::WritableDecryptionErrorReportArray() {
+    static_assert(sizeof(Item::header) == 6);
     items.reserve(ReadableDecryptionErrorReportArray::max_count);
 }
 
@@ -78,16 +80,15 @@ void WritableDecryptionErrorReportArray::Serialize(RawData *raw_data) const {
     ASSERT(items.size() <= ReadableDecryptionErrorReportArray::max_count);
 
     for (const auto &elem : items) {
-        ASSERT(raw_data->current + sizeof(DecryptionErrorHeader) <= raw_data->end);
-        DecryptionErrorHeader *dst = (DecryptionErrorHeader *)raw_data->current;
-        *dst = elem.header;
-        raw_data->current += sizeof(DecryptionErrorHeader);
+        ASSERT(raw_data->current + sizeof(elem.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &elem.header, sizeof(elem.header));
+        raw_data->current += sizeof(elem.header);
 
         for (auto &entry : elem.MacAddresses) {
             ReadableMacAddress *write_entry = (ReadableMacAddress *)raw_data->current;
             write_entry->Length = entry.Length;
 
-            memcpy(write_entry->MACAddresses, entry.Address, entry.Length);
+            std::memcpy(write_entry->MACAddresses, entry.Address, entry.Length);
             raw_data->current += sizeof(ReadableMacAddress::Length) + entry.Length;
         }
     }
@@ -123,9 +124,7 @@ bool ReadableDecryptionErrorReportArray::Deserialize(RawData *raw_data) {
     if (!item.header->Validate()) {
         return false;
     }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item.header->GetLength();
-    if (last > raw_data->end) {
+    if (raw_data->current + sizeof(ElementHeader) + item.header->GetLength() > raw_data->end) {
         return false;
     }
 
