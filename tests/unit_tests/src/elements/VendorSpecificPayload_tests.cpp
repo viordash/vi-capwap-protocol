@@ -124,3 +124,34 @@ TEST(VendorSpecificPayloadTestsGroup, Add_array_of_items_not_unique) {
     CHECK_EQUAL(6, read_data.Get().size());
     CHECK_TRUE(read_data.IsPresent());
 }
+
+TEST(VendorSpecificPayloadTestsGroup, Payload_take_ownership) {
+    uint8_t buffer[4096] = {};
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+
+    std::string str("abcdef Привет 1234");
+
+    WritableVendorSpecificPayloadArray write_data;
+    write_data.Add(1, 2, str);
+    str.clear();
+
+    write_data.Serialize(&raw_data);
+    CHECK_EQUAL(&buffer[0] + 34, raw_data.current);
+    const uint8_t reference[] = { 0x00, 0x25, 0x00, 0x1E, 0x00, 0x00, 0x00, 0x01, 0x00,
+                                  0x02, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x20, 0xD0,
+                                  0x9F, 0xD1, 0x80, 0xD0, 0xB8, 0xD0, 0xB2, 0xD0, 0xB5,
+                                  0xD1, 0x82, 0x20, 0x31, 0x32, 0x33, 0x34 };
+
+    MEMCMP_EQUAL(buffer, reference, sizeof(reference));
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+    ReadableVendorSpecificPayloadArray read_data;
+    CHECK_FALSE(read_data.IsPresent());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+
+    CHECK_EQUAL(1, read_data.Get().size());
+    CHECK_EQUAL(1, read_data.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(2, read_data.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("abcdef Привет 1234", read_data.Get()[0]->value, 24);
+}
