@@ -46,13 +46,6 @@ void WritableCAPWAPControlIPV4AdrArray::Serialize(RawData *raw_data) const {
         raw_data->current += sizeof(CAPWAPControlIPv4Address);
     }
 }
-uint16_t WritableCAPWAPControlIPV4AdrArray::GetTotalLength() const {
-    uint16_t size = 0;
-    for (const auto &elem : items) {
-        size += elem.GetLength() + sizeof(ElementHeader);
-    }
-    return size;
-}
 
 void WritableCAPWAPControlIPV4AdrArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
@@ -99,4 +92,12 @@ void ReadableCAPWAPControlIPV4AdrArray::Log() const {
               IpToString(items[i]->GetIPAddress()).c_str(),
               items[i]->GetWTPCount());
     }
+}
+
+ElementHeader::ElementType ReadableCAPWAPControlIPV4AdrArray::GetElementType() const {
+    return ElementHeader::CAPWAPControlIPv4Address;
+}
+
+bool ReadableCAPWAPControlIPV4AdrArray::IsPresent() const {
+    return count > 0;
 }
