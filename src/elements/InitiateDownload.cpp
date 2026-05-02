@@ -1,34 +1,17 @@
 #include "InitiateDownload.h"
 #include "Logging.h"
 #include "lassert.h"
-#include <string.h>
+#include <cstring>
 
 InitiateDownload::InitiateDownload()
     : ElementHeader(ElementHeader::InitiateDownload,
                     sizeof(InitiateDownload) - sizeof(ElementHeader)) {
 }
+
 bool InitiateDownload::Validate() const {
     static_assert(sizeof(InitiateDownload) == 4);
     return ElementHeader::GetElementType() == ElementHeader::InitiateDownload
         && ElementHeader::GetLength() == (sizeof(InitiateDownload) - sizeof(ElementHeader));
-}
-void InitiateDownload::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(InitiateDownload) <= raw_data->end);
-    InitiateDownload *dst = (InitiateDownload *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(InitiateDownload);
-}
-InitiateDownload *InitiateDownload::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(InitiateDownload) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (InitiateDownload *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(InitiateDownload);
-    return res;
 }
 
 void InitiateDownload::Log() const {
@@ -36,7 +19,9 @@ void InitiateDownload::Log() const {
 }
 
 void WritableInitiateDownload::Serialize(RawData *raw_data) const {
-    element.Serialize(raw_data);
+    ASSERT(raw_data->current + sizeof(InitiateDownload) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
 }
 
 void WritableInitiateDownload::Log() const {
@@ -44,9 +29,19 @@ void WritableInitiateDownload::Log() const {
 }
 
 bool ReadableInitiateDownload::Deserialize(RawData *raw_data) {
-    element = InitiateDownload::Deserialize(raw_data);
-    is_present = element != nullptr;
-    return is_present;
+    if (raw_data->current + sizeof(InitiateDownload) > raw_data->end) {
+        return false;
+    }
+
+    auto res = (InitiateDownload *)raw_data->current;
+    if (!res->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(InitiateDownload);
+
+    element = res;
+    is_present = true;
+    return true;
 }
 
 const InitiateDownload *const ReadableInitiateDownload::Get() const {

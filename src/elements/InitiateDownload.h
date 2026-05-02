@@ -6,13 +6,10 @@
 #include <cstdint>
 
 struct __attribute__((packed)) InitiateDownload : ElementHeader {
-    InitiateDownload(const InitiateDownload &) = delete;
+    InitiateDownload(const InitiateDownload &) = default;
     InitiateDownload();
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static InitiateDownload *Deserialize(RawData *raw_data);
-
     void Log() const;
 };
 
