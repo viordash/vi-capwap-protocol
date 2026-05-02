@@ -258,3 +258,11 @@ void ReadableACDescriptor::Log() const {
               items[i]->data);
     }
 }
+
+ElementHeader::ElementType ReadableACDescriptor::GetElementType() const {
+    return ElementHeader::ACDescriptor;
+}
+
+bool ReadableACDescriptor::IsPresent() const {
+    return count > 0;
+}
