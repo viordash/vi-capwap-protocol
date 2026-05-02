@@ -20,29 +20,6 @@ bool WTPStaticIPAddressInformation::Validate() const {
                == (sizeof(WTPStaticIPAddressInformation) - sizeof(ElementHeader));
 }
 
-void WTPStaticIPAddressInformation::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(WTPStaticIPAddressInformation) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(WTPStaticIPAddressInformation));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(WTPStaticIPAddressInformation);
-}
-WTPStaticIPAddressInformation *WTPStaticIPAddressInformation::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(WTPStaticIPAddressInformation) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (WTPStaticIPAddressInformation *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(WTPStaticIPAddressInformation);
-    return res;
-}
-
 void WTPStaticIPAddressInformation::Log() const {
     log_i("ME WTPStaticIPAddressInformation IP Address:%s, Netmask:%s, Gateway:%s, use static:%u",
           IpToString(IpAddress).c_str(),
@@ -59,7 +36,9 @@ WritableWTPStaticIPAddressInformation::WritableWTPStaticIPAddressInformation(uin
 }
 
 void WritableWTPStaticIPAddressInformation::Serialize(RawData *raw_data) const {
-    element.Serialize(raw_data);
+    ASSERT(raw_data->current + sizeof(WTPStaticIPAddressInformation) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
 }
 
 void WritableWTPStaticIPAddressInformation::Log() const {
@@ -67,9 +46,19 @@ void WritableWTPStaticIPAddressInformation::Log() const {
 }
 
 bool ReadableWTPStaticIPAddressInformation::Deserialize(RawData *raw_data) {
-    element = WTPStaticIPAddressInformation::Deserialize(raw_data);
-    is_present = element != nullptr;
-    return is_present;
+    if (raw_data->current + sizeof(WTPStaticIPAddressInformation) > raw_data->end) {
+        return false;
+    }
+
+    auto res = (WTPStaticIPAddressInformation *)raw_data->current;
+    if (!res->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(WTPStaticIPAddressInformation);
+
+    element = res;
+    is_present = true;
+    return true;
 }
 
 const WTPStaticIPAddressInformation *const ReadableWTPStaticIPAddressInformation::Get() const {

@@ -20,15 +20,12 @@ struct __attribute__((packed)) WTPStaticIPAddressInformation : ElementHeader {
     uint8_t Static;
 
     WTPStaticIPAddressInformation(const WTPStaticIPAddressInformation &) = default;
-    WTPStaticIPAddressInformation(WTPStaticIPAddressInformation &&) = default;
     WTPStaticIPAddressInformation(uint32_t ipaddress,
                                   uint32_t netmask,
                                   uint32_t gateway,
                                   bool use_static);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static WTPStaticIPAddressInformation *Deserialize(RawData *raw_data);
     void Log() const;
 };
 

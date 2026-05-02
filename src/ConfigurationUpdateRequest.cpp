@@ -68,7 +68,10 @@ void WritableConfigurationUpdateRequest::Serialize(RawData *raw_data) const {
         wtp_name.value().Serialize(raw_data);
     }
     if (wtp_static_ipaddress.has_value()) {
-        wtp_static_ipaddress.value().Serialize(raw_data);
+        const auto &addr = wtp_static_ipaddress.value();
+        WritableWTPStaticIPAddressInformation{ addr.IpAddress, addr.Netmask, addr.Gateway,
+                                               addr.Static != 0 }
+            .Serialize(raw_data);
     }
     if (image_identifier.has_value()) {
         image_identifier.value().Serialize(raw_data);
@@ -150,7 +153,6 @@ ReadableConfigurationUpdateRequest::ReadableConfigurationUpdateRequest() : unkno
     location_data = nullptr;
     statistics_timer = nullptr;
     wtp_name = nullptr;
-    wtp_static_ipaddress = nullptr;
 }
 
 ControlHeader::MessageType ReadableConfigurationUpdateRequest::GetMessageType() const {
@@ -243,8 +245,7 @@ bool ReadableConfigurationUpdateRequest::Deserialize(RawData *raw_data) {
             //     valid = true;
             //     break;
             case ElementHeader::ElementType::WTPStaticIPAddressInformation:
-                wtp_static_ipaddress = WTPStaticIPAddressInformation::Deserialize(raw_data);
-                if (wtp_static_ipaddress == nullptr) {
+                if (!wtp_static_ipaddress.Deserialize(raw_data)) {
                     return false;
                 }
                 valid = true;
@@ -319,8 +320,8 @@ void ReadableConfigurationUpdateRequest::Log() const {
     if (wtp_name != nullptr) {
         wtp_name->Log();
     }
-    if (wtp_static_ipaddress != nullptr) {
-        wtp_static_ipaddress->Log();
+    if (wtp_static_ipaddress.IsPresent()) {
+        wtp_static_ipaddress.Log();
     }
     image_identifier.Log();
     if (vendor_specific_payloads.Get().size() > 0) {
