@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CapwapMessage.h"
+#include "IElement.h"
 #include "elements/ACNameWithPriority.h"
 #include "elements/ACTimestamp.h"
 #include "elements/AddMacAclEntry.h"
@@ -24,40 +25,16 @@
 struct WritableConfigurationUpdateRequest : WritableCapwapRequest {
 
   private:
-    WritableACNameWithPriorityArray &ac_names_with_priority;
-    std::optional<ACTimestamp> &ac_timestamp;
-    WritableAddMacAclEntry &add_mac_acl_entry;
-    std::optional<CAPWAPTimers> &capwap_timers;
-    WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods;
-    WritableDeleteMacAclEntry &delete_mac_acl_entry;
-    std::optional<IdleTimeout> &idle_timeout;
-    std::optional<WritableLocationData> &location_data;
-    WritableRadioAdministrativeStateArray &radio_states;
-    std::optional<StatisticsTimer> &statistics_timer;
-    std::optional<WTPFallback> &wtp_fallback;
-    std::optional<WritableWTPName> &wtp_name;
-    std::optional<WTPStaticIPAddressInformation> &wtp_static_ipaddress;
-    std::optional<WritableImageIdentifier> &image_identifier;
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads;
+    nonstd::span<IWritableConfigurationUpdateRequestOptionalElement *const> optional_elements;
 
   public:
     WritableConfigurationUpdateRequest(const WritableConfigurationUpdateRequest &) = delete;
+
     WritableConfigurationUpdateRequest(
-        WritableACNameWithPriorityArray &ac_names_with_priority,
-        std::optional<ACTimestamp> &ac_timestamp,
-        WritableAddMacAclEntry &add_mac_acl_entry,
-        std::optional<CAPWAPTimers> &capwap_timers,
-        WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods,
-        WritableDeleteMacAclEntry &delete_mac_acl_entry,
-        std::optional<IdleTimeout> &idle_timeout,
-        std::optional<WritableLocationData> &location_data,
-        WritableRadioAdministrativeStateArray &radio_states,
-        std::optional<StatisticsTimer> &statistics_timer,
-        std::optional<WTPFallback> &wtp_fallback,
-        std::optional<WritableWTPName> &wtp_name,
-        std::optional<WTPStaticIPAddressInformation> &wtp_static_ipaddress,
-        std::optional<WritableImageIdentifier> &image_identifier,
-        WritableVendorSpecificPayloadArray &vendor_specific_payloads);
+        nonstd::span<IWritableConfigurationUpdateRequestOptionalElement *const> optional_elements);
+    WritableConfigurationUpdateRequest(
+        std::initializer_list<IWritableConfigurationUpdateRequestOptionalElement *const>
+            optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
