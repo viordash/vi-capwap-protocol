@@ -13,56 +13,6 @@ TEST_GROUP(VendorSpecificPayloadTestsGroup){ //
                                              TEST_TEARDOWN(){}
 };
 
-TEST(VendorSpecificPayloadTestsGroup, VendorSpecificPayload_serialize) {
-    uint8_t buffer[4096] = {};
-    RawData raw_data{ buffer, buffer + sizeof(buffer) };
-
-    VendorSpecificPayload payload{ 123456, 789, 0 };
-
-    payload.Serialize(&raw_data);
-    CHECK_EQUAL(&buffer[0] + 10, raw_data.current);
-    const uint8_t reference[] = { 0x00, 0x25, 0x00, 0x06, 0x00, 0x01, 0xE2, 0x40, 0x03, 0x15 };
-
-    MEMCMP_EQUAL(buffer, reference, sizeof(reference));
-
-    raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = VendorSpecificPayload::Deserialize(&raw_data);
-    CHECK(element != nullptr);
-
-    CHECK_EQUAL(&buffer[0] + sizeof(reference), raw_data.current);
-    CHECK_EQUAL(6, element->GetLength());
-    CHECK_EQUAL(123456, element->GetVendorIdentifier());
-    CHECK_EQUAL(789, element->GetElementId());
-}
-
-TEST(VendorSpecificPayloadTestsGroup, VendorSpecificPayload_deserialize) {
-    uint8_t data[] = {
-        // 7. [ОПЦИОНАЛЬНО] Vendor Specific Payload (Тип: 37, Длина: 7)
-        0x00,
-        0x25,
-        0x00,
-        0x07,
-        // Value:
-        0x00,
-        0x00,
-        0x00,
-        0x09, // Vendor ID: 9 (Cisco)
-        0xDE,
-        0xAD, // Element ID: 0xDEAD
-        0x01  // Data: 1 байт (например, флаг отладки)
-    };
-    RawData raw_data{ data, data + sizeof(data) };
-
-    auto element = VendorSpecificPayload::Deserialize(&raw_data);
-    CHECK(element != nullptr);
-
-    CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(1 + 6, element->GetLength());
-    CHECK_EQUAL(9, element->GetVendorIdentifier());
-    CHECK_EQUAL(0xDEAD, element->GetElementId());
-    CHECK_EQUAL(1, element->value[0]);
-}
-
 TEST(VendorSpecificPayloadTestsGroup, VendorSpecificPayloadArray_serialize) {
     uint8_t buffer[4096] = {};
 
@@ -91,6 +41,33 @@ TEST(VendorSpecificPayloadTestsGroup, VendorSpecificPayloadArray_serialize) {
         0x39, 0x30, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30
     };
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableVendorSpecificPayloadArray read_data;
+    CHECK_FALSE(read_data.IsPresent());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_FALSE(read_data.Deserialize(&raw_data));
+
+    CHECK_EQUAL(6, read_data.Get().size());
+
+    CHECK_EQUAL(4 + 6, read_data.Get()[0]->GetLength());
+    CHECK_EQUAL(12300, read_data.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(700, read_data.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("0123", read_data.Get()[0]->value, 4);
+
+    CHECK_EQUAL(22 + 6, read_data.Get()[5]->GetLength());
+    CHECK_EQUAL(12305, read_data.Get()[5]->GetVendorIdentifier());
+    CHECK_EQUAL(705, read_data.Get()[5]->GetElementId());
+    STRNCMP_EQUAL("0123456789001234567890", read_data.Get()[5]->value, 22);
+
+    CHECK_TRUE(read_data.IsPresent());
 }
 
 TEST(VendorSpecificPayloadTestsGroup, Add_array_of_items_not_unique) {

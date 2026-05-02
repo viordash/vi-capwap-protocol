@@ -18,8 +18,6 @@ struct __attribute__((packed)) VendorSpecificPayload : ElementHeader {
     NetworkU16 element_id;
 
   public:
-    char value[];
-
     VendorSpecificPayload(const VendorSpecificPayload &) = default;
     VendorSpecificPayload(uint32_t vendor_identifier, uint16_t element_id, uint16_t length);
 
@@ -27,8 +25,6 @@ struct __attribute__((packed)) VendorSpecificPayload : ElementHeader {
     uint32_t GetElementId() const;
     bool Validate() const;
     uint16_t GetTotalLength() const;
-    void Serialize(RawData *raw_data) const;
-    static VendorSpecificPayload *Deserialize(RawData *raw_data);
     static WritableVendorSpecificPayloadArray Dummy;
 };
 
@@ -74,8 +70,13 @@ struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestO
     static const size_t max_data_size = 2048;
     static const size_t max_count = 16;
 
+    struct Item : VendorSpecificPayload {
+        char value[];
+        Item(const Item &) = delete;
+    };
+
   protected:
-    std::array<const VendorSpecificPayload *, max_count> items;
+    std::array<const Item *, max_count> items;
     size_t count;
 
   public:
@@ -83,7 +84,7 @@ struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestO
     ReadableVendorSpecificPayloadArray();
 
     bool Deserialize(RawData *raw_data) override final;
-    nonstd::span<const VendorSpecificPayload *const> Get() const;
+    nonstd::span<const ReadableVendorSpecificPayloadArray::Item *const> Get() const;
     void Log() const override final;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;

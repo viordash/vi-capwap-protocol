@@ -3,6 +3,7 @@
 #include "Logging.h"
 #include "lassert.h"
 #include <algorithm>
+#include <cstring>
 #include <string.h>
 
 WritableVendorSpecificPayloadArray VendorSpecificPayload::Dummy;
@@ -35,35 +36,10 @@ uint16_t VendorSpecificPayload::GetTotalLength() const {
     return GetLength() + sizeof(ElementHeader);
 }
 
-void VendorSpecificPayload::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(VendorSpecificPayload) <= raw_data->end);
-    VendorSpecificPayload *dst = (VendorSpecificPayload *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(VendorSpecificPayload);
-}
-
-VendorSpecificPayload *VendorSpecificPayload::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(VendorSpecificPayload) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (VendorSpecificPayload *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current = last;
-    return res;
-}
-
 WritableVendorSpecificPayloadArray::WritableVendorSpecificPayloadArray(
     const nonstd::span<const Item> &items)
     : items{ items.begin(), items.end() } {
+    static_assert(sizeof(Item::header) == 10);
     ASSERT(items.size() <= ReadableVendorSpecificPayloadArray::max_count);
 }
 
@@ -99,7 +75,9 @@ void WritableVendorSpecificPayloadArray::Clear() {
 
 void WritableVendorSpecificPayloadArray::Serialize(RawData *raw_data) const {
     for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
+        ASSERT(raw_data->current + sizeof(ElementHeader) <= raw_data->end);
+        std::memcpy(raw_data->current, &elem.header, sizeof(elem.header));
+        raw_data->current += sizeof(elem.header);
         uint16_t data_size =
             elem.header.GetLength() - (sizeof(VendorSpecificPayload) - sizeof(ElementHeader));
         memcpy(raw_data->current, elem.value.data(), data_size);
@@ -135,16 +113,22 @@ bool ReadableVendorSpecificPayloadArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto vendor_payload = VendorSpecificPayload::Deserialize(raw_data);
-    if (vendor_payload == nullptr) {
+    auto res = (ReadableVendorSpecificPayloadArray::Item *)raw_data->current;
+    if (!res->Validate()) {
         return false;
     }
-    items[count] = vendor_payload;
+    if (raw_data->current + sizeof(ElementHeader) + res->GetLength() > raw_data->end) {
+        return false;
+    }
+    raw_data->current += sizeof(ElementHeader) + res->GetLength();
+    items[count] = res;
+
     count++;
     return true;
 }
 
-nonstd::span<const VendorSpecificPayload *const> ReadableVendorSpecificPayloadArray::Get() const {
+nonstd::span<const ReadableVendorSpecificPayloadArray::Item *const>
+ReadableVendorSpecificPayloadArray::Get() const {
     nonstd::span span(items.begin(), count);
     return span;
 }
