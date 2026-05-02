@@ -45,7 +45,9 @@ TEST(ReturnedMessageElementTestsGroup, ReturnedMessageElementArray) {
 
     ReadableReturnedMessageElementArray read_data;
     raw_data = { buffer, buffer + 43 };
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -84,7 +86,9 @@ TEST(ReturnedMessageElementTestsGroup,
     raw_data = { buffer, buffer + 261 };
 
     ReadableReturnedMessageElementArray read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
 
     CHECK_EQUAL(1, read_data.Get().size());
     CHECK_EQUAL(255, read_data.Get()[0]->GetDataLength());
@@ -109,7 +113,9 @@ TEST(ReturnedMessageElementTestsGroup,
     raw_data = { buffer, buffer + 262 };
 
     ReadableReturnedMessageElementArray read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_FALSE(read_data.Deserialize(&raw_data));
+    CHECK_FALSE(read_data.IsPresent());
 }
 
 TEST(ReturnedMessageElementTestsGroup, ReturnedMessageElementArray_clear) {
@@ -160,7 +166,9 @@ TEST(ReturnedMessageElementTestsGroup, Add_array_of_items_is_unique) {
     raw_data = { buffer, buffer + data_size };
 
     ReadableReturnedMessageElementArray read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_FALSE(read_data.Deserialize(&raw_data));
 

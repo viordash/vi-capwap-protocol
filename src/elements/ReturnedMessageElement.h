@@ -2,6 +2,7 @@
 #include "ClearHeader.h"
 #include "ControlHeader.h"
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "lassert.h"
 #include "span.hpp"
@@ -36,11 +37,9 @@ struct __attribute__((packed)) ReturnedMessageElement : ElementHeader {
     Reasons GetReason() const;
     uint8_t GetDataLength() const;
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static ReturnedMessageElement *Deserialize(RawData *raw_data);
 };
 
-struct WritableReturnedMessageElementArray {
+struct WritableReturnedMessageElementArray : IWritableElement {
   public:
     struct Item {
         std::vector<uint8_t> data;
@@ -62,13 +61,13 @@ struct WritableReturnedMessageElementArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
+    void Serialize(RawData *raw_data) const override final;
 
     bool Validate() const;
-    void Log() const;
+    void Log() const override final;
 };
 
-struct ReadableReturnedMessageElementArray {
+struct ReadableReturnedMessageElementArray : IReadableElement {
     static const size_t max_count = 32;
 
   protected:
@@ -79,7 +78,9 @@ struct ReadableReturnedMessageElementArray {
     ReadableReturnedMessageElementArray(const ReadableReturnedMessageElementArray &) = delete;
     ReadableReturnedMessageElementArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const ReturnedMessageElement *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };
