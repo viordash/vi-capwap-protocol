@@ -62,7 +62,7 @@ void WritableConfigurationUpdateRequest::Serialize(RawData *raw_data) const {
     //     statistics_timer.value().Serialize(raw_data);
     // }
     if (wtp_fallback.has_value()) {
-        wtp_fallback.value().Serialize(raw_data);
+        WritableWTPFallback{ wtp_fallback.value().mode }.Serialize(raw_data);
     }
     if (wtp_name.has_value()) {
         wtp_name.value().Serialize(raw_data);
@@ -149,7 +149,6 @@ ReadableConfigurationUpdateRequest::ReadableConfigurationUpdateRequest() : unkno
     idle_timeout = nullptr;
     location_data = nullptr;
     statistics_timer = nullptr;
-    wtp_fallback = nullptr;
     wtp_name = nullptr;
     wtp_static_ipaddress = nullptr;
 }
@@ -231,8 +230,7 @@ bool ReadableConfigurationUpdateRequest::Deserialize(RawData *raw_data) {
             //     valid = true;
             //     break;
             case ElementHeader::ElementType::WTPFallback:
-                wtp_fallback = WTPFallback::Deserialize(raw_data);
-                if (wtp_fallback == nullptr) {
+                if (!wtp_fallback.Deserialize(raw_data)) {
                     return false;
                 }
                 valid = true;
@@ -315,8 +313,8 @@ void ReadableConfigurationUpdateRequest::Log() const {
     if (statistics_timer != nullptr) {
         statistics_timer->Log();
     }
-    if (wtp_fallback != nullptr) {
-        wtp_fallback->Log();
+    if (wtp_fallback.IsPresent()) {
+        wtp_fallback.Log();
     }
     if (wtp_name != nullptr) {
         wtp_name->Log();

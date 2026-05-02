@@ -92,7 +92,7 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_serializ
 
     CHECK_TRUE(read_data.idle_timeout.IsPresent());
     CHECK_EQUAL(1234, read_data.idle_timeout.Get()->GetTimeout());
-    CHECK_EQUAL(WTPFallback::Mode::Enabled, read_data.wtp_fallback->mode);
+    CHECK_EQUAL(WTPFallback::Mode::Enabled, read_data.wtp_fallback.Get()->mode);
 
     CHECK_TRUE(read_data.ac_ipv4_list.IsPresent());
     CHECK_EQUAL(3, read_data.ac_ipv4_list.Get()->GetCount());
@@ -197,7 +197,7 @@ TEST(ConfigurationStatusResponseTestsGroup, ConfigurationStatusResponse_deserial
 
     CHECK_TRUE(read_data.idle_timeout.IsPresent());
     CHECK_EQUAL(300, read_data.idle_timeout.Get()->GetTimeout());
-    CHECK_EQUAL(WTPFallback::Mode::Enabled, read_data.wtp_fallback->mode);
+    CHECK_EQUAL(WTPFallback::Mode::Enabled, read_data.wtp_fallback.Get()->mode);
 
     CHECK_TRUE(read_data.ac_ipv4_list.IsPresent());
     CHECK_EQUAL(2, read_data.ac_ipv4_list.Get()->GetCount());

@@ -170,7 +170,7 @@
 
 //     CHECK_EQUAL(12345, read_data.statistics_timer->GetValue());
 
-//     CHECK_EQUAL(WTPFallback::Mode::Reserved, read_data.wtp_fallback->mode);
+//     CHECK_EQUAL(WTPFallback::Mode::Reserved, read_data.wtp_fallback.Get()->mode);
 
 //     CHECK_EQUAL(16, read_data.wtp_name->GetLength());
 //     STRNCMP_EQUAL("abcdefабвгд", (char *)read_data.wtp_name->name, 16);
@@ -345,7 +345,7 @@
 
 //     CHECK_EQUAL(180, read_data.statistics_timer->GetValue());
 
-//     CHECK_EQUAL(WTPFallback::Mode::Enabled, read_data.wtp_fallback->mode);
+//     CHECK_EQUAL(WTPFallback::Mode::Enabled, read_data.wtp_fallback.Get()->mode);
 
 //     CHECK_EQUAL(13, read_data.wtp_name->GetLength());
 //     STRNCMP_EQUAL("Office-AP-101", (char *)read_data.wtp_name->name, 13);

@@ -77,7 +77,7 @@ struct ReadableConfigurationUpdateRequest : ReadableCapwapRequest {
     ReadableLocationData *location_data;
     ReadableRadioAdministrativeStateArray radio_states;
     StatisticsTimer *statistics_timer;
-    WTPFallback *wtp_fallback;
+    ReadableWTPFallback wtp_fallback;
     ReadableWTPName *wtp_name;
     WTPStaticIPAddressInformation *wtp_static_ipaddress;
     ReadableImageIdentifier image_identifier;
