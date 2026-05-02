@@ -64,17 +64,17 @@ TEST(CapwapElementTestsGroup, WTPMACType_deserialize) {
         0x00, 0x2c, 0x00, 0x01, 0x00,
     };
     RawData raw_data{ data, data + sizeof(data) };
-    auto element = WTPMACType::Deserialize(&raw_data);
+    ReadableWTPMACType read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK(element != nullptr);
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::WTPMACType, element->GetElementType());
-    CHECK_EQUAL(WTPMACType::Type::Local_MAC, element->type);
+    CHECK_EQUAL(ElementHeader::ElementType::WTPMACType, read_data.GetElementType());
+    CHECK_EQUAL(WTPMACType::Type::Local_MAC, read_data.Get()->type);
 }
 
 TEST(CapwapElementTestsGroup, WTPMACType_serialize) {
     uint8_t buffer[256] = {};
-    WTPMACType element_0{ WTPMACType::Type::Split_MAC };
+    WritableWTPMACType element_0{ WTPMACType::Type::Split_MAC };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     element_0.Serialize(&raw_data);
@@ -85,11 +85,11 @@ TEST(CapwapElementTestsGroup, WTPMACType_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = WTPMACType::Deserialize(&raw_data);
-    CHECK(element != nullptr);
+    ReadableWTPMACType read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(&buffer[0] + 5, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::WTPMACType, element->GetElementType());
-    CHECK_EQUAL(WTPMACType::Type::Split_MAC, element->type);
+    CHECK_EQUAL(ElementHeader::ElementType::WTPMACType, read_data.GetElementType());
+    CHECK_EQUAL(WTPMACType::Type::Split_MAC, read_data.Get()->type);
 }
 
 TEST(CapwapElementTestsGroup, MTUDiscoveryPadding_deserialize) {

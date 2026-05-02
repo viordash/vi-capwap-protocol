@@ -361,7 +361,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_deserialize) {
     CHECK_FALSE(read_data.wtp_frame_tunnel_mode->E);
     CHECK_FALSE(read_data.wtp_frame_tunnel_mode->N);
 
-    CHECK_EQUAL(WTPMACType::Type::Local_MAC, read_data.wtp_mac_type->type);
+    CHECK_EQUAL(WTPMACType::Type::Local_MAC, read_data.wtp_mac_type.Get()->type);
 
     CHECK_EQUAL(1, read_data.wtp_radio_informations.Get().size());
     CHECK_TRUE(read_data.wtp_radio_informations.Get()[0]->B);

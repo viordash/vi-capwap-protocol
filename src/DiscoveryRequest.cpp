@@ -80,7 +80,6 @@ void WritableDiscoveryRequest::Serialize(RawData *raw_data) const {
 
 ReadableDiscoveryRequest::ReadableDiscoveryRequest() : unknown_elements{} {
     wtp_frame_tunnel_mode = nullptr;
-    wtp_mac_type = nullptr;
     padding = nullptr;
 }
 
@@ -115,8 +114,7 @@ bool ReadableDiscoveryRequest::Deserialize(RawData *raw_data) {
                 }
                 break;
             case ElementHeader::ElementType::WTPMACType:
-                wtp_mac_type = WTPMACType::Deserialize(raw_data);
-                if (wtp_mac_type == nullptr) {
+                if (!wtp_mac_type.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -153,7 +151,7 @@ bool ReadableDiscoveryRequest::Deserialize(RawData *raw_data) {
     }
     return discovery_type.IsPresent() && wtp_board_data.header != nullptr
         && wtp_descriptor.header != nullptr && wtp_frame_tunnel_mode != nullptr
-        && wtp_mac_type != nullptr && wtp_radio_informations.Get().size() > 0;
+        && wtp_mac_type.IsPresent() && wtp_radio_informations.Get().size() > 0;
 }
 
 void ReadableDiscoveryRequest::Log() const {
@@ -168,8 +166,7 @@ void ReadableDiscoveryRequest::Log() const {
     ASSERT(wtp_frame_tunnel_mode != nullptr);
     wtp_frame_tunnel_mode->Log();
 
-    ASSERT(wtp_mac_type != nullptr);
-    wtp_mac_type->Log();
+    wtp_mac_type.Log();
 
     wtp_radio_informations.Log();
 
