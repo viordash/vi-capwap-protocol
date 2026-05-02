@@ -1,6 +1,7 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "elements/MacAddress.h"
 #include "span.hpp"
@@ -16,11 +17,9 @@ struct __attribute__((packed)) DecryptionErrorHeader : ElementHeader {
     DecryptionErrorHeader(const DecryptionErrorHeader &) = default;
     DecryptionErrorHeader(uint16_t element_length, uint8_t radio_id, uint8_t num_of_entries);
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static DecryptionErrorHeader *Deserialize(RawData *raw_data);
 };
 
-struct WritableDecryptionErrorReportArray {
+struct WritableDecryptionErrorReportArray : IWritableElement {
   public:
     struct Item {
         std::vector<MacAddress> MacAddresses;
@@ -45,12 +44,11 @@ struct WritableDecryptionErrorReportArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    uint16_t GetTotalLength() const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableDecryptionErrorReportArray {
+struct ReadableDecryptionErrorReportArray : IReadableElement {
   public:
     static const size_t max_count = 32;
     struct Item {
@@ -75,7 +73,9 @@ struct ReadableDecryptionErrorReportArray {
     ReadableDecryptionErrorReportArray(const ReadableDecryptionErrorReportArray &) = delete;
     ReadableDecryptionErrorReportArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     const nonstd::span<const Item> Get();
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

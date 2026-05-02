@@ -29,32 +29,6 @@ bool DecryptionErrorHeader::Validate() const {
     return true;
 }
 
-void DecryptionErrorHeader::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(DecryptionErrorHeader) + GetLength() <= raw_data->end);
-    DecryptionErrorHeader *dst = (DecryptionErrorHeader *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(DecryptionErrorHeader);
-}
-
-DecryptionErrorHeader *DecryptionErrorHeader::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(DecryptionErrorHeader) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (DecryptionErrorHeader *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current += sizeof(DecryptionErrorHeader);
-    return res;
-}
-
 uint16_t WritableDecryptionErrorReportArray::Item::CalcEntriesSize(
     const nonstd::span<const MacAddress> &entries) {
     ASSERT(entries.size() <= DecryptionErrorHeader::max_count);
@@ -104,7 +78,10 @@ void WritableDecryptionErrorReportArray::Serialize(RawData *raw_data) const {
     ASSERT(items.size() <= ReadableDecryptionErrorReportArray::max_count);
 
     for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
+        ASSERT(raw_data->current + sizeof(DecryptionErrorHeader) <= raw_data->end);
+        DecryptionErrorHeader *dst = (DecryptionErrorHeader *)raw_data->current;
+        *dst = elem.header;
+        raw_data->current += sizeof(DecryptionErrorHeader);
 
         for (auto &entry : elem.MacAddresses) {
             ReadableMacAddress *write_entry = (ReadableMacAddress *)raw_data->current;
@@ -114,13 +91,6 @@ void WritableDecryptionErrorReportArray::Serialize(RawData *raw_data) const {
             raw_data->current += sizeof(ReadableMacAddress::Length) + entry.Length;
         }
     }
-}
-uint16_t WritableDecryptionErrorReportArray::GetTotalLength() const {
-    uint16_t len = 0;
-    for (const auto &elem : items) {
-        len += elem.header.GetLength() + sizeof(ElementHeader);
-    }
-    return len;
 }
 
 void WritableDecryptionErrorReportArray::Log() const {
@@ -144,17 +114,28 @@ bool ReadableDecryptionErrorReportArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    Item &item = items[count];
-    item.header = DecryptionErrorHeader::Deserialize(raw_data);
-    if (item.header == nullptr) {
+    if (raw_data->current + sizeof(DecryptionErrorHeader) > raw_data->end) {
         return false;
     }
+
+    Item &item = items[count];
+    item.header = (DecryptionErrorHeader *)raw_data->current;
+    if (!item.header->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item.header->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current += sizeof(DecryptionErrorHeader);
 
     const uint8_t *end = raw_data->current + item.header->GetLength()
                        - (sizeof(DecryptionErrorHeader) - sizeof(ElementHeader));
 
     while (raw_data->current < end) {
-        if (count >= DecryptionErrorHeader::max_count) {
+        if (item.num_of_entries >= DecryptionErrorHeader::max_count) {
             log_e("ReadableDecryptionErrorReport::Deserialize entries count exceeds");
             return false;
         }
@@ -204,4 +185,12 @@ void ReadableDecryptionErrorReportArray::Log() const {
             MacAddress::Log(i, items[i].entries[k]->Length, items[i].entries[k]->MACAddresses);
         }
     }
+}
+
+ElementHeader::ElementType ReadableDecryptionErrorReportArray::GetElementType() const {
+    return ElementHeader::DecryptionErrorReport;
+}
+
+bool ReadableDecryptionErrorReportArray::IsPresent() const {
+    return count > 0;
 }
