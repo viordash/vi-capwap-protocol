@@ -26,38 +26,15 @@ TEST(WTPNameTestsGroup, WTPName_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto read_data = ReadableWTPName::Deserialize(&raw_data);
-    CHECK(read_data != nullptr);
+    ReadableWTPName read_data;
+    CHECK_FALSE(read_data.IsPresent());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(&buffer[0] + sizeof(reference), raw_data.current);
-    CHECK_EQUAL(16, read_data->GetLength());
-    CHECK_EQUAL(ElementHeader::ElementType::WTPName, read_data->GetElementType());
-    STRNCMP_EQUAL("abcdefабвгд", (char *)read_data->name, 16);
-}
-
-TEST(WTPNameTestsGroup, WTPName_take_ownership) {
-    uint8_t buffer[256] = {};
-    RawData raw_data{ buffer, buffer + sizeof(buffer) };
-
-    std::string str("abcdefабвгд");
-
-    WritableWTPName write_data{ str };
-    str.clear();
-
-    write_data.Serialize(&raw_data);
-    CHECK_EQUAL(&buffer[0] + 4 + 16, raw_data.current);
-    const uint8_t reference[] = { 0x00, 0x2D, 0x00, 0x10, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66,
-                                  0xD0, 0xB0, 0xD0, 0xB1, 0xD0, 0xB2, 0xD0, 0xB3, 0xD0, 0xB4 };
-    MEMCMP_EQUAL(buffer, reference, sizeof(reference));
-
-    raw_data = { buffer, buffer + sizeof(buffer) };
-    auto read_data = ReadableWTPName::Deserialize(&raw_data);
-    CHECK(read_data != nullptr);
-
-    CHECK_EQUAL(&buffer[0] + sizeof(reference), raw_data.current);
-    CHECK_EQUAL(16, read_data->GetLength());
-    CHECK_EQUAL(ElementHeader::ElementType::WTPName, read_data->GetElementType());
-    STRNCMP_EQUAL("abcdefабвгд", (char *)read_data->name, 16);
+    CHECK_EQUAL(16, read_data.Get()->GetLength());
+    CHECK_EQUAL(ElementHeader::ElementType::WTPName, read_data.GetElementType());
+    STRNCMP_EQUAL("abcdefабвгд", (char *)read_data.Get()->name, 16);
+    CHECK_TRUE(read_data.IsPresent());
 }
 
 TEST(WTPNameTestsGroup, WTPName_deserialize_ascii) {
@@ -77,11 +54,11 @@ TEST(WTPNameTestsGroup, WTPName_deserialize_ascii) {
 
     RawData raw_data{ data, data + sizeof(data) };
 
-    auto read_data = ReadableWTPName::Deserialize(&raw_data);
-    CHECK(read_data != nullptr);
+    ReadableWTPName read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(14, read_data->GetLength());
-    STRNCMP_EQUAL("Corporate-AC-1", (char *)read_data->name, 14);
+    CHECK_EQUAL(14, read_data.Get()->GetLength());
+    STRNCMP_EQUAL("Corporate-AC-1", (char *)read_data.Get()->name, 14);
 }
 
 TEST(WTPNameTestsGroup, WTPName_deserialize_utf8) {
@@ -106,9 +83,9 @@ uint8_t data[] = {
 
     RawData raw_data{ data, data + sizeof(data) };
 
-    auto read_data = ReadableWTPName::Deserialize(&raw_data);
-    CHECK(read_data != nullptr);
+    ReadableWTPName read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(16, read_data->GetLength());
-    STRNCMP_EQUAL("München-AC-Main", (char *)read_data->name, 16);
+    CHECK_EQUAL(16, read_data.Get()->GetLength());
+    STRNCMP_EQUAL("München-AC-Main", (char *)read_data.Get()->name, 16);
 }

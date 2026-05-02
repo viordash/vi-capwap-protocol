@@ -80,7 +80,6 @@ void WritableJoinRequest::Serialize(RawData *raw_data) const {
 ReadableJoinRequest::ReadableJoinRequest(
     nonstd::span<IReadableJoinRequestOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
-    wtp_name = nullptr;
     wtp_frame_tunnel_mode = nullptr;
     wtp_mac_type = nullptr;
 }
@@ -118,8 +117,7 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
                 break;
 
             case ElementHeader::ElementType::WTPName:
-                wtp_name = ReadableWTPName::Deserialize(raw_data);
-                if (wtp_name == nullptr) {
+                if (!wtp_name.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -180,7 +178,7 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
     }
 
     return location_data.IsPresent() && wtp_board_data.header != nullptr
-        && wtp_descriptor.header != nullptr && wtp_name != nullptr && session_id.IsPresent()
+        && wtp_descriptor.header != nullptr && wtp_name.IsPresent() && session_id.IsPresent()
         && wtp_frame_tunnel_mode != nullptr && wtp_mac_type != nullptr
         && wtp_radio_informations.Get().size() > 0 && ecn_support.IsPresent()
         && ip_addresses.Get().size() > 0;
@@ -195,8 +193,7 @@ void ReadableJoinRequest::Log() const {
     wtp_board_data.Log();
     wtp_descriptor.Log();
 
-    ASSERT(wtp_name != nullptr);
-    wtp_name->Log();
+    wtp_name.Log();
 
     session_id.Log();
 

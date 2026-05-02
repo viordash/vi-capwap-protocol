@@ -79,7 +79,7 @@ struct ReadableJoinRequest : ReadableCapwapRequest {
     ReadableLocationData location_data;
     ReadableWTPBoardData wtp_board_data;
     ReadableWTPDescriptor wtp_descriptor;
-    ReadableWTPName *wtp_name;
+    ReadableWTPName wtp_name;
     ReadableSessionId session_id;
     WTPFrameTunnelMode *wtp_frame_tunnel_mode;
     WTPMACType *wtp_mac_type;

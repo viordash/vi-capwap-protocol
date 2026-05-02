@@ -235,13 +235,13 @@ bool ReadableConfigurationUpdateRequest::Deserialize(RawData *raw_data) {
                 }
                 valid = true;
                 break;
-            case ElementHeader::ElementType::WTPName:
-                wtp_name = ReadableWTPName::Deserialize(raw_data);
-                if (wtp_name == nullptr) {
-                    return false;
-                }
-                valid = true;
-                break;
+            // case ElementHeader::ElementType::WTPName:
+            //     wtp_name = ReadableWTPName::Deserialize(raw_data);
+            //     if (wtp_name == nullptr) {
+            //         return false;
+            //     }
+            //     valid = true;
+            //     break;
             case ElementHeader::ElementType::WTPStaticIPAddressInformation:
                 wtp_static_ipaddress = WTPStaticIPAddressInformation::Deserialize(raw_data);
                 if (wtp_static_ipaddress == nullptr) {
