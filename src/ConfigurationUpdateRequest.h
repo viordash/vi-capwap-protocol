@@ -18,9 +18,7 @@
 #include "elements/WTPName.h"
 #include "elements/WTPStaticIPAddressInformation.h"
 #include "span.hpp"
-#include <limits>
-#include <optional>
-#include <vector>
+#include <unordered_map>
 
 struct WritableConfigurationUpdateRequest : WritableCapwapRequest {
 
@@ -39,31 +37,27 @@ struct WritableConfigurationUpdateRequest : WritableCapwapRequest {
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
     void Serialize(RawData *raw_data) const override final;
-    void Clear();
-    bool Validate();
 };
 
 struct ReadableConfigurationUpdateRequest : ReadableCapwapRequest {
-    ReadableACNameWithPriorityArray ac_names_with_priority;
-    ACTimestamp *ac_timestamp;
-    ReadableAddMacAclEntry add_mac_acl_entry;
-    CAPWAPTimers *capwap_timers;
-    ReadableDecryptionErrorReportPeriodArray decryption_error_report_periods;
-    ReadableDeleteMacAclEntry delete_mac_acl_entry;
-    IdleTimeout *idle_timeout;
-    ReadableLocationData *location_data;
-    ReadableRadioAdministrativeStateArray radio_states;
-    StatisticsTimer *statistics_timer;
-    ReadableWTPFallback wtp_fallback;
-    ReadableWTPName *wtp_name;
-    ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
-    ReadableImageIdentifier image_identifier;
-    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+  protected:
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableConfigurationUpdateRequestOptionalElement *const>
+        key_optional_elements;
 
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableConfigurationUpdateRequestOptionalElement *const>
+    MapOptionalsElements(
+        nonstd::span<IReadableConfigurationUpdateRequestOptionalElement *const> optional_elements);
+
+  public:
     size_t unknown_elements;
 
     ReadableConfigurationUpdateRequest(const ReadableConfigurationUpdateRequest &) = delete;
-    ReadableConfigurationUpdateRequest();
+    ReadableConfigurationUpdateRequest(nonstd::span<IReadableConfigurationUpdateRequestOptionalElement *const> optional_elements);
+
+    ReadableConfigurationUpdateRequest(
+        std::initializer_list<IReadableConfigurationUpdateRequestOptionalElement *> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

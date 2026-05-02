@@ -15,7 +15,7 @@ struct __attribute__((packed)) LocationData : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableLocationData : IWritableElement {
+struct WritableLocationData : IWritableConfigurationUpdateRequestOptionalElement {
   protected:
     LocationData element;
     const std::string_view data;
@@ -28,7 +28,7 @@ struct WritableLocationData : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableLocationData : IReadableElement {
+struct ReadableLocationData : IReadableConfigurationUpdateRequestOptionalElement {
   public:
     struct Element : LocationData {
         char data[];

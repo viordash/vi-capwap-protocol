@@ -25,7 +25,8 @@ struct __attribute__((packed)) ImageIdentifierHeader : ElementHeader {
 };
 
 struct WritableImageIdentifier : IWritableJoinResponseOptionalElement,
-                                 IWritableImageDataRequestOptionalElement {
+                                 IWritableImageDataRequestOptionalElement,
+                                 IWritableConfigurationUpdateRequestOptionalElement {
   protected:
     ImageIdentifierHeader element;
     std::vector<char> data;
@@ -38,7 +39,8 @@ struct WritableImageIdentifier : IWritableJoinResponseOptionalElement,
 };
 
 struct ReadableImageIdentifier : IReadableJoinResponseOptionalElement,
-                                 IReadableImageDataRequestOptionalElement {
+                                 IReadableImageDataRequestOptionalElement,
+                                 IReadableConfigurationUpdateRequestOptionalElement {
   public:
     struct Element : ImageIdentifierHeader {
         char data[];

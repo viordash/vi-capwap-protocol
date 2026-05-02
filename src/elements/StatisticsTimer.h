@@ -20,7 +20,7 @@ struct __attribute__((packed)) StatisticsTimer : ElementHeader {
     void Log() const;
 };
 
-struct WritableStatisticsTimer : IWritableElement {
+struct WritableStatisticsTimer : IWritableConfigurationUpdateRequestOptionalElement {
   protected:
     StatisticsTimer element;
 
@@ -31,7 +31,7 @@ struct WritableStatisticsTimer : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableStatisticsTimer : IReadableElement {
+struct ReadableStatisticsTimer : IReadableConfigurationUpdateRequestOptionalElement {
   protected:
     StatisticsTimer *element = nullptr;
     bool is_present = false;

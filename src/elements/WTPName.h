@@ -16,7 +16,7 @@ struct __attribute__((packed)) WTPName : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableWTPName : IWritableElement {
+struct WritableWTPName : IWritableConfigurationUpdateRequestOptionalElement {
   protected:
     WTPName element;
     const std::string_view name;
@@ -29,7 +29,7 @@ struct WritableWTPName : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableWTPName : IReadableElement {
+struct ReadableWTPName : IReadableConfigurationUpdateRequestOptionalElement {
   public:
     struct Element : WTPName {
         char name[];

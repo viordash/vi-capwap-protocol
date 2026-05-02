@@ -24,7 +24,7 @@ struct __attribute__((packed)) RadioAdministrativeState : ElementHeader {
     static RadioAdministrativeState *Deserialize(RawData *raw_data);
 };
 
-struct WritableRadioAdministrativeStateArray : IWritableElement {
+struct WritableRadioAdministrativeStateArray : IWritableConfigurationUpdateRequestOptionalElement {
   private:
     std::vector<RadioAdministrativeState> items;
 
@@ -40,7 +40,7 @@ struct WritableRadioAdministrativeStateArray : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableRadioAdministrativeStateArray : IReadableElement {
+struct ReadableRadioAdministrativeStateArray : IReadableConfigurationUpdateRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

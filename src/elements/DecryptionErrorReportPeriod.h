@@ -27,7 +27,8 @@ struct __attribute__((packed)) DecryptionErrorReportPeriod : ElementHeader {
     uint16_t ReportInterval() const;
 };
 
-struct WritableDecryptionErrorReportPeriodArray : IWritableElement {
+struct WritableDecryptionErrorReportPeriodArray
+    : IWritableConfigurationUpdateRequestOptionalElement {
   private:
     std::vector<DecryptionErrorReportPeriod> items;
 
@@ -44,7 +45,8 @@ struct WritableDecryptionErrorReportPeriodArray : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableDecryptionErrorReportPeriodArray : IReadableElement {
+struct ReadableDecryptionErrorReportPeriodArray
+    : IReadableConfigurationUpdateRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

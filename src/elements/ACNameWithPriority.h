@@ -30,7 +30,8 @@ struct __attribute__((packed)) ACNameWithPriorityHeader : ElementHeader {
     static ACNameWithPriorityHeader *Deserialize(RawData *raw_data);
 };
 
-struct WritableACNameWithPriorityArray : IWritableConfigurationStatusRequestOptionalElement {
+struct WritableACNameWithPriorityArray : IWritableConfigurationStatusRequestOptionalElement,
+                                         IWritableConfigurationUpdateRequestOptionalElement {
   public:
     struct Item {
         std::string_view name;
@@ -56,7 +57,8 @@ struct WritableACNameWithPriorityArray : IWritableConfigurationStatusRequestOpti
     void Log() const override final;
 };
 
-struct ReadableACNameWithPriorityArray : IReadableConfigurationStatusRequestOptionalElement {
+struct ReadableACNameWithPriorityArray : IReadableConfigurationStatusRequestOptionalElement,
+                                         IReadableConfigurationUpdateRequestOptionalElement {
     static const size_t max_count = 32;
 
   protected:

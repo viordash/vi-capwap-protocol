@@ -16,7 +16,7 @@ struct __attribute__((packed)) WTPFallback : ElementHeader {
     void Log() const;
 };
 
-struct WritableWTPFallback : IWritableElement {
+struct WritableWTPFallback : IWritableConfigurationUpdateRequestOptionalElement {
   protected:
     WTPFallback element;
 
@@ -27,7 +27,7 @@ struct WritableWTPFallback : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableWTPFallback : IReadableElement {
+struct ReadableWTPFallback : IReadableConfigurationUpdateRequestOptionalElement {
   protected:
     WTPFallback *element = nullptr;
     bool is_present = false;

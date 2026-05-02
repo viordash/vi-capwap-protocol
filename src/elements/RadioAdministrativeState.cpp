@@ -132,7 +132,7 @@ void ReadableRadioAdministrativeStateArray::Log() const {
 }
 
 ElementHeader::ElementType ReadableRadioAdministrativeStateArray::GetElementType() const {
-    return ElementHeader::ACNameWithPriority;
+    return ElementHeader::RadioAdministrativeState;
 }
 
 bool ReadableRadioAdministrativeStateArray::IsPresent() const {

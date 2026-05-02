@@ -16,7 +16,7 @@ struct __attribute__((packed)) CAPWAPTimers : ElementHeader {
     void Log() const;
 };
 
-struct WritableCAPWAPTimers : IWritableElement {
+struct WritableCAPWAPTimers : IWritableConfigurationUpdateRequestOptionalElement {
   protected:
     CAPWAPTimers element;
 
@@ -27,7 +27,7 @@ struct WritableCAPWAPTimers : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableCAPWAPTimers : IReadableElement {
+struct ReadableCAPWAPTimers : IReadableConfigurationUpdateRequestOptionalElement {
   protected:
     CAPWAPTimers *element = nullptr;
     bool is_present = false;

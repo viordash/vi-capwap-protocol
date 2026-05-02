@@ -8,7 +8,7 @@
 #include "span.hpp"
 #include <vector>
 
-struct WritableAddMacAclEntry : IWritableElement {
+struct WritableAddMacAclEntry : IWritableConfigurationUpdateRequestOptionalElement {
 
   protected:
     std::vector<MacAddress> items;
@@ -25,7 +25,7 @@ struct WritableAddMacAclEntry : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableAddMacAclEntry : IReadableElement {
+struct ReadableAddMacAclEntry : IReadableConfigurationUpdateRequestOptionalElement {
   public:
     MacAclEntriesHeader *header;
 

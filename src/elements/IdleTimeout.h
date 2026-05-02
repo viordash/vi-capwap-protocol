@@ -22,7 +22,7 @@ struct __attribute__((packed)) IdleTimeout : ElementHeader {
     void Log() const;
 };
 
-struct WritableIdleTimeout : IWritableElement {
+struct WritableIdleTimeout : IWritableConfigurationUpdateRequestOptionalElement {
   protected:
     IdleTimeout element;
 
@@ -33,7 +33,7 @@ struct WritableIdleTimeout : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableIdleTimeout : IReadableElement {
+struct ReadableIdleTimeout : IReadableConfigurationUpdateRequestOptionalElement {
   protected:
     IdleTimeout *element = nullptr;
     bool is_present = false;
