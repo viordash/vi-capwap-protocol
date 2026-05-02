@@ -148,7 +148,7 @@ bool ReadableDiscoveryRequest::Deserialize(RawData *raw_data) {
         }
     }
     return discovery_type.IsPresent() && wtp_board_data.IsPresent()
-        && wtp_descriptor.header != nullptr && wtp_frame_tunnel_mode.IsPresent()
+        && wtp_descriptor.IsPresent() && wtp_frame_tunnel_mode.IsPresent()
         && wtp_mac_type.IsPresent() && wtp_radio_informations.Get().size() > 0;
 }
 
