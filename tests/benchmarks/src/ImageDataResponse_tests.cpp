@@ -27,7 +27,7 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_serialize_deserialize_perf) 
 
     const uint8_t hash[] = { 0xF8, 0x1D, 0x4F, 0xAE, 0x7D, 0xEC, 0x11, 0xD0,
                              0xA7, 0x65, 0x00, 0xA0, 0xC9, 0x1E, 0x6B, 0xF6 };
-    ImageInformation image_information{ 12345, hash };
+    WritableImageInformation image_information{ 12345, hash };
 
     WritableImageDataResponse write_data(ResultCode::Type::Success,
                                          vendor_specific_payloads,

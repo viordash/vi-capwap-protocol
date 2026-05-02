@@ -44,7 +44,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_deserialize_perf) {
                                          wtpdescriptor_encr_elements,
                                          wtpdescriptor_descr_elements };
 
-    WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
+    WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
     WritableWTPRadioInformationArray wtp_radio_informations;
     wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
