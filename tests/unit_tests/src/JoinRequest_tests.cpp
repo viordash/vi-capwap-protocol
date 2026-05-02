@@ -430,7 +430,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
 
     const uint8_t session_id[] = { 0xDE, 0xC0, 0xAD, 0xDE, 0x12, 0x34, 0x56, 0x78,
                                    0x90, 0xAB, 0xCD, 0xEF, 0xFE, 0xED, 0xDA, 0xBE };
-    MEMCMP_EQUAL(session_id, read_data.session_id->session_id, sizeof(session_id));
+    MEMCMP_EQUAL(session_id, read_data.session_id.Get()->session_id, sizeof(session_id));
 
     CHECK_TRUE(read_data.wtp_frame_tunnel_mode->L);
     CHECK_FALSE(read_data.wtp_frame_tunnel_mode->E);

@@ -25,7 +25,7 @@ struct WritableJoinRequest : WritableCapwapRequest {
     const WritableWTPBoardData &wtp_board_data;
     const WritableWTPDescriptor &wtp_descriptor;
     const WritableWTPName wtp_name;
-    const SessionId &session_id;
+    const WritableSessionId session_id;
     const WTPFrameTunnelMode &wtp_frame_tunnel_mode;
     const WTPMACType wtp_mac_type;
     WritableWTPRadioInformationArray &wtp_radio_informations;
@@ -80,7 +80,7 @@ struct ReadableJoinRequest : ReadableCapwapRequest {
     ReadableWTPBoardData wtp_board_data;
     ReadableWTPDescriptor wtp_descriptor;
     ReadableWTPName *wtp_name;
-    SessionId *session_id;
+    ReadableSessionId session_id;
     WTPFrameTunnelMode *wtp_frame_tunnel_mode;
     WTPMACType *wtp_mac_type;
     ReadableWTPRadioInformationArray wtp_radio_informations;

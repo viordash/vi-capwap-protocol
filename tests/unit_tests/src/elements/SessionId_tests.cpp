@@ -31,19 +31,22 @@ TEST(SessionIdTestsGroup, SessionId_deserialize) {
     };
     // clang-format on
     RawData raw_data{ data, data + sizeof(data) };
-    auto element = SessionId::Deserialize(&raw_data);
+    ReadableSessionId read_data;
+    CHECK_FALSE(read_data.IsPresent());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK(element != nullptr);
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::SessionID, element->GetElementType());
+    CHECK_EQUAL(ElementHeader::ElementType::SessionID, read_data.GetElementType());
+    CHECK_TRUE(read_data.IsPresent());
 }
 
 TEST(SessionIdTestsGroup, SessionId_serialize) {
     uint8_t buffer[256] = {};
     const uint8_t id[] = { 0xF8, 0x1D, 0x4F, 0xAE, 0x7D, 0xEC, 0x11, 0xD0,
                            0xA7, 0x65, 0x00, 0xA0, 0xC9, 0x1E, 0x6B, 0xF6 };
-    SessionId element_0;
-    std::memcpy(element_0.session_id, id, sizeof(element_0.session_id));
+    AlignedSessionId aligned_id(id);
+    SessionId session_id(aligned_id);
+    WritableSessionId element_0{ session_id };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     element_0.Serialize(&raw_data);
@@ -53,11 +56,11 @@ TEST(SessionIdTestsGroup, SessionId_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = SessionId::Deserialize(&raw_data);
-    CHECK(element != nullptr);
+    ReadableSessionId read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(&buffer[0] + 20, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::SessionID, element->GetElementType());
-    MEMCMP_EQUAL(id, element->session_id, 16);
+    CHECK_EQUAL(ElementHeader::ElementType::SessionID, read_data.GetElementType());
+    MEMCMP_EQUAL(id, read_data.Get()->session_id, 16);
 }
 
 TEST(SessionIdTestsGroup, SessionId_equal) {
