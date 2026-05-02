@@ -65,7 +65,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_deserialize_perf) {
     SessionId session_id;
     std::memcpy(session_id.session_id, id, sizeof(session_id.session_id));
 
-    WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
+    WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");

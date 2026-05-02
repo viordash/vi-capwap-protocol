@@ -11,7 +11,7 @@ WritableJoinRequest::WritableJoinRequest(
     const WritableWTPDescriptor &wtp_descriptor,
     const std::string_view wtp_name,
     const SessionId &session_id,
-    const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
+    const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
     const WTPMACType::Type mac_type,
     WritableWTPRadioInformationArray &wtp_radio_informations,
     const ECNSupport::Type ecn_support,
@@ -31,7 +31,7 @@ WritableJoinRequest::WritableJoinRequest(
     const WritableWTPDescriptor &wtp_descriptor,
     const std::string_view wtp_name,
     const SessionId &session_id,
-    const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
+    const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
     const WTPMACType::Type mac_type,
     WritableWTPRadioInformationArray &wtp_radio_informations,
     const ECNSupport::Type ecn_support,
@@ -80,7 +80,6 @@ void WritableJoinRequest::Serialize(RawData *raw_data) const {
 ReadableJoinRequest::ReadableJoinRequest(
     nonstd::span<IReadableJoinRequestOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
-    wtp_frame_tunnel_mode = nullptr;
 }
 
 ReadableJoinRequest::ReadableJoinRequest(
@@ -126,8 +125,7 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
                 }
                 break;
             case ElementHeader::ElementType::WTPFrameTunnelMode:
-                wtp_frame_tunnel_mode = WTPFrameTunnelMode::Deserialize(raw_data);
-                if (wtp_frame_tunnel_mode == nullptr) {
+                if (!wtp_frame_tunnel_mode.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -177,7 +175,7 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
 
     return location_data.IsPresent() && wtp_board_data.header != nullptr
         && wtp_descriptor.header != nullptr && wtp_name.IsPresent() && session_id.IsPresent()
-        && wtp_frame_tunnel_mode != nullptr && wtp_mac_type.IsPresent()
+        && wtp_frame_tunnel_mode.IsPresent() && wtp_mac_type.IsPresent()
         && wtp_radio_informations.Get().size() > 0 && ecn_support.IsPresent()
         && ip_addresses.Get().size() > 0;
 }
@@ -195,8 +193,7 @@ void ReadableJoinRequest::Log() const {
 
     session_id.Log();
 
-    ASSERT(wtp_frame_tunnel_mode != nullptr);
-    wtp_frame_tunnel_mode->Log();
+    wtp_frame_tunnel_mode.Log();
 
     wtp_mac_type.Log();
 

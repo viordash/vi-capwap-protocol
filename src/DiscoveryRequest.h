@@ -19,7 +19,7 @@ struct WritableDiscoveryRequest : WritableCapwapRequest {
     const WritableDiscoveryType discovery_type;
     const WritableWTPBoardData &wtp_board_data;
     const WritableWTPDescriptor &wtp_descriptor;
-    const WTPFrameTunnelMode &wtp_frame_tunnel_mode;
+    const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode;
     const WritableWTPMACType wtp_mac_type;
     WritableWTPRadioInformationArray &wtp_radio_informations;
 
@@ -38,7 +38,7 @@ struct WritableDiscoveryRequest : WritableCapwapRequest {
     WritableDiscoveryRequest(const DiscoveryType::Type discovery_type,
                              const WritableWTPBoardData &wtp_board_data,
                              const WritableWTPDescriptor &wtp_descriptor,
-                             const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
+                             const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
                              const WTPMACType::Type mac_type,
                              WritableWTPRadioInformationArray &wtp_radio_informations,
                              WritableVendorSpecificPayloadArray &vendor_specific_payloads,
@@ -53,7 +53,7 @@ struct ReadableDiscoveryRequest : ReadableCapwapRequest {
     ReadableDiscoveryType discovery_type;
     ReadableWTPBoardData wtp_board_data;
     ReadableWTPDescriptor wtp_descriptor;
-    WTPFrameTunnelMode *wtp_frame_tunnel_mode;
+    ReadableWTPFrameTunnelMode wtp_frame_tunnel_mode;
     ReadableWTPMACType wtp_mac_type;
     ReadableWTPRadioInformationArray wtp_radio_informations;
 

@@ -26,7 +26,7 @@ struct WritableJoinRequest : WritableCapwapRequest {
     const WritableWTPDescriptor &wtp_descriptor;
     const WritableWTPName wtp_name;
     const WritableSessionId session_id;
-    const WTPFrameTunnelMode &wtp_frame_tunnel_mode;
+    const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode;
     const WritableWTPMACType wtp_mac_type;
     WritableWTPRadioInformationArray &wtp_radio_informations;
     const WritableECNSupport ecn_support;
@@ -41,7 +41,7 @@ struct WritableJoinRequest : WritableCapwapRequest {
                         const WritableWTPDescriptor &wtp_descriptor,
                         const std::string_view wtp_name,
                         const SessionId &session_id,
-                        const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
+                        const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
                         const WTPMACType::Type mac_type,
                         WritableWTPRadioInformationArray &wtp_radio_informations,
                         const ECNSupport::Type ecn_support,
@@ -54,7 +54,7 @@ struct WritableJoinRequest : WritableCapwapRequest {
         const WritableWTPDescriptor &wtp_descriptor,
         const std::string_view wtp_name,
         const SessionId &session_id,
-        const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
+        const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
         const WTPMACType::Type mac_type,
         WritableWTPRadioInformationArray &wtp_radio_informations,
         const ECNSupport::Type ecn_support,
@@ -81,7 +81,7 @@ struct ReadableJoinRequest : ReadableCapwapRequest {
     ReadableWTPDescriptor wtp_descriptor;
     ReadableWTPName wtp_name;
     ReadableSessionId session_id;
-    WTPFrameTunnelMode *wtp_frame_tunnel_mode;
+    ReadableWTPFrameTunnelMode wtp_frame_tunnel_mode;
     ReadableWTPMACType wtp_mac_type;
     ReadableWTPRadioInformationArray wtp_radio_informations;
     ReadableECNSupport ecn_support;

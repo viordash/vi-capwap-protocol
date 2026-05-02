@@ -9,7 +9,7 @@ WritableDiscoveryRequest::WritableDiscoveryRequest(
     const DiscoveryType::Type discovery_type,
     const WritableWTPBoardData &wtp_board_data,
     const WritableWTPDescriptor &wtp_descriptor,
-    const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
+    const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
     const WTPMACType::Type mac_type,
     WritableWTPRadioInformationArray &wtp_radio_informations,
     WritableVendorSpecificPayloadArray &vendor_specific_payloads,
@@ -79,7 +79,6 @@ void WritableDiscoveryRequest::Serialize(RawData *raw_data) const {
 }
 
 ReadableDiscoveryRequest::ReadableDiscoveryRequest() : unknown_elements{} {
-    wtp_frame_tunnel_mode = nullptr;
     padding = nullptr;
 }
 
@@ -108,8 +107,7 @@ bool ReadableDiscoveryRequest::Deserialize(RawData *raw_data) {
                 }
                 break;
             case ElementHeader::ElementType::WTPFrameTunnelMode:
-                wtp_frame_tunnel_mode = WTPFrameTunnelMode::Deserialize(raw_data);
-                if (wtp_frame_tunnel_mode == nullptr) {
+                if (!wtp_frame_tunnel_mode.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -150,7 +148,7 @@ bool ReadableDiscoveryRequest::Deserialize(RawData *raw_data) {
         }
     }
     return discovery_type.IsPresent() && wtp_board_data.header != nullptr
-        && wtp_descriptor.header != nullptr && wtp_frame_tunnel_mode != nullptr
+        && wtp_descriptor.header != nullptr && wtp_frame_tunnel_mode.IsPresent()
         && wtp_mac_type.IsPresent() && wtp_radio_informations.Get().size() > 0;
 }
 
@@ -163,8 +161,7 @@ void ReadableDiscoveryRequest::Log() const {
     wtp_board_data.Log();
     wtp_descriptor.Log();
 
-    ASSERT(wtp_frame_tunnel_mode != nullptr);
-    wtp_frame_tunnel_mode->Log();
+    wtp_frame_tunnel_mode.Log();
 
     wtp_mac_type.Log();
 

@@ -38,7 +38,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize) {
                                          wtpdescriptor_encr_elements,
                                          wtpdescriptor_descr_elements };
 
-    WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
+    WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
     WritableWTPRadioInformationArray wtp_radio_informations;
     wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
@@ -128,7 +128,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_VendorSpecificP
                                          wtpdescriptor_encr_elements,
                                          wtpdescriptor_descr_elements };
 
-    WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
+    WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
     WritableWTPRadioInformationArray wtp_radio_informations;
     wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
@@ -204,7 +204,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_MTUDiscoveryPad
                                          wtpdescriptor_encr_elements,
                                          wtpdescriptor_descr_elements };
 
-    WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
+    WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
     WritableWTPRadioInformationArray wtp_radio_informations;
     wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
@@ -357,9 +357,10 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_deserialize) {
                 read_data.wtp_descriptor.GetDescriptors()[3]->GetType());
     CHECK_EQUAL(1, read_data.wtp_descriptor.GetDescriptors()[3]->GetLength());
 
-    CHECK_TRUE(read_data.wtp_frame_tunnel_mode->L);
-    CHECK_FALSE(read_data.wtp_frame_tunnel_mode->E);
-    CHECK_FALSE(read_data.wtp_frame_tunnel_mode->N);
+    CHECK_TRUE(read_data.wtp_frame_tunnel_mode.IsPresent());
+    CHECK_TRUE(read_data.wtp_frame_tunnel_mode.Get()->L);
+    CHECK_FALSE(read_data.wtp_frame_tunnel_mode.Get()->E);
+    CHECK_FALSE(read_data.wtp_frame_tunnel_mode.Get()->N);
 
     CHECK_EQUAL(WTPMACType::Type::Local_MAC, read_data.wtp_mac_type.Get()->type);
 

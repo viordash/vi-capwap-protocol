@@ -61,7 +61,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize) {
         SessionId session_id;
         std::memcpy(session_id.session_id, id, sizeof(session_id.session_id));
 
-        WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
+        WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
         WritableJoinRequest write_data(
             "location_data",
@@ -193,7 +193,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_with_VendorSpecificPayload) {
         SessionId session_id;
         std::memcpy(session_id.session_id, id, sizeof(session_id.session_id));
 
-        WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
+        WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
@@ -433,9 +433,10 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
                                    0x90, 0xAB, 0xCD, 0xEF, 0xFE, 0xED, 0xDA, 0xBE };
     MEMCMP_EQUAL(session_id, read_data.session_id.Get()->session_id, sizeof(session_id));
 
-    CHECK_TRUE(read_data.wtp_frame_tunnel_mode->L);
-    CHECK_FALSE(read_data.wtp_frame_tunnel_mode->E);
-    CHECK_FALSE(read_data.wtp_frame_tunnel_mode->N);
+    CHECK_TRUE(read_data.wtp_frame_tunnel_mode.IsPresent());
+    CHECK_TRUE(read_data.wtp_frame_tunnel_mode.Get()->L);
+    CHECK_FALSE(read_data.wtp_frame_tunnel_mode.Get()->E);
+    CHECK_FALSE(read_data.wtp_frame_tunnel_mode.Get()->N);
 
     CHECK_TRUE(read_data.wtp_mac_type.IsPresent());
     CHECK_EQUAL(WTPMACType::Type::Local_MAC, read_data.wtp_mac_type.Get()->type);

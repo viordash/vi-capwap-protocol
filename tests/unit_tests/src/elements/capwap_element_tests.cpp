@@ -26,19 +26,19 @@ TEST(CapwapElementTestsGroup, WTPFrameTunnelMode_deserialize) {
         0x00, 0x29, 0x00, 0x01, 0x0A,
     };
     RawData raw_data{ data, data + sizeof(data) };
-    auto element = WTPFrameTunnelMode::Deserialize(&raw_data);
+    ReadableWTPFrameTunnelMode read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK(element != nullptr);
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::WTPFrameTunnelMode, element->GetElementType());
-    CHECK_TRUE(element->L);
-    CHECK_FALSE(element->E);
-    CHECK_TRUE(element->N);
+    CHECK_EQUAL(ElementHeader::ElementType::WTPFrameTunnelMode, read_data.GetElementType());
+    CHECK_TRUE(read_data.Get()->L);
+    CHECK_FALSE(read_data.Get()->E);
+    CHECK_TRUE(read_data.Get()->N);
 }
 
 TEST(CapwapElementTestsGroup, WTPFrameTunnelMode_serialize) {
     uint8_t buffer[256] = {};
-    WTPFrameTunnelMode element_0{ true, true, false };
+    WritableWTPFrameTunnelMode element_0{ true, true, false };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     element_0.Serialize(&raw_data);
@@ -49,13 +49,13 @@ TEST(CapwapElementTestsGroup, WTPFrameTunnelMode_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = WTPFrameTunnelMode::Deserialize(&raw_data);
-    CHECK(element != nullptr);
+    ReadableWTPFrameTunnelMode read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(&buffer[0] + 5, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::WTPFrameTunnelMode, element->GetElementType());
-    CHECK_TRUE(element->L);
-    CHECK_TRUE(element->E);
-    CHECK_FALSE(element->N);
+    CHECK_EQUAL(ElementHeader::ElementType::WTPFrameTunnelMode, read_data.GetElementType());
+    CHECK_TRUE(read_data.Get()->L);
+    CHECK_TRUE(read_data.Get()->E);
+    CHECK_FALSE(read_data.Get()->N);
 }
 
 TEST(CapwapElementTestsGroup, WTPMACType_deserialize) {
