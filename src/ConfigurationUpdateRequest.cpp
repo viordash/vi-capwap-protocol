@@ -43,24 +43,24 @@ ControlHeader::MessageType WritableConfigurationUpdateRequest::GetResponseMessag
 void WritableConfigurationUpdateRequest::Serialize(RawData *raw_data) const {
     ac_names_with_priority.Serialize(raw_data);
     if (ac_timestamp.has_value()) {
-        ac_timestamp.value().Serialize(raw_data);
+        // ac_timestamp.value().Serialize(raw_data);
     }
     add_mac_acl_entry.Serialize(raw_data);
-    if (capwap_timers.has_value()) {
-        capwap_timers.value().Serialize(raw_data);
-    }
+    // if (capwap_timers.has_value()) {
+    //     capwap_timers.value().Serialize(raw_data);
+    // }
     decryption_error_report_periods.Serialize(raw_data);
     delete_mac_acl_entry.Serialize(raw_data);
-    if (idle_timeout.has_value()) {
-        idle_timeout.value().Serialize(raw_data);
-    }
+    // if (idle_timeout.has_value()) {
+    //     idle_timeout.value().Serialize(raw_data);
+    // }
     if (location_data.has_value()) {
         location_data.value().Serialize(raw_data);
     }
     radio_states.Serialize(raw_data);
-    if (statistics_timer.has_value()) {
-        statistics_timer.value().Serialize(raw_data);
-    }
+    // if (statistics_timer.has_value()) {
+    //     statistics_timer.value().Serialize(raw_data);
+    // }
     if (wtp_fallback.has_value()) {
         wtp_fallback.value().Serialize(raw_data);
     }
@@ -171,26 +171,26 @@ bool ReadableConfigurationUpdateRequest::Deserialize(RawData *raw_data) {
                 valid = true;
                 break;
 
-            case ElementHeader::ElementType::ACTimestamp:
-                ac_timestamp = ACTimestamp::Deserialize(raw_data);
-                if (ac_timestamp == nullptr) {
-                    return false;
-                }
-                valid = true;
-                break;
+            // case ElementHeader::ElementType::ACTimestamp:
+            //     ac_timestamp = ACTimestamp::Deserialize(raw_data);
+            //     if (ac_timestamp == nullptr) {
+            //         return false;
+            //     }
+            //     valid = true;
+            //     break;
             case ElementHeader::ElementType::AddMACACLEntry:
                 if (!add_mac_acl_entry.Deserialize(raw_data)) {
                     return false;
                 }
                 valid = true;
                 break;
-            case ElementHeader::ElementType::CAPWAPTimers:
-                capwap_timers = CAPWAPTimers::Deserialize(raw_data);
-                if (capwap_timers == nullptr) {
-                    return false;
-                }
-                valid = true;
-                break;
+            // case ElementHeader::ElementType::CAPWAPTimers:
+            //     capwap_timers = CAPWAPTimers::Deserialize(raw_data);
+            //     if (capwap_timers == nullptr) {
+            //         return false;
+            //     }
+            //     valid = true;
+            //     break;
             case ElementHeader::ElementType::DecryptionErrorReportPeriod:
                 if (!decryption_error_report_periods.Deserialize(raw_data)) {
                     return false;
@@ -203,33 +203,33 @@ bool ReadableConfigurationUpdateRequest::Deserialize(RawData *raw_data) {
                 }
                 valid = true;
                 break;
-            case ElementHeader::ElementType::IdleTimeout:
-                idle_timeout = IdleTimeout::Deserialize(raw_data);
-                if (idle_timeout == nullptr) {
-                    return false;
-                }
-                valid = true;
-                break;
-            case ElementHeader::ElementType::LocationData:
-                location_data = ReadableLocationData::Deserialize(raw_data);
-                if (location_data == nullptr) {
-                    return false;
-                }
-                valid = true;
-                break;
+            // case ElementHeader::ElementType::IdleTimeout:
+            //     idle_timeout = IdleTimeout::Deserialize(raw_data);
+            //     if (idle_timeout == nullptr) {
+            //         return false;
+            //     }
+            //     valid = true;
+            //     break;
+            // case ElementHeader::ElementType::LocationData:
+            //     location_data = ReadableLocationData::Deserialize(raw_data);
+            //     if (location_data == nullptr) {
+            //         return false;
+            //     }
+            //     valid = true;
+            //     break;
             case ElementHeader::ElementType::RadioAdministrativeState:
                 if (!radio_states.Deserialize(raw_data)) {
                     return false;
                 }
                 valid = true;
                 break;
-            case ElementHeader::ElementType::StatisticsTimer:
-                statistics_timer = StatisticsTimer::Deserialize(raw_data);
-                if (statistics_timer == nullptr) {
-                    return false;
-                }
-                valid = true;
-                break;
+            // case ElementHeader::ElementType::StatisticsTimer:
+            //     statistics_timer = StatisticsTimer::Deserialize(raw_data);
+            //     if (statistics_timer == nullptr) {
+            //         return false;
+            //     }
+            //     valid = true;
+            //     break;
             case ElementHeader::ElementType::WTPFallback:
                 wtp_fallback = WTPFallback::Deserialize(raw_data);
                 if (wtp_fallback == nullptr) {
