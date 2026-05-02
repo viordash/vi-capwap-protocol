@@ -57,7 +57,7 @@ struct ReadableConfigurationStatusRequest : ReadableCapwapRequest {
         nonstd::span<IReadableConfigurationStatusRequestOptionalElement *const> optional_elements);
 
   public:
-    ReadableACName *ac_name;
+    ReadableACName ac_name;
     ReadableRadioAdministrativeStateArray radio_states;
     ReadableStatisticsTimer statistics_timer;
     ReadableWTPRebootStatistics wtp_reboot_statistics;

@@ -138,7 +138,8 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
     CHECK_EQUAL(9, read_data.ac_descriptor.Get()[1]->GetLength());
     CHECK_EQUAL(5678, read_data.ac_descriptor.Get()[1]->GetVendorIdentifier());
 
-    STRNCMP_EQUAL("Corporate-AC-1", (char *)read_data.ac_name->name, 14);
+    CHECK_TRUE(read_data.ac_name.IsPresent());
+    STRNCMP_EQUAL("Corporate-AC-1", (char *)read_data.ac_name.Get()->name, 14);
 
     CHECK_EQUAL(3, read_data.wtp_radio_informations.Get().size());
     CHECK_EQUAL(10, read_data.wtp_radio_informations.Get()[0]->RadioID);
@@ -423,8 +424,8 @@ uint8_t data[] = {
     CHECK_EQUAL(10, read_data.ac_descriptor.Get()[1]->GetLength());
     CHECK_EQUAL(9279, read_data.ac_descriptor.Get()[1]->GetVendorIdentifier());
 
-    CHECK_EQUAL(15, read_data.ac_name->GetLength());
-    STRNCMP_EQUAL("ACME-Corp-AC-01", (char *)read_data.ac_name->name, 15);
+    CHECK_EQUAL(15, read_data.ac_name.Get()->GetLength());
+    STRNCMP_EQUAL("ACME-Corp-AC-01", (char *)read_data.ac_name.Get()->name, 15);
 
     CHECK_EQUAL(2, read_data.wtp_radio_informations.Get().size());
     CHECK_EQUAL(1, read_data.wtp_radio_informations.Get()[0]->RadioID);

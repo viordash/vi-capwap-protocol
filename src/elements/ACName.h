@@ -1,28 +1,49 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include <string_view>
+#include <vector>
 
-struct __attribute__((packed)) WritableACName : ElementHeader {
-    const char *name;
-
-    WritableACName(const WritableACName &) = delete;
-    WritableACName(std::string_view name);
-
-    void Serialize(RawData *raw_data) const;
-    uint16_t GetTotalLength() const;
-    void Log() const;
-};
-
-struct __attribute__((packed)) ReadableACName : ElementHeader {
+struct __attribute__((packed)) ACName : ElementHeader {
     static const size_t max_data_size = 512;
-    char name[];
 
-    ReadableACName(const ReadableACName &) = delete;
-    ReadableACName();
+    ACName(const ACName &) = delete;
+    ACName(uint16_t length);
+    uint16_t GetDataLenght() const;
 
     bool Validate() const;
-    static ReadableACName *Deserialize(RawData *raw_data);
-    void Log() const;
+};
+
+struct WritableACName : IWritableElement {
+  protected:
+    ACName element;
+    const std::string_view name;
+
+  public:
+    WritableACName(const WritableACName &) = delete;
+    WritableACName(const std::string_view name);
+
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
+};
+
+struct ReadableACName : IReadableElement {
+  public:
+    struct Element : ACName {
+        char name[];
+        Element(const Element &) = delete;
+    };
+
+  protected:
+    Element *element = nullptr;
+    bool is_present = false;
+
+  public:
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
+    const ReadableACName::Element *const Get() const;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

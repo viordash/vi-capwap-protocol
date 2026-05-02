@@ -88,7 +88,8 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize)
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    STRNCMP_EQUAL("abcdefабвгд", (char *)read_data.ac_name->name, 14);
+    CHECK_TRUE(read_data.ac_name.IsPresent());
+    STRNCMP_EQUAL("abcdefабвгд", (char *)read_data.ac_name.Get()->name, 14);
 
     CHECK_EQUAL(2, read_data.radio_states.Get().size());
     CHECK_EQUAL(0, read_data.radio_states.Get()[0]->RadioID);
@@ -250,8 +251,8 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_deserializ
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    STRNCMP_EQUAL("AC-Primary", (char *)read_data.ac_name->name, 10);
-    CHECK_EQUAL(10, read_data.ac_name->GetLength());
+    STRNCMP_EQUAL("AC-Primary", (char *)read_data.ac_name.Get()->name, 10);
+    CHECK_EQUAL(10, read_data.ac_name.Get()->GetLength());
 
     CHECK_EQUAL(3, read_data.radio_states.Get().size());
     CHECK_EQUAL(255, read_data.radio_states.Get()[0]->RadioID);

@@ -62,7 +62,6 @@ void WritableConfigurationStatusRequest::Serialize(RawData *raw_data) const {
 ReadableConfigurationStatusRequest::ReadableConfigurationStatusRequest(
     nonstd::span<IReadableConfigurationStatusRequestOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
-    ac_name = nullptr;
 }
 
 ReadableConfigurationStatusRequest::ReadableConfigurationStatusRequest(
@@ -83,8 +82,7 @@ bool ReadableConfigurationStatusRequest::Deserialize(RawData *raw_data) {
 
         switch (element->GetElementType()) {
             case ElementHeader::ElementType::ACName:
-                ac_name = ReadableACName::Deserialize(raw_data);
-                if (ac_name == nullptr) {
+                if (!ac_name.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -126,7 +124,7 @@ bool ReadableConfigurationStatusRequest::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return ac_name != nullptr && radio_states.IsPresent() > 0 && statistics_timer.IsPresent()
+    return ac_name.IsPresent() && radio_states.IsPresent() > 0 && statistics_timer.IsPresent()
         && wtp_reboot_statistics.IsPresent();
 }
 
@@ -134,8 +132,7 @@ void ReadableConfigurationStatusRequest::Log() const {
     log_i("----------------------------------");
     log_i("ME ConfigurationStatusRequest:");
 
-    ASSERT(ac_name != nullptr);
-    ac_name->Log();
+    ac_name.Log();
 
     radio_states.Log();
 

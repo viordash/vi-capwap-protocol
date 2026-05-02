@@ -92,7 +92,7 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize) {
     CHECK_EQUAL(inet_addr("192.168.100.11"), read_data.ip_addresses.Get()[1]->GetIPAddress());
     CHECK_EQUAL(20, read_data.ip_addresses.Get()[1]->GetWTPCount());
 
-    STRNCMP_EQUAL("Corporate-AC-1", read_data.ac_name->name, 14);
+    STRNCMP_EQUAL("Corporate-AC-1", read_data.ac_name.Get()->name, 14);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -262,8 +262,8 @@ uint8_t data[] = {
     CHECK_EQUAL(12, read_data.ac_descriptor.Get()[1]->GetLength());
     CHECK_EQUAL(0, read_data.ac_descriptor.Get()[1]->GetVendorIdentifier());
 
-    CHECK_EQUAL(16, read_data.ac_name->GetLength());
-    STRNCMP_EQUAL("Corp-AC-Floor15", (char *)read_data.ac_name->name, 16);
+    CHECK_EQUAL(16, read_data.ac_name.Get()->GetLength());
+    STRNCMP_EQUAL("Corp-AC-Floor15", (char *)read_data.ac_name.Get()->name, 16);
 
     CHECK_EQUAL(2, read_data.wtp_radio_informations.Get().size());
     CHECK_EQUAL(1, read_data.wtp_radio_informations.Get()[0]->RadioID);

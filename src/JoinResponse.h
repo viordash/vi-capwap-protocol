@@ -71,7 +71,7 @@ struct ReadableJoinResponse : ReadableCapwapResponse {
   public:
     ReadableResultCode result_code;
     ReadableACDescriptor ac_descriptor;
-    ReadableACName *ac_name;
+    ReadableACName ac_name;
     ReadableWTPRadioInformationArray wtp_radio_informations;
     ReadableECNSupport ecn_support;
     ReadableCAPWAPControlIPV4AdrArray control_ip_addresses;

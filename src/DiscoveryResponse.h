@@ -10,7 +10,6 @@
 #include "span.hpp"
 #include <limits>
 #include <string_view>
-#include <vector>
 
 struct WritableDiscoveryResponse : WritableCapwapResponse {
 
@@ -21,8 +20,6 @@ struct WritableDiscoveryResponse : WritableCapwapResponse {
     const WritableCAPWAPControlIPV4AdrArray ip_addresses;
 
     WritableVendorSpecificPayloadArray &vendor_specific_payloads;
-
-    uint16_t CalcTotalSize();
 
   public:
     WritableDiscoveryResponse(const WritableDiscoveryResponse &) = delete;
@@ -39,7 +36,7 @@ struct WritableDiscoveryResponse : WritableCapwapResponse {
 
 struct ReadableDiscoveryResponse : ReadableCapwapResponse {
     ReadableACDescriptor ac_descriptor;
-    ReadableACName *ac_name;
+    ReadableACName ac_name;
     ReadableWTPRadioInformationArray wtp_radio_informations;
     ReadableCAPWAPControlIPV4AdrArray ip_addresses;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;

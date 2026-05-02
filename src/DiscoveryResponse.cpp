@@ -24,15 +24,6 @@ ControlHeader::MessageType WritableDiscoveryResponse::GetRequestMessageType() co
     return ControlHeader::DiscoveryRequest;
 }
 
-uint16_t WritableDiscoveryResponse::CalcTotalSize() {
-    uint16_t total = ac_descriptor.GetTotalLength();
-    total += ac_name.GetTotalLength();
-    total += wtp_radio_informations.GetTotalLength();
-    total += ip_addresses.GetTotalLength();
-    total += vendor_specific_payloads.GetTotalLength();
-    return total;
-}
-
 void WritableDiscoveryResponse::Serialize(RawData *raw_data) const {
     ac_descriptor.Serialize(raw_data);
     ac_name.Serialize(raw_data);
@@ -42,7 +33,6 @@ void WritableDiscoveryResponse::Serialize(RawData *raw_data) const {
 }
 
 ReadableDiscoveryResponse::ReadableDiscoveryResponse() : unknown_elements{} {
-    ac_name = nullptr;
 }
 
 ControlHeader::MessageType ReadableDiscoveryResponse::GetMessageType() const {
@@ -60,8 +50,7 @@ bool ReadableDiscoveryResponse::Deserialize(RawData *raw_data) {
                 }
                 break;
             case ElementHeader::ElementType::ACName:
-                ac_name = ReadableACName::Deserialize(raw_data);
-                if (ac_name == nullptr) {
+                if (!ac_name.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -95,7 +84,7 @@ bool ReadableDiscoveryResponse::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return ac_descriptor.header != nullptr && ac_name != nullptr
+    return ac_descriptor.header != nullptr && ac_name.IsPresent()
         && wtp_radio_informations.Get().size() > 0 && ip_addresses.Get().size() > 0;
 }
 
@@ -105,8 +94,8 @@ void ReadableDiscoveryResponse::Log() const {
 
     ac_descriptor.Log();
 
-    ASSERT(ac_name != nullptr);
-    ac_name->Log();
+    ASSERT(ac_name.IsPresent());
+    ac_name.Log();
 
     wtp_radio_informations.Log();
     ip_addresses.Log();
