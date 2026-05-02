@@ -173,7 +173,7 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
         }
     }
 
-    return location_data.IsPresent() && wtp_board_data.header != nullptr
+    return location_data.IsPresent() && wtp_board_data.IsPresent()
         && wtp_descriptor.header != nullptr && wtp_name.IsPresent() && session_id.IsPresent()
         && wtp_frame_tunnel_mode.IsPresent() && wtp_mac_type.IsPresent()
         && wtp_radio_informations.Get().size() > 0 && ecn_support.IsPresent()

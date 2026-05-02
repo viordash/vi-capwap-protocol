@@ -67,27 +67,6 @@ bool BoardDataSubElementHeader::Validate() const {
 #pragma GCC diagnostic pop
 }
 
-void BoardDataSubElementHeader::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(BoardDataSubElementHeader) + GetLength() <= raw_data->end);
-    BoardDataSubElementHeader *dst = (BoardDataSubElementHeader *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(BoardDataSubElementHeader);
-}
-
-BoardDataSubElementHeader *BoardDataSubElementHeader::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(BoardDataSubElementHeader) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (BoardDataSubElementHeader *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    raw_data->current += sizeof(BoardDataSubElementHeader);
-    return res;
-}
-
 uint16_t WritableWTPBoardData::GetSubElementsSize(const nonstd::span<const SubElement> &elements) {
     uint16_t size = 0;
     for (const auto &elem : elements) {
@@ -105,10 +84,13 @@ void WritableWTPBoardData::Serialize(RawData *raw_data) const {
     ASSERT(items.size() <= ReadableWTPBoardData::max_count);
 
     header.Serialize(raw_data);
+
     for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
-        memcpy(raw_data->current, elem.value, elem.header.GetLength());
-        raw_data->current += elem.header.GetLength();
+        BoardDataSubElementHeader *sub_element = (BoardDataSubElementHeader *)raw_data->current;
+        *sub_element = elem.header;
+
+        memcpy(sub_element->value, elem.value, elem.header.GetLength());
+        raw_data->current += sizeof(BoardDataSubElementHeader) + elem.header.GetLength();
     }
 }
 uint16_t WritableWTPBoardData::GetTotalLength() const {
@@ -143,16 +125,22 @@ bool ReadableWTPBoardData::Deserialize(RawData *raw_data) {
     const uint8_t *end = raw_data->current + header->GetLength()
                        - (sizeof(WTPBoardDataHeader) - sizeof(ElementHeader));
     while (raw_data->current < end) {
-        auto sub_element_header = BoardDataSubElementHeader::Deserialize(raw_data);
-        if (sub_element_header == nullptr) {
+        if (raw_data->current + sizeof(BoardDataSubElementHeader) > raw_data->end) {
             return false;
         }
+
+        auto sub_element_header = (BoardDataSubElementHeader *)raw_data->current;
+        if (!sub_element_header->Validate()) {
+            return false;
+        }
+
         if (count >= max_count) {
             log_e("ReadableWTPBoardData::Deserialize sub elements count exceeds");
             return false;
         }
         items[count] = sub_element_header;
         count++;
+        raw_data->current += sizeof(BoardDataSubElementHeader);
         raw_data->current += sub_element_header->GetLength();
         switch (sub_element_header->GetType()) {
             case BoardDataSubElementHeader::WTPModelNumber:
@@ -189,4 +177,12 @@ void ReadableWTPBoardData::Log() const {
               items[i]->GetLength(),
               (char *)items[i]->value);
     }
+}
+
+ElementHeader::ElementType ReadableWTPBoardData::GetElementType() const {
+    return ElementHeader::WTPBoardData;
+}
+
+bool ReadableWTPBoardData::IsPresent() const {
+    return header != nullptr;
 }
