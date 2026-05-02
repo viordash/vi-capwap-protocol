@@ -16,47 +16,6 @@ TEST_GROUP(RadioOperationalStateTestsGroup){ //
                                              TEST_TEARDOWN(){}
 };
 
-TEST(RadioOperationalStateTestsGroup, Deserialize) {
-    uint8_t data[] = {
-        0x00, 0x20, // Type: 32
-        0x00, 0x03, // Length: 2 байта
-        0x01,       // Value -> Radio ID: 1
-        0x01,       // Value -> State: 1 (Enabled)
-        0x03        // Value -> Cause: 3 (AdministrativelySet)
-    };
-    RawData raw_data{ data, data + sizeof(data) };
-    auto element = RadioOperationalState::Deserialize(&raw_data);
-    CHECK(element != nullptr);
-    CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::RadioOperationalState, element->GetElementType());
-
-    CHECK_EQUAL(1, element->RadioID);
-    CHECK_EQUAL(RadioOperationalState::States::Enabled, element->State);
-    CHECK_EQUAL(RadioOperationalState::Causes::AdministrativelySet, element->Cause);
-}
-
-TEST(RadioOperationalStateTestsGroup, Serialize) {
-    uint8_t buffer[256] = {};
-    RadioOperationalState element_0{ 3,
-                                     RadioOperationalState::States::Disabled,
-                                     RadioOperationalState::Causes::RadioFailure };
-    RawData raw_data{ buffer, buffer + sizeof(buffer) };
-
-    element_0.Serialize(&raw_data);
-    CHECK_EQUAL(&buffer[0] + 7, raw_data.current);
-    const uint8_t reference[] = { 0x00, 0x20, 0x00, 0x03, 0x03, 0x02, 0x01 };
-    MEMCMP_EQUAL(buffer, reference, sizeof(reference));
-
-    raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = RadioOperationalState::Deserialize(&raw_data);
-    CHECK(element != nullptr);
-    CHECK_EQUAL(&buffer[0] + 7, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::RadioOperationalState, element->GetElementType());
-    CHECK_EQUAL(3, element->RadioID);
-    CHECK_EQUAL(RadioOperationalState::States::Disabled, element->State);
-    CHECK_EQUAL(RadioOperationalState::Causes::RadioFailure, element->Cause);
-}
-
 TEST(RadioOperationalStateTestsGroup, Serialize_Deserialize_few_elements) {
     uint8_t buffer[2048] = {};
 
@@ -89,10 +48,12 @@ TEST(RadioOperationalStateTestsGroup, Serialize_Deserialize_few_elements) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     ReadableRadioOperationalStateArray r_states;
+    CHECK_FALSE(r_states.IsPresent());
 
     raw_data = { reference, reference + sizeof(reference) };
 
     CHECK_TRUE(r_states.Deserialize(&raw_data));
+    CHECK_TRUE(r_states.IsPresent());
     CHECK_TRUE(r_states.Deserialize(&raw_data));
     CHECK_TRUE(r_states.Deserialize(&raw_data));
     CHECK_TRUE(r_states.Deserialize(&raw_data));
@@ -148,8 +109,10 @@ TEST(RadioOperationalStateTestsGroup, Add_array_of_items_is_unique) {
     raw_data = { buffer, buffer + data_size };
 
     ReadableRadioOperationalStateArray r_states;
+    CHECK_FALSE(r_states.IsPresent());
 
     CHECK_TRUE(r_states.Deserialize(&raw_data));
+    CHECK_TRUE(r_states.IsPresent());
     CHECK_TRUE(r_states.Deserialize(&raw_data));
     CHECK_FALSE(r_states.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

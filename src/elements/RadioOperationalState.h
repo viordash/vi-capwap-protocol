@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -28,11 +29,9 @@ struct __attribute__((packed)) RadioOperationalState : ElementHeader {
     RadioOperationalState(const RadioOperationalState &) = default;
     RadioOperationalState(const uint8_t radio_id, const States state, const Causes cause);
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static RadioOperationalState *Deserialize(RawData *raw_data);
 };
 
-struct WritableRadioOperationalStateArray {
+struct WritableRadioOperationalStateArray : IWritableElement {
   private:
     std::vector<RadioOperationalState> items;
 
@@ -44,11 +43,11 @@ struct WritableRadioOperationalStateArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableRadioOperationalStateArray {
+struct ReadableRadioOperationalStateArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -60,7 +59,9 @@ struct ReadableRadioOperationalStateArray {
     ReadableRadioOperationalStateArray(const ReadableRadioOperationalStateArray &) = delete;
     ReadableRadioOperationalStateArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const RadioOperationalState *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };
