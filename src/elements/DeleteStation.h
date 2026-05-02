@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/DuplicateStatus.h"
 #include "elements/ElementHeader.h"
 #include "elements/MacAddress.h"
@@ -23,7 +24,7 @@ struct __attribute__((packed)) DeleteStation : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableDeleteStationArray {
+struct WritableDeleteStationArray : IWritableElement {
   public:
     struct Item {
         MacAddress Mac;
@@ -44,12 +45,11 @@ struct WritableDeleteStationArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    uint16_t GetTotalLength() const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableDeleteStationArray {
+struct ReadableDeleteStationArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -61,7 +61,9 @@ struct ReadableDeleteStationArray {
     ReadableDeleteStationArray(const ReadableDeleteStationArray &) = delete;
     ReadableDeleteStationArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const DeleteStation *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

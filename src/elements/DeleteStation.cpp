@@ -80,13 +80,6 @@ void WritableDeleteStationArray::Serialize(RawData *raw_data) const {
             elem.header.GetLength() - (sizeof(DeleteStation) - sizeof(ElementHeader));
     }
 }
-uint16_t WritableDeleteStationArray::GetTotalLength() const {
-    uint16_t len = 0;
-    for (const auto &elem : items) {
-        len += elem.header.GetLength() + sizeof(ElementHeader);
-    }
-    return len;
-}
 
 void WritableDeleteStationArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
@@ -129,4 +122,12 @@ void ReadableDeleteStationArray::Log() const {
         log_i("ME DeleteStation #%zu Radio ID:%u", i, items[i]->RadioID);
         MacAddress::Log(i, items[i]->MACAddress.Length, items[i]->MACAddress.MACAddresses);
     }
+}
+
+ElementHeader::ElementType ReadableDeleteStationArray::GetElementType() const {
+    return ElementHeader::DeleteStation;
+}
+
+bool ReadableDeleteStationArray::IsPresent() const {
+    return count > 0;
 }
