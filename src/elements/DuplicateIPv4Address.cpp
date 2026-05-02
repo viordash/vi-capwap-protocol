@@ -98,13 +98,6 @@ void WritableDuplicateIPv4AdrArray::Serialize(RawData *raw_data) const {
             elem.header.GetLength() - (sizeof(DuplicateIPv4Address) - sizeof(ElementHeader));
     }
 }
-uint16_t WritableDuplicateIPv4AdrArray::GetTotalLength() const {
-    uint16_t len = 0;
-    for (const auto &elem : items) {
-        len += elem.header.GetLength() + sizeof(ElementHeader);
-    }
-    return len;
-}
 
 void WritableDuplicateIPv4AdrArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
@@ -153,4 +146,12 @@ void ReadableDuplicateIPv4AdrArray::Log() const {
               items[i]->Status);
         MacAddress::Log(i, items[i]->MACAddress.Length, items[i]->MACAddress.MACAddresses);
     }
+}
+
+ElementHeader::ElementType ReadableDuplicateIPv4AdrArray::GetElementType() const {
+    return ElementHeader::DuplicateIPv4Address;
+}
+
+bool ReadableDuplicateIPv4AdrArray::IsPresent() const {
+    return count > 0;
 }

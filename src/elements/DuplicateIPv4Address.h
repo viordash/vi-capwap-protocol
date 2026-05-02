@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/DuplicateStatus.h"
 #include "elements/ElementHeader.h"
 #include "elements/MacAddress.h"
@@ -26,7 +27,7 @@ struct __attribute__((packed)) DuplicateIPv4Address : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableDuplicateIPv4AdrArray {
+struct WritableDuplicateIPv4AdrArray : IWritableElement {
   public:
     struct Item {
         MacAddress Mac;
@@ -47,12 +48,11 @@ struct WritableDuplicateIPv4AdrArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    uint16_t GetTotalLength() const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableDuplicateIPv4AdrArray {
+struct ReadableDuplicateIPv4AdrArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -64,7 +64,9 @@ struct ReadableDuplicateIPv4AdrArray {
     ReadableDuplicateIPv4AdrArray(const ReadableDuplicateIPv4AdrArray &) = delete;
     ReadableDuplicateIPv4AdrArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const DuplicateIPv4Address *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };
