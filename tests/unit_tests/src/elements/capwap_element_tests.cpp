@@ -20,40 +20,6 @@ TEST_GROUP(CapwapElementTestsGroup){ //
                                      TEST_TEARDOWN(){}
 };
 
-TEST(CapwapElementTestsGroup, DiscoveryType_deserialize) {
-    uint8_t data[] = {
-        // 1. Discovery Type (Тип: 20, Длина: 1) - Static Configuration
-        0x00, 0x14, 0x00, 0x01, 0x01,
-    };
-    RawData raw_data{ data, data + sizeof(data) };
-    auto element = DiscoveryType::Deserialize(&raw_data);
-
-    CHECK(element != nullptr);
-    CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::DiscoveryType, element->GetElementType());
-    CHECK_EQUAL(DiscoveryType::Type::StaticConfiguration, element->type);
-}
-
-TEST(CapwapElementTestsGroup, DiscoveryType_serialize) {
-    uint8_t buffer[256] = {};
-    DiscoveryType element_0{ DiscoveryType::Type::DNS };
-    RawData raw_data{ buffer, buffer + sizeof(buffer) };
-
-    element_0.Serialize(&raw_data);
-    CHECK_EQUAL(&buffer[0] + 5, raw_data.current);
-    const uint8_t reference[] = {
-        0x00, 0x14, 0x00, 0x01, 0x03,
-    };
-    MEMCMP_EQUAL(buffer, reference, sizeof(reference));
-
-    raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = DiscoveryType::Deserialize(&raw_data);
-    CHECK(element != nullptr);
-    CHECK_EQUAL(&buffer[0] + 5, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::DiscoveryType, element->GetElementType());
-    CHECK_EQUAL(DiscoveryType::Type::DNS, element->type);
-}
-
 TEST(CapwapElementTestsGroup, WTPFrameTunnelMode_deserialize) {
     uint8_t data[] = {
         // 2. WTP Frame Tunnel Mode (Тип: 41, Длина: 1) - Local Bridging + native

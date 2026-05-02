@@ -16,7 +16,7 @@
 struct WritableDiscoveryRequest : WritableCapwapRequest {
 
   private:
-    const DiscoveryType discovery_type;
+    const WritableDiscoveryType discovery_type;
     const WritableWTPBoardData &wtp_board_data;
     const WritableWTPDescriptor &wtp_descriptor;
     const WTPFrameTunnelMode &wtp_frame_tunnel_mode;
@@ -50,7 +50,7 @@ struct WritableDiscoveryRequest : WritableCapwapRequest {
 };
 
 struct ReadableDiscoveryRequest : ReadableCapwapRequest {
-    DiscoveryType *discovery_type;
+    ReadableDiscoveryType discovery_type;
     ReadableWTPBoardData wtp_board_data;
     ReadableWTPDescriptor wtp_descriptor;
     WTPFrameTunnelMode *wtp_frame_tunnel_mode;

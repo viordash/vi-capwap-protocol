@@ -316,7 +316,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_deserialize) {
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    CHECK_EQUAL(DiscoveryType::Type::DHCP, read_data.discovery_type->type);
+    CHECK_EQUAL(DiscoveryType::Type::DHCP, read_data.discovery_type.Get()->type);
 
     CHECK_EQUAL(2, read_data.wtp_board_data.Get().size());
     CHECK_EQUAL(1234, read_data.wtp_board_data.header->GetVendorIdentifier());
@@ -418,7 +418,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_deserialize_from_pcap) {
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    CHECK_EQUAL(DiscoveryType::Type::Unknown, read_data.discovery_type->type);
+    CHECK_EQUAL(DiscoveryType::Type::Unknown, read_data.discovery_type.Get()->type);
 
     CHECK_EQUAL(5, read_data.wtp_board_data.Get().size());
     CHECK_EQUAL(51833, read_data.wtp_board_data.header->GetVendorIdentifier());
