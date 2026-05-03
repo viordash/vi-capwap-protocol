@@ -58,13 +58,13 @@ bool ReadableCAPWAPLocalIPV4AdrArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto element = (CAPWAPLocalIPv4Address *)raw_data->current;
-    if (!element->Validate()) {
+    auto item = (CAPWAPLocalIPv4Address *)raw_data->current;
+    if (!item->Validate()) {
         return false;
     }
     raw_data->current += sizeof(CAPWAPLocalIPv4Address);
 
-    items[count] = element;
+    items[count] = item;
     count++;
     return true;
 }

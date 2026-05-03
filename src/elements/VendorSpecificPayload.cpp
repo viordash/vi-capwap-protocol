@@ -113,6 +113,10 @@ bool ReadableVendorSpecificPayloadArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
+    if (raw_data->current + sizeof(VendorSpecificPayload) > raw_data->end) {
+        return false;
+    }
+
     auto res = (ReadableVendorSpecificPayloadArray::Item *)raw_data->current;
     if (!res->Validate()) {
         return false;

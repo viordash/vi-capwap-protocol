@@ -42,11 +42,9 @@ TEST(RateSetTestsGroup, Serialize_Deserialize_array) {
 
     CHECK_EQUAL(1, r_rate_sets.Get()[0]->GetRadioID());
     CHECK_EQUAL(2 + 1, r_rate_sets.Get()[0]->GetLength());
-    CHECK_EQUAL(0x82, r_rate_sets.Get()[0]->data[0]);
-    CHECK_EQUAL(0x84, r_rate_sets.Get()[0]->data[1]);
+    MEMCMP_EQUAL(rate_set1.data(), r_rate_sets.Get()[0]->data, 2);
 
     CHECK_EQUAL(2, r_rate_sets.Get()[1]->GetRadioID());
     CHECK_EQUAL(8 + 1, r_rate_sets.Get()[1]->GetLength());
-    CHECK_EQUAL(0x8B, r_rate_sets.Get()[1]->data[0]);
-    CHECK_EQUAL(0x48, r_rate_sets.Get()[1]->data[7]);
+    MEMCMP_EQUAL(rate_set2.data(), r_rate_sets.Get()[1]->data, 8);
 }

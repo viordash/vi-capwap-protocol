@@ -33,6 +33,7 @@ bool RateSet::Validate() const {
 }
 
 WritableRateSetArray::WritableRateSetArray() {
+    static_assert(sizeof(Item::header) == 5);
     items.reserve(ReadableRateSetArray::max_count);
 }
 
@@ -79,6 +80,10 @@ ReadableRateSetArray::ReadableRateSetArray() : count{ 0 } {
 bool ReadableRateSetArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableRateSetArray::Deserialize elements count exceeds");
+        return false;
+    }
+
+    if (raw_data->current + sizeof(RateSet) > raw_data->end) {
         return false;
     }
 
