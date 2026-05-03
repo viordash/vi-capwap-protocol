@@ -52,10 +52,12 @@ TEST(WTPRadioConfigurationTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(&buffer[0] + 60, raw_data.current); // 3 * 20 = 60
 
     ReadableWTPRadioConfigurationArray r_configs;
+    CHECK_FALSE(r_configs.IsPresent());
 
     raw_data = { buffer, buffer + 60 };
 
     CHECK_TRUE(r_configs.Deserialize(&raw_data));
+    CHECK_TRUE(r_configs.IsPresent());
     CHECK_TRUE(r_configs.Deserialize(&raw_data));
     CHECK_TRUE(r_configs.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

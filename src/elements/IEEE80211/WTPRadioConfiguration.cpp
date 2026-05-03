@@ -87,6 +87,15 @@ void WritableWTPRadioConfigurationArray::Log() const {
 ReadableWTPRadioConfigurationArray::ReadableWTPRadioConfigurationArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableWTPRadioConfigurationArray::GetElementType() const {
+    return ElementHeader::WTPRadioConfiguration;
+}
+
+bool ReadableWTPRadioConfigurationArray::IsPresent() const {
+    return count > 0;
+}
+
+
 bool ReadableWTPRadioConfigurationArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableWTPRadioConfigurationArray::Deserialize elements count exceeds");
