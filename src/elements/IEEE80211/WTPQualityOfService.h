@@ -95,8 +95,6 @@ struct __attribute__((packed)) WTPQualityOfService : ElementHeader {
     void SetI(bool value);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static WTPQualityOfService *Deserialize(RawData *raw_data);
 };
 
 struct WritableWTPQualityOfServiceArray {
