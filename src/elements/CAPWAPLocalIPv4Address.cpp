@@ -25,12 +25,13 @@ void CAPWAPLocalIPv4Address::Log() const {
 WritableCAPWAPLocalIPV4AdrArray::WritableCAPWAPLocalIPV4AdrArray(
     const nonstd::span<const CAPWAPLocalIPv4Address> &items)
     : items(items) {
+    static_assert(sizeof(items[0]) == 8);
     ASSERT(items.size() <= ReadableCAPWAPLocalIPV4AdrArray::max_count);
 }
 
 void WritableCAPWAPLocalIPV4AdrArray::Serialize(RawData *raw_data) const {
     for (const auto &item : items) {
-        ASSERT(raw_data->current + sizeof(CAPWAPLocalIPv4Address) <= raw_data->end);
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
         std::memcpy(raw_data->current, &item, sizeof(item));
         raw_data->current += sizeof(item);
     }

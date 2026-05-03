@@ -70,15 +70,15 @@ void WritableDeleteStationArray::Clear() {
 void WritableDeleteStationArray::Serialize(RawData *raw_data) const {
     ASSERT(items.size() <= ReadableDeleteStationArray::max_count);
 
-    for (const auto &elem : items) {
-        ASSERT(raw_data->current + sizeof(elem.header) + elem.header.GetLength()
-               <= raw_data->end);
-        std::memcpy(raw_data->current, &elem.header, sizeof(elem.header));
-        raw_data->current += sizeof(elem.header);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) + item.header.GetLength() <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
 
-        std::memcpy(raw_data->current, elem.Mac.Address, elem.header.MACAddress.Length);
-        raw_data->current +=
-            elem.header.GetLength() - (sizeof(DeleteStation) - sizeof(ElementHeader));
+        uint16_t data_size =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.Mac.Address, data_size);
+        raw_data->current += data_size;
     }
 }
 
