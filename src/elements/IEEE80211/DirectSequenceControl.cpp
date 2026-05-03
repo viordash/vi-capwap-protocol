@@ -54,31 +54,8 @@ bool DirectSequenceControl::Validate() const {
     return true;
 }
 
-void DirectSequenceControl::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(DirectSequenceControl) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(DirectSequenceControl));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(DirectSequenceControl);
-}
-
-DirectSequenceControl *DirectSequenceControl::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(DirectSequenceControl) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (DirectSequenceControl *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(DirectSequenceControl);
-    return res;
-}
-
 WritableDirectSequenceControlArray::WritableDirectSequenceControlArray() {
+    static_assert(sizeof(items[0]) == 12);
     items.reserve(ReadableDirectSequenceControlArray::max_count);
 }
 
@@ -106,8 +83,10 @@ void WritableDirectSequenceControlArray::Clear() {
 }
 
 void WritableDirectSequenceControlArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -132,11 +111,17 @@ bool ReadableDirectSequenceControlArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto ctrl = DirectSequenceControl::Deserialize(raw_data);
-    if (ctrl == nullptr) {
+    if (raw_data->current + sizeof(DirectSequenceControl) > raw_data->end) {
         return false;
     }
-    items[count] = ctrl;
+
+    auto item = (DirectSequenceControl *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(DirectSequenceControl);
+
+    items[count] = item;
     count++;
     return true;
 }

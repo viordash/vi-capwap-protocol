@@ -47,8 +47,6 @@ struct __attribute__((packed)) DirectSequenceControl : ElementHeader {
     uint32_t GetEnergyDetectThreshold() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static DirectSequenceControl *Deserialize(RawData *raw_data);
 };
 
 struct WritableDirectSequenceControlArray {
