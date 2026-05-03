@@ -35,8 +35,6 @@ struct __attribute__((packed)) TxPower : ElementHeader {
     TxPower(uint8_t radio_id, uint16_t current_tx_power);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static TxPower *Deserialize(RawData *raw_data);
 };
 
 struct WritableTxPowerArray {
