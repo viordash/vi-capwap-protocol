@@ -43,8 +43,6 @@ struct __attribute__((packed)) WTPRadioFailAlarmIndication : ElementHeader {
     WTPRadioFailAlarmIndication(uint8_t radio_id, AlarmType type, AlarmStatus status);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static WTPRadioFailAlarmIndication *Deserialize(RawData *raw_data);
 };
 
 struct WritableWTPRadioFailAlarmIndicationArray {
