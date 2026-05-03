@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -44,7 +45,7 @@ struct __attribute__((packed)) RateSet : ElementHeader {
     static RateSet *Deserialize(RawData *raw_data);
 };
 
-struct WritableRateSetArray {
+struct WritableRateSetArray : IWritableElement {
   public:
     struct Item {
         uint8_t radio_id;
@@ -62,11 +63,11 @@ struct WritableRateSetArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableRateSetArray {
+struct ReadableRateSetArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -78,7 +79,9 @@ struct ReadableRateSetArray {
     ReadableRateSetArray(const ReadableRateSetArray &) = delete;
     ReadableRateSetArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const RateSet *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

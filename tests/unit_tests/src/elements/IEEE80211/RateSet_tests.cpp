@@ -87,9 +87,12 @@ TEST(RateSetTestsGroup, Serialize_Deserialize_array) {
     CHECK_EQUAL(&buffer[0] + 20, raw_data.current);
 
     ReadableRateSetArray r_rate_sets;
+    CHECK_FALSE(r_rate_sets.IsPresent());
+
     raw_data = { buffer, buffer + 20 };
 
     CHECK_TRUE(r_rate_sets.Deserialize(&raw_data));
+    CHECK_TRUE(r_rate_sets.IsPresent());
     CHECK_TRUE(r_rate_sets.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, r_rate_sets.Get().size());

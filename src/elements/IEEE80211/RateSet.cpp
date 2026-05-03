@@ -8,7 +8,7 @@ RateSet::RateSet(uint8_t radio_id, nonstd::span<const uint8_t> rate_set_data)
     : ElementHeader(ElementHeader::RateSet,
                     sizeof(RateSet) - sizeof(ElementHeader) + rate_set_data.size()),
       radio_id{ radio_id } {
-    memcpy(this->rate_set_data, rate_set_data.data(), rate_set_data.size());
+    std::memcpy(this->rate_set_data, rate_set_data.data(), rate_set_data.size());
 }
 
 uint8_t RateSet::GetRadioID() const {
@@ -48,7 +48,7 @@ void RateSet::Serialize(RawData *raw_data) const {
 #if __GNUC__ >= 8
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #endif
-    memcpy(raw_data->current, this, sizeof(ElementHeader) + total_size);
+    std::memcpy(raw_data->current, this, sizeof(ElementHeader) + total_size);
 #pragma GCC diagnostic pop
     raw_data->current += sizeof(ElementHeader) + total_size;
 }
@@ -102,7 +102,7 @@ void WritableRateSetArray::Serialize(RawData *raw_data) const {
 
         // Write header
         ElementHeader header(ElementHeader::RateSet, element_length);
-        memcpy(raw_data->current, &header, sizeof(ElementHeader));
+        std::memcpy(raw_data->current, &header, sizeof(ElementHeader));
         raw_data->current += sizeof(ElementHeader);
 
         // Write radio_id
@@ -110,7 +110,7 @@ void WritableRateSetArray::Serialize(RawData *raw_data) const {
         raw_data->current += 1;
 
         // Write rate_set_data
-        memcpy(raw_data->current, item.rate_set_data.data(), item.rate_set_data.size());
+        std::memcpy(raw_data->current, item.rate_set_data.data(), item.rate_set_data.size());
         raw_data->current += item.rate_set_data.size();
     }
 }
@@ -154,4 +154,12 @@ void ReadableRateSetArray::Log() const {
               items[i]->GetRadioID(),
               items[i]->GetRateSetData().size());
     }
+}
+
+ElementHeader::ElementType ReadableRateSetArray::GetElementType() const {
+    return ElementHeader::RateSet;
+}
+
+bool ReadableRateSetArray::IsPresent() const {
+    return count > 0;
 }
