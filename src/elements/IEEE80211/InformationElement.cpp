@@ -7,9 +7,9 @@
 InformationElement::InformationElement(uint8_t radio_id,
                                        uint8_t wlan_id,
                                        uint8_t flags,
-                                       uint16_t ie_length)
+                                       uint16_t length)
     : ElementHeader(ElementHeader::InformationElement,
-                    (sizeof(InformationElement) - sizeof(ElementHeader)) + ie_length),
+                    (sizeof(InformationElement) - sizeof(ElementHeader)) + length),
       radio_id{ radio_id }, wlan_id{ wlan_id }, flags{ flags } {
 }
 
@@ -62,21 +62,6 @@ bool InformationElement::Validate() const {
     return true;
 }
 
-WritableInformationElementArray::Item::Item(uint8_t radio_id,
-                                            uint8_t wlan_id,
-                                            uint8_t flags,
-                                            nonstd::span<const uint8_t> ie)
-    : ie_data{ ie }, header{ radio_id, wlan_id, flags, (uint16_t)ie_data.size() } {
-}
-
-uint8_t WritableInformationElementArray::Item::GetRadioID() const {
-    return header.GetRadioID();
-}
-
-uint8_t WritableInformationElementArray::Item::GetWlanID() const {
-    return header.GetWlanID();
-}
-
 WritableInformationElementArray::WritableInformationElementArray() {
     items.reserve(ReadableInformationElementArray::max_count);
 }
@@ -96,15 +81,14 @@ void WritableInformationElementArray::Clear() {
 }
 
 void WritableInformationElementArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        ASSERT(raw_data->current + sizeof(InformationElement) <= raw_data->end);
-        std::memcpy(raw_data->current, &elem.header, sizeof(InformationElement));
-        raw_data->current += sizeof(InformationElement);
-
-        uint16_t ie_size =
-            elem.header.GetLength() - (sizeof(InformationElement) - sizeof(ElementHeader));
-        std::memcpy(raw_data->current, elem.ie_data.data(), ie_size);
-        raw_data->current += ie_size;
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
+        uint16_t data_size =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.data.data(), item.data.size());
+        raw_data->current += data_size;
     }
 }
 
@@ -118,7 +102,7 @@ void WritableInformationElementArray::Log() const {
               items[i].header.GetFlags(),
               items[i].header.GetBeaconFlag() ? 1 : 0,
               items[i].header.GetProbeResponseFlag() ? 1 : 0,
-              items[i].ie_data.size());
+              items[i].data.size());
     }
 }
 
@@ -135,7 +119,7 @@ bool ReadableInformationElementArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto res = (InformationElement *)raw_data->current;
+    auto res = (ReadableInformationElementArray::Item *)raw_data->current;
     if (!res->Validate()) {
         return false;
     }
@@ -151,7 +135,8 @@ bool ReadableInformationElementArray::Deserialize(RawData *raw_data) {
     return true;
 }
 
-nonstd::span<const InformationElement *const> ReadableInformationElementArray::Get() const {
+nonstd::span<const ReadableInformationElementArray::Item *const>
+ReadableInformationElementArray::Get() const {
     nonstd::span span(items.begin(), count);
     return span;
 }

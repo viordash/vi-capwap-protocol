@@ -48,14 +48,17 @@ TEST(InformationElementTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(1, r_ies.Get()[0]->GetWlanID());
     CHECK_EQUAL(0xC0, r_ies.Get()[0]->GetFlags());
     CHECK_EQUAL(4, r_ies.Get()[0]->GetIELength());
+    MEMCMP_EQUAL(ie1.data(), r_ies.Get()[0]->data, 4);
 
     CHECK_EQUAL(1, r_ies.Get()[1]->GetRadioID());
     CHECK_EQUAL(2, r_ies.Get()[1]->GetWlanID());
     CHECK_EQUAL(0x80, r_ies.Get()[1]->GetFlags());
     CHECK_EQUAL(6, r_ies.Get()[1]->GetIELength());
+    MEMCMP_EQUAL(ie2.data(), r_ies.Get()[1]->data, 6);
 
     CHECK_EQUAL(2, r_ies.Get()[2]->GetRadioID());
     CHECK_EQUAL(1, r_ies.Get()[2]->GetWlanID());
     CHECK_EQUAL(0x40, r_ies.Get()[2]->GetFlags());
     CHECK_EQUAL(3, r_ies.Get()[2]->GetIELength());
+    MEMCMP_EQUAL(ie3.data(), r_ies.Get()[2]->data, 3);
 }

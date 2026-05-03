@@ -28,10 +28,9 @@ struct __attribute__((packed)) InformationElement : ElementHeader {
 
   public:
     // Info Element: The IEEE 802.11 Information Element (type, length, value)
-    uint8_t ie_data[];
 
     InformationElement(const InformationElement &) = default;
-    InformationElement(uint8_t radio_id, uint8_t wlan_id, uint8_t flags, uint16_t ie_length);
+    InformationElement(uint8_t radio_id, uint8_t wlan_id, uint8_t flags, uint16_t length);
 
     uint8_t GetRadioID() const;
     uint8_t GetWlanID() const;
@@ -46,14 +45,11 @@ struct __attribute__((packed)) InformationElement : ElementHeader {
 struct WritableInformationElementArray : IWritableElement {
   public:
     struct Item {
-        nonstd::span<const uint8_t> ie_data;
+        nonstd::span<const uint8_t> data;
         InformationElement header;
-
         Item(const Item &) = default;
-        Item(uint8_t radio_id, uint8_t wlan_id, uint8_t flags, nonstd::span<const uint8_t> ie);
-
-        uint8_t GetRadioID() const;
-        uint8_t GetWlanID() const;
+        Item(uint8_t radio_id, uint8_t wlan_id, uint8_t flags, nonstd::span<const uint8_t> ie_data)
+            : data{ ie_data }, header{ radio_id, wlan_id, flags, (uint16_t)ie_data.size() } {};
     };
 
   private:
@@ -75,8 +71,13 @@ struct ReadableInformationElementArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
+    struct Item : InformationElement {
+        uint8_t data[];
+        Item(const Item &) = delete;
+    };
+
   protected:
-    std::array<const InformationElement *, max_count> items;
+    std::array<const Item *, max_count> items;
     size_t count;
 
   public:
@@ -84,7 +85,7 @@ struct ReadableInformationElementArray : IReadableElement {
     ReadableInformationElementArray();
 
     bool Deserialize(RawData *raw_data) override final;
-    nonstd::span<const InformationElement *const> Get() const;
+    nonstd::span<const ReadableInformationElementArray::Item *const> Get() const;
     void Log() const override final;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
