@@ -20,8 +20,6 @@ struct __attribute__((packed)) RadioAdministrativeState : ElementHeader {
     RadioAdministrativeState(const uint8_t radio_id, const States admin_state);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static RadioAdministrativeState *Deserialize(RawData *raw_data);
 };
 
 struct WritableRadioAdministrativeStateArray : IWritableConfigurationUpdateRequestOptionalElement {

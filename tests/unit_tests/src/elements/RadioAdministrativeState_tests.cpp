@@ -16,44 +16,6 @@ TEST_GROUP(RadioAdministrativeStateTestsGroup){ //
                                                 TEST_TEARDOWN(){}
 };
 
-TEST(RadioAdministrativeStateTestsGroup, Deserialize) {
-    // Юнит-тест: CAPWAP Control IPv4 Address - Пример 1 (один интерфейс)
-    // Тип элемента = 10, Длина = 6
-    uint8_t data[] = {
-        0x00, 0x1F, // Type: 31 (Radio Administrative State)
-        0x00, 0x02, // Length: 2 байта
-        0x01,       // Value -> Radio ID: 1
-        0x01        // Value -> Admin State: 1 (Enabled)
-    };
-    RawData raw_data{ data, data + sizeof(data) };
-    auto element = RadioAdministrativeState::Deserialize(&raw_data);
-    CHECK(element != nullptr);
-    CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::RadioAdministrativeState, element->GetElementType());
-
-    CHECK_EQUAL(1, element->RadioID);
-    CHECK_EQUAL(RadioAdministrativeState::States::Enabled, element->AdminState);
-}
-
-TEST(RadioAdministrativeStateTestsGroup, Serialize) {
-    uint8_t buffer[256] = {};
-    RadioAdministrativeState element_0{ 3, RadioAdministrativeState::States::Disabled };
-    RawData raw_data{ buffer, buffer + sizeof(buffer) };
-
-    element_0.Serialize(&raw_data);
-    CHECK_EQUAL(&buffer[0] + 6, raw_data.current);
-    const uint8_t reference[] = { 0x00, 0x1F, 0x00, 0x02, 0x03, 0x02 };
-    MEMCMP_EQUAL(buffer, reference, sizeof(reference));
-
-    raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = RadioAdministrativeState::Deserialize(&raw_data);
-    CHECK(element != nullptr);
-    CHECK_EQUAL(&buffer[0] + 6, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::RadioAdministrativeState, element->GetElementType());
-    CHECK_EQUAL(3, element->RadioID);
-    CHECK_EQUAL(RadioAdministrativeState::States::Disabled, element->AdminState);
-}
-
 TEST(RadioAdministrativeStateTestsGroup, Serialize_Deserialize_few_elements) {
     uint8_t buffer[2048] = {};
 
