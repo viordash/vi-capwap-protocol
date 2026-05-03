@@ -33,31 +33,8 @@ bool StationQoSProfile::Validate() const {
     return true;
 }
 
-void StationQoSProfile::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(StationQoSProfile) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(StationQoSProfile));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(StationQoSProfile);
-}
-
-StationQoSProfile *StationQoSProfile::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(StationQoSProfile) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (StationQoSProfile *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(StationQoSProfile);
-    return res;
-}
-
 WritableStationQoSProfileArray::WritableStationQoSProfileArray() {
+    static_assert(sizeof(items[0]) == 12);
     items.reserve(ReadableStationQoSProfileArray::max_count);
 }
 
@@ -76,8 +53,10 @@ void WritableStationQoSProfileArray::Clear() {
 }
 
 void WritableStationQoSProfileArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -104,11 +83,17 @@ bool ReadableStationQoSProfileArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto profile = StationQoSProfile::Deserialize(raw_data);
-    if (profile == nullptr) {
+    if (raw_data->current + sizeof(StationQoSProfile) > raw_data->end) {
         return false;
     }
-    items[count] = profile;
+
+    auto item = (StationQoSProfile *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(StationQoSProfile);
+
+    items[count] = item;
     count++;
     return true;
 }

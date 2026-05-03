@@ -44,8 +44,6 @@ struct __attribute__((packed)) StationQoSProfile : ElementHeader {
     uint8_t Get8021pPriority() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static StationQoSProfile *Deserialize(RawData *raw_data);
 };
 
 struct WritableStationQoSProfileArray {
