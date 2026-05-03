@@ -36,29 +36,26 @@ struct __attribute__((packed)) SupportedRates : ElementHeader {
   public:
     // Supported Rates: A variable-length field containing the supported rates.
     // Each rate is 8 bits: bit 7 = basic rate flag, bits 6-0 = rate in 0.5 Mbps units.
-    uint8_t rates[];
 
     SupportedRates(const SupportedRates &) = default;
-    SupportedRates(uint8_t radio_id, uint8_t rates_count);
+    SupportedRates(uint8_t radio_id, uint16_t length);
 
     uint8_t GetRadioID() const;
     uint8_t GetRatesCount() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static SupportedRates *Deserialize(RawData *raw_data);
 };
 
 struct WritableSupportedRatesArray : IWritableElement {
   public:
     struct Item {
-        nonstd::span<const uint8_t> rates_data;
+        nonstd::span<const uint8_t> data;
         SupportedRates header;
 
         Item(const Item &) = default;
-        Item(uint8_t radio_id, nonstd::span<const uint8_t> rates);
-
-        uint8_t GetRadioID() const;
+        Item(uint8_t radio_id, nonstd::span<const uint8_t> rates)
+            : data(rates), header(radio_id, (uint16_t)data.size()) {
+        }
     };
 
   private:
@@ -80,8 +77,13 @@ struct ReadableSupportedRatesArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
+    struct Item : SupportedRates {
+        uint8_t data[];
+        Item(const Item &) = delete;
+    };
+
   protected:
-    std::array<const SupportedRates *, max_count> items;
+    std::array<const Item *, max_count> items;
     size_t count;
 
   public:
@@ -89,7 +91,7 @@ struct ReadableSupportedRatesArray : IReadableElement {
     ReadableSupportedRatesArray();
 
     bool Deserialize(RawData *raw_data) override final;
-    nonstd::span<const SupportedRates *const> Get() const;
+    nonstd::span<const ReadableSupportedRatesArray::Item *const> Get() const;
     void Log() const override final;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
