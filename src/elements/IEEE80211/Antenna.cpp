@@ -72,31 +72,6 @@ bool Antenna::Validate() const {
     return true;
 }
 
-void Antenna::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(Antenna) <= raw_data->end);
-    std::memcpy(raw_data->current, this, sizeof(Antenna));
-    raw_data->current += sizeof(Antenna);
-}
-
-Antenna *Antenna::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(Antenna) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (Antenna *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current = last;
-    return res;
-}
-
 WritableAntennaArray::WritableAntennaArray() {
     items.reserve(ReadableAntennaArray::max_count);
 }
@@ -131,7 +106,10 @@ void WritableAntennaArray::Clear() {
 
 void WritableAntennaArray::Serialize(RawData *raw_data) const {
     for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
+        ASSERT(raw_data->current + sizeof(Antenna) <= raw_data->end);
+        std::memcpy(raw_data->current, &elem.header, sizeof(Antenna));
+        raw_data->current += sizeof(Antenna);
+
         auto selection_count = elem.header.GetLength() - (sizeof(Antenna) - sizeof(ElementHeader));
         std::memcpy(raw_data->current, elem.selections.data(), selection_count);
         raw_data->current += selection_count;
@@ -158,11 +136,22 @@ bool ReadableAntennaArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto antenna = Antenna::Deserialize(raw_data);
-    if (antenna == nullptr) {
+    if (raw_data->current + sizeof(Antenna) > raw_data->end) {
         return false;
     }
-    items[count] = antenna;
+
+    auto res = (Antenna *)raw_data->current;
+    if (!res->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    items[count] = res;
     count++;
     return true;
 }

@@ -43,8 +43,6 @@ struct __attribute__((packed)) Antenna : ElementHeader {
     Combiner GetCombiner() const;
     uint8_t GetAntennaCount() const;
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static Antenna *Deserialize(RawData *raw_data);
 };
 
 struct WritableAntennaArray : IWritableElement {
