@@ -15,7 +15,7 @@ Station::Station(uint8_t radio_id,
                     (sizeof(Station) - sizeof(ElementHeader)) + supported_rates_length),
       radio_id{ radio_id }, association_id{ association_id }, flags{ flags },
       capabilities{ capabilities }, wlan_id{ wlan_id } {
-    memcpy(this->mac_address, mac_address, mac_address_size);
+    std::memcpy(this->mac_address, mac_address, mac_address_size);
 }
 
 uint8_t Station::GetRadioID() const {
@@ -70,8 +70,7 @@ bool Station::Validate() const {
 
 void Station::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(Station) <= raw_data->end);
-    Station *dst = (Station *)raw_data->current;
-    *dst = *this;
+    std::memcpy(raw_data->current, this, sizeof(Station));
     raw_data->current += sizeof(Station);
 }
 
@@ -140,7 +139,7 @@ void WritableStationArray::Serialize(RawData *raw_data) const {
     for (const auto &elem : items) {
         elem.header.Serialize(raw_data);
         uint16_t rates_size = elem.header.GetLength() - (sizeof(Station) - sizeof(ElementHeader));
-        memcpy(raw_data->current, elem.supported_rates_data.data(), rates_size);
+        std::memcpy(raw_data->current, elem.supported_rates_data.data(), rates_size);
         raw_data->current += rates_size;
     }
 }
@@ -202,4 +201,12 @@ void ReadableStationArray::Log() const {
               items[i]->GetWlanID(),
               items[i]->GetSupportedRatesLength());
     }
+}
+
+ElementHeader::ElementType ReadableStationArray::GetElementType() const {
+    return ElementHeader::Station;
+}
+
+bool ReadableStationArray::IsPresent() const {
+    return count > 0;
 }

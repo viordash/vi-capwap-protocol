@@ -106,9 +106,12 @@ TEST(StationTestsGroup, Serialize_Deserialize_array) {
     CHECK_EQUAL(&buffer[0] + 42, raw_data.current); // (17+2) + (17+6) = 42
 
     ReadableStationArray r_stations;
+    CHECK_FALSE(r_stations.IsPresent());
+
     raw_data = { buffer, buffer + 42 };
 
     CHECK_TRUE(r_stations.Deserialize(&raw_data));
+    CHECK_TRUE(r_stations.IsPresent());
     CHECK_TRUE(r_stations.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, r_stations.Get().size());
