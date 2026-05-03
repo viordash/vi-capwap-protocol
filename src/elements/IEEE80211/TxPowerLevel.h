@@ -44,8 +44,6 @@ struct __attribute__((packed)) TxPowerLevel : ElementHeader {
     uint8_t GetNumLevels() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static TxPowerLevel *Deserialize(RawData *raw_data);
 };
 
 struct WritableTxPowerLevelArray : IWritableElement {
