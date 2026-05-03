@@ -18,8 +18,6 @@ struct __attribute__((packed)) DeleteWlan : ElementHeader {
     DeleteWlan(uint8_t radio_id, uint8_t wlan_id);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static DeleteWlan *Deserialize(RawData *raw_data);
 };
 
 struct WritableDeleteWlanArray {

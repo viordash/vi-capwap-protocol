@@ -26,31 +26,8 @@ bool DeleteWlan::Validate() const {
     return true;
 }
 
-void DeleteWlan::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(DeleteWlan) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(DeleteWlan));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(DeleteWlan);
-}
-
-DeleteWlan *DeleteWlan::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(DeleteWlan) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (DeleteWlan *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(DeleteWlan);
-    return res;
-}
-
 WritableDeleteWlanArray::WritableDeleteWlanArray() {
+    static_assert(sizeof(DeleteWlan) == 6);
     items.reserve(ReadableDeleteWlanArray::max_count);
 }
 
@@ -79,8 +56,10 @@ void WritableDeleteWlanArray::Clear() {
 }
 
 void WritableDeleteWlanArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -99,11 +78,17 @@ bool ReadableDeleteWlanArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto wlan = DeleteWlan::Deserialize(raw_data);
-    if (wlan == nullptr) {
+    if (raw_data->current + sizeof(DeleteWlan) > raw_data->end) {
         return false;
     }
-    items[count] = wlan;
+
+    auto item = (DeleteWlan *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(DeleteWlan);
+
+    items[count] = item;
     count++;
     return true;
 }

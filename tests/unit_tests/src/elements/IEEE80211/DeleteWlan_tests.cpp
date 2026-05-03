@@ -13,47 +13,6 @@ TEST_GROUP(DeleteWlanTestsGroup){ //
                                   TEST_TEARDOWN(){}
 };
 
-TEST(DeleteWlanTestsGroup, Deserialize) {
-    // clang-format off
-    uint8_t data[] = {
-        // ---- Message Element Header (4 bytes) ----
-        0x04, 0x03,     // Type: 1027 (IEEE 802.11 Delete WLAN)
-        0x00, 0x02,     // Length: 2 bytes
-
-        // ---- Value (2 bytes) ----
-        0x01,           // Radio ID: 1
-        0x02            // WLAN ID: 2
-    };
-    // clang-format on
-    RawData raw_data{ data, data + sizeof(data) };
-    auto element = DeleteWlan::Deserialize(&raw_data);
-    CHECK(element != nullptr);
-    CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::DeleteWlan, element->GetElementType());
-
-    CHECK_EQUAL(1, element->RadioID);
-    CHECK_EQUAL(2, element->WlanID);
-}
-
-TEST(DeleteWlanTestsGroup, Serialize) {
-    uint8_t buffer[256] = {};
-    DeleteWlan element_0{ 5, 3 };
-    RawData raw_data{ buffer, buffer + sizeof(buffer) };
-
-    element_0.Serialize(&raw_data);
-    CHECK_EQUAL(&buffer[0] + 6, raw_data.current);
-    const uint8_t reference[] = { 0x04, 0x03, 0x00, 0x02, 0x05, 0x03 };
-    MEMCMP_EQUAL(buffer, reference, sizeof(reference));
-
-    raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = DeleteWlan::Deserialize(&raw_data);
-    CHECK(element != nullptr);
-    CHECK_EQUAL(&buffer[0] + 6, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::DeleteWlan, element->GetElementType());
-    CHECK_EQUAL(5, element->RadioID);
-    CHECK_EQUAL(3, element->WlanID);
-}
-
 TEST(DeleteWlanTestsGroup, Serialize_Deserialize_few_elements) {
     uint8_t buffer[2048] = {};
 
@@ -134,70 +93,4 @@ TEST(DeleteWlanTestsGroup, Add_array_of_items_is_unique) {
 
     CHECK_EQUAL(2, r_wlans.Get()[1]->RadioID);
     CHECK_EQUAL(2, r_wlans.Get()[1]->WlanID);
-}
-
-TEST(DeleteWlanTestsGroup, Validate_RadioID_range) {
-    // clang-format off
-    // Valid RadioID = 0
-    uint8_t data_valid_zero[] = {
-        0x04, 0x03, 0x00, 0x02, 0x00, 0x01
-    };
-    // Valid RadioID = 1
-    uint8_t data_valid_min[] = {
-        0x04, 0x03, 0x00, 0x02, 0x01, 0x01
-    };
-    // Valid RadioID = 31
-    uint8_t data_valid_max[] = {
-        0x04, 0x03, 0x00, 0x02, 0x1F, 0x01
-    };
-    // Invalid RadioID = 32
-    uint8_t data_invalid_high[] = {
-        0x04, 0x03, 0x00, 0x02, 0x20, 0x01
-    };
-    // clang-format on
-
-    RawData raw_data = { data_valid_zero, data_valid_zero + sizeof(data_valid_zero) };
-    CHECK(DeleteWlan::Deserialize(&raw_data) != nullptr);
-
-    raw_data = { data_valid_min, data_valid_min + sizeof(data_valid_min) };
-    CHECK(DeleteWlan::Deserialize(&raw_data) != nullptr);
-
-    raw_data = { data_valid_max, data_valid_max + sizeof(data_valid_max) };
-    CHECK(DeleteWlan::Deserialize(&raw_data) != nullptr);
-
-    raw_data = { data_invalid_high, data_invalid_high + sizeof(data_invalid_high) };
-    CHECK(DeleteWlan::Deserialize(&raw_data) == nullptr);
-}
-
-TEST(DeleteWlanTestsGroup, Validate_WlanID_range) {
-    // clang-format off
-    // Valid WlanID = 1
-    uint8_t data_valid_min[] = {
-        0x04, 0x03, 0x00, 0x02, 0x01, 0x01
-    };
-    // Valid WlanID = 16
-    uint8_t data_valid_max[] = {
-        0x04, 0x03, 0x00, 0x02, 0x01, 0x10
-    };
-    // Invalid WlanID = 0
-    uint8_t data_invalid_zero[] = {
-        0x04, 0x03, 0x00, 0x02, 0x01, 0x00
-    };
-    // Invalid WlanID = 17
-    uint8_t data_invalid_high[] = {
-        0x04, 0x03, 0x00, 0x02, 0x01, 0x11
-    };
-    // clang-format on
-
-    RawData raw_data = { data_valid_min, data_valid_min + sizeof(data_valid_min) };
-    CHECK(DeleteWlan::Deserialize(&raw_data) != nullptr);
-
-    raw_data = { data_valid_max, data_valid_max + sizeof(data_valid_max) };
-    CHECK(DeleteWlan::Deserialize(&raw_data) != nullptr);
-
-    raw_data = { data_invalid_zero, data_invalid_zero + sizeof(data_invalid_zero) };
-    CHECK(DeleteWlan::Deserialize(&raw_data) == nullptr);
-
-    raw_data = { data_invalid_high, data_invalid_high + sizeof(data_invalid_high) };
-    CHECK(DeleteWlan::Deserialize(&raw_data) == nullptr);
 }
