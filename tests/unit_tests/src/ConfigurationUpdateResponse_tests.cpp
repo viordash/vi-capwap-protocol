@@ -17,26 +17,26 @@ TEST_GROUP(ConfigurationUpdateResponseTestsGroup){ //
 TEST(ConfigurationUpdateResponseTestsGroup, ConfigurationUpdateResponse_serialize) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    {
+        WritableRadioOperationalStateArray radio_operational_states;
+        radio_operational_states.Add({ 0,
+                                       RadioOperationalState::States::Enabled,
+                                       RadioOperationalState::Causes::AdministrativelySet });
+        radio_operational_states.Add(
+            { 1, RadioOperationalState::States::Disabled, RadioOperationalState::Causes::Normal });
+        radio_operational_states.Add({ 2,
+                                       RadioOperationalState::States::Reserved,
+                                       RadioOperationalState::Causes::RadioFailure });
 
-    WritableRadioOperationalStateArray radio_operational_states;
-    radio_operational_states.Add({ 0,
-                                   RadioOperationalState::States::Enabled,
-                                   RadioOperationalState::Causes::AdministrativelySet });
-    radio_operational_states.Add(
-        { 1, RadioOperationalState::States::Disabled, RadioOperationalState::Causes::Normal });
-    radio_operational_states.Add({ 2,
-                                   RadioOperationalState::States::Reserved,
-                                   RadioOperationalState::Causes::RadioFailure });
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        WritableConfigurationUpdateResponse write_data(
+            ResultCode::MessageUnexpected_InvalidInCurrentState,
+            { &radio_operational_states, &vendor_specific_payloads });
 
-    WritableConfigurationUpdateResponse write_data(
-        ResultCode::MessageUnexpected_InvalidInCurrentState,
-        radio_operational_states,
-        vendor_specific_payloads);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 76 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = { 0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                   0x08, 0x2A, 0x00, 0x3C, 0x00, 0x00, 0x21, 0x00, 0x04, 0x00, 0x00,
@@ -51,34 +51,34 @@ TEST(ConfigurationUpdateResponseTestsGroup, ConfigurationUpdateResponse_serializ
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 76 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableConfigurationUpdateResponse read_data;
+    ReadableRadioOperationalStateArray radio_operational_states;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableConfigurationUpdateResponse read_data(
+        { &vendor_specific_payloads, &radio_operational_states });
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(ResultCode::MessageUnexpected_InvalidInCurrentState, read_data.result_code.Get()->type);
+    CHECK_EQUAL(ResultCode::MessageUnexpected_InvalidInCurrentState,
+                read_data.result_code.Get()->type);
 
-    CHECK_EQUAL(3, read_data.radio_operational_states.Get().size());
-    CHECK_EQUAL(0, read_data.radio_operational_states.Get()[0]->RadioID);
-    CHECK_EQUAL(RadioOperationalState::States::Enabled,
-                read_data.radio_operational_states.Get()[0]->State);
+    CHECK_TRUE(radio_operational_states.IsPresent());
+    CHECK_EQUAL(3, radio_operational_states.Get().size());
+    CHECK_EQUAL(0, radio_operational_states.Get()[0]->RadioID);
+    CHECK_EQUAL(RadioOperationalState::States::Enabled, radio_operational_states.Get()[0]->State);
     CHECK_EQUAL(RadioOperationalState::Causes::AdministrativelySet,
-                read_data.radio_operational_states.Get()[0]->Cause);
-    CHECK_EQUAL(1, read_data.radio_operational_states.Get()[1]->RadioID);
-    CHECK_EQUAL(RadioOperationalState::States::Disabled,
-                read_data.radio_operational_states.Get()[1]->State);
-    CHECK_EQUAL(RadioOperationalState::Causes::Normal,
-                read_data.radio_operational_states.Get()[1]->Cause);
-    CHECK_EQUAL(2, read_data.radio_operational_states.Get()[2]->RadioID);
-    CHECK_EQUAL(RadioOperationalState::States::Reserved,
-                read_data.radio_operational_states.Get()[2]->State);
+                radio_operational_states.Get()[0]->Cause);
+    CHECK_EQUAL(1, radio_operational_states.Get()[1]->RadioID);
+    CHECK_EQUAL(RadioOperationalState::States::Disabled, radio_operational_states.Get()[1]->State);
+    CHECK_EQUAL(RadioOperationalState::Causes::Normal, radio_operational_states.Get()[1]->Cause);
+    CHECK_EQUAL(2, radio_operational_states.Get()[2]->RadioID);
+    CHECK_EQUAL(RadioOperationalState::States::Reserved, radio_operational_states.Get()[2]->State);
     CHECK_EQUAL(RadioOperationalState::Causes::RadioFailure,
-                read_data.radio_operational_states.Get()[2]->Cause);
+                radio_operational_states.Get()[2]->Cause);
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -143,7 +143,10 @@ TEST(ConfigurationUpdateResponseTestsGroup, ConfigurationUpdateResponse_deserial
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableConfigurationUpdateResponse read_data;
+    ReadableRadioOperationalStateArray radio_operational_states;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableConfigurationUpdateResponse read_data(
+        { &vendor_specific_payloads, &radio_operational_states });
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -151,23 +154,23 @@ TEST(ConfigurationUpdateResponseTestsGroup, ConfigurationUpdateResponse_deserial
 
     CHECK_EQUAL(ResultCode::Success, read_data.result_code.Get()->type);
 
-    CHECK_EQUAL(2, read_data.radio_operational_states.Get().size());
-    CHECK_EQUAL(1, read_data.radio_operational_states.Get()[0]->RadioID);
-    CHECK_EQUAL(RadioOperationalState::States::Disabled,
-                read_data.radio_operational_states.Get()[0]->State);
+    CHECK_TRUE(radio_operational_states.IsPresent());
+    CHECK_EQUAL(2, radio_operational_states.Get().size());
+    CHECK_EQUAL(1, radio_operational_states.Get()[0]->RadioID);
+    CHECK_EQUAL(RadioOperationalState::States::Disabled, radio_operational_states.Get()[0]->State);
     CHECK_EQUAL(RadioOperationalState::Causes::AdministrativelySet,
-                read_data.radio_operational_states.Get()[0]->Cause);
-    CHECK_EQUAL(2, read_data.radio_operational_states.Get()[1]->RadioID);
-    CHECK_EQUAL(RadioOperationalState::States::Enabled,
-                read_data.radio_operational_states.Get()[1]->State);
+                radio_operational_states.Get()[0]->Cause);
+    CHECK_EQUAL(2, radio_operational_states.Get()[1]->RadioID);
+    CHECK_EQUAL(RadioOperationalState::States::Enabled, radio_operational_states.Get()[1]->State);
     CHECK_EQUAL(RadioOperationalState::Causes::AdministrativelySet,
-                read_data.radio_operational_states.Get()[1]->Cause);
+                radio_operational_states.Get()[1]->Cause);
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(14823, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(0x0101, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    CHECK_EQUAL(7, read_data.vendor_specific_payloads.Get()[0]->GetLength());
-    CHECK_EQUAL(0x01, read_data.vendor_specific_payloads.Get()[0]->value[0]);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(14823, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(0x0101, vendor_specific_payloads.Get()[0]->GetElementId());
+    CHECK_EQUAL(7, vendor_specific_payloads.Get()[0]->GetLength());
+    CHECK_EQUAL(0x01, vendor_specific_payloads.Get()[0]->value[0]);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -214,7 +217,7 @@ TEST(ConfigurationUpdateResponseTestsGroup,
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableConfigurationUpdateResponse read_data;
+    ReadableConfigurationUpdateResponse read_data({});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

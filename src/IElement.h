@@ -41,3 +41,6 @@ struct IReadableDiscoveryRequestOptionalElement : IReadableElement {};
 
 struct IWritableDiscoveryResponseOptionalElement : IWritableElement {};
 struct IReadableDiscoveryResponseOptionalElement : IReadableElement {};
+
+struct IWritableConfigurationUpdateResponseOptionalElement : IWritableElement {};
+struct IReadableConfigurationUpdateResponseOptionalElement : IReadableElement {};

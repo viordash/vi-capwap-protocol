@@ -39,8 +39,7 @@ TEST(ConfigurationUpdateResponseTestsGroup,
 
     WritableConfigurationUpdateResponse write_data(
         ResultCode::MessageUnexpected_InvalidInCurrentState,
-        radio_operational_states,
-        vendor_specific_payloads);
+        { &radio_operational_states, &vendor_specific_payloads });
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -48,7 +47,10 @@ TEST(ConfigurationUpdateResponseTestsGroup,
         ankerl::nanobench::doNotOptimizeAway(raw_data);
 
         raw_data = { buffer, buffer + 76 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-        ReadableConfigurationUpdateResponse read_data;
+        ReadableRadioOperationalStateArray radio_operational_states;
+        ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+        ReadableConfigurationUpdateResponse read_data(
+            { &vendor_specific_payloads, &radio_operational_states });
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

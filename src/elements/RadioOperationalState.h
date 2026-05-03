@@ -31,7 +31,7 @@ struct __attribute__((packed)) RadioOperationalState : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableRadioOperationalStateArray : IWritableElement {
+struct WritableRadioOperationalStateArray : IWritableConfigurationUpdateResponseOptionalElement {
   private:
     std::vector<RadioOperationalState> items;
 
@@ -47,7 +47,7 @@ struct WritableRadioOperationalStateArray : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableRadioOperationalStateArray : IReadableElement {
+struct ReadableRadioOperationalStateArray : IReadableConfigurationUpdateResponseOptionalElement {
   public:
     static const size_t max_count = 32;
 

@@ -35,7 +35,8 @@ struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestO
                                             IWritableImageDataRequestOptionalElement,
                                             IWritableConfigurationUpdateRequestOptionalElement,
                                             IWritableDiscoveryRequestOptionalElement,
-                                            IWritableDiscoveryResponseOptionalElement {
+                                            IWritableDiscoveryResponseOptionalElement,
+                                            IWritableConfigurationUpdateResponseOptionalElement {
   public:
     struct Item {
         std::vector<char> value;
@@ -71,7 +72,8 @@ struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestO
                                             IReadableImageDataRequestOptionalElement,
                                             IReadableConfigurationUpdateRequestOptionalElement,
                                             IReadableDiscoveryRequestOptionalElement,
-                                            IReadableDiscoveryResponseOptionalElement {
+                                            IReadableDiscoveryResponseOptionalElement,
+                                            IReadableConfigurationUpdateResponseOptionalElement {
   public:
     static const size_t max_data_size = 2048;
     static const size_t max_count = 16;

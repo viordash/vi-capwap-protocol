@@ -7,10 +7,18 @@
 
 WritableConfigurationUpdateResponse::WritableConfigurationUpdateResponse(
     const ResultCode::Type result_code,
-    WritableRadioOperationalStateArray &radio_operational_states,
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads)
-    : result_code{ result_code }, radio_operational_states{ radio_operational_states },
-      vendor_specific_payloads{ vendor_specific_payloads } {
+    nonstd::span<IWritableConfigurationUpdateResponseOptionalElement *const> optional_elements)
+    : result_code{ result_code }, optional_elements{ optional_elements } {
+}
+WritableConfigurationUpdateResponse::WritableConfigurationUpdateResponse(
+    const ResultCode::Type result_code,
+    std::initializer_list<IWritableConfigurationUpdateResponseOptionalElement *const>
+        optional_elements)
+    : WritableConfigurationUpdateResponse(
+          result_code,
+          nonstd::span<IWritableConfigurationUpdateResponseOptionalElement *const>(
+              optional_elements.begin(),
+              optional_elements.size())) {
 }
 
 ControlHeader::MessageType WritableConfigurationUpdateResponse::GetMessageType() const {
@@ -23,11 +31,23 @@ ControlHeader::MessageType WritableConfigurationUpdateResponse::GetRequestMessag
 
 void WritableConfigurationUpdateResponse::Serialize(RawData *raw_data) const {
     result_code.Serialize(raw_data);
-    radio_operational_states.Serialize(raw_data);
-    vendor_specific_payloads.Serialize(raw_data);
+
+    for (auto *elem : optional_elements) {
+        elem->Serialize(raw_data);
+    }
 }
 
-ReadableConfigurationUpdateResponse::ReadableConfigurationUpdateResponse() : unknown_elements{} {
+ReadableConfigurationUpdateResponse::ReadableConfigurationUpdateResponse(
+    nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const> optional_elements)
+    : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
+}
+
+ReadableConfigurationUpdateResponse::ReadableConfigurationUpdateResponse(
+    std::initializer_list<IReadableConfigurationUpdateResponseOptionalElement *> optional_elements)
+    : ReadableConfigurationUpdateResponse(
+          nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const>(
+              optional_elements.begin(),
+              optional_elements.size())) {
 }
 
 ControlHeader::MessageType ReadableConfigurationUpdateResponse::GetMessageType() const {
@@ -44,18 +64,16 @@ bool ReadableConfigurationUpdateResponse::Deserialize(RawData *raw_data) {
                     return false;
                 }
                 break;
-            case ElementHeader::ElementType::RadioOperationalState:
-                if (!radio_operational_states.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::VendorSpecificPayload:
-                if (!vendor_specific_payloads.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
 
             default: {
+                auto it = key_optional_elements.find(element->GetElementType());
+                if (it != key_optional_elements.end()) {
+                    if (!it->second->Deserialize(raw_data)) {
+                        return false;
+                    }
+                    break;
+                }
+
                 auto unknownElement = UnrecognizedElement::Deserialize(raw_data);
                 if (unknownElement == nullptr) {
                     return false;
@@ -78,10 +96,28 @@ void ReadableConfigurationUpdateResponse::Log() const {
 
     result_code.Log();
 
-    radio_operational_states.Log();
-    vendor_specific_payloads.Log();
+    for (const auto &[_, value] : key_optional_elements) {
+        value->Log();
+    }
+
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
+}
+
+std::unordered_map<ElementHeader::ElementType,
+                   IReadableConfigurationUpdateResponseOptionalElement *const>
+ReadableConfigurationUpdateResponse::MapOptionalsElements(
+    nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const> optional_elements) {
+
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableConfigurationUpdateResponseOptionalElement *const>
+        map;
+
+    for (auto *elem : optional_elements) {
+        map.emplace(elem->GetElementType(), elem);
+    }
+
+    return map;
 }
