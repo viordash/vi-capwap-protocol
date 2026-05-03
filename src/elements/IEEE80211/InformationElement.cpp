@@ -62,31 +62,6 @@ bool InformationElement::Validate() const {
     return true;
 }
 
-void InformationElement::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(InformationElement) <= raw_data->end);
-    std::memcpy(raw_data->current, this, sizeof(InformationElement));
-    raw_data->current += sizeof(InformationElement);
-}
-
-InformationElement *InformationElement::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(InformationElement) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (InformationElement *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current = last;
-    return res;
-}
-
 WritableInformationElementArray::Item::Item(uint8_t radio_id,
                                             uint8_t wlan_id,
                                             uint8_t flags,
@@ -122,7 +97,10 @@ void WritableInformationElementArray::Clear() {
 
 void WritableInformationElementArray::Serialize(RawData *raw_data) const {
     for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
+        ASSERT(raw_data->current + sizeof(InformationElement) <= raw_data->end);
+        std::memcpy(raw_data->current, &elem.header, sizeof(InformationElement));
+        raw_data->current += sizeof(InformationElement);
+
         uint16_t ie_size =
             elem.header.GetLength() - (sizeof(InformationElement) - sizeof(ElementHeader));
         std::memcpy(raw_data->current, elem.ie_data.data(), ie_size);
@@ -153,11 +131,22 @@ bool ReadableInformationElementArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto ie = InformationElement::Deserialize(raw_data);
-    if (ie == nullptr) {
+    if (raw_data->current + sizeof(InformationElement) > raw_data->end) {
         return false;
     }
-    items[count] = ie;
+
+    auto res = (InformationElement *)raw_data->current;
+    if (!res->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    items[count] = res;
     count++;
     return true;
 }

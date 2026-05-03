@@ -41,8 +41,6 @@ struct __attribute__((packed)) InformationElement : ElementHeader {
     uint16_t GetIELength() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static InformationElement *Deserialize(RawData *raw_data);
 };
 
 struct WritableInformationElementArray : IWritableElement {
