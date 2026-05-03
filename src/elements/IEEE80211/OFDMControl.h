@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -62,7 +63,7 @@ struct __attribute__((packed)) OFDMControl : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableOFDMControlArray {
+struct WritableOFDMControlArray : IWritableElement {
   protected:
     std::vector<OFDMControl> items;
 
@@ -74,11 +75,11 @@ struct WritableOFDMControlArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override;
+    void Log() const override;
 };
 
-struct ReadableOFDMControlArray {
+struct ReadableOFDMControlArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -90,7 +91,9 @@ struct ReadableOFDMControlArray {
     ReadableOFDMControlArray(const ReadableOFDMControlArray &) = delete;
     ReadableOFDMControlArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override;
+    ElementHeader::ElementType GetElementType() const override;
+    bool IsPresent() const override;
     nonstd::span<const OFDMControl *const> Get() const;
-    void Log() const;
+    void Log() const override;
 };

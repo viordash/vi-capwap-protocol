@@ -84,6 +84,15 @@ void WritableOFDMControlArray::Log() const {
 ReadableOFDMControlArray::ReadableOFDMControlArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableOFDMControlArray::GetElementType() const {
+    return ElementHeader::OFDMControl;
+}
+
+bool ReadableOFDMControlArray::IsPresent() const {
+    return count > 0;
+}
+
+
 bool ReadableOFDMControlArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableOFDMControlArray::Deserialize elements count exceeds");

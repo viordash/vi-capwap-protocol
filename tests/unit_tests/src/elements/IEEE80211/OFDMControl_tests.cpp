@@ -25,9 +25,11 @@ TEST(OFDMControlTestsGroup, Serialize_Deserialize_array) {
     CHECK_EQUAL(&buffer[0] + 24, raw_data.current); // 2 × 12 = 24
 
     ReadableOFDMControlArray r_controls;
+    CHECK_FALSE(r_controls.IsPresent());
     raw_data = { buffer, buffer + 24 };
 
     CHECK_TRUE(r_controls.Deserialize(&raw_data));
+    CHECK_TRUE(r_controls.IsPresent());
     CHECK_TRUE(r_controls.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, r_controls.Get().size());
