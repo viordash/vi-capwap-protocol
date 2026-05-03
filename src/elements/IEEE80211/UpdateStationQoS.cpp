@@ -102,6 +102,15 @@ void WritableUpdateStationQoSArray::Log() const {
 ReadableUpdateStationQoSArray::ReadableUpdateStationQoSArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableUpdateStationQoSArray::GetElementType() const {
+    return ElementHeader::UpdateStationQoS;
+}
+
+bool ReadableUpdateStationQoSArray::IsPresent() const {
+    return count > 0;
+}
+
+
 bool ReadableUpdateStationQoSArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableUpdateStationQoSArray::Deserialize elements count exceeds");

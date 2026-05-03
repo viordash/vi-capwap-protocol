@@ -32,10 +32,12 @@ TEST(UpdateStationQoSTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(&buffer[0] + 39, raw_data.current); // 3 * 13 = 39
 
     ReadableUpdateStationQoSArray r_qos;
+    CHECK_FALSE(r_qos.IsPresent());
 
     raw_data = { buffer, buffer + 39 };
 
     CHECK_TRUE(r_qos.Deserialize(&raw_data));
+    CHECK_TRUE(r_qos.IsPresent());
     CHECK_TRUE(r_qos.Deserialize(&raw_data));
     CHECK_TRUE(r_qos.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
