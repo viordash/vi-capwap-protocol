@@ -164,7 +164,6 @@ bool ReadableAntennaArray::Deserialize(RawData *raw_data) {
     }
     items[count] = antenna;
     count++;
-    is_present = true;
     return true;
 }
 
@@ -189,5 +188,5 @@ ElementHeader::ElementType ReadableAntennaArray::GetElementType() const {
 }
 
 bool ReadableAntennaArray::IsPresent() const {
-    return is_present;
+    return count > 0;
 }

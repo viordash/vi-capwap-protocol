@@ -86,7 +86,6 @@ struct ReadableAntennaArray : IReadableElement {
   protected:
     std::array<const Antenna *, max_count> items;
     size_t count;
-    bool is_present = false;
 
   public:
     ReadableAntennaArray(const ReadableAntennaArray &) = delete;
