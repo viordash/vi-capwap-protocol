@@ -60,8 +60,6 @@ struct __attribute__((packed)) OFDMControl : ElementHeader {
     uint32_t GetTIThreshold() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static OFDMControl *Deserialize(RawData *raw_data);
 };
 
 struct WritableOFDMControlArray {
