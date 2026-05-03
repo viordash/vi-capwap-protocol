@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -46,7 +47,7 @@ struct __attribute__((packed)) Antenna : ElementHeader {
     static Antenna *Deserialize(RawData *raw_data);
 };
 
-struct WritableAntennaArray {
+struct WritableAntennaArray : IWritableElement {
   public:
     struct Item {
         nonstd::span<const Antenna::AntennaSelection> selections;
@@ -74,23 +75,26 @@ struct WritableAntennaArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableAntennaArray {
+struct ReadableAntennaArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
   protected:
     std::array<const Antenna *, max_count> items;
     size_t count;
+    bool is_present = false;
 
   public:
     ReadableAntennaArray(const ReadableAntennaArray &) = delete;
     ReadableAntennaArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const Antenna *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

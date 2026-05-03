@@ -108,10 +108,12 @@ TEST(AntennaTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(&buffer[0] + 30, raw_data.current);
 
     ReadableAntennaArray r_antennas;
+    CHECK_FALSE(r_antennas.IsPresent());
 
     raw_data = { buffer, raw_data.current };
 
     CHECK_TRUE(r_antennas.Deserialize(&raw_data));
+    CHECK_TRUE(r_antennas.IsPresent());
     CHECK_TRUE(r_antennas.Deserialize(&raw_data));
     CHECK_TRUE(r_antennas.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -163,8 +165,10 @@ TEST(AntennaTestsGroup, Add_array_of_items_is_unique_by_radio_id) {
     raw_data = { buffer, buffer + data_size };
 
     ReadableAntennaArray r_antennas;
+    CHECK_FALSE(r_antennas.IsPresent());
 
     CHECK_TRUE(r_antennas.Deserialize(&raw_data));
+    CHECK_TRUE(r_antennas.IsPresent());
     CHECK_TRUE(r_antennas.Deserialize(&raw_data));
     CHECK_FALSE(r_antennas.Deserialize(&raw_data));
 

@@ -74,8 +74,7 @@ bool Antenna::Validate() const {
 
 void Antenna::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(Antenna) <= raw_data->end);
-    Antenna *dst = (Antenna *)raw_data->current;
-    *dst = *this;
+    std::memcpy(raw_data->current, this, sizeof(Antenna));
     raw_data->current += sizeof(Antenna);
 }
 
@@ -134,7 +133,7 @@ void WritableAntennaArray::Serialize(RawData *raw_data) const {
     for (const auto &elem : items) {
         elem.header.Serialize(raw_data);
         auto selection_count = elem.header.GetLength() - (sizeof(Antenna) - sizeof(ElementHeader));
-        memcpy(raw_data->current, elem.selections.data(), selection_count);
+        std::memcpy(raw_data->current, elem.selections.data(), selection_count);
         raw_data->current += selection_count;
     }
 }
@@ -165,6 +164,7 @@ bool ReadableAntennaArray::Deserialize(RawData *raw_data) {
     }
     items[count] = antenna;
     count++;
+    is_present = true;
     return true;
 }
 
@@ -182,4 +182,12 @@ void ReadableAntennaArray::Log() const {
               items[i]->GetCombiner(),
               items[i]->GetAntennaCount());
     }
+}
+
+ElementHeader::ElementType ReadableAntennaArray::GetElementType() const {
+    return ElementHeader::Antenna;
+}
+
+bool ReadableAntennaArray::IsPresent() const {
+    return is_present;
 }
