@@ -19,7 +19,7 @@ struct __attribute__((packed)) DecryptionErrorHeader : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableDecryptionErrorReportArray : IWritableElement {
+struct WritableDecryptionErrorReportArray : IWritableWTPEventRequestOptionalElement {
   public:
     struct Item {
         std::vector<MacAddress> MacAddresses;
@@ -48,7 +48,7 @@ struct WritableDecryptionErrorReportArray : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableDecryptionErrorReportArray : IReadableElement {
+struct ReadableDecryptionErrorReportArray : IReadableWTPEventRequestOptionalElement {
   public:
     static const size_t max_count = 32;
     struct Item {

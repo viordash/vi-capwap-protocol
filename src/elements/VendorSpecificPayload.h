@@ -40,7 +40,8 @@ struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestO
                                             IWritableEchoRequestOptionalElement,
                                             IWritableEchoResponseOptionalElement,
                                             IWritableImageDataResponseOptionalElement,
-                                            IWritableResetRequestOptionalElement {
+                                            IWritableResetRequestOptionalElement,
+                                            IWritableWTPEventRequestOptionalElement {
   public:
     struct Item {
         std::vector<char> value;
@@ -81,7 +82,8 @@ struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestO
                                             IReadableEchoRequestOptionalElement,
                                             IReadableEchoResponseOptionalElement,
                                             IReadableImageDataResponseOptionalElement,
-                                            IReadableResetRequestOptionalElement {
+                                            IReadableResetRequestOptionalElement,
+                                            IReadableWTPEventRequestOptionalElement {
   public:
     static const size_t max_data_size = 2048;
     static const size_t max_count = 16;

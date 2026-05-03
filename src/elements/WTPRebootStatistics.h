@@ -79,7 +79,8 @@ struct __attribute__((packed)) WTPRebootStatistics : ElementHeader {
 };
 
 struct WritableWTPRebootStatistics : IWritableConfigurationStatusRequestOptionalElement,
-                                     IWritableJoinRequestOptionalElement {
+                                     IWritableJoinRequestOptionalElement,
+                                     IWritableWTPEventRequestOptionalElement {
   protected:
     WTPRebootStatistics element;
 
@@ -98,7 +99,8 @@ struct WritableWTPRebootStatistics : IWritableConfigurationStatusRequestOptional
 };
 
 struct ReadableWTPRebootStatistics : IReadableConfigurationStatusRequestOptionalElement,
-                                     IReadableJoinRequestOptionalElement {
+                                     IReadableJoinRequestOptionalElement,
+                                     IReadableWTPEventRequestOptionalElement {
   protected:
     WTPRebootStatistics *element = nullptr;
     bool is_present = false;

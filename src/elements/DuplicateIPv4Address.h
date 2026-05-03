@@ -27,7 +27,7 @@ struct __attribute__((packed)) DuplicateIPv4Address : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableDuplicateIPv4AdrArray : IWritableElement {
+struct WritableDuplicateIPv4AdrArray : IWritableWTPEventRequestOptionalElement {
   public:
     struct Item {
         MacAddress Mac;
@@ -52,7 +52,7 @@ struct WritableDuplicateIPv4AdrArray : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableDuplicateIPv4AdrArray : IReadableElement {
+struct ReadableDuplicateIPv4AdrArray : IReadableWTPEventRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

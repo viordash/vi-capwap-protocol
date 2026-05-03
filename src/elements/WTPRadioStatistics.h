@@ -82,7 +82,7 @@ struct __attribute__((packed)) WTPRadioStatistics : ElementHeader {
     bool operator==(const WTPRadioStatistics &other) const;
 };
 
-struct WritableWTPRadioStatisticsArray : IWritableElement {
+struct WritableWTPRadioStatisticsArray : IWritableWTPEventRequestOptionalElement {
   private:
     std::vector<WTPRadioStatistics> items;
 
@@ -98,7 +98,7 @@ struct WritableWTPRadioStatisticsArray : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableWTPRadioStatisticsArray : IReadableElement {
+struct ReadableWTPRadioStatisticsArray : IReadableWTPEventRequestOptionalElement {
   public:
     static const size_t max_count = 32; //Radio ID
 

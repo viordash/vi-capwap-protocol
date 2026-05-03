@@ -24,7 +24,7 @@ struct __attribute__((packed)) DeleteStation : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableDeleteStationArray : IWritableElement {
+struct WritableDeleteStationArray : IWritableWTPEventRequestOptionalElement {
   public:
     struct Item {
         MacAddress Mac;
@@ -49,7 +49,7 @@ struct WritableDeleteStationArray : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableDeleteStationArray : IReadableElement {
+struct ReadableDeleteStationArray : IReadableWTPEventRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 
