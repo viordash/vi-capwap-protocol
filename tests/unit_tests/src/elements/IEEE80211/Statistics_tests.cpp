@@ -30,10 +30,12 @@ TEST(StatisticsTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(&buffer[0] + 252, raw_data.current); // 3 * 84 = 252
 
     ReadableStatisticsArray r_stats;
+    CHECK_FALSE(r_stats.IsPresent());
 
     raw_data = { buffer, buffer + 252 };
 
     CHECK_TRUE(r_stats.Deserialize(&raw_data));
+    CHECK_TRUE(r_stats.IsPresent());
     CHECK_TRUE(r_stats.Deserialize(&raw_data));
     CHECK_TRUE(r_stats.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -93,10 +95,12 @@ TEST(StatisticsTestsGroup, Add_array_of_items_is_unique_by_RadioID) {
     raw_data = { buffer, buffer + data_size };
 
     ReadableStatisticsArray r_stats;
+    CHECK_FALSE(r_stats.IsPresent());
 
     CHECK_TRUE(r_stats.Deserialize(&raw_data));
     CHECK_TRUE(r_stats.Deserialize(&raw_data));
     CHECK_FALSE(r_stats.Deserialize(&raw_data));
+    CHECK_TRUE(r_stats.IsPresent());
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, r_stats.Get().size());

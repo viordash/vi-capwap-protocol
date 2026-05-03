@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -168,7 +169,7 @@ struct __attribute__((packed)) Statistics : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableStatisticsArray {
+struct WritableStatisticsArray : IWritableElement {
   private:
     std::vector<Statistics> items;
 
@@ -180,11 +181,11 @@ struct WritableStatisticsArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override;
+    void Log() const override;
 };
 
-struct ReadableStatisticsArray {
+struct ReadableStatisticsArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -196,7 +197,9 @@ struct ReadableStatisticsArray {
     ReadableStatisticsArray(const ReadableStatisticsArray &) = delete;
     ReadableStatisticsArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override;
+    ElementHeader::ElementType GetElementType() const override;
+    bool IsPresent() const override;
     nonstd::span<const Statistics *const> Get() const;
-    void Log() const;
+    void Log() const override;
 };
