@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IElement.h"
 #include "CapwapMessage.h"
 #include "elements/RadioOperationalState.h"
 #include "elements/ResultCode.h"

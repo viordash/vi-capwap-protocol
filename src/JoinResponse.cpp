@@ -142,8 +142,8 @@ bool ReadableJoinResponse::Deserialize(RawData *raw_data) {
         }
     }
     return result_code.IsPresent() && ac_descriptor.IsPresent() > 0 && ac_name.IsPresent()
-        && wtp_radio_informations.Get().size() && ecn_support.IsPresent()
-        && control_ip_addresses.Get().size() > 0 && local_ip_addresses.Get().size() > 0;
+        && wtp_radio_informations.IsPresent() && ecn_support.IsPresent()
+        && control_ip_addresses.IsPresent() && local_ip_addresses.IsPresent();
 }
 
 void ReadableJoinResponse::Log() const {

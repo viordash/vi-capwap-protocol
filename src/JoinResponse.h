@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IElement.h"
 #include "CapwapMessage.h"
 #include "elements/ACDescriptor.h"
 #include "elements/ACIPv4List.h"

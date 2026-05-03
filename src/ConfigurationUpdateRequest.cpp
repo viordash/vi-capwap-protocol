@@ -51,7 +51,6 @@ ControlHeader::MessageType ReadableConfigurationUpdateRequest::GetMessageType() 
 }
 
 bool ReadableConfigurationUpdateRequest::Deserialize(RawData *raw_data) {
-    bool valid = false;
     while (raw_data->current + sizeof(ElementHeader) <= raw_data->end) {
         ElementHeader *element = (ElementHeader *)raw_data->current;
 
@@ -62,7 +61,6 @@ bool ReadableConfigurationUpdateRequest::Deserialize(RawData *raw_data) {
                     if (!it->second->Deserialize(raw_data)) {
                         return false;
                     }
-                    valid = true;
                     break;
                 }
 
@@ -79,7 +77,7 @@ bool ReadableConfigurationUpdateRequest::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return valid;
+    return true;
 }
 
 void ReadableConfigurationUpdateRequest::Log() const {
