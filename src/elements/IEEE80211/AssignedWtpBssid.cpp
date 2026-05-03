@@ -86,6 +86,14 @@ void WritableAssignedWtpBssidArray::Log() const {
 ReadableAssignedWtpBssidArray::ReadableAssignedWtpBssidArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableAssignedWtpBssidArray::GetElementType() const {
+    return ElementHeader::AssignedWtpBssid;
+}
+
+bool ReadableAssignedWtpBssidArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableAssignedWtpBssidArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableAssignedWtpBssidArray::Deserialize elements count exceeds");

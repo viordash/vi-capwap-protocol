@@ -45,10 +45,12 @@ TEST(AssignedWtpBssidTestsGroup, Serialize_Deserialize_few_elements) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     ReadableAssignedWtpBssidArray r_bssids;
+    CHECK_FALSE(r_bssids.IsPresent());
 
     raw_data = { reference, reference + sizeof(reference) };
 
     CHECK_TRUE(r_bssids.Deserialize(&raw_data));
+    CHECK_TRUE(r_bssids.IsPresent());
     CHECK_TRUE(r_bssids.Deserialize(&raw_data));
     CHECK_TRUE(r_bssids.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -91,8 +93,10 @@ TEST(AssignedWtpBssidTestsGroup, Add_array_of_items_is_unique) {
     raw_data = { buffer, buffer + data_size };
 
     ReadableAssignedWtpBssidArray r_bssids;
+    CHECK_FALSE(r_bssids.IsPresent());
 
     CHECK_TRUE(r_bssids.Deserialize(&raw_data));
+    CHECK_TRUE(r_bssids.IsPresent());
     CHECK_TRUE(r_bssids.Deserialize(&raw_data));
     CHECK_FALSE(r_bssids.Deserialize(&raw_data));
 
