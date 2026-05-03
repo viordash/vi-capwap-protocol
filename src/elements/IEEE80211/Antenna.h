@@ -33,7 +33,6 @@ struct __attribute__((packed)) Antenna : ElementHeader {
 
   public:
     // Antenna Selection: One 8-bit antenna configuration value per antenna in the WTP.
-    AntennaSelection antenna_selection[];
 
     Antenna(const Antenna &) = default;
     Antenna(uint8_t radio_id, Diversity diversity, Combiner combiner, uint8_t antenna_count);
@@ -81,8 +80,13 @@ struct ReadableAntennaArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
+    struct Item : Antenna {
+        AntennaSelection antenna_selection[];
+        Item(const Item &) = delete;
+    };
+
   protected:
-    std::array<const Antenna *, max_count> items;
+    std::array<const Item *, max_count> items;
     size_t count;
 
   public:
@@ -90,7 +94,7 @@ struct ReadableAntennaArray : IReadableElement {
     ReadableAntennaArray();
 
     bool Deserialize(RawData *raw_data) override final;
-    nonstd::span<const Antenna *const> Get() const;
+    nonstd::span<const ReadableAntennaArray::Item *const> Get() const;
     void Log() const override final;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;

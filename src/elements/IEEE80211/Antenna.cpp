@@ -6,7 +6,8 @@
 
 Antenna::Antenna(uint8_t radio_id, Diversity diversity, Combiner combiner, uint8_t antenna_count)
     : ElementHeader(ElementHeader::Antenna,
-                    (sizeof(Antenna) - sizeof(ElementHeader)) + antenna_count),
+                    (sizeof(Antenna) - sizeof(ElementHeader))
+                        + antenna_count * sizeof(Antenna::AntennaSelection)),
       radio_id{ radio_id }, diversity{ diversity }, combiner{ combiner },
       antenna_count{ antenna_count } {
 }
@@ -59,15 +60,6 @@ bool Antenna::Validate() const {
             break;
         default:
             return false;
-    }
-    for (size_t i = 0; i < antenna_count; i++) {
-        switch (antenna_selection[i]) {
-            case Antenna::AntennaSelection::Internal:
-            case Antenna::AntennaSelection::External:
-                break;
-            default:
-                return false;
-        }
     }
     return true;
 }
@@ -140,7 +132,7 @@ bool ReadableAntennaArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto res = (Antenna *)raw_data->current;
+    auto res = (ReadableAntennaArray::Item *)raw_data->current;
     if (!res->Validate()) {
         return false;
     }
@@ -156,7 +148,7 @@ bool ReadableAntennaArray::Deserialize(RawData *raw_data) {
     return true;
 }
 
-nonstd::span<const Antenna *const> ReadableAntennaArray::Get() const {
+nonstd::span<const ReadableAntennaArray::Item *const> ReadableAntennaArray::Get() const {
     nonstd::span span(items.begin(), count);
     return span;
 }
