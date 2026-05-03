@@ -40,10 +40,10 @@ WritableCAPWAPControlIPV4AdrArray::WritableCAPWAPControlIPV4AdrArray(
 }
 
 void WritableCAPWAPControlIPV4AdrArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
+    for (const auto &item : items) {
         ASSERT(raw_data->current + sizeof(CAPWAPControlIPv4Address) <= raw_data->end);
-        std::memcpy(raw_data->current, &elem, sizeof(elem));
-        raw_data->current += sizeof(elem);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item); 
     }
 }
 

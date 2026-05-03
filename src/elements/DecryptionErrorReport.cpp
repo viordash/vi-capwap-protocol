@@ -79,12 +79,12 @@ void WritableDecryptionErrorReportArray::Clear() {
 void WritableDecryptionErrorReportArray::Serialize(RawData *raw_data) const {
     ASSERT(items.size() <= ReadableDecryptionErrorReportArray::max_count);
 
-    for (const auto &elem : items) {
-        ASSERT(raw_data->current + sizeof(elem.header) <= raw_data->end);
-        std::memcpy(raw_data->current, &elem.header, sizeof(elem.header));
-        raw_data->current += sizeof(elem.header);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
 
-        for (auto &entry : elem.MacAddresses) {
+        for (auto &entry : item.MacAddresses) {
             ReadableMacAddress *write_entry = (ReadableMacAddress *)raw_data->current;
             write_entry->Length = entry.Length;
 

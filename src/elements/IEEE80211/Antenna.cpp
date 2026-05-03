@@ -97,13 +97,14 @@ void WritableAntennaArray::Clear() {
 }
 
 void WritableAntennaArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        ASSERT(raw_data->current + sizeof(Antenna) <= raw_data->end);
-        std::memcpy(raw_data->current, &elem.header, sizeof(Antenna));
-        raw_data->current += sizeof(Antenna);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
 
-        auto selection_count = elem.header.GetLength() - (sizeof(Antenna) - sizeof(ElementHeader));
-        std::memcpy(raw_data->current, elem.selections.data(), selection_count);
+        auto selection_count =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.selections.data(), selection_count);
         raw_data->current += selection_count;
     }
 }

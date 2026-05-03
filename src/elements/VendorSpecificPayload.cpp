@@ -74,20 +74,20 @@ void WritableVendorSpecificPayloadArray::Clear() {
 }
 
 void WritableVendorSpecificPayloadArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        ASSERT(raw_data->current + sizeof(ElementHeader) <= raw_data->end);
-        std::memcpy(raw_data->current, &elem.header, sizeof(elem.header));
-        raw_data->current += sizeof(elem.header);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
         uint16_t data_size =
-            elem.header.GetLength() - (sizeof(VendorSpecificPayload) - sizeof(ElementHeader));
-        std::memcpy(raw_data->current, elem.value.data(), data_size);
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.value.data(), data_size);
         raw_data->current += data_size;
     }
 }
 uint16_t WritableVendorSpecificPayloadArray::GetTotalLength() const {
     uint16_t size = 0;
-    for (const auto &elem : items) {
-        size += elem.header.GetTotalLength();
+    for (const auto &item : items) {
+        size += item.header.GetTotalLength();
     }
     return size;
 }

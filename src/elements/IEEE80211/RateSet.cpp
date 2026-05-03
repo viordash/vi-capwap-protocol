@@ -54,11 +54,12 @@ void WritableRateSetArray::Clear() {
 
 void WritableRateSetArray::Serialize(RawData *raw_data) const {
     for (const auto &item : items) {
-        ASSERT(raw_data->current + sizeof(ElementHeader) <= raw_data->end);
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
         std::memcpy(raw_data->current, &item.header, sizeof(item.header));
         raw_data->current += sizeof(item.header);
-        uint16_t data_size = item.header.GetLength() - (sizeof(RateSet) - sizeof(ElementHeader));
-        std::memcpy(raw_data->current, item.data.data(), item.data.size());
+        uint16_t data_size =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.data.data(), data_size);
         raw_data->current += data_size;
     }
 }
