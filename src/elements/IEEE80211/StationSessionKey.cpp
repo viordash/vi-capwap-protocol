@@ -12,9 +12,9 @@ StationSessionKey::StationSessionKey(const uint8_t *mac_address,
     : ElementHeader(ElementHeader::StationSessionKey,
                     (sizeof(StationSessionKey) - sizeof(ElementHeader)) + key_length),
       flags{ flags } {
-    memcpy(this->mac_address, mac_address, mac_address_size);
-    memcpy(this->pairwise_tsc, pairwise_tsc, tsc_size);
-    memcpy(this->pairwise_rsc, pairwise_rsc, rsc_size);
+    std::memcpy(this->mac_address, mac_address, mac_address_size);
+    std::memcpy(this->pairwise_tsc, pairwise_tsc, tsc_size);
+    std::memcpy(this->pairwise_rsc, pairwise_rsc, rsc_size);
 }
 
 const uint8_t *StationSessionKey::GetMACAddress() const {
@@ -66,8 +66,7 @@ bool StationSessionKey::Validate() const {
 
 void StationSessionKey::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(StationSessionKey) <= raw_data->end);
-    StationSessionKey *dst = (StationSessionKey *)raw_data->current;
-    *dst = *this;
+    std::memcpy(raw_data->current, this, sizeof(StationSessionKey));
     raw_data->current += sizeof(StationSessionKey);
 }
 
@@ -126,7 +125,7 @@ void WritableStationSessionKeyArray::Serialize(RawData *raw_data) const {
         elem.header.Serialize(raw_data);
         uint16_t key_size =
             elem.header.GetLength() - (sizeof(StationSessionKey) - sizeof(ElementHeader));
-        memcpy(raw_data->current, elem.key_data.data(), key_size);
+        std::memcpy(raw_data->current, elem.key_data.data(), key_size);
         raw_data->current += key_size;
     }
 }
@@ -188,4 +187,12 @@ void ReadableStationSessionKeyArray::Log() const {
               items[i]->GetACCryptoFlag() ? 1 : 0,
               items[i]->GetKeyLength());
     }
+}
+
+ElementHeader::ElementType ReadableStationSessionKeyArray::GetElementType() const {
+    return ElementHeader::StationSessionKey;
+}
+
+bool ReadableStationSessionKeyArray::IsPresent() const {
+    return count > 0;
 }

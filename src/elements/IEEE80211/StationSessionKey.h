@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -76,7 +77,7 @@ struct __attribute__((packed)) StationSessionKey : ElementHeader {
     static StationSessionKey *Deserialize(RawData *raw_data);
 };
 
-struct WritableStationSessionKeyArray {
+struct WritableStationSessionKeyArray : IWritableElement {
   public:
     struct Item {
         nonstd::span<const uint8_t> key_data;
@@ -103,11 +104,11 @@ struct WritableStationSessionKeyArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableStationSessionKeyArray {
+struct ReadableStationSessionKeyArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -119,7 +120,9 @@ struct ReadableStationSessionKeyArray {
     ReadableStationSessionKeyArray(const ReadableStationSessionKeyArray &) = delete;
     ReadableStationSessionKeyArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const StationSessionKey *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

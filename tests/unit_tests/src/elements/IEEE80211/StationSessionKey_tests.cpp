@@ -160,9 +160,12 @@ TEST(StationSessionKeyTestsGroup, Serialize_Deserialize_array) {
     CHECK_EQUAL(&buffer[0] + 60, raw_data.current); // (24+4) + (24+8) = 60
 
     ReadableStationSessionKeyArray r_keys;
+    CHECK_FALSE(r_keys.IsPresent());
+
     raw_data = { buffer, buffer + 60 };
 
     CHECK_TRUE(r_keys.Deserialize(&raw_data));
+    CHECK_TRUE(r_keys.IsPresent());
     CHECK_TRUE(r_keys.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, r_keys.Get().size());
