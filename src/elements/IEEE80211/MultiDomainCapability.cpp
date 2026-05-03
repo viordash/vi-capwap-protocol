@@ -87,6 +87,15 @@ void WritableMultiDomainCapabilityArray::Log() const {
 ReadableMultiDomainCapabilityArray::ReadableMultiDomainCapabilityArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableMultiDomainCapabilityArray::GetElementType() const {
+    return ElementHeader::MultiDomainCapability;
+}
+
+bool ReadableMultiDomainCapabilityArray::IsPresent() const {
+    return count > 0;
+}
+
+
 bool ReadableMultiDomainCapabilityArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableMultiDomainCapabilityArray::Deserialize elements count exceeds");

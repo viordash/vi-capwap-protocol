@@ -25,9 +25,11 @@ TEST(MultiDomainCapabilityTestsGroup, Serialize_Deserialize_array) {
     CHECK_EQUAL(&buffer[0] + 24, raw_data.current); // 2 × 12 = 24
 
     ReadableMultiDomainCapabilityArray r_capabilities;
+    CHECK_FALSE(r_capabilities.IsPresent());
     raw_data = { buffer, buffer + 24 };
 
     CHECK_TRUE(r_capabilities.Deserialize(&raw_data));
+    CHECK_TRUE(r_capabilities.IsPresent());
     CHECK_TRUE(r_capabilities.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, r_capabilities.Get().size());
