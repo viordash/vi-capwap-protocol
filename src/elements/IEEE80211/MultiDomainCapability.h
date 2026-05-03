@@ -50,8 +50,6 @@ struct __attribute__((packed)) MultiDomainCapability : ElementHeader {
     uint16_t GetMaxTxPowerLevel() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static MultiDomainCapability *Deserialize(RawData *raw_data);
 };
 
 struct WritableMultiDomainCapabilityArray {

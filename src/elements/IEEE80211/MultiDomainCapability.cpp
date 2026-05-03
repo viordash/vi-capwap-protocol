@@ -44,31 +44,9 @@ bool MultiDomainCapability::Validate() const {
     return true;
 }
 
-void MultiDomainCapability::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(MultiDomainCapability) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(MultiDomainCapability));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(MultiDomainCapability);
-}
-
-MultiDomainCapability *MultiDomainCapability::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(MultiDomainCapability) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (MultiDomainCapability *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(MultiDomainCapability);
-    return res;
-}
 
 WritableMultiDomainCapabilityArray::WritableMultiDomainCapabilityArray() {
+    static_assert(sizeof(items[0]) == 12);
     items.reserve(ReadableMultiDomainCapabilityArray::max_count);
 }
 
@@ -87,8 +65,10 @@ void WritableMultiDomainCapabilityArray::Clear() {
 }
 
 void WritableMultiDomainCapabilityArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -112,12 +92,17 @@ bool ReadableMultiDomainCapabilityArray::Deserialize(RawData *raw_data) {
         log_e("ReadableMultiDomainCapabilityArray::Deserialize elements count exceeds");
         return false;
     }
-
-    auto capability = MultiDomainCapability::Deserialize(raw_data);
-    if (capability == nullptr) {
+    if (raw_data->current + sizeof(MultiDomainCapability) > raw_data->end) {
         return false;
     }
-    items[count] = capability;
+
+    auto item = (MultiDomainCapability *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(MultiDomainCapability);
+
+    items[count] = item;
     count++;
     return true;
 }
