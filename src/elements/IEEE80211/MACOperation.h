@@ -52,8 +52,6 @@ struct __attribute__((packed)) MACOperation : ElementHeader {
     uint32_t GetRxMSDULifetime() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static MACOperation *Deserialize(RawData *raw_data);
 };
 
 struct WritableMACOperationArray {
