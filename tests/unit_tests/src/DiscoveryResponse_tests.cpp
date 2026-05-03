@@ -41,7 +41,7 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize) {
                                          "Corporate-AC-1",
                                          wtp_radio_informations,
                                          ip_addresses,
-                                         VendorSpecificPayload::Dummy);
+                                         {});
 
     write_data.Serialize(&raw_data);
     CHECK_EQUAL(&buffer[0] + 190 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
@@ -66,7 +66,8 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize) {
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 190 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableDiscoveryResponse read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableDiscoveryResponse read_data{ &vendor_specific_payloads };
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(3, read_data.wtp_radio_informations.Get().size());
@@ -93,42 +94,45 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize) {
     CHECK_EQUAL(20, read_data.ip_addresses.Get()[1]->GetWTPCount());
 
     STRNCMP_EQUAL("Corporate-AC-1", read_data.ac_name.Get()->name, 14);
+
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
 TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize_with_VendorSpecificPayload) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    {
+        WritableACDescriptor::SubElement info_elements[] = {
+            { 1234,
+              ACInformationSubElementHeader::Type::HardwareVersion,
+              "01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF" },
+            { 5678, ACInformationSubElementHeader::Type::SoftwareVersion, "efghijklm" },
+        };
+        WritableACDescriptor ac_descriptor{
+            100,  200,   1000,         1234, true, false, ACDescriptorHeader::RMACField::Supported,
+            true, false, info_elements
+        };
 
-    WritableACDescriptor::SubElement info_elements[] = {
-        { 1234,
-          ACInformationSubElementHeader::Type::HardwareVersion,
-          "01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF" },
-        { 5678, ACInformationSubElementHeader::Type::SoftwareVersion, "efghijklm" },
-    };
-    WritableACDescriptor ac_descriptor{
-        100,  200,   1000,         1234, true, false, ACDescriptorHeader::RMACField::Supported,
-        true, false, info_elements
-    };
+        const char *ac_name = "Corporate-AC-1";
 
-    const char *ac_name = "Corporate-AC-1";
+        WritableWTPRadioInformationArray wtp_radio_informations;
+        wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
 
-    WritableWTPRadioInformationArray wtp_radio_informations;
-    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
+        CAPWAPControlIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10"), 19 } };
 
-    CAPWAPControlIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10"), 19 } };
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        vendor_specific_payloads.Add(1, 2, "01234567890A");
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
-    vendor_specific_payloads.Add(1, 2, "01234567890A");
+        WritableDiscoveryResponse write_data(ac_descriptor,
+                                             ac_name,
+                                             wtp_radio_informations,
+                                             ip_addresses,
+                                             { &vendor_specific_payloads });
 
-    WritableDiscoveryResponse write_data(ac_descriptor,
-                                         ac_name,
-                                         wtp_radio_informations,
-                                         ip_addresses,
-                                         vendor_specific_payloads);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 215 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = {
         0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x2A, 0x00, 0xC7,
@@ -153,18 +157,18 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize_with_VendorSpecifi
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 215 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableDiscoveryResponse read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableDiscoveryResponse read_data{ &vendor_specific_payloads };
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(2, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get()[1]->GetVendorIdentifier());
-    CHECK_EQUAL(2, read_data.vendor_specific_payloads.Get()[1]->GetElementId());
-    STRNCMP_EQUAL("01234567890A", (char *)read_data.vendor_specific_payloads.Get()[1]->value, 12);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(2, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
+    CHECK_EQUAL(1, vendor_specific_payloads.Get()[1]->GetVendorIdentifier());
+    CHECK_EQUAL(2, vendor_specific_payloads.Get()[1]->GetElementId());
+    STRNCMP_EQUAL("01234567890A", (char *)vendor_specific_payloads.Get()[1]->value, 12);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -228,7 +232,7 @@ uint8_t data[] = {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableDiscoveryResponse read_data;
+    ReadableDiscoveryResponse read_data({});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -344,9 +348,11 @@ uint8_t data[] = {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableDiscoveryResponse read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableDiscoveryResponse read_data{ &vendor_specific_payloads };
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, read_data.unknown_elements);
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
 }

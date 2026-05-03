@@ -49,7 +49,7 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize_deserialize_perf) 
                                          "Corporate-AC-1",
                                          wtp_radio_informations,
                                          ip_addresses,
-                                         vendor_specific_payloads);
+                                         { &vendor_specific_payloads });
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -57,7 +57,8 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize_deserialize_perf) 
         ankerl::nanobench::doNotOptimizeAway(raw_data);
 
         raw_data = { buffer, buffer + 212 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-        ReadableDiscoveryResponse read_data;
+        ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+        ReadableDiscoveryResponse read_data{ &vendor_specific_payloads };
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

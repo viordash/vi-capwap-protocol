@@ -38,3 +38,6 @@ struct IWritableDiscoveryRequestOptionalElement : IWritableElement {
     virtual uint16_t GetTotalLength() const = 0;
 };
 struct IReadableDiscoveryRequestOptionalElement : IReadableElement {};
+
+struct IWritableDiscoveryResponseOptionalElement : IWritableElement {};
+struct IReadableDiscoveryResponseOptionalElement : IReadableElement {};
