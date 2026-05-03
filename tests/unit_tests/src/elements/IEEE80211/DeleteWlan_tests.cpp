@@ -40,10 +40,12 @@ TEST(DeleteWlanTestsGroup, Serialize_Deserialize_few_elements) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     ReadableDeleteWlanArray r_wlans;
+    CHECK_FALSE(r_wlans.IsPresent());
 
     raw_data = { reference, reference + sizeof(reference) };
 
     CHECK_TRUE(r_wlans.Deserialize(&raw_data));
+    CHECK_TRUE(r_wlans.IsPresent());
     CHECK_TRUE(r_wlans.Deserialize(&raw_data));
     CHECK_TRUE(r_wlans.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -80,8 +82,10 @@ TEST(DeleteWlanTestsGroup, Add_array_of_items_is_unique) {
     raw_data = { buffer, buffer + data_size };
 
     ReadableDeleteWlanArray r_wlans;
+    CHECK_FALSE(r_wlans.IsPresent());
 
     CHECK_TRUE(r_wlans.Deserialize(&raw_data));
+    CHECK_TRUE(r_wlans.IsPresent());
     CHECK_TRUE(r_wlans.Deserialize(&raw_data));
     CHECK_FALSE(r_wlans.Deserialize(&raw_data));
 

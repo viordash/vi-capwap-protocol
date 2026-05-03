@@ -72,6 +72,14 @@ void WritableDeleteWlanArray::Log() const {
 ReadableDeleteWlanArray::ReadableDeleteWlanArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableDeleteWlanArray::GetElementType() const {
+    return ElementHeader::DeleteWlan;
+}
+
+bool ReadableDeleteWlanArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableDeleteWlanArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableDeleteWlanArray::Deserialize elements count exceeds");
