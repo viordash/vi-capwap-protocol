@@ -17,8 +17,6 @@ struct __attribute__((packed)) DecryptionErrorReportPeriod : ElementHeader {
     DecryptionErrorReportPeriod(uint8_t radio_id, uint16_t report_interval);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static DecryptionErrorReportPeriod *Deserialize(RawData *raw_data);
 
     // Radio ID:   The Radio Identifier refers to an interface index on the WTP, whose value is between one (1) and 31.
     uint8_t RadioID() const;

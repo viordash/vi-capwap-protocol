@@ -16,23 +16,6 @@ bool DecryptionErrorReportPeriod::Validate() const {
                == (sizeof(DecryptionErrorReportPeriod) - sizeof(ElementHeader))
         && radio_id <= 31;
 }
-void DecryptionErrorReportPeriod::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(DecryptionErrorReportPeriod) <= raw_data->end);
-    std::memcpy(raw_data->current, this, sizeof(DecryptionErrorReportPeriod));
-    raw_data->current += sizeof(DecryptionErrorReportPeriod);
-}
-DecryptionErrorReportPeriod *DecryptionErrorReportPeriod::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(DecryptionErrorReportPeriod) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (DecryptionErrorReportPeriod *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(DecryptionErrorReportPeriod);
-    return res;
-}
 
 uint8_t DecryptionErrorReportPeriod::RadioID() const {
     return radio_id;
@@ -43,6 +26,7 @@ uint16_t DecryptionErrorReportPeriod::ReportInterval() const {
 }
 
 WritableDecryptionErrorReportPeriodArray::WritableDecryptionErrorReportPeriodArray() {
+    static_assert(sizeof(items[0]) == 7);
     items.reserve(ReadableDecryptionErrorReportPeriodArray::max_count);
 }
 
@@ -71,8 +55,10 @@ void WritableDecryptionErrorReportPeriodArray::Clear() {
 }
 
 void WritableDecryptionErrorReportPeriodArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -94,10 +80,16 @@ bool ReadableDecryptionErrorReportPeriodArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto item = DecryptionErrorReportPeriod::Deserialize(raw_data);
-    if (item == nullptr) {
+    if (raw_data->current + sizeof(DecryptionErrorReportPeriod) > raw_data->end) {
         return false;
     }
+
+    auto item = (DecryptionErrorReportPeriod *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(DecryptionErrorReportPeriod);
+
     items[count] = item;
     count++;
     return true;
