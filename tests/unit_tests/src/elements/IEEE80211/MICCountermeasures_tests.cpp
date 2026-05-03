@@ -44,10 +44,12 @@ TEST(MICCountermeasuresTestsGroup, Serialize_Deserialize_few_elements) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     ReadableMICCountermeasuresArray r_cms;
+    CHECK_FALSE(r_cms.IsPresent());
 
     raw_data = { reference, reference + sizeof(reference) };
 
     CHECK_TRUE(r_cms.Deserialize(&raw_data));
+    CHECK_TRUE(r_cms.IsPresent());
     CHECK_TRUE(r_cms.Deserialize(&raw_data));
     CHECK_TRUE(r_cms.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -26,7 +27,7 @@ struct __attribute__((packed)) MICCountermeasures : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableMICCountermeasuresArray {
+struct WritableMICCountermeasuresArray : IWritableElement {
   private:
     std::vector<MICCountermeasures> items;
 
@@ -38,11 +39,11 @@ struct WritableMICCountermeasuresArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override;
+    void Log() const override;
 };
 
-struct ReadableMICCountermeasuresArray {
+struct ReadableMICCountermeasuresArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -54,7 +55,9 @@ struct ReadableMICCountermeasuresArray {
     ReadableMICCountermeasuresArray(const ReadableMICCountermeasuresArray &) = delete;
     ReadableMICCountermeasuresArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override;
+    ElementHeader::ElementType GetElementType() const override;
+    bool IsPresent() const override;
     nonstd::span<const MICCountermeasures *const> Get() const;
-    void Log() const;
+    void Log() const override;
 };

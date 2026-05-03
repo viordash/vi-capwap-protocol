@@ -76,6 +76,15 @@ void WritableMICCountermeasuresArray::Log() const {
 ReadableMICCountermeasuresArray::ReadableMICCountermeasuresArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableMICCountermeasuresArray::GetElementType() const {
+    return ElementHeader::MICCountermeasures;
+}
+
+bool ReadableMICCountermeasuresArray::IsPresent() const {
+    return count > 0;
+}
+
+
 bool ReadableMICCountermeasuresArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableMICCountermeasuresArray::Deserialize elements count exceeds");
