@@ -55,31 +55,9 @@ bool UpdateStationQoS::Validate() const {
     return true;
 }
 
-void UpdateStationQoS::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(UpdateStationQoS) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(UpdateStationQoS));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(UpdateStationQoS);
-}
-
-UpdateStationQoS *UpdateStationQoS::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(UpdateStationQoS) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (UpdateStationQoS *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(UpdateStationQoS);
-    return res;
-}
 
 WritableUpdateStationQoSArray::WritableUpdateStationQoSArray() {
+    static_assert(sizeof(items[0]) == 13);
     items.reserve(ReadableUpdateStationQoSArray::max_count);
 }
 
@@ -97,8 +75,10 @@ void WritableUpdateStationQoSArray::Clear() {
 }
 
 void WritableUpdateStationQoSArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -128,11 +108,17 @@ bool ReadableUpdateStationQoSArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto usq = UpdateStationQoS::Deserialize(raw_data);
-    if (usq == nullptr) {
+    if (raw_data->current + sizeof(UpdateStationQoS) > raw_data->end) {
         return false;
     }
-    items[count] = usq;
+
+    auto item = (UpdateStationQoS *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(UpdateStationQoS);
+
+    items[count] = item;
     count++;
     return true;
 }

@@ -62,8 +62,6 @@ struct __attribute__((packed)) UpdateStationQoS : ElementHeader {
     void SetDscpTag(uint8_t tag);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static UpdateStationQoS *Deserialize(RawData *raw_data);
 };
 
 struct WritableUpdateStationQoSArray {
