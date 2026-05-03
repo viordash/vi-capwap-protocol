@@ -177,8 +177,8 @@ bool ReadableRSNAErrorReportFromStationArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(RSNAErrorReportFromStation);
 
+    raw_data->current += sizeof(RSNAErrorReportFromStation);
     items[count] = item;
     count++;
     return true;

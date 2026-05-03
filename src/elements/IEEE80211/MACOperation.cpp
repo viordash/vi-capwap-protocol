@@ -135,8 +135,8 @@ bool ReadableMACOperationArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(MACOperation);
 
+    raw_data->current += sizeof(MACOperation);
     items[count] = item;
     count++;
     return true;

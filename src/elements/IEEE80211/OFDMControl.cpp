@@ -118,8 +118,8 @@ bool ReadableOFDMControlArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(OFDMControl);
 
+    raw_data->current += sizeof(OFDMControl);
     items[count] = item;
     count++;
     return true;

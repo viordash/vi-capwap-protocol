@@ -94,8 +94,8 @@ bool ReadableDeleteWlanArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(DeleteWlan);
 
+    raw_data->current += sizeof(DeleteWlan);
     items[count] = item;
     count++;
     return true;

@@ -130,9 +130,9 @@ bool ReadableDuplicateIPv4AdrArray::Deserialize(RawData *raw_data) {
     if (raw_data->current + sizeof(ElementHeader) + item->GetLength() > raw_data->end) {
         return false;
     }
+
     raw_data->current += sizeof(ElementHeader) + item->GetLength();
     items[count] = item;
-
     count++;
     return true;
 }

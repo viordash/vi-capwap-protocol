@@ -31,6 +31,7 @@ bool ACNameWithPriority::Validate() const {
 }
 
 WritableACNameWithPriorityArray::WritableACNameWithPriorityArray() {
+    static_assert(sizeof(Item::header) == 5);
     items.reserve(ReadableACNameWithPriorityArray::max_count);
 }
 
@@ -96,18 +97,22 @@ bool ReadableACNameWithPriorityArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto res = (ReadableACNameWithPriorityArray::Item *)raw_data->current;
-    if (!res->Validate()) {
+    if (raw_data->current + sizeof(ACNameWithPriority) > raw_data->end) {
         return false;
     }
 
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
+    auto item = (ReadableACNameWithPriorityArray::Item *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
     if (last > raw_data->end) {
         return false;
     }
 
     raw_data->current = last;
-    items[count] = res;
+    items[count] = item;
     count++;
     return true;
 }

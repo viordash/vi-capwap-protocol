@@ -120,8 +120,8 @@ bool ReadableMultiDomainCapabilityArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(MultiDomainCapability);
 
+    raw_data->current += sizeof(MultiDomainCapability);
     items[count] = item;
     count++;
     return true;

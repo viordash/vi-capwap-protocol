@@ -144,18 +144,18 @@ bool ReadableUpdateWlanArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto res = (ReadableUpdateWlanArray::Item *)raw_data->current;
-    if (!res->Validate()) {
+    auto item = (ReadableUpdateWlanArray::Item *)raw_data->current;
+    if (!item->Validate()) {
         return false;
     }
 
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
     if (last > raw_data->end) {
         return false;
     }
 
     raw_data->current = last;
-    items[count] = res;
+    items[count] = item;
     count++;
     return true;
 }

@@ -119,8 +119,8 @@ bool ReadableStationQoSProfileArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(StationQoSProfile);
 
+    raw_data->current += sizeof(StationQoSProfile);
     items[count] = item;
     count++;
     return true;

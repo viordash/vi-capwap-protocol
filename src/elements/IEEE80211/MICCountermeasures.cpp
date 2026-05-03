@@ -109,8 +109,8 @@ bool ReadableMICCountermeasuresArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(MICCountermeasures);
 
+    raw_data->current += sizeof(MICCountermeasures);
     items[count] = item;
     count++;
     return true;

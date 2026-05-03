@@ -109,8 +109,8 @@ bool ReadableRadioOperationalStateArray::Deserialize(RawData *raw_data) {
     if (!element->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(RadioOperationalState);
 
+    raw_data->current += sizeof(RadioOperationalState);
     items[count] = element;
     count++;
     return true;

@@ -6,8 +6,7 @@
 #include <string.h>
 
 WTPName::WTPName(uint16_t length)
-    : ElementHeader(ElementHeader::WTPName,
-                    (sizeof(WTPName) - sizeof(ElementHeader)) + length) {
+    : ElementHeader(ElementHeader::WTPName, (sizeof(WTPName) - sizeof(ElementHeader)) + length) {
 }
 
 uint16_t WTPName::GetDataLenght() const {
@@ -49,16 +48,18 @@ bool ReadableWTPName::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto res = (ReadableWTPName::Element *)raw_data->current;
-    if (!res->Validate()) {
+    auto item = (ReadableWTPName::Element *)raw_data->current;
+    if (!item->Validate()) {
         return false;
     }
-    if (raw_data->current + sizeof(ElementHeader) + res->GetLength() > raw_data->end) {
-        return false;
-    }
-    raw_data->current += sizeof(ElementHeader) + res->GetLength();
 
-    element = res;
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    element = item;
     is_present = true;
     return true;
 }

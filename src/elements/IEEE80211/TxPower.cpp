@@ -95,8 +95,8 @@ bool ReadableTxPowerArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(TxPower);
 
+    raw_data->current += sizeof(TxPower);
     items[count] = item;
     count++;
     return true;

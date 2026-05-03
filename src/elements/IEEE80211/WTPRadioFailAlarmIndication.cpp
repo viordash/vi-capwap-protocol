@@ -120,8 +120,8 @@ bool ReadableWTPRadioFailAlarmIndicationArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(WTPRadioFailAlarmIndication);
 
+    raw_data->current += sizeof(WTPRadioFailAlarmIndication);
     items[count] = item;
     count++;
     return true;

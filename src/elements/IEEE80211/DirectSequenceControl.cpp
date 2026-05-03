@@ -127,8 +127,8 @@ bool ReadableDirectSequenceControlArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(DirectSequenceControl);
 
+    raw_data->current += sizeof(DirectSequenceControl);
     items[count] = item;
     count++;
     return true;

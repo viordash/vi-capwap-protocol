@@ -181,13 +181,13 @@ bool ReadableWTPRadioStatisticsArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto element = (WTPRadioStatistics *)raw_data->current;
-    if (!element->Validate()) {
+    auto item = (WTPRadioStatistics *)raw_data->current;
+    if (!item->Validate()) {
         return false;
     }
     raw_data->current += sizeof(WTPRadioStatistics);
 
-    items[count] = element;
+    items[count] = item;
     count++;
     return true;
 }

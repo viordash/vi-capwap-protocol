@@ -209,8 +209,8 @@ bool ReadableStatisticsArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(Statistics);
 
+    raw_data->current += sizeof(Statistics);
     items[count] = item;
     count++;
     return true;

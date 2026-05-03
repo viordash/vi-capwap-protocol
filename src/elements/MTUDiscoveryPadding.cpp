@@ -13,8 +13,7 @@ bool MTUDiscoveryPadding::Validate() const {
     return ElementHeader::GetElementType() == ElementHeader::MTUDiscoveryPadding;
 }
 
-WritableMTUDiscoveryPadding::WritableMTUDiscoveryPadding(uint16_t size)
-    : element{ size } {
+WritableMTUDiscoveryPadding::WritableMTUDiscoveryPadding(uint16_t size) : element{ size } {
     static_assert(sizeof(element) == 4);
 }
 
@@ -44,11 +43,17 @@ bool ReadableMTUDiscoveryPadding::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto res = (ReadableMTUDiscoveryPadding::Element *)raw_data->current;
-    if (!res->Validate()) {
+    if (raw_data->current + sizeof(ReadableMTUDiscoveryPadding::Element) > raw_data->end) {
         return false;
     }
-    if (raw_data->current + sizeof(ElementHeader) + res->GetLength() > raw_data->end) {
+
+    auto item = (ReadableMTUDiscoveryPadding::Element *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
         return false;
     }
 
@@ -60,9 +65,8 @@ bool ReadableMTUDiscoveryPadding::Deserialize(RawData *raw_data) {
     }
 #endif // VALIDATE_MTUDiscoveryPadding
 
-    raw_data->current += sizeof(ElementHeader) + res->GetLength();
-
-    element = res;
+    raw_data->current = last;
+    element = item;
     is_present = true;
     return true;
 }

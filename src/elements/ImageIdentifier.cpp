@@ -48,16 +48,22 @@ bool ReadableImageIdentifier::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto res = (ReadableImageIdentifier::Element *)raw_data->current;
-    if (!res->Validate()) {
+    if (raw_data->current + sizeof(ReadableImageIdentifier::Element) > raw_data->end) {
         return false;
     }
-    if (raw_data->current + sizeof(ElementHeader) + res->GetLength() > raw_data->end) {
-        return false;
-    }
-    raw_data->current += sizeof(ElementHeader) + res->GetLength();
 
-    element = res;
+    auto item = (ReadableImageIdentifier::Element *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    element = item;
     is_present = true;
     return true;
 }

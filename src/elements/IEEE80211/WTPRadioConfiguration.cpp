@@ -123,8 +123,8 @@ bool ReadableWTPRadioConfigurationArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(WTPRadioConfiguration);
 
+    raw_data->current += sizeof(WTPRadioConfiguration);
     items[count] = item;
     count++;
     return true;

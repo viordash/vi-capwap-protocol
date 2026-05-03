@@ -106,12 +106,14 @@ bool ReadableDeleteStationArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    if (raw_data->current + sizeof(ElementHeader) + item->GetLength() > raw_data->end) {
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
         return false;
     }
-    raw_data->current += sizeof(ElementHeader) + item->GetLength();
-    items[count] = item;
 
+    raw_data->current = last;
+    items[count] = item;
     count++;
     return true;
 }

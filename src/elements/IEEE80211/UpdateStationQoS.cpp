@@ -143,8 +143,8 @@ bool ReadableUpdateStationQoSArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += sizeof(UpdateStationQoS);
 
+    raw_data->current += sizeof(UpdateStationQoS);
     items[count] = item;
     count++;
     return true;

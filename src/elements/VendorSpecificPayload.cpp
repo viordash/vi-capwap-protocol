@@ -117,16 +117,18 @@ bool ReadableVendorSpecificPayloadArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto res = (ReadableVendorSpecificPayloadArray::Item *)raw_data->current;
-    if (!res->Validate()) {
+    auto item = (ReadableVendorSpecificPayloadArray::Item *)raw_data->current;
+    if (!item->Validate()) {
         return false;
     }
-    if (raw_data->current + sizeof(ElementHeader) + res->GetLength() > raw_data->end) {
-        return false;
-    }
-    raw_data->current += sizeof(ElementHeader) + res->GetLength();
-    items[count] = res;
 
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    items[count] = item;
     count++;
     return true;
 }
