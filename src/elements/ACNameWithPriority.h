@@ -10,7 +10,7 @@
 #include <string_view>
 #include <vector>
 
-struct __attribute__((packed)) ACNameWithPriorityHeader : ElementHeader {
+struct __attribute__((packed)) ACNameWithPriority : ElementHeader {
     static const size_t max_data_size = 512;
 
   protected:
@@ -18,16 +18,12 @@ struct __attribute__((packed)) ACNameWithPriorityHeader : ElementHeader {
     uint8_t priority;
 
   public:
-    char name[];
-
-    ACNameWithPriorityHeader(const ACNameWithPriorityHeader &) = default;
-    ACNameWithPriorityHeader(uint8_t priority, uint16_t length);
+    ACNameWithPriority(const ACNameWithPriority &) = default;
+    ACNameWithPriority(uint8_t priority, uint16_t length);
 
     uint8_t GetPriority() const;
     uint16_t GetNameLenght() const;
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static ACNameWithPriorityHeader *Deserialize(RawData *raw_data);
 };
 
 struct WritableACNameWithPriorityArray : IWritableConfigurationStatusRequestOptionalElement,
@@ -35,7 +31,7 @@ struct WritableACNameWithPriorityArray : IWritableConfigurationStatusRequestOpti
   public:
     struct Item {
         std::string_view name;
-        ACNameWithPriorityHeader header;
+        ACNameWithPriority header;
         Item(const Item &) = default;
         Item(uint8_t priority, const std::string_view ac_name)
             : name{ ac_name }, header{ priority, (uint16_t)name.size() } {};
@@ -61,8 +57,13 @@ struct ReadableACNameWithPriorityArray : IReadableConfigurationStatusRequestOpti
                                          IReadableConfigurationUpdateRequestOptionalElement {
     static const size_t max_count = 32;
 
+    struct Item : ACNameWithPriority {
+        char name[];
+        Item(const Item &) = delete;
+    };
+
   protected:
-    std::array<const ACNameWithPriorityHeader *, max_count> items;
+    std::array<const Item *, max_count> items;
     size_t count;
 
   public:
@@ -70,7 +71,7 @@ struct ReadableACNameWithPriorityArray : IReadableConfigurationStatusRequestOpti
     ReadableACNameWithPriorityArray();
 
     bool Deserialize(RawData *raw_data) override final;
-    nonstd::span<const ACNameWithPriorityHeader *const> Get() const;
+    nonstd::span<const ReadableACNameWithPriorityArray::Item *const> Get() const;
     void Log() const override final;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;

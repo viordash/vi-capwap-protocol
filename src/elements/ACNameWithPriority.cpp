@@ -5,54 +5,29 @@
 #include <algorithm>
 #include <cstring>
 
-ACNameWithPriorityHeader::ACNameWithPriorityHeader(uint8_t priority, uint16_t length)
+ACNameWithPriority::ACNameWithPriority(uint8_t priority, uint16_t length)
     : ElementHeader(ElementHeader::ACNameWithPriority,
-                    (sizeof(ACNameWithPriorityHeader) - sizeof(ElementHeader)) + length),
+                    (sizeof(ACNameWithPriority) - sizeof(ElementHeader)) + length),
       priority{ priority } {
 }
 
-uint8_t ACNameWithPriorityHeader::GetPriority() const {
+uint8_t ACNameWithPriority::GetPriority() const {
     return priority;
 }
 
-uint16_t ACNameWithPriorityHeader::GetNameLenght() const {
-    return GetLength() - (sizeof(ACNameWithPriorityHeader) - sizeof(ElementHeader));
+uint16_t ACNameWithPriority::GetNameLenght() const {
+    return GetLength() - (sizeof(ACNameWithPriority) - sizeof(ElementHeader));
 }
 
-bool ACNameWithPriorityHeader::Validate() const {
-    static_assert(sizeof(ACNameWithPriorityHeader) == 5);
+bool ACNameWithPriority::Validate() const {
+    static_assert(sizeof(ACNameWithPriority) == 5);
     if (ElementHeader::GetElementType() != ElementHeader::ACNameWithPriority) {
         return false;
     }
-    if (GetNameLenght() > ACNameWithPriorityHeader::max_data_size) {
+    if (GetNameLenght() > ACNameWithPriority::max_data_size) {
         return false;
     }
     return true;
-}
-
-void ACNameWithPriorityHeader::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(ACNameWithPriorityHeader) <= raw_data->end);
-    std::memcpy(raw_data->current, this, sizeof(ACNameWithPriorityHeader));
-    raw_data->current += sizeof(ACNameWithPriorityHeader);
-}
-
-ACNameWithPriorityHeader *ACNameWithPriorityHeader::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(ACNameWithPriorityHeader) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (ACNameWithPriorityHeader *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current = last;
-    return res;
 }
 
 WritableACNameWithPriorityArray::WritableACNameWithPriorityArray() {
@@ -70,7 +45,7 @@ void WritableACNameWithPriorityArray::Add(uint8_t priority, const std::string_vi
                      });
     if (it_exists != items.end()) {
         *it_exists = WritableACNameWithPriorityArray::Item{ priority, str };
-        log_i("ACNameWithPriorityHeader: replace Priority: %u, Name: '%.*s'",
+        log_i("ACNameWithPriority: replace Priority: %u, Name: '%.*s'",
               priority,
               (*it_exists).header.GetNameLenght(),
               (*it_exists).name.data());
@@ -90,17 +65,19 @@ void WritableACNameWithPriorityArray::Clear() {
 void WritableACNameWithPriorityArray::Serialize(RawData *raw_data) const {
     ASSERT(items.size() <= ReadableACNameWithPriorityArray::max_count);
 
-    for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
         uint16_t data_size =
-            elem.header.GetLength() - (sizeof(ACNameWithPriorityHeader) - sizeof(ElementHeader));
-        memcpy(raw_data->current, elem.name.data(), data_size);
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.name.data(), data_size);
         raw_data->current += data_size;
     }
 }
 
 void WritableACNameWithPriorityArray::Log() const {
-    log_i("ME ACNameWithPriorityHeader count:%zu", items.size());
+    log_i("ME ACNameWithPriority count:%zu", items.size());
     for (size_t i = 0; i < items.size(); i++) {
         log_i("     #%zu: priority: %u, :%.*s",
               i,
@@ -119,22 +96,30 @@ bool ReadableACNameWithPriorityArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto item = ACNameWithPriorityHeader::Deserialize(raw_data);
-    if (item == nullptr) {
+    auto res = (ReadableACNameWithPriorityArray::Item *)raw_data->current;
+    if (!res->Validate()) {
         return false;
     }
-    items[count] = item;
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    items[count] = res;
     count++;
     return true;
 }
 
-nonstd::span<const ACNameWithPriorityHeader *const> ReadableACNameWithPriorityArray::Get() const {
+nonstd::span<const ReadableACNameWithPriorityArray::Item *const>
+ReadableACNameWithPriorityArray::Get() const {
     nonstd::span span(items.data(), count);
     return span;
 }
 
 void ReadableACNameWithPriorityArray::Log() const {
-    log_i("ME ACNameWithPriorityHeader count:%zu", count);
+    log_i("ME ACNameWithPriority count:%zu", count);
     for (size_t i = 0; i < count; i++) {
         log_i("     #%zu: priority: %u, :%.*s",
               i,

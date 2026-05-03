@@ -110,11 +110,11 @@ TEST(ACNameWithPriorityTestsGroup, Add_array_of_items_is_unique) {
     CHECK_EQUAL(2, read_data.Get().size());
     CHECK_EQUAL(5, read_data.Get()[0]->GetLength());
     CHECK_EQUAL(0, read_data.Get()[0]->GetPriority());
-    STRNCMP_EQUAL("0123", (char *)read_data.Get()[0]->name, 4);
     CHECK_EQUAL(4, read_data.Get()[0]->GetNameLenght());
+    STRNCMP_EQUAL("0123", (char *)read_data.Get()[0]->name, 4);
 
     CHECK_EQUAL(9, read_data.Get()[1]->GetLength());
     CHECK_EQUAL(1, read_data.Get()[1]->GetPriority());
-    STRNCMP_EQUAL("01234567", (char *)read_data.Get()[1]->name, 8);
     CHECK_EQUAL(8, read_data.Get()[1]->GetNameLenght());
+    STRNCMP_EQUAL("01234567", (char *)read_data.Get()[1]->name, 8);
 }
