@@ -2,8 +2,8 @@
 #include "WTPRadioInformation.h"
 #include "Logging.h"
 #include "lassert.h"
-#include <sstream>
 #include <cstring>
+#include <sstream>
 
 WTPRadioInformation::WTPRadioInformation(uint8_t radio_id,
                                          bool b,
@@ -113,6 +113,14 @@ void WritableWTPRadioInformationArray::Log() const {
 }
 
 ReadableWTPRadioInformationArray::ReadableWTPRadioInformationArray() : count{ 0 } {
+}
+
+ElementHeader::ElementType ReadableWTPRadioInformationArray::GetElementType() const {
+    return ElementHeader::WTPRadioInformation;
+}
+
+bool ReadableWTPRadioInformationArray::IsPresent() const {
+    return count > 0;
 }
 
 bool ReadableWTPRadioInformationArray::Deserialize(RawData *raw_data) {

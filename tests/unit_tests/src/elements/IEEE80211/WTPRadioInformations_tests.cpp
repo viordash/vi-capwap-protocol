@@ -99,9 +99,11 @@ TEST(WTPRadioInformationTestsGroup, Serialize_Deserialize_array) {
     CHECK_EQUAL(&buffer[0] + 27, raw_data.current); // 3 × 9 = 27
 
     ReadableWTPRadioInformationArray r_infos;
+    CHECK_FALSE(r_infos.IsPresent());
     raw_data = { buffer, buffer + 27 };
 
     CHECK_TRUE(r_infos.Deserialize(&raw_data));
+    CHECK_TRUE(r_infos.IsPresent());
     CHECK_TRUE(r_infos.Deserialize(&raw_data));
     CHECK_TRUE(r_infos.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

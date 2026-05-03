@@ -1,6 +1,7 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -38,7 +39,7 @@ struct __attribute__((packed)) WTPRadioInformation : ElementHeader {
     std::string ToString() const;
 };
 
-struct WritableWTPRadioInformationArray {
+struct WritableWTPRadioInformationArray : IWritableElement {
   private:
     std::vector<WTPRadioInformation> items;
 
@@ -51,12 +52,12 @@ struct WritableWTPRadioInformationArray {
     void Clear();
     size_t Size();
 
-    void Serialize(RawData *raw_data) const;
+    void Serialize(RawData *raw_data) const override;
     uint16_t GetTotalLength() const;
-    void Log() const;
+    void Log() const override;
 };
 
-struct ReadableWTPRadioInformationArray {
+struct ReadableWTPRadioInformationArray : IReadableElement {
   public:
     static const size_t max_count = 32; //Radio ID
 
@@ -68,7 +69,9 @@ struct ReadableWTPRadioInformationArray {
     ReadableWTPRadioInformationArray(const ReadableWTPRadioInformationArray &) = delete;
     ReadableWTPRadioInformationArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override;
+    ElementHeader::ElementType GetElementType() const override;
+    bool IsPresent() const override;
     nonstd::span<const WTPRadioInformation *const> Get() const;
-    void Log() const;
+    void Log() const override;
 };
