@@ -2,7 +2,7 @@
 #include "WTPDescriptor.h"
 #include "Logging.h"
 #include "lassert.h"
-#include <string.h>
+#include <cstring>
 
 WTPDescriptorHeader::WTPDescriptorHeader(uint8_t max_radios,
                                          uint8_t radios_in_use,
@@ -21,8 +21,7 @@ bool WTPDescriptorHeader::Validate() const {
 
 void WTPDescriptorHeader::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(WTPDescriptor) <= raw_data->end);
-    WTPDescriptorHeader *dst = (WTPDescriptorHeader *)raw_data->current;
-    *dst = *this;
+    std::memcpy(raw_data->current, this, sizeof(WTPDescriptorHeader));
     raw_data->current += sizeof(WTPDescriptorHeader);
 }
 

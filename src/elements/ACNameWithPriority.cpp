@@ -3,7 +3,7 @@
 #include "Logging.h"
 #include "lassert.h"
 #include <algorithm>
-#include <string.h>
+#include <cstring>
 
 ACNameWithPriorityHeader::ACNameWithPriorityHeader(uint8_t priority, uint16_t length)
     : ElementHeader(ElementHeader::ACNameWithPriority,
@@ -32,8 +32,7 @@ bool ACNameWithPriorityHeader::Validate() const {
 
 void ACNameWithPriorityHeader::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(ACNameWithPriorityHeader) <= raw_data->end);
-    ACNameWithPriorityHeader *dst = (ACNameWithPriorityHeader *)raw_data->current;
-    *dst = *this;
+    std::memcpy(raw_data->current, this, sizeof(ACNameWithPriorityHeader));
     raw_data->current += sizeof(ACNameWithPriorityHeader);
 }
 

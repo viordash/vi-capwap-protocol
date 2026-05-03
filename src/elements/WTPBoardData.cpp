@@ -2,7 +2,7 @@
 #include "WTPBoardData.h"
 #include "Logging.h"
 #include "lassert.h"
-#include <string.h>
+#include <cstring>
 
 WTPBoardDataHeader::WTPBoardDataHeader(uint32_t vendor_identifier, uint16_t sub_elements_size)
     : ElementHeader(ElementHeader::WTPBoardData,
@@ -23,8 +23,7 @@ bool WTPBoardDataHeader::Validate() const {
 
 void WTPBoardDataHeader::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(WTPBoardDataHeader) <= raw_data->end);
-    WTPBoardDataHeader *dst = (WTPBoardDataHeader *)raw_data->current;
-    *dst = *this;
+    std::memcpy(raw_data->current, this, sizeof(WTPBoardDataHeader));
     raw_data->current += sizeof(WTPBoardDataHeader);
 }
 

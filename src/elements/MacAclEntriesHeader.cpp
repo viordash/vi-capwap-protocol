@@ -3,7 +3,7 @@
 #include "Logging.h"
 #include "lassert.h"
 #include <arpa/inet.h>
-#include <string.h>
+#include <cstring>
 
 MacAclEntriesHeader::MacAclEntriesHeader(ElementType element_type,
                                          uint16_t element_length,
@@ -43,8 +43,7 @@ MacAclEntriesHeader::CalcEntriesSize(const nonstd::span<const WritableMacAddress
 
 void MacAclEntriesHeader::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(MacAclEntriesHeader) + GetLength() <= raw_data->end);
-    MacAclEntriesHeader *dst = (MacAclEntriesHeader *)raw_data->current;
-    *dst = *this;
+    std::memcpy(raw_data->current, this, sizeof(MacAclEntriesHeader));
     raw_data->current += sizeof(MacAclEntriesHeader);
 }
 

@@ -2,6 +2,7 @@
 #include "Logging.h"
 #include "NetworkUtils.h"
 #include "lassert.h"
+#include <cstring>
 
 CAPWAPControlIPv4Address::CAPWAPControlIPv4Address(uint32_t ipaddress, uint16_t wtp_count)
     : ElementHeader(ElementHeader::CAPWAPControlIPv4Address,
@@ -41,9 +42,8 @@ WritableCAPWAPControlIPV4AdrArray::WritableCAPWAPControlIPV4AdrArray(
 void WritableCAPWAPControlIPV4AdrArray::Serialize(RawData *raw_data) const {
     for (const auto &elem : items) {
         ASSERT(raw_data->current + sizeof(CAPWAPControlIPv4Address) <= raw_data->end);
-        CAPWAPControlIPv4Address *dst = (CAPWAPControlIPv4Address *)raw_data->current;
-        *dst = elem;
-        raw_data->current += sizeof(CAPWAPControlIPv4Address);
+        std::memcpy(raw_data->current, &elem, sizeof(elem));
+        raw_data->current += sizeof(elem);
     }
 }
 

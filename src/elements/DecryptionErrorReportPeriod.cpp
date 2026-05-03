@@ -2,6 +2,7 @@
 #include "Logging.h"
 #include "lassert.h"
 #include <algorithm>
+#include <cstring>
 
 DecryptionErrorReportPeriod::DecryptionErrorReportPeriod(uint8_t radio_id, uint16_t report_interval)
     : ElementHeader(ElementHeader::DecryptionErrorReportPeriod,
@@ -17,8 +18,7 @@ bool DecryptionErrorReportPeriod::Validate() const {
 }
 void DecryptionErrorReportPeriod::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(DecryptionErrorReportPeriod) <= raw_data->end);
-    DecryptionErrorReportPeriod *dst = (DecryptionErrorReportPeriod *)raw_data->current;
-    *dst = *this;
+    std::memcpy(raw_data->current, this, sizeof(DecryptionErrorReportPeriod));
     raw_data->current += sizeof(DecryptionErrorReportPeriod);
 }
 DecryptionErrorReportPeriod *DecryptionErrorReportPeriod::Deserialize(RawData *raw_data) {
