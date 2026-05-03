@@ -56,7 +56,6 @@ struct __attribute__((packed)) UpdateWlan : ElementHeader {
 
   public:
     // Key: A variable-length field containing the encryption key.
-    uint8_t key[];
 
     UpdateWlan(const UpdateWlan &) = default;
     UpdateWlan(uint8_t radio_id,
@@ -74,30 +73,22 @@ struct __attribute__((packed)) UpdateWlan : ElementHeader {
     uint16_t GetKeyLength() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static UpdateWlan *Deserialize(RawData *raw_data);
 };
 
 struct WritableUpdateWlanArray : IWritableElement {
   public:
     struct Item {
-        nonstd::span<const uint8_t> key_data;
-        uint8_t radio_id;
-        uint8_t wlan_id;
-        uint16_t capability;
-        uint8_t key_index;
-        UpdateWlan::KeyStatus key_status;
-
+        nonstd::span<const uint8_t> data;
+        UpdateWlan header;
         Item(const Item &) = default;
         Item(uint8_t radio_id,
              uint8_t wlan_id,
              uint16_t capability,
              uint8_t key_index,
              UpdateWlan::KeyStatus key_status,
-             nonstd::span<const uint8_t> key);
-
-        uint8_t GetRadioID() const;
-        uint8_t GetWlanID() const;
+             nonstd::span<const uint8_t> key)
+            : data{ key }, header{ radio_id,  wlan_id,    capability,
+                                   key_index, key_status, (uint16_t)data.size() } {};
     };
 
   private:
@@ -119,8 +110,13 @@ struct ReadableUpdateWlanArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
+    struct Item : UpdateWlan {
+        uint8_t data[];
+        Item(const Item &) = delete;
+    };
+
   protected:
-    std::array<const UpdateWlan *, max_count> items;
+    std::array<const Item *, max_count> items;
     size_t count;
 
   public:
@@ -128,7 +124,7 @@ struct ReadableUpdateWlanArray : IReadableElement {
     ReadableUpdateWlanArray();
 
     bool Deserialize(RawData *raw_data) override final;
-    nonstd::span<const UpdateWlan *const> Get() const;
+    nonstd::span<const ReadableUpdateWlanArray::Item *const> Get() const;
     void Log() const override final;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
