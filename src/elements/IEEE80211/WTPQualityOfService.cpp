@@ -149,6 +149,15 @@ void WritableWTPQualityOfServiceArray::Log() const {
 ReadableWTPQualityOfServiceArray::ReadableWTPQualityOfServiceArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableWTPQualityOfServiceArray::GetElementType() const {
+    return ElementHeader::WTPQualityOfService;
+}
+
+bool ReadableWTPQualityOfServiceArray::IsPresent() const {
+    return count > 0;
+}
+
+
 bool ReadableWTPQualityOfServiceArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableWTPQualityOfServiceArray::Deserialize elements count exceeds");

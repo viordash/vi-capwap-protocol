@@ -91,10 +91,12 @@ TEST(WTPQualityOfServiceTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(&buffer[0] + 114, raw_data.current); // 3 * 38 = 114
 
     ReadableWTPQualityOfServiceArray r_qos;
+    CHECK_FALSE(r_qos.IsPresent());
 
     raw_data = { buffer, buffer + 114 };
 
     CHECK_TRUE(r_qos.Deserialize(&raw_data));
+    CHECK_TRUE(r_qos.IsPresent());
     CHECK_TRUE(r_qos.Deserialize(&raw_data));
     CHECK_TRUE(r_qos.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -241,12 +243,15 @@ TEST(WTPQualityOfServiceTestsGroup, Serialize_Deserialize_array) {
     CHECK_EQUAL(&buffer[0] + 114, raw_data.current);
 
     ReadableWTPQualityOfServiceArray r_qos;
+    CHECK_FALSE(r_qos.IsPresent());
 
     raw_data = { buffer, buffer + 114 };
 
     CHECK_TRUE(r_qos.Deserialize(&raw_data));
     CHECK_TRUE(r_qos.Deserialize(&raw_data));
     CHECK_TRUE(r_qos.Deserialize(&raw_data));
+    CHECK_FALSE(r_qos.Deserialize(&raw_data));
+    CHECK_TRUE(r_qos.IsPresent());
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(3, r_qos.Get().size());
 
