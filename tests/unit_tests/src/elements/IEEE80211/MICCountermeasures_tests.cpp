@@ -67,3 +67,52 @@ TEST(MICCountermeasuresTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(1, r_cms.Get()[2]->WlanID);
     MEMCMP_EQUAL(mac_2, r_cms.Get()[2]->MACAddress, sizeof(mac_2));
 }
+
+TEST(MICCountermeasuresTestsGroup, Add_array_of_items_is_unique_by_RadioID_and_WlanID) {
+    uint8_t buffer[2048] = {};
+
+    WritableMICCountermeasuresArray w_cms;
+
+    const uint8_t mac_0[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 };
+    const uint8_t mac_1[] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+    const uint8_t mac_2[] = { 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC };
+    const uint8_t mac_3[] = { 0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA };
+
+    // Add same RadioID + WlanID multiple times - should replace
+    w_cms.Add({ 1, 1, mac_0 });
+    w_cms.Add({ 1, 1, mac_1 });  // Replaces first
+    w_cms.Add({ 1, 2, mac_2 });
+    w_cms.Add({ 2, 1, mac_0 });
+    w_cms.Add({ 2, 1, mac_3 });  // Replaces fourth
+
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    w_cms.Serialize(&raw_data);
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableMICCountermeasuresArray r_cms;
+    CHECK_FALSE(r_cms.IsPresent());
+
+    CHECK_TRUE(r_cms.Deserialize(&raw_data));
+    CHECK_TRUE(r_cms.IsPresent());
+    CHECK_TRUE(r_cms.Deserialize(&raw_data));
+    CHECK_TRUE(r_cms.Deserialize(&raw_data));
+    CHECK_FALSE(r_cms.Deserialize(&raw_data));
+
+    CHECK_EQUAL(raw_data.current, raw_data.end);
+    CHECK_EQUAL(3, r_cms.Get().size());
+
+    // Should have the last values for each RadioID+WlanID combination
+    CHECK_EQUAL(1, r_cms.Get()[0]->RadioID);
+    CHECK_EQUAL(1, r_cms.Get()[0]->WlanID);
+    MEMCMP_EQUAL(mac_1, r_cms.Get()[0]->MACAddress, sizeof(mac_1));
+
+    CHECK_EQUAL(1, r_cms.Get()[1]->RadioID);
+    CHECK_EQUAL(2, r_cms.Get()[1]->WlanID);
+    MEMCMP_EQUAL(mac_2, r_cms.Get()[1]->MACAddress, sizeof(mac_2));
+
+    CHECK_EQUAL(2, r_cms.Get()[2]->RadioID);
+    CHECK_EQUAL(1, r_cms.Get()[2]->WlanID);
+    MEMCMP_EQUAL(mac_3, r_cms.Get()[2]->MACAddress, sizeof(mac_3));
+}

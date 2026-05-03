@@ -48,3 +48,46 @@ TEST(RateSetTestsGroup, Serialize_Deserialize_array) {
     CHECK_EQUAL(8 + 1, r_rate_sets.Get()[1]->GetLength());
     MEMCMP_EQUAL(rate_set2.data(), r_rate_sets.Get()[1]->data, 8);
 }
+
+TEST(RateSetTestsGroup, Add_array_of_items_is_unique_by_radio_id) {
+    uint8_t buffer[2048] = {};
+
+    WritableRateSetArray w_rate_sets;
+
+    // Add same RadioID multiple times - should replace
+    std::vector<uint8_t> rate_set1 = { 0x82, 0x84 };
+    w_rate_sets.Add(1, rate_set1);
+
+    std::vector<uint8_t> rate_set2 = { 0x8B, 0x96 };
+    w_rate_sets.Add(1, rate_set2);
+
+    std::vector<uint8_t> rate_set3 = { 0x0C, 0x12, 0x18 };
+    w_rate_sets.Add(2, rate_set3);
+
+    std::vector<uint8_t> rate_set4 = { 0x24, 0x30 };
+    w_rate_sets.Add(2, rate_set4);
+
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    w_rate_sets.Serialize(&raw_data);
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableRateSetArray r_rate_sets;
+    CHECK_FALSE(r_rate_sets.IsPresent());
+
+    CHECK_TRUE(r_rate_sets.Deserialize(&raw_data));
+    CHECK_TRUE(r_rate_sets.IsPresent());
+    CHECK_TRUE(r_rate_sets.Deserialize(&raw_data));
+    CHECK_FALSE(r_rate_sets.Deserialize(&raw_data));
+
+    CHECK_EQUAL(raw_data.current, raw_data.end);
+    CHECK_EQUAL(2, r_rate_sets.Get().size());
+
+    // Should have the last values for each RadioID
+    CHECK_EQUAL(1, r_rate_sets.Get()[0]->GetRadioID());
+    MEMCMP_EQUAL(rate_set2.data(), r_rate_sets.Get()[0]->data, 2);
+
+    CHECK_EQUAL(2, r_rate_sets.Get()[1]->GetRadioID());
+    MEMCMP_EQUAL(rate_set4.data(), r_rate_sets.Get()[1]->data, 2);
+}

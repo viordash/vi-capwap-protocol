@@ -90,7 +90,27 @@ WritableRSNAErrorReportFromStationArray::WritableRSNAErrorReportFromStationArray
 void WritableRSNAErrorReportFromStationArray::Add(RSNAErrorReportFromStation element) {
     ASSERT(items.size() + 1 <= ReadableRSNAErrorReportFromStationArray::max_count);
 
-    items.emplace_back(std::move(element));
+    auto it_exists = std::find_if(items.begin(),
+                                  items.end(),
+                                  [&element](const RSNAErrorReportFromStation &item) {
+                                      return memcmp(item.GetClientMACAddress(),
+                                                    element.GetClientMACAddress(),
+                                                    RSNAErrorReportFromStation::mac_address_size)
+                                          == 0;
+                                  });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("RSNAErrorReportFromStation: replace MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+              (*it_exists).GetClientMACAddress()[0],
+              (*it_exists).GetClientMACAddress()[1],
+              (*it_exists).GetClientMACAddress()[2],
+              (*it_exists).GetClientMACAddress()[3],
+              (*it_exists).GetClientMACAddress()[4],
+              (*it_exists).GetClientMACAddress()[5]);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableRSNAErrorReportFromStationArray::Empty() const {

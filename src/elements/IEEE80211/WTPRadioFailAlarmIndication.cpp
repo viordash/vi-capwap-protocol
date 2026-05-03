@@ -1,6 +1,7 @@
 #include "WTPRadioFailAlarmIndication.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <algorithm>
 #include <cstring>
 
 WTPRadioFailAlarmIndication::WTPRadioFailAlarmIndication(uint8_t radio_id,
@@ -52,7 +53,19 @@ WritableWTPRadioFailAlarmIndicationArray::WritableWTPRadioFailAlarmIndicationArr
 
 void WritableWTPRadioFailAlarmIndicationArray::Add(WTPRadioFailAlarmIndication element) {
     ASSERT(items.size() + 1 <= ReadableWTPRadioFailAlarmIndicationArray::max_count);
-    items.emplace_back(std::move(element));
+
+    auto it_exists = std::find_if(items.begin(),
+                                  items.end(),
+                                  [&element](const WTPRadioFailAlarmIndication &item) {
+                                      return item.RadioID == element.RadioID;
+                                  });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("WTPRadioFailAlarmIndication: replace RadioID: %u", (*it_exists).RadioID);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableWTPRadioFailAlarmIndicationArray::Empty() const {

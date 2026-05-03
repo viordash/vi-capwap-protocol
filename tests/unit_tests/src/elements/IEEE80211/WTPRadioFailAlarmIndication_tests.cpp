@@ -20,7 +20,7 @@ TEST(WTPRadioFailAlarmIndicationTestsGroup, Serialize_Deserialize_few_elements) 
 
     w_alarms.Add({ 1, WTPRadioFailAlarmIndication::Receiver, WTPRadioFailAlarmIndication::Minor });
     w_alarms.Add(
-        { 1, WTPRadioFailAlarmIndication::Transmitter, WTPRadioFailAlarmIndication::Major });
+        { 3, WTPRadioFailAlarmIndication::Transmitter, WTPRadioFailAlarmIndication::Major });
     w_alarms.Add(
         { 2, WTPRadioFailAlarmIndication::Receiver, WTPRadioFailAlarmIndication::Critical });
 
@@ -33,8 +33,8 @@ TEST(WTPRadioFailAlarmIndicationTestsGroup, Serialize_Deserialize_few_elements) 
     uint8_t reference[] = {
         // Element 0: RadioID=1, Type=Receiver, Status=Minor
         0x04, 0x17, 0x00, 0x04, 0x01, 0x01, 0x02, 0x00,
-        // Element 1: RadioID=1, Type=Transmitter, Status=Major
-        0x04, 0x17, 0x00, 0x04, 0x01, 0x02, 0x03, 0x00,
+        // Element 3: RadioID=1, Type=Transmitter, Status=Major
+        0x04, 0x17, 0x00, 0x04, 0x03, 0x02, 0x03, 0x00,
         // Element 2: RadioID=2, Type=Receiver, Status=Critical
         0x04, 0x17, 0x00, 0x04, 0x02, 0x01, 0x04, 0x00
     };
@@ -57,11 +57,58 @@ TEST(WTPRadioFailAlarmIndicationTestsGroup, Serialize_Deserialize_few_elements) 
     CHECK_EQUAL(WTPRadioFailAlarmIndication::Receiver, r_alarms.Get()[0]->Type);
     CHECK_EQUAL(WTPRadioFailAlarmIndication::Minor, r_alarms.Get()[0]->Status);
 
-    CHECK_EQUAL(1, r_alarms.Get()[1]->RadioID);
+    CHECK_EQUAL(3, r_alarms.Get()[1]->RadioID);
     CHECK_EQUAL(WTPRadioFailAlarmIndication::Transmitter, r_alarms.Get()[1]->Type);
     CHECK_EQUAL(WTPRadioFailAlarmIndication::Major, r_alarms.Get()[1]->Status);
 
     CHECK_EQUAL(2, r_alarms.Get()[2]->RadioID);
     CHECK_EQUAL(WTPRadioFailAlarmIndication::Receiver, r_alarms.Get()[2]->Type);
     CHECK_EQUAL(WTPRadioFailAlarmIndication::Critical, r_alarms.Get()[2]->Status);
+}
+
+TEST(WTPRadioFailAlarmIndicationTestsGroup, Add_array_of_items_is_unique_by_radio_id) {
+    uint8_t buffer[2048] = {};
+
+    WritableWTPRadioFailAlarmIndicationArray w_alarms;
+
+    // Add same RadioID multiple times - should replace
+    w_alarms.Add({ 1,
+                   WTPRadioFailAlarmIndication::AlarmType::Receiver,
+                   WTPRadioFailAlarmIndication::AlarmStatus::Minor });
+    w_alarms.Add({ 1,
+                   WTPRadioFailAlarmIndication::AlarmType::Transmitter,
+                   WTPRadioFailAlarmIndication::AlarmStatus::Major });
+
+    w_alarms.Add({ 2,
+                   WTPRadioFailAlarmIndication::AlarmType::Receiver,
+                   WTPRadioFailAlarmIndication::AlarmStatus::Critical });
+    w_alarms.Add({ 2,
+                   WTPRadioFailAlarmIndication::AlarmType::Transmitter,
+                   WTPRadioFailAlarmIndication::AlarmStatus::Cleared });
+
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    w_alarms.Serialize(&raw_data);
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableWTPRadioFailAlarmIndicationArray r_alarms;
+    CHECK_FALSE(r_alarms.IsPresent());
+
+    CHECK_TRUE(r_alarms.Deserialize(&raw_data));
+    CHECK_TRUE(r_alarms.IsPresent());
+    CHECK_TRUE(r_alarms.Deserialize(&raw_data));
+    CHECK_FALSE(r_alarms.Deserialize(&raw_data));
+
+    CHECK_EQUAL(raw_data.current, raw_data.end);
+    CHECK_EQUAL(2, r_alarms.Get().size());
+
+    // Should have the last values for each RadioID
+    CHECK_EQUAL(1, r_alarms.Get()[0]->RadioID);
+    CHECK_EQUAL(WTPRadioFailAlarmIndication::AlarmType::Transmitter, r_alarms.Get()[0]->Type);
+    CHECK_EQUAL(WTPRadioFailAlarmIndication::AlarmStatus::Major, r_alarms.Get()[0]->Status);
+
+    CHECK_EQUAL(2, r_alarms.Get()[1]->RadioID);
+    CHECK_EQUAL(WTPRadioFailAlarmIndication::AlarmType::Transmitter, r_alarms.Get()[1]->Type);
+    CHECK_EQUAL(WTPRadioFailAlarmIndication::AlarmStatus::Cleared, r_alarms.Get()[1]->Status);
 }

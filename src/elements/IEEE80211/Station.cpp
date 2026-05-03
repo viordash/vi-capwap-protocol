@@ -76,7 +76,27 @@ WritableStationArray::WritableStationArray() {
 void WritableStationArray::Add(WritableStationArray::Item element) {
     ASSERT(items.size() + 1 <= ReadableStationArray::max_count);
 
-    items.emplace_back(std::move(element));
+    auto it_exists = std::find_if(items.begin(), items.end(), [&element](const Item &item) {
+        return item.header.GetRadioID() == element.header.GetRadioID()
+            && memcmp(item.header.GetMACAddress(),
+                      element.header.GetMACAddress(),
+                      Station::mac_address_size)
+                == 0;
+    });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("Station: replace RadioID: %u, MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+              (*it_exists).header.GetRadioID(),
+              (*it_exists).header.GetMACAddress()[0],
+              (*it_exists).header.GetMACAddress()[1],
+              (*it_exists).header.GetMACAddress()[2],
+              (*it_exists).header.GetMACAddress()[3],
+              (*it_exists).header.GetMACAddress()[4],
+              (*it_exists).header.GetMACAddress()[5]);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableStationArray::Empty() const {

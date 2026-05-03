@@ -1,6 +1,7 @@
 #include "WTPQualityOfService.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <algorithm>
 #include <cstring>
 
 uint8_t QoSSubElement::Get8021pTag() const {
@@ -118,7 +119,18 @@ WritableWTPQualityOfServiceArray::WritableWTPQualityOfServiceArray() {
 
 void WritableWTPQualityOfServiceArray::Add(WTPQualityOfService element) {
     ASSERT(items.size() + 1 <= ReadableWTPQualityOfServiceArray::max_count);
-    items.emplace_back(std::move(element));
+
+    auto it_exists =
+        std::find_if(items.begin(), items.end(), [&element](const WTPQualityOfService &item) {
+            return item.RadioID == element.RadioID;
+        });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("WTPQualityOfService: replace RadioID: %u", (*it_exists).RadioID);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableWTPQualityOfServiceArray::Empty() const {

@@ -63,7 +63,25 @@ WritableUpdateStationQoSArray::WritableUpdateStationQoSArray() {
 
 void WritableUpdateStationQoSArray::Add(UpdateStationQoS element) {
     ASSERT(items.size() + 1 <= ReadableUpdateStationQoSArray::max_count);
-    items.emplace_back(std::move(element));
+
+    auto it_exists =
+        std::find_if(items.begin(), items.end(), [&element](const UpdateStationQoS &item) {
+            return memcmp(item.MACAddress, element.MACAddress, UpdateStationQoS::mac_address_size)
+                == 0;
+        });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("UpdateStationQoS: replace MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+              (*it_exists).MACAddress[0],
+              (*it_exists).MACAddress[1],
+              (*it_exists).MACAddress[2],
+              (*it_exists).MACAddress[3],
+              (*it_exists).MACAddress[4],
+              (*it_exists).MACAddress[5]);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableUpdateStationQoSArray::Empty() const {

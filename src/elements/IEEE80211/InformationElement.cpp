@@ -69,7 +69,19 @@ WritableInformationElementArray::WritableInformationElementArray() {
 void WritableInformationElementArray::Add(WritableInformationElementArray::Item element) {
     ASSERT(items.size() + 1 <= ReadableInformationElementArray::max_count);
 
-    items.emplace_back(std::move(element));
+    auto it_exists = std::find_if(items.begin(), items.end(), [&element](const Item &item) {
+        return item.header.GetRadioID() == element.header.GetRadioID()
+            && item.header.GetWlanID() == element.header.GetWlanID();
+    });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("InformationElement: replace RadioID: %u, WlanID: %u",
+              (*it_exists).header.GetRadioID(),
+              (*it_exists).header.GetWlanID());
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableInformationElementArray::Empty() const {

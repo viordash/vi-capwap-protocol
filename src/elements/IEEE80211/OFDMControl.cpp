@@ -51,7 +51,18 @@ WritableOFDMControlArray::WritableOFDMControlArray() {
 void WritableOFDMControlArray::Add(OFDMControl element) {
     ASSERT(items.size() + 1 <= ReadableOFDMControlArray::max_count);
 
-    items.emplace_back(std::move(element));
+    auto it_exists = std::find_if(items.begin(),
+                                  items.end(),
+                                  [&element](const OFDMControl &item) {
+                                      return item.GetRadioID() == element.GetRadioID();
+                                  });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("OFDMControl: replace RadioID: %u", (*it_exists).GetRadioID());
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableOFDMControlArray::Empty() const {

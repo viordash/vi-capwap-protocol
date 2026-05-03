@@ -53,7 +53,18 @@ WritableMultiDomainCapabilityArray::WritableMultiDomainCapabilityArray() {
 void WritableMultiDomainCapabilityArray::Add(MultiDomainCapability element) {
     ASSERT(items.size() + 1 <= ReadableMultiDomainCapabilityArray::max_count);
 
-    items.emplace_back(std::move(element));
+    auto it_exists = std::find_if(items.begin(),
+                                  items.end(),
+                                  [&element](const MultiDomainCapability &item) {
+                                      return item.GetRadioID() == element.GetRadioID();
+                                  });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("MultiDomainCapability: replace RadioID: %u", (*it_exists).GetRadioID());
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableMultiDomainCapabilityArray::Empty() const {

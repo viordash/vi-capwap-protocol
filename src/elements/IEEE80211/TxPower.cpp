@@ -1,6 +1,7 @@
 #include "TxPower.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <algorithm>
 #include <cstring>
 
 TxPower::TxPower(uint8_t radio_id, uint16_t current_tx_power)
@@ -30,7 +31,17 @@ WritableTxPowerArray::WritableTxPowerArray() {
 
 void WritableTxPowerArray::Add(TxPower element) {
     ASSERT(items.size() + 1 <= ReadableTxPowerArray::max_count);
-    items.emplace_back(std::move(element));
+
+    auto it_exists = std::find_if(items.begin(), items.end(), [&element](const TxPower &item) {
+        return item.RadioID == element.RadioID;
+    });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("TxPower: replace RadioID: %u", (*it_exists).RadioID);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableTxPowerArray::Empty() const {

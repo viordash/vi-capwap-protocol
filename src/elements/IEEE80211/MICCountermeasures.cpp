@@ -38,7 +38,18 @@ WritableMICCountermeasuresArray::WritableMICCountermeasuresArray() {
 void WritableMICCountermeasuresArray::Add(MICCountermeasures cm) {
     ASSERT(items.size() + 1 <= ReadableMICCountermeasuresArray::max_count);
 
-    items.emplace_back(std::move(cm));
+    auto it_exists = std::find_if(items.begin(), items.end(), [&cm](const MICCountermeasures &item) {
+        return item.RadioID == cm.RadioID && item.WlanID == cm.WlanID;
+    });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(cm);
+        log_i("MICCountermeasures: replace RadioID: %u, WlanID: %u",
+              (*it_exists).RadioID,
+              (*it_exists).WlanID);
+    } else {
+        items.emplace_back(std::move(cm));
+    }
 }
 
 bool WritableMICCountermeasuresArray::Empty() const {

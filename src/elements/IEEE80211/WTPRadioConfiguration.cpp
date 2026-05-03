@@ -53,7 +53,20 @@ WritableWTPRadioConfigurationArray::WritableWTPRadioConfigurationArray() {
 
 void WritableWTPRadioConfigurationArray::Add(WTPRadioConfiguration element) {
     ASSERT(items.size() + 1 <= ReadableWTPRadioConfigurationArray::max_count);
-    items.emplace_back(std::move(element));
+
+    auto it_exists =
+        std::find_if(items.begin(),
+                     items.end(),
+                     [&element](const WTPRadioConfiguration &item) {
+                         return item.RadioID == element.RadioID;
+                     });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("WTPRadioConfiguration: replace RadioID: %u", (*it_exists).RadioID);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableWTPRadioConfigurationArray::Empty() const {

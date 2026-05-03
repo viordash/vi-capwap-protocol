@@ -108,3 +108,44 @@ TEST(UpdateStationQoSTestsGroup, QoS_sub_element_setters) {
     CHECK_EQUAL(7, elem.Get8021pTag());
     CHECK_EQUAL(63, elem.GetDscpTag());
 }
+
+TEST(UpdateStationQoSTestsGroup, Add_array_of_items_is_unique_by_mac_address) {
+    uint8_t buffer[2048] = {};
+
+    WritableUpdateStationQoSArray w_qos;
+
+    // Add same MAC address multiple times - should replace
+    const uint8_t mac_0[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 };
+    w_qos.Add({ 1, mac_0, 1, 10 });
+    w_qos.Add({ 1, mac_0, 2, 20 });
+
+    const uint8_t mac_1[] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+    w_qos.Add({ 2, mac_1, 3, 30 });
+    w_qos.Add({ 2, mac_1, 4, 40 });
+
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    w_qos.Serialize(&raw_data);
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableUpdateStationQoSArray r_qos;
+    CHECK_FALSE(r_qos.IsPresent());
+
+    CHECK_TRUE(r_qos.Deserialize(&raw_data));
+    CHECK_TRUE(r_qos.IsPresent());
+    CHECK_TRUE(r_qos.Deserialize(&raw_data));
+    CHECK_FALSE(r_qos.Deserialize(&raw_data));
+
+    CHECK_EQUAL(raw_data.current, raw_data.end);
+    CHECK_EQUAL(2, r_qos.Get().size());
+
+    // Should have the last values for each MAC address
+    MEMCMP_EQUAL(mac_0, r_qos.Get()[0]->MACAddress, sizeof(mac_0));
+    CHECK_EQUAL(2, r_qos.Get()[0]->Get8021pTag());
+    CHECK_EQUAL(20, r_qos.Get()[0]->GetDscpTag());
+
+    MEMCMP_EQUAL(mac_1, r_qos.Get()[1]->MACAddress, sizeof(mac_1));
+    CHECK_EQUAL(4, r_qos.Get()[1]->Get8021pTag());
+    CHECK_EQUAL(40, r_qos.Get()[1]->GetDscpTag());
+}

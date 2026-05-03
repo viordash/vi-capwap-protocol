@@ -44,7 +44,17 @@ WritableTxPowerLevelArray::WritableTxPowerLevelArray() {
 
 void WritableTxPowerLevelArray::Add(Item element) {
     ASSERT(items.size() + 1 <= ReadableTxPowerLevelArray::max_count);
-    items.emplace_back(std::move(element));
+
+    auto it_exists = std::find_if(items.begin(), items.end(), [&element](const Item &item) {
+        return item.header.GetRadioID() == element.header.GetRadioID();
+    });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("TxPowerLevel: replace RadioID: %u", (*it_exists).header.GetRadioID());
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableTxPowerLevelArray::Empty() const {

@@ -42,7 +42,16 @@ void WritableRateSetArray::Add(uint8_t radio_id, nonstd::span<const uint8_t> rat
     ASSERT(rate_set_data.size() >= RateSet::min_rate_set_length);
     ASSERT(rate_set_data.size() <= RateSet::max_rate_set_length);
 
-    items.push_back({ radio_id, rate_set_data });
+    auto it_exists = std::find_if(items.begin(), items.end(), [&radio_id](const Item &item) {
+        return item.header.GetRadioID() == radio_id;
+    });
+
+    if (it_exists != items.end()) {
+        *it_exists = Item{ radio_id, rate_set_data };
+        log_i("RateSet: replace RadioID: %u", radio_id);
+    } else {
+        items.push_back({ radio_id, rate_set_data });
+    }
 }
 
 bool WritableRateSetArray::Empty() const {

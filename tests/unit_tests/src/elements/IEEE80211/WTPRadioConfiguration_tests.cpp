@@ -84,3 +84,54 @@ TEST(WTPRadioConfigurationTestsGroup, Serialize_Deserialize_few_elements) {
     MEMCMP_EQUAL(bssid3, r_configs.Get()[2]->BSSID, 6);
     CHECK_EQUAL(150, r_configs.Get()[2]->BeaconPeriod.Get());
 }
+
+TEST(WTPRadioConfigurationTestsGroup, Add_array_of_items_is_unique_by_radio_id) {
+    uint8_t buffer[2048] = {};
+
+    WritableWTPRadioConfigurationArray w_configs;
+
+    // Add same RadioID multiple times - should replace
+    const uint8_t bssid_0[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 };
+    w_configs.Add({ 1, 1, 1, 1, bssid_0, 100, "US" });
+
+    const uint8_t bssid_1[] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+    w_configs.Add({ 1, 0, 2, 2, bssid_1, 200, "GB" });
+
+    const uint8_t bssid_2[] = { 0x12, 0x34, 0x56, 0x78, 0x9A, 0xBC };
+    w_configs.Add({ 2, 1, 3, 3, bssid_2, 300, "DE" });
+
+    const uint8_t bssid_3[] = { 0xFE, 0xDC, 0xBA, 0x98, 0x76, 0x54 };
+    w_configs.Add({ 2, 0, 4, 4, bssid_3, 400, "FR" });
+
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    w_configs.Serialize(&raw_data);
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableWTPRadioConfigurationArray r_configs;
+    CHECK_FALSE(r_configs.IsPresent());
+
+    CHECK_TRUE(r_configs.Deserialize(&raw_data));
+    CHECK_TRUE(r_configs.IsPresent());
+    CHECK_TRUE(r_configs.Deserialize(&raw_data));
+    CHECK_FALSE(r_configs.Deserialize(&raw_data));
+
+    CHECK_EQUAL(raw_data.current, raw_data.end);
+    CHECK_EQUAL(2, r_configs.Get().size());
+
+    // Should have the last values for each RadioID
+    CHECK_EQUAL(1, r_configs.Get()[0]->RadioID);
+    CHECK_EQUAL(0, r_configs.Get()[0]->ShortPreamble);
+    CHECK_EQUAL(2, r_configs.Get()[0]->NumBSSIDs);
+    CHECK_EQUAL(2, r_configs.Get()[0]->DTIMPeriod);
+    CHECK_EQUAL(200, r_configs.Get()[0]->BeaconPeriod.Get());
+    MEMCMP_EQUAL(bssid_1, r_configs.Get()[0]->BSSID, 6);
+
+    CHECK_EQUAL(2, r_configs.Get()[1]->RadioID);
+    CHECK_EQUAL(0, r_configs.Get()[1]->ShortPreamble);
+    CHECK_EQUAL(4, r_configs.Get()[1]->NumBSSIDs);
+    CHECK_EQUAL(4, r_configs.Get()[1]->DTIMPeriod);
+    CHECK_EQUAL(400, r_configs.Get()[1]->BeaconPeriod.Get());
+    MEMCMP_EQUAL(bssid_3, r_configs.Get()[1]->BSSID, 6);
+}

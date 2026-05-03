@@ -90,3 +90,53 @@ TEST(UpdateWlanTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(2 + 8, r_wlans.Get()[2]->GetLength());
     MEMCMP_EQUAL(key_2.data(), r_wlans.Get()[2]->data, 2);
 }
+
+TEST(UpdateWlanTestsGroup, Add_array_of_items_is_unique_by_radio_and_wlan_id) {
+    uint8_t buffer[2048] = {};
+
+    WritableUpdateWlanArray w_wlans;
+
+    // Add same RadioID + WlanID multiple times - should replace
+    std::vector<uint8_t> key_0 = { 0x01, 0x02, 0x03, 0x04 };
+    w_wlans.Add({ 1, 1, 0x0001, 0, UpdateWlan::PerStation, key_0 });
+
+    std::vector<uint8_t> key_1 = { 0xAA, 0xBB };
+    w_wlans.Add({ 1, 1, 0x0002, 0, UpdateWlan::SharedWEP, key_1 });
+
+    // Different WlanID - should be a new entry
+    std::vector<uint8_t> key_2 = { 0xCC, 0xDD, 0xEE };
+    w_wlans.Add({ 1, 2, 0x0003, 0, UpdateWlan::PerStation, key_2 });
+
+    std::vector<uint8_t> key_3 = { 0xFF };
+    w_wlans.Add({ 1, 2, 0x0004, 0, UpdateWlan::CompletedRekeying, key_3 });
+
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    w_wlans.Serialize(&raw_data);
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableUpdateWlanArray r_wlans;
+    CHECK_TRUE(r_wlans.Deserialize(&raw_data));
+    CHECK_TRUE(r_wlans.Deserialize(&raw_data));
+    CHECK_FALSE(r_wlans.Deserialize(&raw_data));
+
+    CHECK_EQUAL(raw_data.current, raw_data.end);
+    CHECK_EQUAL(2, r_wlans.Get().size());
+
+    // First entry should have the replaced values
+    CHECK_EQUAL(1, r_wlans.Get()[0]->GetRadioID());
+    CHECK_EQUAL(1, r_wlans.Get()[0]->GetWlanID());
+    CHECK_EQUAL(0x0002, r_wlans.Get()[0]->GetCapability());
+    CHECK_EQUAL(UpdateWlan::SharedWEP, r_wlans.Get()[0]->GetKeyStatus());
+    CHECK_EQUAL(2, r_wlans.Get()[0]->GetKeyLength());
+    MEMCMP_EQUAL(key_1.data(), r_wlans.Get()[0]->data, 2);
+
+    // Second entry should have the replaced values
+    CHECK_EQUAL(1, r_wlans.Get()[1]->GetRadioID());
+    CHECK_EQUAL(2, r_wlans.Get()[1]->GetWlanID());
+    CHECK_EQUAL(0x0004, r_wlans.Get()[1]->GetCapability());
+    CHECK_EQUAL(UpdateWlan::CompletedRekeying, r_wlans.Get()[1]->GetKeyStatus());
+    CHECK_EQUAL(1, r_wlans.Get()[1]->GetKeyLength());
+    MEMCMP_EQUAL(key_3.data(), r_wlans.Get()[1]->data, 1);
+}

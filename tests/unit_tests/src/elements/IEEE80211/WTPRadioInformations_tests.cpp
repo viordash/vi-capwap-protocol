@@ -134,3 +134,49 @@ TEST(WTPRadioInformationTestsGroup, Serialize_Deserialize_array) {
     CHECK_TRUE(r_infos.Get()[2]->AX);
     CHECK_FALSE(r_infos.Get()[2]->BE);
 }
+
+TEST(WTPRadioInformationTestsGroup, Add_array_of_items_is_unique_by_RadioID) {
+    uint8_t buffer[2048] = {};
+
+    WritableWTPRadioInformationArray w_infos;
+
+    // Add same RadioID multiple times - should replace
+    w_infos.Add({ 1, true, false, true, false, false, false, false });  // First
+    w_infos.Add({ 1, false, true, false, true, true, false, false });   // Second - replaces first
+    w_infos.Add({ 2, true, true, true, true, false, false, false });    // Different RadioID
+    w_infos.Add({ 2, false, false, false, false, true, true, true });   // Replaces second
+
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    w_infos.Serialize(&raw_data);
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableWTPRadioInformationArray r_infos;
+    CHECK_FALSE(r_infos.IsPresent());
+
+    CHECK_TRUE(r_infos.Deserialize(&raw_data));
+    CHECK_TRUE(r_infos.IsPresent());
+    CHECK_TRUE(r_infos.Deserialize(&raw_data));
+    CHECK_FALSE(r_infos.Deserialize(&raw_data));
+
+    CHECK_EQUAL(raw_data.current, raw_data.end);
+    CHECK_EQUAL(2, r_infos.Get().size());
+
+    // Should have the last values for each RadioID
+    CHECK_EQUAL(1, r_infos.Get()[0]->RadioID);
+    CHECK_FALSE(r_infos.Get()[0]->B);
+    CHECK_TRUE(r_infos.Get()[0]->A);
+    CHECK_FALSE(r_infos.Get()[0]->G);
+    CHECK_TRUE(r_infos.Get()[0]->N);
+    CHECK_TRUE(r_infos.Get()[0]->AC);
+
+    CHECK_EQUAL(2, r_infos.Get()[1]->RadioID);
+    CHECK_FALSE(r_infos.Get()[1]->B);
+    CHECK_FALSE(r_infos.Get()[1]->A);
+    CHECK_FALSE(r_infos.Get()[1]->G);
+    CHECK_FALSE(r_infos.Get()[1]->N);
+    CHECK_TRUE(r_infos.Get()[1]->AC);
+    CHECK_TRUE(r_infos.Get()[1]->AX);
+    CHECK_TRUE(r_infos.Get()[1]->BE);
+}

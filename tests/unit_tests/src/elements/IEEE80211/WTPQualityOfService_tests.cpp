@@ -273,3 +273,40 @@ TEST(WTPQualityOfServiceTestsGroup, Serialize_Deserialize_array) {
     CHECK_EQUAL(7, r_qos.Get()[2]->BestEffort.CWMin.Get());
     CHECK_EQUAL(15, r_qos.Get()[2]->BestEffort.CWMax.Get());
 }
+
+TEST(WTPQualityOfServiceTestsGroup, Add_array_of_items_is_unique_by_radio_id) {
+    uint8_t buffer[2048] = {};
+
+    WritableWTPQualityOfServiceArray w_qos;
+
+    // Add same RadioID multiple times - should replace
+    w_qos.Add({ 1, 0x00 });
+    w_qos.Add({ 1, 0x1F }); // All flags set
+
+    w_qos.Add({ 2, 0x10 }); // P flag
+    w_qos.Add({ 2, 0x08 }); // Q flag
+
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    w_qos.Serialize(&raw_data);
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableWTPQualityOfServiceArray r_qos;
+    CHECK_FALSE(r_qos.IsPresent());
+
+    CHECK_TRUE(r_qos.Deserialize(&raw_data));
+    CHECK_TRUE(r_qos.IsPresent());
+    CHECK_TRUE(r_qos.Deserialize(&raw_data));
+    CHECK_FALSE(r_qos.Deserialize(&raw_data));
+
+    CHECK_EQUAL(raw_data.current, raw_data.end);
+    CHECK_EQUAL(2, r_qos.Get().size());
+
+    // Should have the last values for each RadioID
+    CHECK_EQUAL(1, r_qos.Get()[0]->RadioID);
+    CHECK_EQUAL(0x1F, r_qos.Get()[0]->TaggingPolicy);
+
+    CHECK_EQUAL(2, r_qos.Get()[1]->RadioID);
+    CHECK_EQUAL(0x08, r_qos.Get()[1]->TaggingPolicy);
+}

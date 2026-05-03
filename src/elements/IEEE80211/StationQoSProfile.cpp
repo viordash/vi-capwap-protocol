@@ -41,7 +41,26 @@ WritableStationQoSProfileArray::WritableStationQoSProfileArray() {
 void WritableStationQoSProfileArray::Add(StationQoSProfile element) {
     ASSERT(items.size() + 1 <= ReadableStationQoSProfileArray::max_count);
 
-    items.emplace_back(std::move(element));
+    auto it_exists =
+        std::find_if(items.begin(), items.end(), [&element](const StationQoSProfile &item) {
+            return memcmp(item.GetMACAddress(),
+                          element.GetMACAddress(),
+                          StationQoSProfile::mac_address_size)
+                == 0;
+        });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("StationQoSProfile: replace MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+              (*it_exists).GetMACAddress()[0],
+              (*it_exists).GetMACAddress()[1],
+              (*it_exists).GetMACAddress()[2],
+              (*it_exists).GetMACAddress()[3],
+              (*it_exists).GetMACAddress()[4],
+              (*it_exists).GetMACAddress()[5]);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableStationQoSProfileArray::Empty() const {
