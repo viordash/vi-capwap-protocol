@@ -17,15 +17,16 @@ TEST_GROUP(ResetRequestTestsGroup){ //
 TEST(ResetRequestTestsGroup, ResetRequest_serialize) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    {
+        WritableImageIdentifier image_identifier{ 123456, "abcdef Привет 1234" };
 
-    WritableImageIdentifier image_identifier{ 123456, "abcdef Привет 1234" };
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        WritableResetRequest write_data(image_identifier, { &vendor_specific_payloads });
 
-    WritableResetRequest write_data(image_identifier, vendor_specific_payloads);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 63, raw_data.current);
     const uint8_t reference[] = { 0x00, 0x19, 0x00, 0x1C, 0x00, 0x01, 0xE2, 0x40, 0x61, 0x62, 0x63,
                                   0x64, 0x65, 0x66, 0x20, 0xD0, 0x9F, 0xD1, 0x80, 0xD0, 0xB8, 0xD0,
@@ -37,19 +38,20 @@ TEST(ResetRequestTestsGroup, ResetRequest_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + 63 };
-    ReadableResetRequest read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableResetRequest read_data({ &vendor_specific_payloads });
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
+    CHECK_TRUE(read_data.image_identifier.IsPresent());
     CHECK_EQUAL(24, read_data.image_identifier.GetData().size());
     CHECK_EQUAL(123456, read_data.image_identifier.GetVendorIdentifier());
     STRNCMP_EQUAL("abcdef Привет 1234", (char *)read_data.image_identifier.GetData().data(), 24);
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -91,23 +93,23 @@ TEST(ResetRequestTestsGroup, ResetRequest_deserialize_image_data) {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableResetRequest read_data;
-
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableResetRequest read_data({ &vendor_specific_payloads });
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
+    CHECK_TRUE(read_data.image_identifier.IsPresent());
     CHECK_EQUAL(16, read_data.image_identifier.GetData().size());
     CHECK_EQUAL(9, read_data.image_identifier.GetVendorIdentifier());
     STRNCMP_EQUAL("capwap-fw-v2.3.4", (char *)read_data.image_identifier.GetData().data(), 24);
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(14823, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(0x0101, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(14823, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(0x0101, vendor_specific_payloads.Get()[0]->GetElementId());
     const uint8_t vendor_payload[] = { 0xDE, 0xAD, 0xBE, 0xEF };
-    MEMCMP_EQUAL(vendor_payload,
-                 read_data.vendor_specific_payloads.Get()[0]->value,
-                 sizeof(vendor_payload));
+    MEMCMP_EQUAL(vendor_payload, vendor_specific_payloads.Get()[0]->value, sizeof(vendor_payload));
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -146,9 +148,11 @@ TEST(ResetRequestTestsGroup, ResetRequest_deserialize_handle_unknown_element) {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableResetRequest read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableResetRequest read_data({ &vendor_specific_payloads });
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
     CHECK_EQUAL(2, read_data.unknown_elements);
 }

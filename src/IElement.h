@@ -53,3 +53,6 @@ struct IReadableEchoRequestOptionalElement : IReadableElement {};
 
 struct IWritableEchoResponseOptionalElement : IWritableElement {};
 struct IReadableEchoResponseOptionalElement : IReadableElement {};
+
+struct IWritableResetRequestOptionalElement : IWritableElement {};
+struct IReadableResetRequestOptionalElement : IReadableElement {};
