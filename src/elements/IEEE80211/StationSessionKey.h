@@ -55,7 +55,6 @@ struct __attribute__((packed)) StationSessionKey : ElementHeader {
 
   public:
     // Key: Variable-length pairwise encryption key
-    uint8_t key_data[];
 
     StationSessionKey(const StationSessionKey &) = default;
     StationSessionKey(const uint8_t *mac_address,
@@ -73,14 +72,12 @@ struct __attribute__((packed)) StationSessionKey : ElementHeader {
     uint16_t GetKeyLength() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static StationSessionKey *Deserialize(RawData *raw_data);
 };
 
 struct WritableStationSessionKeyArray : IWritableElement {
   public:
     struct Item {
-        nonstd::span<const uint8_t> key_data;
+        nonstd::span<const uint8_t> data;
         StationSessionKey header;
 
         Item(const Item &) = default;
@@ -88,9 +85,10 @@ struct WritableStationSessionKeyArray : IWritableElement {
              uint16_t flags,
              const uint8_t *pairwise_tsc,
              const uint8_t *pairwise_rsc,
-             nonstd::span<const uint8_t> key);
-
-        const uint8_t *GetMACAddress() const;
+             nonstd::span<const uint8_t> key)
+            : data{ key },
+              header{ mac_address, flags, pairwise_tsc, pairwise_rsc, (uint16_t)data.size() } {
+        }
     };
 
   private:
@@ -112,8 +110,13 @@ struct ReadableStationSessionKeyArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
+    struct Item : StationSessionKey {
+        uint8_t data[];
+        Item(const Item &) = delete;
+    };
+
   protected:
-    std::array<const StationSessionKey *, max_count> items;
+    std::array<const Item *, max_count> items;
     size_t count;
 
   public:
@@ -121,7 +124,7 @@ struct ReadableStationSessionKeyArray : IReadableElement {
     ReadableStationSessionKeyArray();
 
     bool Deserialize(RawData *raw_data) override final;
-    nonstd::span<const StationSessionKey *const> Get() const;
+    nonstd::span<const ReadableStationSessionKeyArray::Item *const> Get() const;
     void Log() const override final;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;

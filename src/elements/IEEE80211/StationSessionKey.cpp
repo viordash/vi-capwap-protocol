@@ -64,45 +64,8 @@ bool StationSessionKey::Validate() const {
     return true;
 }
 
-void StationSessionKey::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(StationSessionKey) <= raw_data->end);
-    std::memcpy(raw_data->current, this, sizeof(StationSessionKey));
-    raw_data->current += sizeof(StationSessionKey);
-}
-
-StationSessionKey *StationSessionKey::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(StationSessionKey) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (StationSessionKey *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current = last;
-    return res;
-}
-
-WritableStationSessionKeyArray::Item::Item(const uint8_t *mac_address,
-                                           uint16_t flags,
-                                           const uint8_t *pairwise_tsc,
-                                           const uint8_t *pairwise_rsc,
-                                           nonstd::span<const uint8_t> key)
-    : key_data{ key },
-      header{ mac_address, flags, pairwise_tsc, pairwise_rsc, (uint16_t)key_data.size() } {
-}
-
-const uint8_t *WritableStationSessionKeyArray::Item::GetMACAddress() const {
-    return header.GetMACAddress();
-}
-
 WritableStationSessionKeyArray::WritableStationSessionKeyArray() {
+    static_assert(sizeof(Item::header) == 24);
     items.reserve(ReadableStationSessionKeyArray::max_count);
 }
 
@@ -121,12 +84,14 @@ void WritableStationSessionKeyArray::Clear() {
 }
 
 void WritableStationSessionKeyArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
-        uint16_t key_size =
-            elem.header.GetLength() - (sizeof(StationSessionKey) - sizeof(ElementHeader));
-        std::memcpy(raw_data->current, elem.key_data.data(), key_size);
-        raw_data->current += key_size;
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
+        uint16_t data_size =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.data.data(), data_size);
+        raw_data->current += data_size;
     }
 }
 
@@ -144,7 +109,7 @@ void WritableStationSessionKeyArray::Log() const {
               items[i].header.GetFlags(),
               items[i].header.GetAKMOnlyFlag() ? 1 : 0,
               items[i].header.GetACCryptoFlag() ? 1 : 0,
-              items[i].key_data.size());
+              items[i].data.size());
     }
 }
 
@@ -157,16 +122,28 @@ bool ReadableStationSessionKeyArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto key = StationSessionKey::Deserialize(raw_data);
-    if (key == nullptr) {
+    if (raw_data->current + sizeof(StationSessionKey) > raw_data->end) {
         return false;
     }
-    items[count] = key;
+
+    auto res = (ReadableStationSessionKeyArray::Item *)raw_data->current;
+    if (!res->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    items[count] = res;
     count++;
     return true;
 }
 
-nonstd::span<const StationSessionKey *const> ReadableStationSessionKeyArray::Get() const {
+nonstd::span<const ReadableStationSessionKeyArray::Item *const>
+ReadableStationSessionKeyArray::Get() const {
     nonstd::span span(items.begin(), count);
     return span;
 }
