@@ -40,10 +40,12 @@ TEST(TxPowerTestsGroup, Serialize_Deserialize_few_elements) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     ReadableTxPowerArray r_tps;
+    CHECK_FALSE(r_tps.IsPresent());
 
     raw_data = { reference, reference + sizeof(reference) };
 
     CHECK_TRUE(r_tps.Deserialize(&raw_data));
+    CHECK_TRUE(r_tps.IsPresent());
     CHECK_TRUE(r_tps.Deserialize(&raw_data));
     CHECK_TRUE(r_tps.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

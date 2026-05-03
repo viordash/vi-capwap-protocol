@@ -61,6 +61,15 @@ void WritableTxPowerArray::Log() const {
 ReadableTxPowerArray::ReadableTxPowerArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableTxPowerArray::GetElementType() const {
+    return ElementHeader::TxPower;
+}
+
+bool ReadableTxPowerArray::IsPresent() const {
+    return count > 0;
+}
+
+
 bool ReadableTxPowerArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableTxPowerArray::Deserialize elements count exceeds");
