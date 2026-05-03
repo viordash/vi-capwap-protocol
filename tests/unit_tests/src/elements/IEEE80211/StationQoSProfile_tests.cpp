@@ -29,9 +29,11 @@ TEST(StationQoSProfileTestsGroup, Serialize_Deserialize_array) {
     CHECK_EQUAL(&buffer[0] + 36, raw_data.current); // 3 * 12 = 36
 
     ReadableStationQoSProfileArray r_profiles;
+    CHECK_FALSE(r_profiles.IsPresent());
     raw_data = { buffer, buffer + 36 };
 
     CHECK_TRUE(r_profiles.Deserialize(&raw_data));
+    CHECK_TRUE(r_profiles.IsPresent());
     CHECK_TRUE(r_profiles.Deserialize(&raw_data));
     CHECK_TRUE(r_profiles.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

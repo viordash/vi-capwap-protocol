@@ -77,6 +77,15 @@ void WritableStationQoSProfileArray::Log() const {
 ReadableStationQoSProfileArray::ReadableStationQoSProfileArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableStationQoSProfileArray::GetElementType() const {
+    return ElementHeader::StationQoSProfile;
+}
+
+bool ReadableStationQoSProfileArray::IsPresent() const {
+    return count > 0;
+}
+
+
 bool ReadableStationQoSProfileArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableStationQoSProfileArray::Deserialize elements count exceeds");
