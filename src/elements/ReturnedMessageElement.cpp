@@ -86,14 +86,13 @@ void WritableReturnedMessageElementArray::Clear() {
 }
 
 void WritableReturnedMessageElementArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        ASSERT(raw_data->current + sizeof(elem.header) <= raw_data->end);
-        std::memcpy(raw_data->current, &elem.header, sizeof(elem.header));
-        raw_data->current += sizeof(elem.header);
-
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
         uint16_t data_size =
-            elem.header.GetLength() - (sizeof(ReturnedMessageElement) - sizeof(ElementHeader));
-        std::memcpy(raw_data->current, elem.data.data(), data_size);
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.data.data(), data_size);
         raw_data->current += data_size;
     }
 }

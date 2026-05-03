@@ -138,10 +138,10 @@ void WritableWTPRadioStatisticsArray::Clear() {
 
 void WritableWTPRadioStatisticsArray::Serialize(RawData *raw_data) const {
     ASSERT(items.size() <= ReadableWTPRadioStatisticsArray::max_count);
-    for (const auto &elem : items) {
+    for (const auto &item : items) {
         ASSERT(raw_data->current + sizeof(WTPRadioStatistics) <= raw_data->end);
-        std::memcpy(raw_data->current, &elem, sizeof(elem));
-        raw_data->current += sizeof(elem);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 

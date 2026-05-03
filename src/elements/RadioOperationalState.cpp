@@ -47,6 +47,7 @@ bool RadioOperationalState::Validate() const {
 }
 
 WritableRadioOperationalStateArray::WritableRadioOperationalStateArray() {
+    static_assert(sizeof(items[0]) == 7);
     items.reserve(ReadableRadioOperationalStateArray::max_count);
 }
 
@@ -74,15 +75,10 @@ void WritableRadioOperationalStateArray::Clear() {
 }
 
 void WritableRadioOperationalStateArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        ASSERT(raw_data->current + sizeof(RadioOperationalState) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-        memcpy(raw_data->current, &elem, sizeof(RadioOperationalState));
-#pragma GCC diagnostic pop
-        raw_data->current += sizeof(RadioOperationalState);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
