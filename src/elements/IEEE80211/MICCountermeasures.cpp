@@ -30,31 +30,8 @@ bool MICCountermeasures::Validate() const {
     return true;
 }
 
-void MICCountermeasures::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(MICCountermeasures) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(MICCountermeasures));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(MICCountermeasures);
-}
-
-MICCountermeasures *MICCountermeasures::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(MICCountermeasures) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (MICCountermeasures *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(MICCountermeasures);
-    return res;
-}
-
 WritableMICCountermeasuresArray::WritableMICCountermeasuresArray() {
+    static_assert(sizeof(items[0]) == 12);
     items.reserve(ReadableMICCountermeasuresArray::max_count);
 }
 
@@ -73,8 +50,10 @@ void WritableMICCountermeasuresArray::Clear() {
 }
 
 void WritableMICCountermeasuresArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -102,12 +81,17 @@ bool ReadableMICCountermeasuresArray::Deserialize(RawData *raw_data) {
         log_e("ReadableMICCountermeasuresArray::Deserialize elements count exceeds");
         return false;
     }
-
-    auto cm = MICCountermeasures::Deserialize(raw_data);
-    if (cm == nullptr) {
+    if (raw_data->current + sizeof(MICCountermeasures) > raw_data->end) {
         return false;
     }
-    items[count] = cm;
+
+    auto item = (MICCountermeasures *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(MICCountermeasures);
+
+    items[count] = item;
     count++;
     return true;
 }

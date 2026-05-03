@@ -24,8 +24,6 @@ struct __attribute__((packed)) MICCountermeasures : ElementHeader {
     MICCountermeasures(uint8_t radio_id, uint8_t wlan_id, const uint8_t *mac_address);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static MICCountermeasures *Deserialize(RawData *raw_data);
 };
 
 struct WritableMICCountermeasuresArray {
