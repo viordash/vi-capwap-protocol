@@ -64,8 +64,7 @@ bool InformationElement::Validate() const {
 
 void InformationElement::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(InformationElement) <= raw_data->end);
-    InformationElement *dst = (InformationElement *)raw_data->current;
-    *dst = *this;
+    std::memcpy(raw_data->current, this, sizeof(InformationElement));
     raw_data->current += sizeof(InformationElement);
 }
 
@@ -91,8 +90,8 @@ InformationElement *InformationElement::Deserialize(RawData *raw_data) {
 WritableInformationElementArray::Item::Item(uint8_t radio_id,
                                             uint8_t wlan_id,
                                             uint8_t flags,
-                                            std::vector<uint8_t> &&ie)
-    : ie_data{ std::move(ie) }, header{ radio_id, wlan_id, flags, (uint16_t)ie_data.size() } {
+                                            nonstd::span<const uint8_t> ie)
+    : ie_data{ ie }, header{ radio_id, wlan_id, flags, (uint16_t)ie_data.size() } {
 }
 
 uint8_t WritableInformationElementArray::Item::GetRadioID() const {
@@ -126,7 +125,7 @@ void WritableInformationElementArray::Serialize(RawData *raw_data) const {
         elem.header.Serialize(raw_data);
         uint16_t ie_size =
             elem.header.GetLength() - (sizeof(InformationElement) - sizeof(ElementHeader));
-        memcpy(raw_data->current, elem.ie_data.data(), ie_size);
+        std::memcpy(raw_data->current, elem.ie_data.data(), ie_size);
         raw_data->current += ie_size;
     }
 }
@@ -180,4 +179,12 @@ void ReadableInformationElementArray::Log() const {
               items[i]->GetProbeResponseFlag() ? 1 : 0,
               items[i]->GetIELength());
     }
+}
+
+ElementHeader::ElementType ReadableInformationElementArray::GetElementType() const {
+    return ElementHeader::InformationElement;
+}
+
+bool ReadableInformationElementArray::IsPresent() const {
+    return count > 0;
 }

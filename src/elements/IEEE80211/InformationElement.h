@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -44,14 +45,14 @@ struct __attribute__((packed)) InformationElement : ElementHeader {
     static InformationElement *Deserialize(RawData *raw_data);
 };
 
-struct WritableInformationElementArray {
+struct WritableInformationElementArray : IWritableElement {
   public:
     struct Item {
-        std::vector<uint8_t> ie_data;
+        nonstd::span<const uint8_t> ie_data;
         InformationElement header;
 
         Item(const Item &) = default;
-        Item(uint8_t radio_id, uint8_t wlan_id, uint8_t flags, std::vector<uint8_t> &&ie);
+        Item(uint8_t radio_id, uint8_t wlan_id, uint8_t flags, nonstd::span<const uint8_t> ie);
 
         uint8_t GetRadioID() const;
         uint8_t GetWlanID() const;
@@ -68,11 +69,11 @@ struct WritableInformationElementArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableInformationElementArray {
+struct ReadableInformationElementArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -84,7 +85,9 @@ struct ReadableInformationElementArray {
     ReadableInformationElementArray(const ReadableInformationElementArray &) = delete;
     ReadableInformationElementArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const InformationElement *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

@@ -54,7 +54,7 @@ TEST(InformationElementTestsGroup, Deserialize) {
 TEST(InformationElementTestsGroup, Serialize) {
     uint8_t buffer[256] = {};
     std::vector<uint8_t> ie_data = { 0x00, 0x04, 0x54, 0x45, 0x53, 0x54 }; // SSID: "TEST"
-    WritableInformationElementArray::Item item{ 5, 3, 0x80, std::move(ie_data) };
+    WritableInformationElementArray::Item item{ 5, 3, 0x80, ie_data };
 
     WritableInformationElementArray w_ies;
     w_ies.Add(std::move(item));
@@ -99,9 +99,9 @@ TEST(InformationElementTestsGroup, Serialize_Deserialize_few_elements) {
     std::vector<uint8_t> ie2 = { 0x01, 0x04, 0x82, 0x84, 0x8B, 0x96 }; // Supported Rates
     std::vector<uint8_t> ie3 = { 0x03, 0x01, 0x06 }; // DS Parameter Set: Channel 6
 
-    w_ies.Add({ 1, 1, 0xC0, std::move(ie1) }); // B=1, P=1
-    w_ies.Add({ 1, 2, 0x80, std::move(ie2) }); // B=1, P=0
-    w_ies.Add({ 2, 1, 0x40, std::move(ie3) }); // B=0, P=1
+    w_ies.Add({ 1, 1, 0xC0, ie1 }); // B=1, P=1
+    w_ies.Add({ 1, 2, 0x80, ie2 }); // B=1, P=0
+    w_ies.Add({ 2, 1, 0x40, ie3 }); // B=0, P=1
 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
@@ -110,10 +110,12 @@ TEST(InformationElementTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(&buffer[0] + 34, raw_data.current);
 
     ReadableInformationElementArray r_ies;
+    CHECK_FALSE(r_ies.IsPresent());
 
     raw_data = { buffer, buffer + 34 };
 
     CHECK_TRUE(r_ies.Deserialize(&raw_data));
+    CHECK_TRUE(r_ies.IsPresent());
     CHECK_TRUE(r_ies.Deserialize(&raw_data));
     CHECK_TRUE(r_ies.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
