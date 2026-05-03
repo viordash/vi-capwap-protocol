@@ -2,7 +2,8 @@
 #include "WTPRadioStatistics.h"
 #include "Logging.h"
 #include "lassert.h"
-#include <string.h>
+#include <algorithm>
+#include <cstring>
 
 WTPRadioStatistics::WTPRadioStatistics(uint8_t radio_id,
                                        LastFailureType last_failure_type,
@@ -45,24 +46,6 @@ bool WTPRadioStatistics::Validate() const {
             return false;
     };
 }
-void WTPRadioStatistics::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(WTPRadioStatistics) <= raw_data->end);
-    WTPRadioStatistics *dst = (WTPRadioStatistics *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(WTPRadioStatistics);
-}
-WTPRadioStatistics *WTPRadioStatistics::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(WTPRadioStatistics) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (WTPRadioStatistics *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(WTPRadioStatistics);
-    return res;
-}
 
 uint8_t WTPRadioStatistics::GetRadioID() const {
     return radio_id;
@@ -96,9 +79,6 @@ uint16_t WTPRadioStatistics::GetBandChangeCount() const {
 }
 int16_t WTPRadioStatistics::GetCurrentNoiseFloor() const {
     return current_noise_floor.Get();
-}
-uint16_t WTPRadioStatistics::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
 }
 
 bool WTPRadioStatistics::operator==(const WTPRadioStatistics &other) const {
@@ -159,16 +139,10 @@ void WritableWTPRadioStatisticsArray::Clear() {
 void WritableWTPRadioStatisticsArray::Serialize(RawData *raw_data) const {
     ASSERT(items.size() <= ReadableWTPRadioStatisticsArray::max_count);
     for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+        ASSERT(raw_data->current + sizeof(WTPRadioStatistics) <= raw_data->end);
+        std::memcpy(raw_data->current, &elem, sizeof(elem));
+        raw_data->current += sizeof(elem);
     }
-}
-
-uint16_t WritableWTPRadioStatisticsArray::GetTotalLength() const {
-    uint16_t size = 0;
-    for (const auto &elem : items) {
-        size += elem.GetTotalLength();
-    }
-    return size;
 }
 
 void WritableWTPRadioStatisticsArray::Log() const {
@@ -203,11 +177,17 @@ bool ReadableWTPRadioStatisticsArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto radio_info = WTPRadioStatistics::Deserialize(raw_data);
-    if (radio_info == nullptr) {
+    if (raw_data->current + sizeof(WTPRadioStatistics) > raw_data->end) {
         return false;
     }
-    items[count] = radio_info;
+
+    auto element = (WTPRadioStatistics *)raw_data->current;
+    if (!element->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(WTPRadioStatistics);
+
+    items[count] = element;
     count++;
     return true;
 }
@@ -238,4 +218,12 @@ void ReadableWTPRadioStatisticsArray::Log() const {
               items[i]->GetBandChangeCount(),
               items[i]->GetCurrentNoiseFloor());
     }
+}
+
+ElementHeader::ElementType ReadableWTPRadioStatisticsArray::GetElementType() const {
+    return ElementHeader::WTPRadioStatistics;
+}
+
+bool ReadableWTPRadioStatisticsArray::IsPresent() const {
+    return count > 0;
 }
