@@ -134,6 +134,15 @@ void WritableRSNAErrorReportFromStationArray::Log() const {
 ReadableRSNAErrorReportFromStationArray::ReadableRSNAErrorReportFromStationArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableRSNAErrorReportFromStationArray::GetElementType() const {
+    return ElementHeader::RSNAErrorReportFromStation;
+}
+
+bool ReadableRSNAErrorReportFromStationArray::IsPresent() const {
+    return count > 0;
+}
+
+
 bool ReadableRSNAErrorReportFromStationArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableRSNAErrorReportFromStationArray::Deserialize elements count exceeds");

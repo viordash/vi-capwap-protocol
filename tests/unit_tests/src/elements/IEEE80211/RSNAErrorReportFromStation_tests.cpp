@@ -29,9 +29,11 @@ TEST(RSNAErrorReportFromStationTestsGroup, Serialize_Deserialize_array) {
     CHECK_EQUAL(&buffer[0] + 88, raw_data.current); // 2 × 44 = 88
 
     ReadableRSNAErrorReportFromStationArray r_reports;
+    CHECK_FALSE(r_reports.IsPresent());
     raw_data = { buffer, buffer + 88 };
 
     CHECK_TRUE(r_reports.Deserialize(&raw_data));
+    CHECK_TRUE(r_reports.IsPresent());
     CHECK_TRUE(r_reports.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, r_reports.Get().size());
