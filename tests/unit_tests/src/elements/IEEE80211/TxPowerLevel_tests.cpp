@@ -49,10 +49,16 @@ TEST(TxPowerLevelTestsGroup, Serialize_Deserialize_few_elements) {
 
     CHECK_EQUAL(1, r_levels.Get()[0]->GetRadioID());
     CHECK_EQUAL(1, r_levels.Get()[0]->GetNumLevels());
+    CHECK_EQUAL(2 + 2, r_levels.Get()[0]->GetLength());
+    MEMCMP_EQUAL(levels_0.data(), r_levels.Get()[0]->data, 2);
 
     CHECK_EQUAL(1, r_levels.Get()[1]->GetRadioID());
     CHECK_EQUAL(3, r_levels.Get()[1]->GetNumLevels());
+    CHECK_EQUAL(6 + 2, r_levels.Get()[1]->GetLength());
+    MEMCMP_EQUAL(levels_1.data(), r_levels.Get()[1]->data, 6);
 
     CHECK_EQUAL(2, r_levels.Get()[2]->GetRadioID());
     CHECK_EQUAL(5, r_levels.Get()[2]->GetNumLevels());
+    CHECK_EQUAL(10 + 2, r_levels.Get()[2]->GetLength());
+    MEMCMP_EQUAL(levels_2.data(), r_levels.Get()[2]->data, 10);
 }

@@ -35,7 +35,6 @@ struct __attribute__((packed)) TxPowerLevel : ElementHeader {
 
   public:
     // Power Level: A 16-bit signed value, in dBm, for each of the supported power levels.
-    NetworkS16 power_levels[];
 
     TxPowerLevel(const TxPowerLevel &) = default;
     TxPowerLevel(uint8_t radio_id, uint8_t num_levels);
@@ -49,13 +48,13 @@ struct __attribute__((packed)) TxPowerLevel : ElementHeader {
 struct WritableTxPowerLevelArray : IWritableElement {
   public:
     struct Item {
-        nonstd::span<const int16_t> levels_data;
+        nonstd::span<const int16_t> data;
         TxPowerLevel header;
 
         Item(const Item &) = default;
-        Item(uint8_t radio_id, nonstd::span<const int16_t> levels);
-
-        uint8_t GetRadioID() const;
+        Item(uint8_t radio_id, nonstd::span<const int16_t> levels)
+            : data(levels), header(radio_id, data.size()) {
+        }
     };
 
   private:
@@ -77,8 +76,13 @@ struct ReadableTxPowerLevelArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
+    struct Item : TxPowerLevel {
+        uint8_t data[];
+        Item(const Item &) = delete;
+    };
+
   protected:
-    std::array<const TxPowerLevel *, max_count> items;
+    std::array<const Item *, max_count> items;
     size_t count;
 
   public:
@@ -86,7 +90,7 @@ struct ReadableTxPowerLevelArray : IReadableElement {
     ReadableTxPowerLevelArray();
 
     bool Deserialize(RawData *raw_data) override final;
-    nonstd::span<const TxPowerLevel *const> Get() const;
+    nonstd::span<const ReadableTxPowerLevelArray::Item *const> Get() const;
     void Log() const override final;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
