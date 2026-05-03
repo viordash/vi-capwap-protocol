@@ -13,27 +13,6 @@ bool CAPWAPLocalIPv4Address::Validate() const {
     return ElementHeader::GetElementType() == ElementHeader::CAPWAPLocalIPv4Address
         && ElementHeader::GetLength() == (sizeof(CAPWAPLocalIPv4Address) - sizeof(ElementHeader));
 }
-void CAPWAPLocalIPv4Address::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(CAPWAPLocalIPv4Address) <= raw_data->end);
-    CAPWAPLocalIPv4Address *dst = (CAPWAPLocalIPv4Address *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(CAPWAPLocalIPv4Address);
-}
-CAPWAPLocalIPv4Address *CAPWAPLocalIPv4Address::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(CAPWAPLocalIPv4Address) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (CAPWAPLocalIPv4Address *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(CAPWAPLocalIPv4Address);
-    return res;
-}
-uint16_t CAPWAPLocalIPv4Address::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
-}
 
 uint32_t CAPWAPLocalIPv4Address::GetIPAddress() const {
     return ipaddress;
@@ -51,15 +30,10 @@ WritableCAPWAPLocalIPV4AdrArray::WritableCAPWAPLocalIPV4AdrArray(
 
 void WritableCAPWAPLocalIPV4AdrArray::Serialize(RawData *raw_data) const {
     for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+        ASSERT(raw_data->current + sizeof(CAPWAPLocalIPv4Address) <= raw_data->end);
+        std::memcpy(raw_data->current, &elem, sizeof(elem));
+        raw_data->current += sizeof(elem);
     }
-}
-uint16_t WritableCAPWAPLocalIPV4AdrArray::GetTotalLength() const {
-    uint16_t size = 0;
-    for (const auto &elem : items) {
-        size += elem.GetTotalLength();
-    }
-    return size;
 }
 
 void WritableCAPWAPLocalIPV4AdrArray::Log() const {
@@ -79,11 +53,17 @@ bool ReadableCAPWAPLocalIPV4AdrArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto ip_address = CAPWAPLocalIPv4Address::Deserialize(raw_data);
-    if (ip_address == nullptr) {
+    if (raw_data->current + sizeof(CAPWAPLocalIPv4Address) > raw_data->end) {
         return false;
     }
-    items[count] = ip_address;
+
+    auto element = (CAPWAPLocalIPv4Address *)raw_data->current;
+    if (!element->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(CAPWAPLocalIPv4Address);
+
+    items[count] = element;
     count++;
     return true;
 }
@@ -99,4 +79,12 @@ void ReadableCAPWAPLocalIPV4AdrArray::Log() const {
               i,
               IpToString(items[i]->GetIPAddress()).c_str());
     }
+}
+
+ElementHeader::ElementType ReadableCAPWAPLocalIPV4AdrArray::GetElementType() const {
+    return ElementHeader::CAPWAPLocalIPv4Address;
+}
+
+bool ReadableCAPWAPLocalIPV4AdrArray::IsPresent() const {
+    return count > 0;
 }

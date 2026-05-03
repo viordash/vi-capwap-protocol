@@ -16,49 +16,6 @@ TEST_GROUP(CAPWAPLocalIPv4AddressTestsGroup){ //
                                               TEST_TEARDOWN(){}
 };
 
-TEST(CAPWAPLocalIPv4AddressTestsGroup, Deserialize) {
-    // Юнит-тест: CAPWAP Local IPv4 Address - Пример 1 (WTP за NAT)
-    // Тип элемента = 30, Длина = 4
-    uint8_t data[] = {
-        // --- TLV Header (4 байта) ---
-        0x00,
-        0x1E, // Type = 30 (в Big Endian)
-        0x00,
-        0x04, // Length = 4 (в Big Endian)
-
-        // --- Value (4 байта) ---
-        0xC0,
-        0xA8,
-        0x01,
-        0x64 // IP Address: 192.168.1.100
-    };
-    RawData raw_data{ data, data + sizeof(data) };
-    auto element = CAPWAPLocalIPv4Address::Deserialize(&raw_data);
-    CHECK(element != nullptr);
-    CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::CAPWAPLocalIPv4Address, element->GetElementType());
-
-    CHECK_EQUAL(inet_addr("192.168.1.100"), element->GetIPAddress());
-}
-
-TEST(CAPWAPLocalIPv4AddressTestsGroup, Serialize) {
-    uint8_t buffer[256] = {};
-    CAPWAPLocalIPv4Address element_0{ inet_addr("192.168.1.100") };
-    RawData raw_data{ buffer, buffer + sizeof(buffer) };
-
-    element_0.Serialize(&raw_data);
-    CHECK_EQUAL(&buffer[0] + 8, raw_data.current);
-    const uint8_t reference[] = { 0x00, 0x1E, 0x00, 0x04, 0xC0, 0xA8, 0x01, 0x64 };
-    MEMCMP_EQUAL(buffer, reference, sizeof(reference));
-
-    raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = CAPWAPLocalIPv4Address::Deserialize(&raw_data);
-    CHECK(element != nullptr);
-    CHECK_EQUAL(&buffer[0] + 8, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::CAPWAPLocalIPv4Address, element->GetElementType());
-    CHECK_EQUAL(inet_addr("192.168.1.100"), element->GetIPAddress());
-}
-
 TEST(CAPWAPLocalIPv4AddressTestsGroup, Serialize_Deserialize_few_elements) {
     uint8_t buffer[2048] = {};
     CAPWAPLocalIPv4Address addresses[] = {
@@ -90,10 +47,12 @@ TEST(CAPWAPLocalIPv4AddressTestsGroup, Serialize_Deserialize_few_elements) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     ReadableCAPWAPLocalIPV4AdrArray r_addresses;
+    CHECK_FALSE(r_addresses.IsPresent());
 
     raw_data = { reference, reference + sizeof(reference) };
 
     CHECK_TRUE(r_addresses.Deserialize(&raw_data));
+    CHECK_TRUE(r_addresses.IsPresent());
     CHECK_TRUE(r_addresses.Deserialize(&raw_data));
     CHECK_TRUE(r_addresses.Deserialize(&raw_data));
     CHECK_TRUE(r_addresses.Deserialize(&raw_data));
