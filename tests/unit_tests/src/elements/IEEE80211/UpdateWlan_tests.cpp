@@ -151,10 +151,12 @@ TEST(UpdateWlanTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(&buffer[0] + 42, raw_data.current);
 
     ReadableUpdateWlanArray r_wlans;
+    CHECK_FALSE(r_wlans.IsPresent());
 
     raw_data = { buffer, buffer + 42 };
 
     CHECK_TRUE(r_wlans.Deserialize(&raw_data));
+    CHECK_TRUE(r_wlans.IsPresent());
     CHECK_TRUE(r_wlans.Deserialize(&raw_data));
     CHECK_TRUE(r_wlans.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

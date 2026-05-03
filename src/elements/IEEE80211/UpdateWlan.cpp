@@ -80,7 +80,7 @@ void UpdateWlan::Serialize(RawData *raw_data) const {
 #if __GNUC__ >= 8
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #endif
-    memcpy(raw_data->current, this, total_size);
+    std::memcpy(raw_data->current, this, total_size);
 #pragma GCC diagnostic pop
     raw_data->current += total_size;
 }
@@ -148,9 +148,9 @@ void WritableUpdateWlanArray::Serialize(RawData *raw_data) const {
         header.Serialize(raw_data);
         // Overwrite key data in the serialized buffer
         if (!elem.key_data.empty()) {
-            memcpy(raw_data->current - elem.key_data.size(),
-                   elem.key_data.data(),
-                   elem.key_data.size());
+            std::memcpy(raw_data->current - elem.key_data.size(),
+                        elem.key_data.data(),
+                        elem.key_data.size());
         }
     }
 }
@@ -204,4 +204,12 @@ void ReadableUpdateWlanArray::Log() const {
               items[i]->GetKeyStatus(),
               items[i]->GetKeyLength());
     }
+}
+
+ElementHeader::ElementType ReadableUpdateWlanArray::GetElementType() const {
+    return ElementHeader::UpdateWlan;
+}
+
+bool ReadableUpdateWlanArray::IsPresent() const {
+    return count > 0;
 }

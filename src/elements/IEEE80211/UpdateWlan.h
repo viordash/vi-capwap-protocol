@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -77,7 +78,7 @@ struct __attribute__((packed)) UpdateWlan : ElementHeader {
     static UpdateWlan *Deserialize(RawData *raw_data);
 };
 
-struct WritableUpdateWlanArray {
+struct WritableUpdateWlanArray : IWritableElement {
   public:
     struct Item {
         nonstd::span<const uint8_t> key_data;
@@ -110,11 +111,11 @@ struct WritableUpdateWlanArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableUpdateWlanArray {
+struct ReadableUpdateWlanArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -126,7 +127,9 @@ struct ReadableUpdateWlanArray {
     ReadableUpdateWlanArray(const ReadableUpdateWlanArray &) = delete;
     ReadableUpdateWlanArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const UpdateWlan *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };
