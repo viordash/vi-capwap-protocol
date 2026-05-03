@@ -140,10 +140,12 @@ TEST(TxPowerLevelTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(&buffer[0] + 36, raw_data.current);
 
     ReadableTxPowerLevelArray r_levels;
+    CHECK_FALSE(r_levels.IsPresent());
 
     raw_data = { buffer, buffer + 36 };
 
     CHECK_TRUE(r_levels.Deserialize(&raw_data));
+    CHECK_TRUE(r_levels.IsPresent());
     CHECK_TRUE(r_levels.Deserialize(&raw_data));
     CHECK_TRUE(r_levels.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

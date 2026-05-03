@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -47,7 +48,7 @@ struct __attribute__((packed)) TxPowerLevel : ElementHeader {
     static TxPowerLevel *Deserialize(RawData *raw_data);
 };
 
-struct WritableTxPowerLevelArray {
+struct WritableTxPowerLevelArray : IWritableElement {
   public:
     struct Item {
         nonstd::span<const int16_t> levels_data;
@@ -70,11 +71,11 @@ struct WritableTxPowerLevelArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableTxPowerLevelArray {
+struct ReadableTxPowerLevelArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -86,7 +87,9 @@ struct ReadableTxPowerLevelArray {
     ReadableTxPowerLevelArray(const ReadableTxPowerLevelArray &) = delete;
     ReadableTxPowerLevelArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const TxPowerLevel *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

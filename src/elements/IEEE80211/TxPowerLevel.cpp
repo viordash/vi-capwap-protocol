@@ -44,7 +44,7 @@ void TxPowerLevel::Serialize(RawData *raw_data) const {
 #if __GNUC__ >= 8
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #endif
-    memcpy(raw_data->current, this, total_size);
+    std::memcpy(raw_data->current, this, total_size);
 #pragma GCC diagnostic pop
     raw_data->current += total_size;
 }
@@ -97,7 +97,7 @@ void WritableTxPowerLevelArray::Serialize(RawData *raw_data) const {
         auto *levels_ptr = raw_data->current - elem.levels_data.size() * sizeof(NetworkS16);
         for (size_t i = 0; i < elem.levels_data.size(); i++) {
             NetworkS16 net_value{ elem.levels_data[i] };
-            memcpy(levels_ptr + i * sizeof(NetworkS16), &net_value, sizeof(NetworkS16));
+            std::memcpy(levels_ptr + i * sizeof(NetworkS16), &net_value, sizeof(NetworkS16));
         }
     }
 }
@@ -141,4 +141,12 @@ void ReadableTxPowerLevelArray::Log() const {
               items[i]->GetRadioID(),
               items[i]->GetNumLevels());
     }
+}
+
+ElementHeader::ElementType ReadableTxPowerLevelArray::GetElementType() const {
+    return ElementHeader::TxPowerLevel;
+}
+
+bool ReadableTxPowerLevelArray::IsPresent() const {
+    return count > 0;
 }
