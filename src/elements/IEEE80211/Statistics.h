@@ -166,8 +166,6 @@ struct __attribute__((packed)) Statistics : ElementHeader {
     uint32_t GetQoSCFPollsUnusableCount() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static Statistics *Deserialize(RawData *raw_data);
 };
 
 struct WritableStatisticsArray {
