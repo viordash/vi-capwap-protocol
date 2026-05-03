@@ -42,10 +42,12 @@ TEST(WTPRadioFailAlarmIndicationTestsGroup, Serialize_Deserialize_few_elements) 
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     ReadableWTPRadioFailAlarmIndicationArray r_alarms;
+    CHECK_FALSE(r_alarms.IsPresent());
 
     raw_data = { reference, reference + sizeof(reference) };
 
     CHECK_TRUE(r_alarms.Deserialize(&raw_data));
+    CHECK_TRUE(r_alarms.IsPresent());
     CHECK_TRUE(r_alarms.Deserialize(&raw_data));
     CHECK_TRUE(r_alarms.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

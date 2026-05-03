@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -45,7 +46,7 @@ struct __attribute__((packed)) WTPRadioFailAlarmIndication : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableWTPRadioFailAlarmIndicationArray {
+struct WritableWTPRadioFailAlarmIndicationArray : IWritableElement {
   private:
     std::vector<WTPRadioFailAlarmIndication> items;
 
@@ -58,11 +59,11 @@ struct WritableWTPRadioFailAlarmIndicationArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override;
+    void Log() const override;
 };
 
-struct ReadableWTPRadioFailAlarmIndicationArray {
+struct ReadableWTPRadioFailAlarmIndicationArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -75,7 +76,9 @@ struct ReadableWTPRadioFailAlarmIndicationArray {
         delete;
     ReadableWTPRadioFailAlarmIndicationArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override;
+    ElementHeader::ElementType GetElementType() const override;
+    bool IsPresent() const override;
     nonstd::span<const WTPRadioFailAlarmIndication *const> Get() const;
-    void Log() const;
+    void Log() const override;
 };

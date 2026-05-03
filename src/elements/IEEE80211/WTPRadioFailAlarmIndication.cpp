@@ -84,6 +84,15 @@ void WritableWTPRadioFailAlarmIndicationArray::Log() const {
 ReadableWTPRadioFailAlarmIndicationArray::ReadableWTPRadioFailAlarmIndicationArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableWTPRadioFailAlarmIndicationArray::GetElementType() const {
+    return ElementHeader::WTPRadioFailAlarmIndication;
+}
+
+bool ReadableWTPRadioFailAlarmIndicationArray::IsPresent() const {
+    return count > 0;
+}
+
+
 bool ReadableWTPRadioFailAlarmIndicationArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableWTPRadioFailAlarmIndicationArray::Deserialize elements count exceeds");
