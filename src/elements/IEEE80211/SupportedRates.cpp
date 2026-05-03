@@ -40,7 +40,7 @@ void SupportedRates::Serialize(RawData *raw_data) const {
 #if __GNUC__ >= 8
 #pragma GCC diagnostic ignored "-Wclass-memaccess"
 #endif
-    memcpy(raw_data->current, this, total_size);
+    std::memcpy(raw_data->current, this, total_size);
 #pragma GCC diagnostic pop
     raw_data->current += total_size;
 }
@@ -90,9 +90,9 @@ void WritableSupportedRatesArray::Clear() {
 void WritableSupportedRatesArray::Serialize(RawData *raw_data) const {
     for (const auto &elem : items) {
         elem.header.Serialize(raw_data);
-        memcpy(raw_data->current - elem.rates_data.size(),
-               elem.rates_data.data(),
-               elem.rates_data.size());
+        std::memcpy(raw_data->current - elem.rates_data.size(),
+                    elem.rates_data.data(),
+                    elem.rates_data.size());
     }
 }
 
@@ -135,4 +135,12 @@ void ReadableSupportedRatesArray::Log() const {
               items[i]->GetRadioID(),
               items[i]->GetRatesCount());
     }
+}
+
+ElementHeader::ElementType ReadableSupportedRatesArray::GetElementType() const {
+    return ElementHeader::SupportedRates;
+}
+
+bool ReadableSupportedRatesArray::IsPresent() const {
+    return count > 0;
 }

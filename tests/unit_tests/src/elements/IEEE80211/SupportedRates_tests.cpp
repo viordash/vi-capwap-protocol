@@ -95,10 +95,12 @@ TEST(SupportedRatesTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(&buffer[0] + 27, raw_data.current);
 
     ReadableSupportedRatesArray r_rates;
+    CHECK_FALSE(r_rates.IsPresent());
 
     raw_data = { buffer, buffer + 27 };
 
     CHECK_TRUE(r_rates.Deserialize(&raw_data));
+    CHECK_TRUE(r_rates.IsPresent());
     CHECK_TRUE(r_rates.Deserialize(&raw_data));
     CHECK_TRUE(r_rates.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
