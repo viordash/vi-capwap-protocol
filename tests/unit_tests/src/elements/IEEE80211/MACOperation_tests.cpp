@@ -28,10 +28,12 @@ TEST(MACOperationTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(&buffer[0] + 60, raw_data.current);
 
     ReadableMACOperationArray r_ops;
+    CHECK_FALSE(r_ops.IsPresent());
 
     raw_data = { buffer, buffer + 60 };
 
     CHECK_TRUE(r_ops.Deserialize(&raw_data));
+    CHECK_TRUE(r_ops.IsPresent());
     CHECK_TRUE(r_ops.Deserialize(&raw_data));
     CHECK_TRUE(r_ops.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -82,6 +84,7 @@ TEST(MACOperationTestsGroup, Add_array_of_items_is_unique_by_RadioID) {
     raw_data = { buffer, buffer + data_size };
 
     ReadableMACOperationArray r_ops;
+    CHECK_FALSE(r_ops.IsPresent());
 
     CHECK_TRUE(r_ops.Deserialize(&raw_data));
     CHECK_TRUE(r_ops.Deserialize(&raw_data));
