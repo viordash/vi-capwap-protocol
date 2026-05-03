@@ -47,3 +47,6 @@ struct IReadableConfigurationUpdateResponseOptionalElement : IReadableElement {}
 
 struct IWritableEchoRequestOptionalElement : IWritableElement {};
 struct IReadableEchoRequestOptionalElement : IReadableElement {};
+
+struct IWritableEchoResponseOptionalElement : IWritableElement {};
+struct IReadableEchoResponseOptionalElement : IReadableElement {};

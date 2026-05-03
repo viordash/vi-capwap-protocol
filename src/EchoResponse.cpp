@@ -6,8 +6,15 @@
 #include "lassert.h"
 
 WritableEchoResponse::WritableEchoResponse(
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads)
-    : vendor_specific_payloads{ vendor_specific_payloads } {
+    nonstd::span<IWritableEchoResponseOptionalElement *const> optional_elements)
+    : optional_elements{ optional_elements } {
+}
+
+WritableEchoResponse::WritableEchoResponse(
+    std::initializer_list<IWritableEchoResponseOptionalElement *const> optional_elements)
+    : WritableEchoResponse(
+          nonstd::span<IWritableEchoResponseOptionalElement *const>(optional_elements.begin(),
+                                                                    optional_elements.size())) {
 }
 
 ControlHeader::MessageType WritableEchoResponse::GetMessageType() const {
@@ -19,10 +26,21 @@ ControlHeader::MessageType WritableEchoResponse::GetRequestMessageType() const {
 }
 
 void WritableEchoResponse::Serialize(RawData *raw_data) const {
-    vendor_specific_payloads.Serialize(raw_data);
+    for (auto *elem : optional_elements) {
+        elem->Serialize(raw_data);
+    }
 }
 
-ReadableEchoResponse::ReadableEchoResponse() : unknown_elements{} {
+ReadableEchoResponse::ReadableEchoResponse(
+    nonstd::span<IReadableEchoResponseOptionalElement *const> optional_elements)
+    : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
+}
+
+ReadableEchoResponse::ReadableEchoResponse(
+    std::initializer_list<IReadableEchoResponseOptionalElement *> optional_elements)
+    : ReadableEchoResponse(
+          nonstd::span<IReadableEchoResponseOptionalElement *const>(optional_elements.begin(),
+                                                                    optional_elements.size())) {
 }
 
 ControlHeader::MessageType ReadableEchoResponse::GetMessageType() const {
@@ -34,13 +52,15 @@ bool ReadableEchoResponse::Deserialize(RawData *raw_data) {
         ElementHeader *element = (ElementHeader *)raw_data->current;
 
         switch (element->GetElementType()) {
-            case ElementHeader::ElementType::VendorSpecificPayload:
-                if (!vendor_specific_payloads.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-
             default: {
+                auto it = key_optional_elements.find(element->GetElementType());
+                if (it != key_optional_elements.end()) {
+                    if (!it->second->Deserialize(raw_data)) {
+                        return false;
+                    }
+                    break;
+                }
+
                 auto unknownElement = UnrecognizedElement::Deserialize(raw_data);
                 if (unknownElement == nullptr) {
                     return false;
@@ -61,9 +81,24 @@ void ReadableEchoResponse::Log() const {
     log_i("----------------------------------");
     log_i("ME EchoResponse:");
 
-    vendor_specific_payloads.Log();
+    for (const auto &[_, value] : key_optional_elements) {
+        value->Log();
+    }
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
+}
+
+std::unordered_map<ElementHeader::ElementType, IReadableEchoResponseOptionalElement *const>
+ReadableEchoResponse::MapOptionalsElements(
+    nonstd::span<IReadableEchoResponseOptionalElement *const> optional_elements) {
+
+    std::unordered_map<ElementHeader::ElementType, IReadableEchoResponseOptionalElement *const> map;
+
+    for (auto *elem : optional_elements) {
+        map.emplace(elem->GetElementType(), elem);
+    }
+
+    return map;
 }

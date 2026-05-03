@@ -17,11 +17,11 @@ TEST_GROUP(EchoRequestTestsGroup){ //
 TEST(EchoRequestTestsGroup, EchoRequest_serialize) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
-    {
-        WritableEchoRequest write_data({});
 
-        write_data.Serialize(&raw_data);
-    }
+    WritableEchoRequest write_data({});
+
+    write_data.Serialize(&raw_data);
+
     CHECK_EQUAL(&buffer[0] + 16 + 0 - (sizeof(ClearHeader) + sizeof(ControlHeader)),
                 raw_data.current);
     const uint8_t reference[] = { 0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00,
