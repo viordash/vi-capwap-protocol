@@ -68,8 +68,6 @@ struct __attribute__((packed)) WTPRadioConfiguration : ElementHeader {
                           const char *country);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static WTPRadioConfiguration *Deserialize(RawData *raw_data);
 };
 
 struct WritableWTPRadioConfigurationArray {
