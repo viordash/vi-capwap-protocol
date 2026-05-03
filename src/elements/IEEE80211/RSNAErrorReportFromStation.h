@@ -102,8 +102,6 @@ struct __attribute__((packed)) RSNAErrorReportFromStation : ElementHeader {
     uint32_t GetTKIPReplays() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static RSNAErrorReportFromStation *Deserialize(RawData *raw_data);
 };
 
 struct WritableRSNAErrorReportFromStationArray {
