@@ -7,10 +7,17 @@
 
 WritableImageDataResponse::WritableImageDataResponse(
     const ResultCode::Type result_code,
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads,
-    const WritableImageInformation *image_information)
-    : result_code{ result_code }, vendor_specific_payloads{ vendor_specific_payloads },
-      image_information{ image_information } {
+    nonstd::span<IWritableImageDataResponseOptionalElement *const> optional_elements)
+    : result_code{ result_code }, optional_elements{ optional_elements } {
+}
+
+WritableImageDataResponse::WritableImageDataResponse(
+    const ResultCode::Type result_code,
+    std::initializer_list<IWritableImageDataResponseOptionalElement *const> optional_elements)
+    : WritableImageDataResponse(result_code,
+                                nonstd::span<IWritableImageDataResponseOptionalElement *const>(
+                                    optional_elements.begin(),
+                                    optional_elements.size())) {
 }
 
 ControlHeader::MessageType WritableImageDataResponse::GetMessageType() const {
@@ -23,13 +30,22 @@ ControlHeader::MessageType WritableImageDataResponse::GetRequestMessageType() co
 
 void WritableImageDataResponse::Serialize(RawData *raw_data) const {
     result_code.Serialize(raw_data);
-    vendor_specific_payloads.Serialize(raw_data);
-    if (image_information != nullptr) {
-        image_information->Serialize(raw_data);
+
+    for (auto *elem : optional_elements) {
+        elem->Serialize(raw_data);
     }
 }
 
-ReadableImageDataResponse::ReadableImageDataResponse() : unknown_elements{} {
+ReadableImageDataResponse::ReadableImageDataResponse(
+    nonstd::span<IReadableImageDataResponseOptionalElement *const> optional_elements)
+    : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
+}
+
+ReadableImageDataResponse::ReadableImageDataResponse(
+    std::initializer_list<IReadableImageDataResponseOptionalElement *> optional_elements)
+    : ReadableImageDataResponse(nonstd::span<IReadableImageDataResponseOptionalElement *const>(
+          optional_elements.begin(),
+          optional_elements.size())) {
 }
 
 ControlHeader::MessageType ReadableImageDataResponse::GetMessageType() const {
@@ -47,19 +63,15 @@ bool ReadableImageDataResponse::Deserialize(RawData *raw_data) {
                 }
                 break;
 
-            case ElementHeader::ElementType::VendorSpecificPayload:
-                if (!vendor_specific_payloads.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-
-            case ElementHeader::ElementType::ImageInformation:
-                if (!image_information.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-
             default: {
+                auto it = key_optional_elements.find(element->GetElementType());
+                if (it != key_optional_elements.end()) {
+                    if (!it->second->Deserialize(raw_data)) {
+                        return false;
+                    }
+                    break;
+                }
+
                 auto unknownElement = UnrecognizedElement::Deserialize(raw_data);
                 if (unknownElement == nullptr) {
                     return false;
@@ -81,13 +93,25 @@ void ReadableImageDataResponse::Log() const {
 
     result_code.Log();
 
-    vendor_specific_payloads.Log();
-    if (image_information.IsPresent()) {
-        image_information.Log();
+    for (const auto &[_, value] : key_optional_elements) {
+        value->Log();
     }
-
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
+}
+
+std::unordered_map<ElementHeader::ElementType, IReadableImageDataResponseOptionalElement *const>
+ReadableImageDataResponse::MapOptionalsElements(
+    nonstd::span<IReadableImageDataResponseOptionalElement *const> optional_elements) {
+
+    std::unordered_map<ElementHeader::ElementType, IReadableImageDataResponseOptionalElement *const>
+        map;
+
+    for (auto *elem : optional_elements) {
+        map.emplace(elem->GetElementType(), elem);
+    }
+
+    return map;
 }

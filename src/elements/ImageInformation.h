@@ -24,7 +24,7 @@ struct __attribute__((packed)) ImageInformation : ElementHeader {
     void Log() const;
 };
 
-struct WritableImageInformation : IWritableElement {
+struct WritableImageInformation : IWritableImageDataResponseOptionalElement {
   protected:
     ImageInformation element;
 
@@ -35,7 +35,7 @@ struct WritableImageInformation : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableImageInformation : IReadableElement {
+struct ReadableImageInformation : IReadableImageDataResponseOptionalElement {
   protected:
     ImageInformation *element = nullptr;
     bool is_present = false;

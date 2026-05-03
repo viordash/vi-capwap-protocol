@@ -31,6 +31,9 @@ struct IReadableJoinResponseOptionalElement : IReadableElement {};
 struct IWritableImageDataRequestOptionalElement : IWritableElement {};
 struct IReadableImageDataRequestOptionalElement : IReadableElement {};
 
+struct IWritableImageDataResponseOptionalElement : IWritableElement {};
+struct IReadableImageDataResponseOptionalElement : IReadableElement {};
+
 struct IWritableConfigurationUpdateRequestOptionalElement : IWritableElement {};
 struct IReadableConfigurationUpdateRequestOptionalElement : IReadableElement {};
 
