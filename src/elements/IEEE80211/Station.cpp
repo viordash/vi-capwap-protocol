@@ -68,56 +68,8 @@ bool Station::Validate() const {
     return true;
 }
 
-void Station::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(Station) <= raw_data->end);
-    std::memcpy(raw_data->current, this, sizeof(Station));
-    raw_data->current += sizeof(Station);
-}
-
-Station *Station::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(Station) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (Station *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current = last;
-    return res;
-}
-
-WritableStationArray::Item::Item(uint8_t radio_id,
-                                 uint16_t association_id,
-                                 uint8_t flags,
-                                 const uint8_t *mac_address,
-                                 uint16_t capabilities,
-                                 uint8_t wlan_id,
-                                 nonstd::span<const uint8_t> supported_rates)
-    : supported_rates_data{ supported_rates }, header{ radio_id,
-                                                       association_id,
-                                                       flags,
-                                                       mac_address,
-                                                       capabilities,
-                                                       wlan_id,
-                                                       (uint16_t)supported_rates_data.size() } {
-}
-
-const uint8_t *WritableStationArray::Item::GetMACAddress() const {
-    return header.GetMACAddress();
-}
-
-uint8_t WritableStationArray::Item::GetRadioID() const {
-    return header.GetRadioID();
-}
-
 WritableStationArray::WritableStationArray() {
+    static_assert(sizeof(Item::header) == 17);
     items.reserve(ReadableStationArray::max_count);
 }
 
@@ -136,11 +88,14 @@ void WritableStationArray::Clear() {
 }
 
 void WritableStationArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
-        uint16_t rates_size = elem.header.GetLength() - (sizeof(Station) - sizeof(ElementHeader));
-        std::memcpy(raw_data->current, elem.supported_rates_data.data(), rates_size);
-        raw_data->current += rates_size;
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
+        uint16_t data_size =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.data.data(), data_size);
+        raw_data->current += data_size;
     }
 }
 
@@ -158,7 +113,7 @@ void WritableStationArray::Log() const {
               items[i].header.GetMACAddress()[4],
               items[i].header.GetMACAddress()[5],
               items[i].header.GetWlanID(),
-              items[i].supported_rates_data.size());
+              items[i].data.size());
     }
 }
 
@@ -171,16 +126,27 @@ bool ReadableStationArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto station = Station::Deserialize(raw_data);
-    if (station == nullptr) {
+    if (raw_data->current + sizeof(Station) > raw_data->end) {
         return false;
     }
-    items[count] = station;
+
+    auto res = (ReadableStationArray::Item *)raw_data->current;
+    if (!res->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    items[count] = res;
     count++;
     return true;
 }
 
-nonstd::span<const Station *const> ReadableStationArray::Get() const {
+nonstd::span<const ReadableStationArray::Item *const> ReadableStationArray::Get() const {
     nonstd::span span(items.begin(), count);
     return span;
 }
