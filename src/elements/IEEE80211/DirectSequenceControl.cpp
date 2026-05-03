@@ -105,6 +105,14 @@ void WritableDirectSequenceControlArray::Log() const {
 ReadableDirectSequenceControlArray::ReadableDirectSequenceControlArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableDirectSequenceControlArray::GetElementType() const {
+    return ElementHeader::DirectSequenceControl;
+}
+
+bool ReadableDirectSequenceControlArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableDirectSequenceControlArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableDirectSequenceControlArray::Deserialize elements count exceeds");

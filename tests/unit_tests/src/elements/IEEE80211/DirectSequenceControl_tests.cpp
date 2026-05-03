@@ -40,10 +40,12 @@ TEST(DirectSequenceControlTestsGroup, Serialize_Deserialize_few_elements) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     ReadableDirectSequenceControlArray r_ctrls;
+    CHECK_FALSE(r_ctrls.IsPresent());
 
     raw_data = { reference, reference + sizeof(reference) };
 
     CHECK_TRUE(r_ctrls.Deserialize(&raw_data));
+    CHECK_TRUE(r_ctrls.IsPresent());
     CHECK_TRUE(r_ctrls.Deserialize(&raw_data));
     CHECK_TRUE(r_ctrls.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -85,6 +87,7 @@ TEST(DirectSequenceControlTestsGroup, Add_array_of_items_is_unique_by_RadioID) {
     raw_data = { buffer, buffer + data_size };
 
     ReadableDirectSequenceControlArray r_ctrls;
+    CHECK_FALSE(r_ctrls.IsPresent());
 
     CHECK_TRUE(r_ctrls.Deserialize(&raw_data));
     CHECK_TRUE(r_ctrls.Deserialize(&raw_data));
