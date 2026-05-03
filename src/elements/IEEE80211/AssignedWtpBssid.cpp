@@ -29,31 +29,8 @@ bool AssignedWtpBssid::Validate() const {
     return true;
 }
 
-void AssignedWtpBssid::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(AssignedWtpBssid) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(AssignedWtpBssid));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(AssignedWtpBssid);
-}
-
-AssignedWtpBssid *AssignedWtpBssid::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(AssignedWtpBssid) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (AssignedWtpBssid *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(AssignedWtpBssid);
-    return res;
-}
-
 WritableAssignedWtpBssidArray::WritableAssignedWtpBssidArray() {
+    static_assert(sizeof(items[0]) == 12);
     items.reserve(ReadableAssignedWtpBssidArray::max_count);
 }
 
@@ -83,8 +60,10 @@ void WritableAssignedWtpBssidArray::Clear() {
 }
 
 void WritableAssignedWtpBssidArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -113,11 +92,17 @@ bool ReadableAssignedWtpBssidArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto bssid = AssignedWtpBssid::Deserialize(raw_data);
-    if (bssid == nullptr) {
+    if (raw_data->current + sizeof(AssignedWtpBssid) > raw_data->end) {
         return false;
     }
-    items[count] = bssid;
+
+    auto item = (AssignedWtpBssid *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(AssignedWtpBssid);
+
+    items[count] = item;
     count++;
     return true;
 }

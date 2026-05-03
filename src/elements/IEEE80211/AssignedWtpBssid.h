@@ -23,8 +23,6 @@ struct __attribute__((packed)) AssignedWtpBssid : ElementHeader {
     AssignedWtpBssid(uint8_t radio_id, uint8_t wlan_id, const uint8_t *bssid);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static AssignedWtpBssid *Deserialize(RawData *raw_data);
 };
 
 struct WritableAssignedWtpBssidArray {
