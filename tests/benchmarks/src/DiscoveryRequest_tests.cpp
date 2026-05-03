@@ -58,7 +58,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_deserialize_perf) {
                                         wtp_frame_tunnel_mode,
                                         WTPMACType::Local_MAC,
                                         wtp_radio_informations,
-                                        vendor_specific_payloads,
+                                        { &vendor_specific_payloads },
                                         1500);
 
     b.run("serialization", [&] {
@@ -67,7 +67,10 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_deserialize_perf) {
         ankerl::nanobench::doNotOptimizeAway(raw_data);
 
         raw_data = { buffer, buffer + 1500 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-        ReadableDiscoveryRequest read_data;
+        
+        ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+        ReadableDiscoveryRequest read_data({ &vendor_specific_payloads });
+
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

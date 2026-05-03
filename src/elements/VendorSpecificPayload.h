@@ -33,7 +33,8 @@ struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestO
                                             IWritableJoinRequestOptionalElement,
                                             IWritableJoinResponseOptionalElement,
                                             IWritableImageDataRequestOptionalElement,
-                                            IWritableConfigurationUpdateRequestOptionalElement {
+                                            IWritableConfigurationUpdateRequestOptionalElement,
+                                            IWritableDiscoveryRequestOptionalElement {
   public:
     struct Item {
         std::vector<char> value;
@@ -58,7 +59,7 @@ struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestO
     void Clear();
 
     void Serialize(RawData *raw_data) const override final;
-    uint16_t GetTotalLength() const;
+    uint16_t GetTotalLength() const override final;
     void Log() const override final;
 };
 
@@ -67,7 +68,8 @@ struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestO
                                             IReadableJoinRequestOptionalElement,
                                             IReadableJoinResponseOptionalElement,
                                             IReadableImageDataRequestOptionalElement,
-                                            IReadableConfigurationUpdateRequestOptionalElement {
+                                            IReadableConfigurationUpdateRequestOptionalElement,
+                                            IReadableDiscoveryRequestOptionalElement {
   public:
     static const size_t max_data_size = 2048;
     static const size_t max_count = 16;

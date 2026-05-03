@@ -33,3 +33,8 @@ struct IReadableImageDataRequestOptionalElement : IReadableElement {};
 
 struct IWritableConfigurationUpdateRequestOptionalElement : IWritableElement {};
 struct IReadableConfigurationUpdateRequestOptionalElement : IReadableElement {};
+
+struct IWritableDiscoveryRequestOptionalElement : IWritableElement {
+    virtual uint16_t GetTotalLength() const = 0;
+};
+struct IReadableDiscoveryRequestOptionalElement : IReadableElement {};

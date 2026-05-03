@@ -12,13 +12,33 @@ WritableDiscoveryRequest::WritableDiscoveryRequest(
     const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
     const WTPMACType::Type mac_type,
     WritableWTPRadioInformationArray &wtp_radio_informations,
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads,
+    nonstd::span<IWritableDiscoveryRequestOptionalElement *const> optional_elements,
     const uint16_t probe_mtu_size)
     : discovery_type{ discovery_type }, wtp_board_data{ wtp_board_data },
       wtp_descriptor{ wtp_descriptor }, wtp_frame_tunnel_mode{ wtp_frame_tunnel_mode },
       wtp_mac_type{ mac_type }, wtp_radio_informations{ wtp_radio_informations },
-      vendor_specific_payloads{ vendor_specific_payloads },
-      padding{ CalcMTUPadding(probe_mtu_size) } {
+      optional_elements{ optional_elements }, padding{ CalcMTUPadding(probe_mtu_size) } {
+}
+
+WritableDiscoveryRequest::WritableDiscoveryRequest(
+    const DiscoveryType::Type discovery_type,
+    const WritableWTPBoardData &wtp_board_data,
+    const WritableWTPDescriptor &wtp_descriptor,
+    const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
+    const WTPMACType::Type mac_type,
+    WritableWTPRadioInformationArray &wtp_radio_informations,
+    std::initializer_list<IWritableDiscoveryRequestOptionalElement *const> optional_elements,
+    const uint16_t probe_mtu_size)
+    : WritableDiscoveryRequest(
+          discovery_type,
+          wtp_board_data,
+          wtp_descriptor,
+          wtp_frame_tunnel_mode,
+          mac_type,
+          wtp_radio_informations,
+          nonstd::span<IWritableDiscoveryRequestOptionalElement *const>(optional_elements.begin(),
+                                                                        optional_elements.size()),
+          probe_mtu_size) {
 }
 
 ControlHeader::MessageType WritableDiscoveryRequest::GetMessageType() const {
@@ -36,7 +56,10 @@ uint16_t WritableDiscoveryRequest::CalcTotalSize() {
     total += wtp_frame_tunnel_mode.GetTotalLength();
     total += wtp_mac_type.GetTotalLength();
     total += wtp_radio_informations.GetTotalLength();
-    total += vendor_specific_payloads.GetTotalLength();
+
+    for (auto *elem : optional_elements) {
+        total += elem->GetTotalLength();
+    }
 
     return total;
 }
@@ -72,13 +95,26 @@ void WritableDiscoveryRequest::Serialize(RawData *raw_data) const {
     wtp_frame_tunnel_mode.Serialize(raw_data);
     wtp_mac_type.Serialize(raw_data);
     wtp_radio_informations.Serialize(raw_data);
-    vendor_specific_payloads.Serialize(raw_data);
+
+    for (auto *elem : optional_elements) {
+        elem->Serialize(raw_data);
+    }
+
     if (padding.GetLength() != no_probe_mtu_size) {
         padding.Serialize(raw_data);
     }
 }
 
-ReadableDiscoveryRequest::ReadableDiscoveryRequest() : unknown_elements{} {
+ReadableDiscoveryRequest::ReadableDiscoveryRequest(
+    nonstd::span<IReadableDiscoveryRequestOptionalElement *const> optional_elements)
+    : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
+}
+
+ReadableDiscoveryRequest::ReadableDiscoveryRequest(
+    std::initializer_list<IReadableDiscoveryRequestOptionalElement *> optional_elements)
+    : ReadableDiscoveryRequest(
+          nonstd::span<IReadableDiscoveryRequestOptionalElement *const>(optional_elements.begin(),
+                                                                        optional_elements.size())) {
 }
 
 ControlHeader::MessageType ReadableDiscoveryRequest::GetMessageType() const {
@@ -120,12 +156,6 @@ bool ReadableDiscoveryRequest::Deserialize(RawData *raw_data) {
                     return false;
                 }
                 break;
-            case ElementHeader::ElementType::VendorSpecificPayload:
-                if (!vendor_specific_payloads.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-
             case ElementHeader::ElementType::MTUDiscoveryPadding:
                 if (!padding.Deserialize(raw_data)) {
                     return false;
@@ -133,6 +163,14 @@ bool ReadableDiscoveryRequest::Deserialize(RawData *raw_data) {
                 break;
 
             default: {
+                auto it = key_optional_elements.find(element->GetElementType());
+                if (it != key_optional_elements.end()) {
+                    if (!it->second->Deserialize(raw_data)) {
+                        return false;
+                    }
+                    break;
+                }
+
                 auto unknownElement = UnrecognizedElement::Deserialize(raw_data);
                 if (unknownElement == nullptr) {
                     return false;
@@ -165,11 +203,28 @@ void ReadableDiscoveryRequest::Log() const {
 
     wtp_radio_informations.Log();
 
-    vendor_specific_payloads.Log();
+    for (const auto &[_, value] : key_optional_elements) {
+        value->Log();
+    }
+
     padding.Log();
 
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
+}
+
+std::unordered_map<ElementHeader::ElementType, IReadableDiscoveryRequestOptionalElement *const>
+ReadableDiscoveryRequest::MapOptionalsElements(
+    nonstd::span<IReadableDiscoveryRequestOptionalElement *const> optional_elements) {
+
+    std::unordered_map<ElementHeader::ElementType, IReadableDiscoveryRequestOptionalElement *const>
+        map;
+
+    for (auto *elem : optional_elements) {
+        map.emplace(elem->GetElementType(), elem);
+    }
+
+    return map;
 }

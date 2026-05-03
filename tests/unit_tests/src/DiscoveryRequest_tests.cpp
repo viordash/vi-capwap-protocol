@@ -52,7 +52,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize) {
                                         wtp_frame_tunnel_mode,
                                         WTPMACType::Local_MAC,
                                         wtp_radio_informations,
-                                        VendorSpecificPayload::Dummy);
+                                        {});
 
     write_data.Serialize(&raw_data);
     CHECK_EQUAL(&buffer[0] + 220 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
@@ -79,7 +79,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize) {
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 220 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableDiscoveryRequest read_data;
+    ReadableDiscoveryRequest read_data({});
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(4, read_data.wtp_radio_informations.Get().size());
@@ -109,43 +109,44 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize) {
 TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_VendorSpecificPayload) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    {
+        WritableWTPBoardData::SubElement wtpboarddata_elements[] = {
+            { BoardDataSubElementHeader::Type::WTPModelNumber, "abcd" },
+            { BoardDataSubElementHeader::Type::WTPSerialNumber, "1234" },
+        };
+        WritableWTPBoardData wtpboarddata{ 1234, wtpboarddata_elements };
 
-    WritableWTPBoardData::SubElement wtpboarddata_elements[] = {
-        { BoardDataSubElementHeader::Type::WTPModelNumber, "abcd" },
-        { BoardDataSubElementHeader::Type::WTPSerialNumber, "1234" },
-    };
-    WritableWTPBoardData wtpboarddata{ 1234, wtpboarddata_elements };
+        EncryptionSubElement wtpdescriptor_encr_elements[] = { { 0 } };
 
-    EncryptionSubElement wtpdescriptor_encr_elements[] = { { 0 } };
+        WritableWTPDescriptor::SubElement wtpdescriptor_descr_elements[] = {
+            { 1234, DescriptorSubElementHeader::Type::HardwareVersion, "0001" },
+            { 1234, DescriptorSubElementHeader::Type::ActiveSoftwareVersion, "abcd" },
+            { 1234, DescriptorSubElementHeader::Type::BootVersion, "1234" }
+        };
+        WritableWTPDescriptor wtpdescriptor{ 10,
+                                             3,
+                                             wtpdescriptor_encr_elements,
+                                             wtpdescriptor_descr_elements };
 
-    WritableWTPDescriptor::SubElement wtpdescriptor_descr_elements[] = {
-        { 1234, DescriptorSubElementHeader::Type::HardwareVersion, "0001" },
-        { 1234, DescriptorSubElementHeader::Type::ActiveSoftwareVersion, "abcd" },
-        { 1234, DescriptorSubElementHeader::Type::BootVersion, "1234" }
-    };
-    WritableWTPDescriptor wtpdescriptor{ 10,
-                                         3,
-                                         wtpdescriptor_encr_elements,
-                                         wtpdescriptor_descr_elements };
+        WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
-    WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
+        WritableWTPRadioInformationArray wtp_radio_informations;
+        wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
 
-    WritableWTPRadioInformationArray wtp_radio_informations;
-    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        vendor_specific_payloads.Add(1, 2, "01234567890A");
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
-    vendor_specific_payloads.Add(1, 2, "01234567890A");
+        WritableDiscoveryRequest write_data(DiscoveryType::Type::DHCP,
+                                            wtpboarddata,
+                                            wtpdescriptor,
+                                            wtp_frame_tunnel_mode,
+                                            WTPMACType::Local_MAC,
+                                            wtp_radio_informations,
+                                            { &vendor_specific_payloads });
 
-    WritableDiscoveryRequest write_data(DiscoveryType::Type::DHCP,
-                                        wtpboarddata,
-                                        wtpdescriptor,
-                                        wtp_frame_tunnel_mode,
-                                        WTPMACType::Local_MAC,
-                                        wtp_radio_informations,
-                                        vendor_specific_payloads);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 163 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = {
         0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x2A, 0x00, 0x73,
@@ -166,18 +167,19 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_VendorSpecificP
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 163 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableDiscoveryRequest read_data;
+
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableDiscoveryRequest read_data({ &vendor_specific_payloads });
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(2, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get()[1]->GetVendorIdentifier());
-    CHECK_EQUAL(2, read_data.vendor_specific_payloads.Get()[1]->GetElementId());
-    STRNCMP_EQUAL("01234567890A", (char *)read_data.vendor_specific_payloads.Get()[1]->value, 12);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(2, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
+    CHECK_EQUAL(1, vendor_specific_payloads.Get()[1]->GetVendorIdentifier());
+    CHECK_EQUAL(2, vendor_specific_payloads.Get()[1]->GetElementId());
+    STRNCMP_EQUAL("01234567890A", (char *)vendor_specific_payloads.Get()[1]->value, 12);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -219,7 +221,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_MTUDiscoveryPad
                                                  wtp_frame_tunnel_mode,
                                                  WTPMACType::Local_MAC,
                                                  wtp_radio_informations,
-                                                 vendor_specific_payloads,
+                                                 { &vendor_specific_payloads },
                                                  1470);
 
         write_data_1470.Serialize(&raw_data);
@@ -227,23 +229,27 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_MTUDiscoveryPad
                     raw_data.current);
 
         raw_data = { buffer, buffer + 1470 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-        ReadableDiscoveryRequest read_data_1470;
+        ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+        ReadableDiscoveryRequest read_data_1470({ &vendor_specific_payloads });
         CHECK_TRUE(read_data_1470.Deserialize(&raw_data));
         CHECK_EQUAL(0, read_data_1470.unknown_elements);
     }
 
-    raw_data = { buffer, buffer + sizeof(buffer) };
-    WritableDiscoveryRequest write_data_300(DiscoveryType::Type::DHCP,
-                                            wtpboarddata,
-                                            wtpdescriptor,
-                                            wtp_frame_tunnel_mode,
-                                            WTPMACType::Local_MAC,
-                                            wtp_radio_informations,
-                                            vendor_specific_payloads,
-                                            300);
+    {
+        raw_data = { buffer, buffer + sizeof(buffer) };
+        WritableDiscoveryRequest write_data_300(DiscoveryType::Type::DHCP,
+                                                wtpboarddata,
+                                                wtpdescriptor,
+                                                wtp_frame_tunnel_mode,
+                                                WTPMACType::Local_MAC,
+                                                wtp_radio_informations,
+                                                { &vendor_specific_payloads },
+                                                300);
 
-    write_data_300.Serialize(&raw_data);
-    CHECK_EQUAL(&buffer[0] + 300 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
+        write_data_300.Serialize(&raw_data);
+        CHECK_EQUAL(&buffer[0] + 300 - (sizeof(ClearHeader) + sizeof(ControlHeader)),
+                    raw_data.current);
+    }
 
     const uint8_t reference[] = {
         0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x2A, 0x01, 0x1C,
@@ -271,11 +277,13 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_with_MTUDiscoveryPad
     MEMCMP_EQUAL(buffer,
                  reference + (sizeof(ClearHeader) + sizeof(ControlHeader)),
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
-
-    raw_data = { buffer, buffer + 300 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableDiscoveryRequest read_data_300;
-    CHECK_TRUE(read_data_300.Deserialize(&raw_data));
-    CHECK_EQUAL(0, read_data_300.unknown_elements);
+    {
+        raw_data = { buffer, buffer + 300 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
+        ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+        ReadableDiscoveryRequest read_data_300({ &vendor_specific_payloads });
+        CHECK_TRUE(read_data_300.Deserialize(&raw_data));
+        CHECK_EQUAL(0, read_data_300.unknown_elements);
+    }
 }
 
 TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_deserialize) {
@@ -310,7 +318,8 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_deserialize) {
     // clang-format on
     RawData raw_data{ data + sizeof(ClearHeader) + sizeof(ControlHeader), data + sizeof(data) };
 
-    ReadableDiscoveryRequest read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableDiscoveryRequest read_data({ &vendor_specific_payloads });
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -369,6 +378,8 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_deserialize) {
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[0]->A);
     CHECK_TRUE(read_data.wtp_radio_informations.Get()[0]->G);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[0]->N);
+
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -413,7 +424,8 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_deserialize_from_pcap) {
     };
     RawData raw_data{ data + sizeof(ClearHeader) + sizeof(ControlHeader), data + sizeof(data) };
 
-    ReadableDiscoveryRequest read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableDiscoveryRequest read_data({ &vendor_specific_payloads });
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -431,6 +443,12 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_deserialize_from_pcap) {
     CHECK_EQUAL(BoardDataSubElementHeader::Type::WTPSerialNumber,
                 read_data.wtp_board_data.Get()[1]->GetType());
     CHECK_EQUAL(32, read_data.wtp_board_data.Get()[1]->GetLength());
+
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(51833, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(63, vendor_specific_payloads.Get()[0]->GetElementId());
+    CHECK_EQUAL(9 + 6, vendor_specific_payloads.Get()[0]->GetLength());
 }
 
 TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_deserialize_handle_unknown_element) {
@@ -469,7 +487,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_deserialize_handle_unknown_ele
     // clang-format on
     RawData raw_data{ data + sizeof(ClearHeader) + sizeof(ControlHeader), data + sizeof(data) };
 
-    ReadableDiscoveryRequest read_data;
+    ReadableDiscoveryRequest read_data({});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
