@@ -39,7 +39,7 @@ struct __attribute__((packed)) WTPRadioInformation : ElementHeader {
     std::string ToString() const;
 };
 
-struct WritableWTPRadioInformationArray : IWritableElement {
+struct WritableWTPRadioInformationArray : IWritableConfigurationStatusRequestOptionalElement {
   private:
     std::vector<WTPRadioInformation> items;
 
@@ -57,7 +57,7 @@ struct WritableWTPRadioInformationArray : IWritableElement {
     void Log() const override;
 };
 
-struct ReadableWTPRadioInformationArray : IReadableElement {
+struct ReadableWTPRadioInformationArray : IReadableConfigurationStatusRequestOptionalElement {
   public:
     static const size_t max_count = 32; //Radio ID
 

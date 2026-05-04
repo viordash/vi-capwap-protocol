@@ -105,7 +105,8 @@ struct __attribute__((packed)) RSNAErrorReportFromStation : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableRSNAErrorReportFromStationArray : IWritableElement {
+struct WritableRSNAErrorReportFromStationArray : IWritableConfigurationUpdateRequestOptionalElement,
+                                                 IWritableWTPEventRequestOptionalElement {
   protected:
     std::vector<RSNAErrorReportFromStation> items;
 
@@ -122,7 +123,8 @@ struct WritableRSNAErrorReportFromStationArray : IWritableElement {
     void Log() const override;
 };
 
-struct ReadableRSNAErrorReportFromStationArray : IReadableElement {
+struct ReadableRSNAErrorReportFromStationArray : IReadableConfigurationUpdateRequestOptionalElement,
+                                                 IReadableWTPEventRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

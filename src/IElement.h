@@ -22,6 +22,9 @@ struct IReadableConfigurationStatusRequestOptionalElement : IReadableElement {};
 struct IWritableConfigurationStatusResponseOptionalElement : IWritableElement {};
 struct IReadableConfigurationStatusResponseOptionalElement : IReadableElement {};
 
+struct IWritableConfigurationUpdateRequestOptionalElement : IWritableElement {};
+struct IReadableConfigurationUpdateRequestOptionalElement : IReadableElement {};
+
 struct IWritableJoinRequestOptionalElement : IWritableElement {};
 struct IReadableJoinRequestOptionalElement : IReadableElement {};
 
@@ -33,10 +36,6 @@ struct IReadableImageDataRequestOptionalElement : IReadableElement {};
 
 struct IWritableImageDataResponseOptionalElement : IWritableElement {};
 struct IReadableImageDataResponseOptionalElement : IReadableElement {};
-
-struct IWritableConfigurationUpdateRequestOptionalElement : IWritableElement {};
-struct IReadableConfigurationUpdateRequestOptionalElement : IReadableElement {};
-
 struct IWritableDiscoveryRequestOptionalElement : IWritableElement {
     virtual uint16_t GetTotalLength() const = 0;
 };
@@ -70,3 +69,9 @@ struct IReadableChangeStateEventRequestOptionalElement : IReadableElement {};
 
 struct IWritableChangeStateEventResponseOptionalElement : IWritableElement {};
 struct IReadableChangeStateEventResponseOptionalElement : IReadableElement {};
+
+struct IWritableWlanConfigurationRequestOptionalElement : IWritableElement {};
+struct IReadableWlanConfigurationRequestOptionalElement : IReadableElement {};
+
+struct IWritableWlanConfigurationResponseOptionalElement : IWritableElement {};
+struct IReadableWlanConfigurationResponseOptionalElement : IReadableElement {};

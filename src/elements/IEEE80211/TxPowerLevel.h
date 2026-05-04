@@ -45,7 +45,7 @@ struct __attribute__((packed)) TxPowerLevel : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableTxPowerLevelArray : IWritableElement {
+struct WritableTxPowerLevelArray : IWritableConfigurationStatusRequestOptionalElement {
   public:
     struct Item {
         nonstd::span<const int16_t> data;
@@ -72,7 +72,7 @@ struct WritableTxPowerLevelArray : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableTxPowerLevelArray : IReadableElement {
+struct ReadableTxPowerLevelArray : IReadableConfigurationStatusRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

@@ -46,7 +46,7 @@ struct __attribute__((packed)) WTPRadioFailAlarmIndication : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableWTPRadioFailAlarmIndicationArray : IWritableElement {
+struct WritableWTPRadioFailAlarmIndicationArray : IWritableChangeStateEventRequestOptionalElement {
   private:
     std::vector<WTPRadioFailAlarmIndication> items;
 
@@ -61,9 +61,10 @@ struct WritableWTPRadioFailAlarmIndicationArray : IWritableElement {
 
     void Serialize(RawData *raw_data) const override;
     void Log() const override;
+    ElementHeader::ElementType GetElementType() const override final;
 };
 
-struct ReadableWTPRadioFailAlarmIndicationArray : IReadableElement {
+struct ReadableWTPRadioFailAlarmIndicationArray : IReadableChangeStateEventRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

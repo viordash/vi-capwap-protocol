@@ -169,7 +169,7 @@ struct __attribute__((packed)) Statistics : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableStatisticsArray : IWritableElement {
+struct WritableStatisticsArray : IWritableWTPEventRequestOptionalElement {
   private:
     std::vector<Statistics> items;
 
@@ -185,7 +185,7 @@ struct WritableStatisticsArray : IWritableElement {
     void Log() const override;
 };
 
-struct ReadableStatisticsArray : IReadableElement {
+struct ReadableStatisticsArray : IReadableWTPEventRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

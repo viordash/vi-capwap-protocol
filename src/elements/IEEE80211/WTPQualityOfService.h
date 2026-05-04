@@ -98,7 +98,8 @@ struct __attribute__((packed)) WTPQualityOfService : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableWTPQualityOfServiceArray : IWritableElement {
+struct WritableWTPQualityOfServiceArray : IWritableConfigurationStatusResponseOptionalElement,
+                                          IWritableConfigurationUpdateRequestOptionalElement {
   private:
     std::vector<WTPQualityOfService> items;
 
@@ -114,7 +115,8 @@ struct WritableWTPQualityOfServiceArray : IWritableElement {
     void Log() const override;
 };
 
-struct ReadableWTPQualityOfServiceArray : IReadableElement {
+struct ReadableWTPQualityOfServiceArray : IReadableConfigurationStatusResponseOptionalElement,
+                                          IReadableConfigurationUpdateRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

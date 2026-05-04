@@ -50,7 +50,9 @@ struct __attribute__((packed)) DirectSequenceControl : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableDirectSequenceControlArray : IWritableElement {
+struct WritableDirectSequenceControlArray : IWritableConfigurationStatusRequestOptionalElement,
+                                            IWritableConfigurationStatusResponseOptionalElement,
+                                            IWritableConfigurationUpdateRequestOptionalElement {
   private:
     std::vector<DirectSequenceControl> items;
 
@@ -66,7 +68,9 @@ struct WritableDirectSequenceControlArray : IWritableElement {
     void Log() const override;
 };
 
-struct ReadableDirectSequenceControlArray : IReadableElement {
+struct ReadableDirectSequenceControlArray : IReadableConfigurationStatusRequestOptionalElement,
+                                            IReadableConfigurationStatusResponseOptionalElement,
+                                            IReadableConfigurationUpdateRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

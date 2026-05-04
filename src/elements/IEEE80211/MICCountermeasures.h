@@ -27,7 +27,7 @@ struct __attribute__((packed)) MICCountermeasures : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableMICCountermeasuresArray : IWritableElement {
+struct WritableMICCountermeasuresArray : IWritableWTPEventRequestOptionalElement {
   private:
     std::vector<MICCountermeasures> items;
 
@@ -43,7 +43,7 @@ struct WritableMICCountermeasuresArray : IWritableElement {
     void Log() const override;
 };
 
-struct ReadableMICCountermeasuresArray : IReadableElement {
+struct ReadableMICCountermeasuresArray : IReadableWTPEventRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

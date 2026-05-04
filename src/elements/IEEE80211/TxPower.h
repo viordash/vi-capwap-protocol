@@ -38,7 +38,9 @@ struct __attribute__((packed)) TxPower : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableTxPowerArray : IWritableElement {
+struct WritableTxPowerArray : IWritableConfigurationStatusRequestOptionalElement,
+                              IWritableConfigurationStatusResponseOptionalElement,
+                              IWritableConfigurationUpdateRequestOptionalElement {
   private:
     std::vector<TxPower> items;
 
@@ -54,7 +56,9 @@ struct WritableTxPowerArray : IWritableElement {
     void Log() const override;
 };
 
-struct ReadableTxPowerArray : IReadableElement {
+struct ReadableTxPowerArray : IReadableConfigurationStatusRequestOptionalElement,
+                              IReadableConfigurationStatusResponseOptionalElement,
+                              IReadableConfigurationUpdateRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

@@ -40,7 +40,8 @@ struct __attribute__((packed)) RateSet : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableRateSetArray : IWritableElement {
+struct WritableRateSetArray : IWritableConfigurationStatusResponseOptionalElement,
+                              IWritableConfigurationUpdateRequestOptionalElement {
   public:
     struct Item {
         nonstd::span<const uint8_t> data;
@@ -65,7 +66,8 @@ struct WritableRateSetArray : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableRateSetArray : IReadableElement {
+struct ReadableRateSetArray : IReadableConfigurationStatusResponseOptionalElement,
+                              IReadableConfigurationUpdateRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

@@ -63,7 +63,9 @@ struct __attribute__((packed)) OFDMControl : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableOFDMControlArray : IWritableElement {
+struct WritableOFDMControlArray : IWritableConfigurationStatusRequestOptionalElement,
+                                  IWritableConfigurationStatusResponseOptionalElement,
+                                  IWritableConfigurationUpdateRequestOptionalElement {
   protected:
     std::vector<OFDMControl> items;
 
@@ -79,7 +81,9 @@ struct WritableOFDMControlArray : IWritableElement {
     void Log() const override;
 };
 
-struct ReadableOFDMControlArray : IReadableElement {
+struct ReadableOFDMControlArray : IReadableConfigurationStatusRequestOptionalElement,
+                                  IReadableConfigurationStatusResponseOptionalElement,
+                                  IReadableConfigurationUpdateRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

@@ -55,7 +55,9 @@ struct __attribute__((packed)) MACOperation : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableMACOperationArray : IWritableElement {
+struct WritableMACOperationArray : IWritableConfigurationStatusRequestOptionalElement,
+                                   IWritableConfigurationStatusResponseOptionalElement,
+                                   IWritableConfigurationUpdateRequestOptionalElement {
   private:
     std::vector<MACOperation> items;
 
@@ -71,7 +73,9 @@ struct WritableMACOperationArray : IWritableElement {
     void Log() const override;
 };
 
-struct ReadableMACOperationArray : IReadableElement {
+struct ReadableMACOperationArray : IReadableConfigurationStatusRequestOptionalElement,
+                                   IReadableConfigurationStatusResponseOptionalElement,
+                                   IReadableConfigurationUpdateRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

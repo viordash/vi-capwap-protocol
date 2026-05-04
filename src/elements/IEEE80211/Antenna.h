@@ -44,7 +44,9 @@ struct __attribute__((packed)) Antenna : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableAntennaArray : IWritableElement {
+struct WritableAntennaArray : IWritableConfigurationStatusRequestOptionalElement,
+                              IWritableConfigurationStatusResponseOptionalElement,
+                              IWritableConfigurationUpdateRequestOptionalElement {
   public:
     struct Item {
         nonstd::span<const Antenna::AntennaSelection> selections;
@@ -76,7 +78,9 @@ struct WritableAntennaArray : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableAntennaArray : IReadableElement {
+struct ReadableAntennaArray : IReadableConfigurationStatusRequestOptionalElement,
+                              IReadableConfigurationStatusResponseOptionalElement,
+                              IReadableConfigurationUpdateRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

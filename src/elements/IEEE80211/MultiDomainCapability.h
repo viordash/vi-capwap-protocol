@@ -53,7 +53,9 @@ struct __attribute__((packed)) MultiDomainCapability : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableMultiDomainCapabilityArray : IWritableElement {
+struct WritableMultiDomainCapabilityArray : IWritableConfigurationStatusRequestOptionalElement,
+                                            IWritableConfigurationStatusResponseOptionalElement,
+                                            IWritableConfigurationUpdateRequestOptionalElement {
   protected:
     std::vector<MultiDomainCapability> items;
 
@@ -69,7 +71,9 @@ struct WritableMultiDomainCapabilityArray : IWritableElement {
     void Log() const override;
 };
 
-struct ReadableMultiDomainCapabilityArray : IReadableElement {
+struct ReadableMultiDomainCapabilityArray : IReadableConfigurationStatusRequestOptionalElement,
+                                            IReadableConfigurationStatusResponseOptionalElement,
+                                            IReadableConfigurationUpdateRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

@@ -93,6 +93,10 @@ void WritableWTPRadioFailAlarmIndicationArray::Log() const {
     }
 }
 
+ElementHeader::ElementType WritableWTPRadioFailAlarmIndicationArray::GetElementType() const {
+    return ElementHeader::WTPRadioFailAlarmIndication;
+}
+
 ReadableWTPRadioFailAlarmIndicationArray::ReadableWTPRadioFailAlarmIndicationArray() : count{ 0 } {
 }
 
