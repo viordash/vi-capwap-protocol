@@ -54,9 +54,9 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_deserialize_perf) {
 
     CAPWAPLocalIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10") } };
 
-    CapwapTransportProtocol capwap_transport_protocol{ CapwapTransportProtocol::Type::UDP };
-    MaximumMessageLength maximum_message_length{ 65000 };
-    WTPRebootStatistics wtp_reboot_statistics{
+    WritableCapwapTransportProtocol capwap_transport_protocol{ CapwapTransportProtocol::Type::UDP };
+    WritableMaximumMessageLength maximum_message_length{ 65000 };
+    WritableWTPRebootStatistics wtp_reboot_statistics{
         100, 101, 1001, 1002, 333, 444, 555, WTPRebootStatistics::LastFailureType::LinkFailure
     };
 
@@ -65,7 +65,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_deserialize_perf) {
     SessionId session_id;
     std::memcpy(session_id.session_id, id, sizeof(session_id.session_id));
 
-    WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
+    WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
@@ -81,10 +81,10 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_deserialize_perf) {
                                    wtp_radio_informations,
                                    ECNSupport::Type::FullAndLimitedECN,
                                    ip_addresses,
-                                   &capwap_transport_protocol,
-                                   &maximum_message_length,
-                                   &wtp_reboot_statistics,
-                                   vendor_specific_payloads);
+                                   { &capwap_transport_protocol,
+                                     &maximum_message_length,
+                                     &wtp_reboot_statistics,
+                                     &vendor_specific_payloads });
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -92,7 +92,16 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_deserialize_perf) {
         ankerl::nanobench::doNotOptimizeAway(raw_data);
 
         raw_data = { buffer, buffer + 360 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-        ReadableJoinRequest read_data;
+
+        ReadableCapwapTransportProtocol capwap_transport_protocol;
+        ReadableMaximumMessageLength maximum_message_length;
+        ReadableWTPRebootStatistics wtp_reboot_statistics;
+        ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+        ReadableJoinRequest read_data({ &capwap_transport_protocol,
+                                        &maximum_message_length,
+                                        &wtp_reboot_statistics,
+                                        &vendor_specific_payloads });
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

@@ -39,7 +39,9 @@ TEST(DecryptionErrorReportTestsGroup, DecryptionErrorReport_serialize) {
 
     raw_data = { buffer, buffer + sizeof(reference) };
     ReadableDecryptionErrorReportArray read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(&buffer[0] + sizeof(reference), raw_data.current);
@@ -89,7 +91,9 @@ TEST(DecryptionErrorReportTestsGroup, DecryptionErrorReport_deserialize) {
     RawData raw_data{ data, data + sizeof(data) };
 
     ReadableDecryptionErrorReportArray read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
 
     const uint8_t mac_6_0[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
     const uint8_t mac_6_1[] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
@@ -129,7 +133,9 @@ TEST(DecryptionErrorReportTestsGroup, Add_array_of_items_is_unique) {
     raw_data = { buffer, buffer + data_size };
 
     ReadableDecryptionErrorReportArray read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_FALSE(read_data.Deserialize(&raw_data));
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -18,11 +19,9 @@ struct __attribute__((packed)) DeleteWlan : ElementHeader {
     DeleteWlan(uint8_t radio_id, uint8_t wlan_id);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static DeleteWlan *Deserialize(RawData *raw_data);
 };
 
-struct WritableDeleteWlanArray {
+struct WritableDeleteWlanArray : IWritableElement {
   private:
     std::vector<DeleteWlan> items;
 
@@ -34,11 +33,11 @@ struct WritableDeleteWlanArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override;
+    void Log() const override;
 };
 
-struct ReadableDeleteWlanArray {
+struct ReadableDeleteWlanArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -50,7 +49,9 @@ struct ReadableDeleteWlanArray {
     ReadableDeleteWlanArray(const ReadableDeleteWlanArray &) = delete;
     ReadableDeleteWlanArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override;
+    ElementHeader::ElementType GetElementType() const override;
+    bool IsPresent() const override;
     nonstd::span<const DeleteWlan *const> Get() const;
-    void Log() const;
+    void Log() const override;
 };

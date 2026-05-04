@@ -50,10 +50,12 @@ TEST(CAPWAPControlIPv4AddressTestsGroup, Serialize_Deserialize_few_elements) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     ReadableCAPWAPControlIPV4AdrArray r_addresses;
+    CHECK_FALSE(r_addresses.IsPresent());
 
     raw_data = { reference, reference + sizeof(reference) };
 
     CHECK_TRUE(r_addresses.Deserialize(&raw_data));
+    CHECK_TRUE(r_addresses.IsPresent());
     CHECK_TRUE(r_addresses.Deserialize(&raw_data));
     CHECK_TRUE(r_addresses.Deserialize(&raw_data));
     CHECK_TRUE(r_addresses.Deserialize(&raw_data));

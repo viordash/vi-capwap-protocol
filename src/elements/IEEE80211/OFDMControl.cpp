@@ -43,38 +43,24 @@ bool OFDMControl::Validate() const {
     return true;
 }
 
-void OFDMControl::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(OFDMControl) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(OFDMControl));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(OFDMControl);
-}
-
-OFDMControl *OFDMControl::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(OFDMControl) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (OFDMControl *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(OFDMControl);
-    return res;
-}
-
 WritableOFDMControlArray::WritableOFDMControlArray() {
+    static_assert(sizeof(items[0]) == 12);
     items.reserve(ReadableOFDMControlArray::max_count);
 }
 
 void WritableOFDMControlArray::Add(OFDMControl element) {
     ASSERT(items.size() + 1 <= ReadableOFDMControlArray::max_count);
 
-    items.emplace_back(std::move(element));
+    auto it_exists = std::find_if(items.begin(), items.end(), [&element](const OFDMControl &item) {
+        return item.GetRadioID() == element.GetRadioID();
+    });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("OFDMControl: replace RadioID: %u", (*it_exists).GetRadioID());
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableOFDMControlArray::Empty() const {
@@ -86,8 +72,10 @@ void WritableOFDMControlArray::Clear() {
 }
 
 void WritableOFDMControlArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -105,17 +93,31 @@ void WritableOFDMControlArray::Log() const {
 ReadableOFDMControlArray::ReadableOFDMControlArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableOFDMControlArray::GetElementType() const {
+    return ElementHeader::OFDMControl;
+}
+
+bool ReadableOFDMControlArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableOFDMControlArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableOFDMControlArray::Deserialize elements count exceeds");
         return false;
     }
 
-    auto ofdm_control = OFDMControl::Deserialize(raw_data);
-    if (ofdm_control == nullptr) {
+    if (raw_data->current + sizeof(OFDMControl) > raw_data->end) {
         return false;
     }
-    items[count] = ofdm_control;
+
+    auto item = (OFDMControl *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(OFDMControl);
+    items[count] = item;
     count++;
     return true;
 }

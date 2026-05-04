@@ -2,7 +2,7 @@
 #include "WTPDescriptor.h"
 #include "Logging.h"
 #include "lassert.h"
-#include <string.h>
+#include <cstring>
 
 WTPDescriptorHeader::WTPDescriptorHeader(uint8_t max_radios,
                                          uint8_t radios_in_use,
@@ -21,8 +21,7 @@ bool WTPDescriptorHeader::Validate() const {
 
 void WTPDescriptorHeader::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(WTPDescriptor) <= raw_data->end);
-    WTPDescriptorHeader *dst = (WTPDescriptorHeader *)raw_data->current;
-    *dst = *this;
+    std::memcpy(raw_data->current, this, sizeof(WTPDescriptorHeader));
     raw_data->current += sizeof(WTPDescriptorHeader);
 }
 
@@ -54,27 +53,6 @@ bool EncryptionSubElement::Validate() const {
     return WBID == WBIDType::IEEE_80211;
 }
 
-void EncryptionSubElement::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(EncryptionSubElement) <= raw_data->end);
-    EncryptionSubElement *dst = (EncryptionSubElement *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(EncryptionSubElement);
-}
-
-EncryptionSubElement *EncryptionSubElement::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(EncryptionSubElement) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (EncryptionSubElement *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    raw_data->current += sizeof(EncryptionSubElement);
-    return res;
-}
-
 DescriptorSubElementHeader::DescriptorSubElementHeader(uint32_t vendor_identifier,
                                                        Type type,
                                                        uint16_t length)
@@ -103,26 +81,6 @@ bool DescriptorSubElementHeader::Validate() const {
         default:
             return false;
     }
-}
-void DescriptorSubElementHeader::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(DescriptorSubElementHeader) <= raw_data->end);
-    DescriptorSubElementHeader *dst = (DescriptorSubElementHeader *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(DescriptorSubElementHeader);
-}
-
-DescriptorSubElementHeader *DescriptorSubElementHeader::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(DescriptorSubElementHeader) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (DescriptorSubElementHeader *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    raw_data->current += sizeof(DescriptorSubElementHeader);
-    return res;
 }
 
 uint16_t WritableWTPDescriptor::GetSubElementsSize(
@@ -158,13 +116,17 @@ void WritableWTPDescriptor::Serialize(RawData *raw_data) const {
     header.Serialize(raw_data);
 
     for (const auto &elem : encr_items) {
-        elem.Serialize(raw_data);
+        EncryptionSubElement *encr_element = (EncryptionSubElement *)raw_data->current;
+        *encr_element = elem;
+        raw_data->current += sizeof(EncryptionSubElement);
     }
 
     for (const auto &elem : desc_items) {
-        elem.header.Serialize(raw_data);
-        memcpy(raw_data->current, elem.utf8_value, elem.header.GetLength());
-        raw_data->current += elem.header.GetLength();
+        DescriptorSubElementHeader *sub_element = (DescriptorSubElementHeader *)raw_data->current;
+        *sub_element = elem.header;
+
+        memcpy(sub_element->utf8_value, elem.utf8_value, elem.header.GetLength());
+        raw_data->current += sizeof(DescriptorSubElementHeader) + elem.header.GetLength();
     }
 }
 uint16_t WritableWTPDescriptor::GetTotalLength() const {
@@ -210,10 +172,15 @@ bool ReadableWTPDescriptor::Deserialize(RawData *raw_data) {
     const uint8_t *end = raw_data->current + header->GetLength()
                        - (sizeof(WTPDescriptorHeader) - sizeof(ElementHeader));
     while (raw_data->current < end && encr_count < header->NumEncrypt) {
-        auto sub_element = EncryptionSubElement::Deserialize(raw_data);
-        if (sub_element == nullptr) {
+        if (raw_data->current + sizeof(EncryptionSubElement) > raw_data->end) {
             return false;
         }
+
+        auto sub_element = (EncryptionSubElement *)raw_data->current;
+        if (!sub_element->Validate()) {
+            return false;
+        }
+
         if (encr_count >= encr_max_count) {
             log_e("ReadableWTPDescriptor::Deserialize encr sub elements count "
                   "exceeds max");
@@ -221,6 +188,7 @@ bool ReadableWTPDescriptor::Deserialize(RawData *raw_data) {
         }
         encr_items[encr_count] = sub_element;
         encr_count++;
+        raw_data->current += sizeof(EncryptionSubElement);
     }
 
     if (encr_count != header->NumEncrypt) {
@@ -235,10 +203,15 @@ bool ReadableWTPDescriptor::Deserialize(RawData *raw_data) {
 
     desc_count = 0;
     while (raw_data->current < end) {
-        auto sub_element_header = DescriptorSubElementHeader::Deserialize(raw_data);
-        if (sub_element_header == nullptr) {
+        if (raw_data->current + sizeof(DescriptorSubElementHeader) > raw_data->end) {
             return false;
         }
+
+        auto sub_element_header = (DescriptorSubElementHeader *)raw_data->current;
+        if (!sub_element_header->Validate()) {
+            return false;
+        }
+
         if (desc_count >= desc_max_count) {
             log_e("ReadableWTPDescriptor::Deserialize decr sub elements count "
                   "exceeds");
@@ -246,6 +219,7 @@ bool ReadableWTPDescriptor::Deserialize(RawData *raw_data) {
         }
         desc_items[desc_count] = sub_element_header;
         desc_count++;
+        raw_data->current += sizeof(DescriptorSubElementHeader);
         raw_data->current += sub_element_header->GetLength();
 
         switch (sub_element_header->GetType()) {
@@ -301,4 +275,12 @@ void ReadableWTPDescriptor::Log() const {
               desc_items[i]->GetLength(),
               desc_items[i]->utf8_value);
     }
+}
+
+ElementHeader::ElementType ReadableWTPDescriptor::GetElementType() const {
+    return ElementHeader::WTPDescriptor;
+}
+
+bool ReadableWTPDescriptor::IsPresent() const {
+    return header != nullptr;
 }

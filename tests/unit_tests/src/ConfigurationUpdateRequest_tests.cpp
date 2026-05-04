@@ -18,74 +18,72 @@ TEST(ConfigurationUpdateRequestTestsGroup, ConfigurationUpdateRequest_serialize)
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
-    WritableACNameWithPriorityArray ac_names_with_priority;
-    ac_names_with_priority.Add(1, "ACNameWithPriority");
-
-    std::optional<ACTimestamp> ac_timestamp{ 12345 };
-
     const uint8_t mac_6_0[] = { 0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E };
     const uint8_t mac_8_0[] = { 0xAA, 0xBB, 0xCC, 0xFF, 0xFE, 0xDD, 0xEE, 0xFF };
     const uint8_t mac_6_1[] = { 0xAA, 0xBB, 0xCC, 0xFF, 0xFE, 0xDD };
     const uint8_t mac_8_1[] = { 0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0xEE, 0xFF };
+    {
+        WritableACNameWithPriorityArray ac_names_with_priority;
+        ac_names_with_priority.Add(1, "ACNameWithPriority");
 
-    WritableAddMacAclEntry add_mac_acl_entry;
-    add_mac_acl_entry.Add({ mac_6_0 });
-    add_mac_acl_entry.Add({ mac_8_0 });
+        WritableACTimestamp ac_timestamp{ 12345 };
 
-    std::optional<CAPWAPTimers> capwap_timers{ std::in_place, 42, 19 };
+        WritableAddMacAclEntry add_mac_acl_entry;
+        add_mac_acl_entry.Add({ mac_6_0 });
+        add_mac_acl_entry.Add({ mac_8_0 });
 
-    WritableDecryptionErrorReportPeriodArray decryption_error_report_periods;
-    decryption_error_report_periods.Add({ 0, 10 });
-    decryption_error_report_periods.Add({ 1, 100 });
+        WritableCAPWAPTimers capwap_timers{ 42, 19 };
 
-    WritableDeleteMacAclEntry delete_mac_acl_entry;
-    delete_mac_acl_entry.Add({ mac_8_1 });
-    delete_mac_acl_entry.Add({ mac_6_1 });
+        WritableDecryptionErrorReportPeriodArray decryption_error_report_periods;
+        decryption_error_report_periods.Add({ 0, 10 });
+        decryption_error_report_periods.Add({ 1, 100 });
 
-    std::optional<IdleTimeout> idle_timeout{ std::in_place, 12345 };
+        WritableDeleteMacAclEntry delete_mac_acl_entry;
+        delete_mac_acl_entry.Add({ mac_8_1 });
+        delete_mac_acl_entry.Add({ mac_6_1 });
 
-    std::optional<WritableLocationData> location_data{ std::in_place, "abcdefабвгд" };
+        WritableIdleTimeout idle_timeout{ 12345 };
 
-    WritableRadioAdministrativeStateArray radio_states;
-    radio_states.Add({ 0, RadioAdministrativeState::States::Enabled });
-    radio_states.Add({ 1, RadioAdministrativeState::States::Disabled });
+        WritableLocationData location_data{ "abcdefабвгд" };
 
-    std::optional<StatisticsTimer> statistics_timer{ std::in_place, 12345 };
+        WritableRadioAdministrativeStateArray radio_states;
+        radio_states.Add({ 0, RadioAdministrativeState::States::Enabled });
+        radio_states.Add({ 1, RadioAdministrativeState::States::Disabled });
 
-    std::optional<WTPFallback> wtp_fallback{ std::in_place, WTPFallback::Mode::Reserved };
+        WritableStatisticsTimer statistics_timer{ 12345 };
 
-    std::optional<WritableWTPName> wtp_name{ std::in_place, "abcdefабвгд" };
+        WritableWTPFallback wtp_fallback{ WTPFallback::Mode::Reserved };
 
-    std::optional<WTPStaticIPAddressInformation> wtp_static_ipaddress{ std::in_place,
-                                                                       inet_addr("192.168.100.10"),
-                                                                       inet_addr("255.255.255.0"),
-                                                                       inet_addr("192.168.1.1"),
-                                                                       true };
+        WritableWTPName wtp_name{ "abcdefабвгд" };
 
-    std::optional<WritableImageIdentifier> image_identifier{ std::in_place,
-                                                             123456,
-                                                             "abcdef Привет 1234" };
+        WritableWTPStaticIPAddressInformation wtp_static_ipaddress{ inet_addr("192.168.100.10"),
+                                                                    inet_addr("255.255.255.0"),
+                                                                    inet_addr("192.168.1.1"),
+                                                                    true };
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        WritableImageIdentifier image_identifier{ 123456, "abcdef Привет 1234" };
 
-    WritableConfigurationUpdateRequest write_data(ac_names_with_priority,
-                                                  ac_timestamp,
-                                                  add_mac_acl_entry,
-                                                  capwap_timers,
-                                                  decryption_error_report_periods,
-                                                  delete_mac_acl_entry,
-                                                  idle_timeout,
-                                                  location_data,
-                                                  radio_states,
-                                                  statistics_timer,
-                                                  wtp_fallback,
-                                                  wtp_name,
-                                                  wtp_static_ipaddress,
-                                                  image_identifier,
-                                                  vendor_specific_payloads);
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-    write_data.Serialize(&raw_data);
+        WritableConfigurationUpdateRequest write_data({ &ac_names_with_priority,
+                                                        &ac_timestamp,
+                                                        &add_mac_acl_entry,
+                                                        &capwap_timers,
+                                                        &decryption_error_report_periods,
+                                                        &delete_mac_acl_entry,
+                                                        &idle_timeout,
+                                                        &location_data,
+                                                        &radio_states,
+                                                        &statistics_timer,
+                                                        &wtp_fallback,
+                                                        &wtp_name,
+                                                        &wtp_static_ipaddress,
+                                                        &image_identifier,
+                                                        &vendor_specific_payloads });
+
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 260 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = {
         0x00, 0x10, 0x42, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x07, 0x01, 0x00, 0xF4,
@@ -113,83 +111,115 @@ TEST(ConfigurationUpdateRequestTestsGroup, ConfigurationUpdateRequest_serialize)
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 260 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableConfigurationUpdateRequest read_data;
+
+    ReadableACNameWithPriorityArray ac_names_with_priority;
+    ReadableACTimestamp ac_timestamp;
+    ReadableAddMacAclEntry add_mac_acl_entry;
+    ReadableCAPWAPTimers capwap_timers;
+    ReadableDecryptionErrorReportPeriodArray decryption_error_report_periods;
+    ReadableDeleteMacAclEntry delete_mac_acl_entry;
+    ReadableIdleTimeout idle_timeout;
+    ReadableLocationData location_data;
+    ReadableRadioAdministrativeStateArray radio_states;
+    ReadableStatisticsTimer statistics_timer;
+    ReadableWTPFallback wtp_fallback;
+    ReadableWTPName wtp_name;
+    ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
+    ReadableImageIdentifier image_identifier;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+    ReadableConfigurationUpdateRequest read_data({ &ac_names_with_priority,
+                                                   &ac_timestamp,
+                                                   &add_mac_acl_entry,
+                                                   &capwap_timers,
+                                                   &decryption_error_report_periods,
+                                                   &delete_mac_acl_entry,
+                                                   &idle_timeout,
+                                                   &location_data,
+                                                   &radio_states,
+                                                   &statistics_timer,
+                                                   &wtp_fallback,
+                                                   &wtp_name,
+                                                   &wtp_static_ipaddress,
+                                                   &image_identifier,
+                                                   &vendor_specific_payloads });
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(1, read_data.ac_names_with_priority.Get().size());
-    CHECK_EQUAL(19, read_data.ac_names_with_priority.Get()[0]->GetLength());
-    CHECK_EQUAL(1, read_data.ac_names_with_priority.Get()[0]->GetPriority());
-    STRNCMP_EQUAL("ACNameWithPriority",
-                  (char *)read_data.ac_names_with_priority.Get()[0]->name,
-                  18);
-    CHECK_EQUAL(18, read_data.ac_names_with_priority.Get()[0]->GetNameLenght());
+    CHECK_TRUE(ac_names_with_priority.IsPresent());
+    CHECK_EQUAL(1, ac_names_with_priority.Get().size());
+    CHECK_EQUAL(19, ac_names_with_priority.Get()[0]->GetLength());
+    CHECK_EQUAL(1, ac_names_with_priority.Get()[0]->GetPriority());
+    STRNCMP_EQUAL("ACNameWithPriority", (char *)ac_names_with_priority.Get()[0]->name, 18);
+    CHECK_EQUAL(18, ac_names_with_priority.Get()[0]->GetNameLenght());
 
-    CHECK_EQUAL(12345, read_data.ac_timestamp->GetTimestamp());
+    CHECK_TRUE(ac_timestamp.IsPresent());
+    CHECK_EQUAL(12345, ac_timestamp.Get()->GetTimestamp());
 
-    CHECK_EQUAL(2, read_data.add_mac_acl_entry.Get().size());
-    CHECK_EQUAL(6, read_data.add_mac_acl_entry.Get()[0]->Length);
-    MEMCMP_EQUAL(mac_6_0,
-                 (char *)read_data.add_mac_acl_entry.Get()[0]->MACAddresses,
-                 sizeof(mac_6_0));
-    CHECK_EQUAL(8, read_data.add_mac_acl_entry.Get()[1]->Length);
-    MEMCMP_EQUAL(mac_8_0,
-                 (char *)read_data.add_mac_acl_entry.Get()[1]->MACAddresses,
-                 sizeof(mac_8_0));
+    CHECK_TRUE(add_mac_acl_entry.IsPresent());
+    CHECK_EQUAL(2, add_mac_acl_entry.Get().size());
+    CHECK_EQUAL(6, add_mac_acl_entry.Get()[0]->Length);
+    MEMCMP_EQUAL(mac_6_0, (char *)add_mac_acl_entry.Get()[0]->MACAddresses, sizeof(mac_6_0));
+    CHECK_EQUAL(8, add_mac_acl_entry.Get()[1]->Length);
+    MEMCMP_EQUAL(mac_8_0, (char *)add_mac_acl_entry.Get()[1]->MACAddresses, sizeof(mac_8_0));
 
-    CHECK_EQUAL(42, read_data.capwap_timers->Discovery);
-    CHECK_EQUAL(19, read_data.capwap_timers->EchoInterval);
+    CHECK_TRUE(capwap_timers.IsPresent());
+    CHECK_EQUAL(42, capwap_timers.Get()->Discovery);
+    CHECK_EQUAL(19, capwap_timers.Get()->EchoInterval);
 
-    CHECK_EQUAL(2, read_data.decryption_error_report_periods.Get().size());
-    CHECK_EQUAL(0, read_data.decryption_error_report_periods.Get()[0]->RadioID());
-    CHECK_EQUAL(10, read_data.decryption_error_report_periods.Get()[0]->ReportInterval());
-    CHECK_EQUAL(1, read_data.decryption_error_report_periods.Get()[1]->RadioID());
-    CHECK_EQUAL(100, read_data.decryption_error_report_periods.Get()[1]->ReportInterval());
+    CHECK_TRUE(decryption_error_report_periods.IsPresent());
+    CHECK_EQUAL(2, decryption_error_report_periods.Get().size());
+    CHECK_EQUAL(0, decryption_error_report_periods.Get()[0]->RadioID());
+    CHECK_EQUAL(10, decryption_error_report_periods.Get()[0]->ReportInterval());
+    CHECK_EQUAL(1, decryption_error_report_periods.Get()[1]->RadioID());
+    CHECK_EQUAL(100, decryption_error_report_periods.Get()[1]->ReportInterval());
 
-    CHECK_EQUAL(2, read_data.delete_mac_acl_entry.Get().size());
-    CHECK_EQUAL(8, read_data.delete_mac_acl_entry.Get()[0]->Length);
-    MEMCMP_EQUAL(mac_8_1,
-                 (char *)read_data.delete_mac_acl_entry.Get()[0]->MACAddresses,
-                 sizeof(mac_8_1));
-    CHECK_EQUAL(6, read_data.delete_mac_acl_entry.Get()[1]->Length);
-    MEMCMP_EQUAL(mac_6_1,
-                 (char *)read_data.delete_mac_acl_entry.Get()[1]->MACAddresses,
-                 sizeof(mac_6_1));
+    CHECK_TRUE(delete_mac_acl_entry.IsPresent());
+    CHECK_EQUAL(2, delete_mac_acl_entry.Get().size());
+    CHECK_EQUAL(8, delete_mac_acl_entry.Get()[0]->Length);
+    MEMCMP_EQUAL(mac_8_1, (char *)delete_mac_acl_entry.Get()[0]->MACAddresses, sizeof(mac_8_1));
+    CHECK_EQUAL(6, delete_mac_acl_entry.Get()[1]->Length);
+    MEMCMP_EQUAL(mac_6_1, (char *)delete_mac_acl_entry.Get()[1]->MACAddresses, sizeof(mac_6_1));
 
-    CHECK_EQUAL(12345, read_data.idle_timeout->GetTimeout());
+    CHECK_TRUE(idle_timeout.IsPresent());
+    CHECK_EQUAL(12345, idle_timeout.Get()->GetTimeout());
 
-    CHECK_EQUAL(16, read_data.location_data->GetLength());
-    STRNCMP_EQUAL("abcdefабвгд", (char *)read_data.location_data->data, 16);
+    CHECK_TRUE(location_data.IsPresent());
+    CHECK_EQUAL(16, location_data.Get()->GetLength());
+    STRNCMP_EQUAL("abcdefабвгд", (char *)location_data.Get()->data, 16);
 
-    CHECK_EQUAL(2, read_data.radio_states.Get().size());
-    CHECK_EQUAL(0, read_data.radio_states.Get()[0]->RadioID);
-    CHECK_EQUAL(RadioAdministrativeState::States::Enabled,
-                read_data.radio_states.Get()[0]->AdminState);
-    CHECK_EQUAL(1, read_data.radio_states.Get()[1]->RadioID);
-    CHECK_EQUAL(RadioAdministrativeState::States::Disabled,
-                read_data.radio_states.Get()[1]->AdminState);
+    CHECK_TRUE(radio_states.IsPresent());
+    CHECK_EQUAL(2, radio_states.Get().size());
+    CHECK_EQUAL(0, radio_states.Get()[0]->RadioID);
+    CHECK_EQUAL(RadioAdministrativeState::States::Enabled, radio_states.Get()[0]->AdminState);
+    CHECK_EQUAL(1, radio_states.Get()[1]->RadioID);
+    CHECK_EQUAL(RadioAdministrativeState::States::Disabled, radio_states.Get()[1]->AdminState);
 
-    CHECK_EQUAL(12345, read_data.statistics_timer->GetValue());
+    CHECK_TRUE(statistics_timer.IsPresent());
+    CHECK_EQUAL(12345, statistics_timer.Get()->GetValue());
 
-    CHECK_EQUAL(WTPFallback::Mode::Reserved, read_data.wtp_fallback->mode);
+    CHECK_TRUE(wtp_fallback.IsPresent());
+    CHECK_EQUAL(WTPFallback::Mode::Reserved, wtp_fallback.Get()->mode);
 
-    CHECK_EQUAL(16, read_data.wtp_name->GetLength());
-    STRNCMP_EQUAL("abcdefабвгд", (char *)read_data.wtp_name->name, 16);
+    CHECK_TRUE(wtp_name.IsPresent());
+    CHECK_EQUAL(16, wtp_name.Get()->GetLength());
+    STRNCMP_EQUAL("abcdefабвгд", (char *)wtp_name.Get()->name, 16);
 
-    CHECK_EQUAL(inet_addr("192.168.100.10"), read_data.wtp_static_ipaddress->IpAddress);
-    CHECK_EQUAL(inet_addr("255.255.255.0"), read_data.wtp_static_ipaddress->Netmask);
-    CHECK_EQUAL(inet_addr("192.168.1.1"), read_data.wtp_static_ipaddress->Gateway);
-    CHECK_EQUAL(1, read_data.wtp_static_ipaddress->Static);
+    CHECK_TRUE(wtp_static_ipaddress.IsPresent());
+    CHECK_EQUAL(inet_addr("192.168.100.10"), wtp_static_ipaddress.Get()->IpAddress);
+    CHECK_EQUAL(inet_addr("255.255.255.0"), wtp_static_ipaddress.Get()->Netmask);
+    CHECK_EQUAL(inet_addr("192.168.1.1"), wtp_static_ipaddress.Get()->Gateway);
+    CHECK_EQUAL(1, wtp_static_ipaddress.Get()->Static);
 
-    CHECK_EQUAL(24, read_data.image_identifier.GetData().size());
-    CHECK_EQUAL(123456, read_data.image_identifier.GetVendorIdentifier());
-    STRNCMP_EQUAL("abcdef Привет 1234", (char *)read_data.image_identifier.GetData().data(), 24);
+    CHECK_TRUE(image_identifier.IsPresent());
+    CHECK_EQUAL(24, image_identifier.GetData().size());
+    CHECK_EQUAL(123456, image_identifier.GetVendorIdentifier());
+    STRNCMP_EQUAL("abcdef Привет 1234", (char *)image_identifier.GetData().data(), 24);
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -222,7 +252,7 @@ TEST(ConfigurationUpdateRequestTestsGroup, ConfigurationUpdateRequest_deserializ
         0x00, 0x0D,     // Length: 13
         'O', 'f', 'f', 'i', 'c', 'e', '-', 'A', 'P', '-', '1', '0', '1', // Value: "Office-AP-101"
 
-        // --- Элемент 2: Location Data (Type 28) - 24 байта --- 
+        // --- Элемент 2: Location Data (Type 28) - 24 байта ---
         0x00, 0x1C,     // Type: 28
         0x00, 0x14,     // Length: 20 (длина строки "3rd Floor, East Wing") <
         '3', 'r', 'd', ' ', 'F', 'l', 'o', 'o', 'r', ',', ' ', // Value: "3rd Floor, East Wing"
@@ -293,76 +323,107 @@ TEST(ConfigurationUpdateRequestTestsGroup, ConfigurationUpdateRequest_deserializ
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableConfigurationUpdateRequest read_data;
+    ReadableACNameWithPriorityArray ac_names_with_priority;
+    ReadableACTimestamp ac_timestamp;
+    ReadableAddMacAclEntry add_mac_acl_entry;
+    ReadableCAPWAPTimers capwap_timers;
+    ReadableDecryptionErrorReportPeriodArray decryption_error_report_periods;
+    ReadableDeleteMacAclEntry delete_mac_acl_entry;
+    ReadableIdleTimeout idle_timeout;
+    ReadableLocationData location_data;
+    ReadableRadioAdministrativeStateArray radio_states;
+    ReadableStatisticsTimer statistics_timer;
+    ReadableWTPFallback wtp_fallback;
+    ReadableWTPName wtp_name;
+    ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
+    ReadableImageIdentifier image_identifier;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+    ReadableConfigurationUpdateRequest read_data({ &ac_names_with_priority,
+                                                   &ac_timestamp,
+                                                   &add_mac_acl_entry,
+                                                   &capwap_timers,
+                                                   &decryption_error_report_periods,
+                                                   &delete_mac_acl_entry,
+                                                   &idle_timeout,
+                                                   &location_data,
+                                                   &radio_states,
+                                                   &statistics_timer,
+                                                   &wtp_fallback,
+                                                   &wtp_name,
+                                                   &wtp_static_ipaddress,
+                                                   &image_identifier,
+                                                   &vendor_specific_payloads });
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    CHECK_EQUAL(1, read_data.ac_names_with_priority.Get().size());
-    CHECK_EQUAL(10, read_data.ac_names_with_priority.Get()[0]->GetLength());
-    CHECK_EQUAL(2, read_data.ac_names_with_priority.Get()[0]->GetPriority());
-    STRNCMP_EQUAL("AC-Backup", (char *)read_data.ac_names_with_priority.Get()[0]->name, 9);
-    CHECK_EQUAL(9, read_data.ac_names_with_priority.Get()[0]->GetNameLenght());
+    CHECK_TRUE(ac_names_with_priority.IsPresent());
+    CHECK_EQUAL(1, ac_names_with_priority.Get().size());
+    CHECK_EQUAL(10, ac_names_with_priority.Get()[0]->GetLength());
+    CHECK_EQUAL(2, ac_names_with_priority.Get()[0]->GetPriority());
+    STRNCMP_EQUAL("AC-Backup", (char *)ac_names_with_priority.Get()[0]->name, 9);
+    CHECK_EQUAL(9, ac_names_with_priority.Get()[0]->GetNameLenght());
 
-    CHECK_EQUAL(nullptr, read_data.ac_timestamp);
+    CHECK_FALSE(ac_timestamp.IsPresent());
 
     const uint8_t mac_6_0[] = { 0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E };
     const uint8_t mac_6_1[] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
-    CHECK_EQUAL(2, read_data.add_mac_acl_entry.Get().size());
-    CHECK_EQUAL(6, read_data.add_mac_acl_entry.Get()[0]->Length);
-    MEMCMP_EQUAL(mac_6_0,
-                 (char *)read_data.add_mac_acl_entry.Get()[0]->MACAddresses,
-                 sizeof(mac_6_0));
-    CHECK_EQUAL(6, read_data.add_mac_acl_entry.Get()[1]->Length);
-    MEMCMP_EQUAL(mac_6_1,
-                 (char *)read_data.add_mac_acl_entry.Get()[1]->MACAddresses,
-                 sizeof(mac_6_1));
+    CHECK_TRUE(add_mac_acl_entry.IsPresent());
+    CHECK_EQUAL(2, add_mac_acl_entry.Get().size());
+    CHECK_EQUAL(6, add_mac_acl_entry.Get()[0]->Length);
+    MEMCMP_EQUAL(mac_6_0, (char *)add_mac_acl_entry.Get()[0]->MACAddresses, sizeof(mac_6_0));
+    CHECK_EQUAL(6, add_mac_acl_entry.Get()[1]->Length);
+    MEMCMP_EQUAL(mac_6_1, (char *)add_mac_acl_entry.Get()[1]->MACAddresses, sizeof(mac_6_1));
 
-    CHECK_EQUAL(nullptr, read_data.capwap_timers);
+    CHECK_FALSE(capwap_timers.IsPresent());
 
-    CHECK_EQUAL(0, read_data.decryption_error_report_periods.Get().size());
+    CHECK_FALSE(decryption_error_report_periods.IsPresent());
 
+    CHECK_TRUE(delete_mac_acl_entry.IsPresent());
     const uint8_t mac_6_2[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE };
-    CHECK_EQUAL(1, read_data.delete_mac_acl_entry.Get().size());
-    CHECK_EQUAL(6, read_data.delete_mac_acl_entry.Get()[0]->Length);
-    MEMCMP_EQUAL(mac_6_2,
-                 (char *)read_data.delete_mac_acl_entry.Get()[0]->MACAddresses,
-                 sizeof(mac_6_2));
+    CHECK_EQUAL(1, delete_mac_acl_entry.Get().size());
+    CHECK_EQUAL(6, delete_mac_acl_entry.Get()[0]->Length);
+    MEMCMP_EQUAL(mac_6_2, (char *)delete_mac_acl_entry.Get()[0]->MACAddresses, sizeof(mac_6_2));
 
-    CHECK_EQUAL(600, read_data.idle_timeout->GetTimeout());
+    CHECK_TRUE(idle_timeout.IsPresent());
+    CHECK_EQUAL(600, idle_timeout.Get()->GetTimeout());
 
-    CHECK_EQUAL(20, read_data.location_data->GetLength());
-    STRNCMP_EQUAL("3rd Floor, East Wing", (char *)read_data.location_data->data, 20);
+    CHECK_TRUE(location_data.IsPresent());
+    CHECK_EQUAL(20, location_data.Get()->GetLength());
+    STRNCMP_EQUAL("3rd Floor, East Wing", (char *)location_data.Get()->data, 20);
 
-    CHECK_EQUAL(2, read_data.radio_states.Get().size());
-    CHECK_EQUAL(1, read_data.radio_states.Get()[0]->RadioID);
-    CHECK_EQUAL(RadioAdministrativeState::States::Disabled,
-                read_data.radio_states.Get()[0]->AdminState);
-    CHECK_EQUAL(2, read_data.radio_states.Get()[1]->RadioID);
-    CHECK_EQUAL(RadioAdministrativeState::States::Enabled,
-                read_data.radio_states.Get()[1]->AdminState);
+    CHECK_TRUE(radio_states.IsPresent());
+    CHECK_EQUAL(2, radio_states.Get().size());
+    CHECK_EQUAL(1, radio_states.Get()[0]->RadioID);
+    CHECK_EQUAL(RadioAdministrativeState::States::Disabled, radio_states.Get()[0]->AdminState);
+    CHECK_EQUAL(2, radio_states.Get()[1]->RadioID);
+    CHECK_EQUAL(RadioAdministrativeState::States::Enabled, radio_states.Get()[1]->AdminState);
 
-    CHECK_EQUAL(180, read_data.statistics_timer->GetValue());
+    CHECK_TRUE(statistics_timer.IsPresent());
+    CHECK_EQUAL(180, statistics_timer.Get()->GetValue());
 
-    CHECK_EQUAL(WTPFallback::Mode::Enabled, read_data.wtp_fallback->mode);
+    CHECK_TRUE(wtp_fallback.IsPresent());
+    CHECK_EQUAL(WTPFallback::Mode::Enabled, wtp_fallback.Get()->mode);
 
-    CHECK_EQUAL(13, read_data.wtp_name->GetLength());
-    STRNCMP_EQUAL("Office-AP-101", (char *)read_data.wtp_name->name, 13);
+    CHECK_TRUE(wtp_name.IsPresent());
+    CHECK_EQUAL(13, wtp_name.Get()->GetLength());
+    STRNCMP_EQUAL("Office-AP-101", (char *)wtp_name.Get()->name, 13);
 
-    CHECK_EQUAL(nullptr, read_data.wtp_static_ipaddress);
+    CHECK_FALSE(wtp_static_ipaddress.IsPresent());
 
-    CHECK_EQUAL(16, read_data.image_identifier.GetData().size());
-    CHECK_EQUAL(9, read_data.image_identifier.GetVendorIdentifier());
-    STRNCMP_EQUAL("capwap-fw-v2.3.4", (char *)read_data.image_identifier.GetData().data(), 24);
+    CHECK_TRUE(image_identifier.IsPresent());
+    CHECK_EQUAL(16, image_identifier.GetData().size());
+    CHECK_EQUAL(9, image_identifier.GetVendorIdentifier());
+    STRNCMP_EQUAL("capwap-fw-v2.3.4", (char *)image_identifier.GetData().data(), 24);
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(14823, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(0x0101, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(14823, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(0x0101, vendor_specific_payloads.Get()[0]->GetElementId());
     const uint8_t vendor_payload[] = { 0xDE, 0xAD, 0xBE, 0xEF };
-    MEMCMP_EQUAL(vendor_payload,
-                 read_data.vendor_specific_payloads.Get()[0]->value,
-                 sizeof(vendor_payload));
+    MEMCMP_EQUAL(vendor_payload, vendor_specific_payloads.Get()[0]->value, sizeof(vendor_payload));
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -400,7 +461,9 @@ TEST(ConfigurationUpdateRequestTestsGroup,
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableConfigurationUpdateRequest read_data;
+    ReadableWTPName wtp_name;
+
+    ReadableConfigurationUpdateRequest read_data({ &wtp_name });
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -410,44 +473,15 @@ TEST(ConfigurationUpdateRequestTestsGroup,
 TEST(ConfigurationUpdateRequestTestsGroup, One_or_more_serialize) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
-
-    WritableACNameWithPriorityArray ac_names_with_priority;
-    std::optional<ACTimestamp> ac_timestamp;
-
     const uint8_t mac_6_0[] = { 0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E };
-    WritableAddMacAclEntry add_mac_acl_entry;
-    add_mac_acl_entry.Add({ mac_6_0 });
+    {
+        WritableAddMacAclEntry add_mac_acl_entry;
+        add_mac_acl_entry.Add({ mac_6_0 });
 
-    std::optional<CAPWAPTimers> capwap_timers;
-    WritableDecryptionErrorReportPeriodArray decryption_error_report_periods;
-    WritableDeleteMacAclEntry delete_mac_acl_entry;
-    std::optional<IdleTimeout> idle_timeout;
-    std::optional<WritableLocationData> location_data;
-    WritableRadioAdministrativeStateArray radio_states;
-    std::optional<StatisticsTimer> statistics_timer;
-    std::optional<WTPFallback> wtp_fallback;
-    std::optional<WritableWTPName> wtp_name;
-    std::optional<WTPStaticIPAddressInformation> wtp_static_ipaddress;
-    std::optional<WritableImageIdentifier> image_identifier;
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        WritableConfigurationUpdateRequest write_data({ &add_mac_acl_entry });
 
-    WritableConfigurationUpdateRequest write_data(ac_names_with_priority,
-                                                  ac_timestamp,
-                                                  add_mac_acl_entry,
-                                                  capwap_timers,
-                                                  decryption_error_report_periods,
-                                                  delete_mac_acl_entry,
-                                                  idle_timeout,
-                                                  location_data,
-                                                  radio_states,
-                                                  statistics_timer,
-                                                  wtp_fallback,
-                                                  wtp_name,
-                                                  wtp_static_ipaddress,
-                                                  image_identifier,
-                                                  vendor_specific_payloads);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 12, raw_data.current);
     const uint8_t reference[] = { 0x00, 0x07, 0x00, 0x08, 0x01, 0x06,
                                   0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E };
@@ -455,104 +489,24 @@ TEST(ConfigurationUpdateRequestTestsGroup, One_or_more_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + 12 };
-    ReadableConfigurationUpdateRequest read_data;
+
+    ReadableACNameWithPriorityArray ac_names_with_priority;
+    ReadableACTimestamp ac_timestamp;
+    ReadableAddMacAclEntry add_mac_acl_entry;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+    ReadableConfigurationUpdateRequest read_data(
+        { &ac_names_with_priority, &ac_timestamp, &add_mac_acl_entry, &vendor_specific_payloads });
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(0, read_data.ac_names_with_priority.Get().size());
-    CHECK_EQUAL(nullptr, read_data.ac_timestamp);
+    CHECK_FALSE(ac_names_with_priority.IsPresent());
+    CHECK_FALSE(ac_timestamp.IsPresent());
 
-    CHECK_EQUAL(1, read_data.add_mac_acl_entry.Get().size());
-    CHECK_EQUAL(6, read_data.add_mac_acl_entry.Get()[0]->Length);
-    MEMCMP_EQUAL(mac_6_0,
-                 (char *)read_data.add_mac_acl_entry.Get()[0]->MACAddresses,
-                 sizeof(mac_6_0));
+    CHECK_TRUE(add_mac_acl_entry.IsPresent());
+    CHECK_EQUAL(1, add_mac_acl_entry.Get().size());
+    CHECK_EQUAL(6, add_mac_acl_entry.Get()[0]->Length);
+    MEMCMP_EQUAL(mac_6_0, (char *)add_mac_acl_entry.Get()[0]->MACAddresses, sizeof(mac_6_0));
 
-    CHECK_EQUAL(nullptr, read_data.capwap_timers);
-    CHECK_EQUAL(0, read_data.decryption_error_report_periods.Get().size());
-    CHECK_EQUAL(0, read_data.delete_mac_acl_entry.Get().size());
-    CHECK_EQUAL(nullptr, read_data.idle_timeout);
-    CHECK_EQUAL(nullptr, read_data.location_data);
-    CHECK_EQUAL(0, read_data.radio_states.Get().size());
-    CHECK_EQUAL(nullptr, read_data.statistics_timer);
-    CHECK_EQUAL(nullptr, read_data.wtp_fallback);
-    CHECK_EQUAL(nullptr, read_data.wtp_name);
-    CHECK_EQUAL(nullptr, read_data.wtp_static_ipaddress);
-    CHECK_EQUAL(0, read_data.image_identifier.GetData().size());
-    CHECK_EQUAL(0, read_data.vendor_specific_payloads.Get().size());
-
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
     CHECK_EQUAL(0, read_data.unknown_elements);
-}
-
-TEST(ConfigurationUpdateRequestTestsGroup, Validate_returns_false_when_empty_elements) {
-    WritableACNameWithPriorityArray ac_names_with_priority;
-    std::optional<ACTimestamp> ac_timestamp;
-    WritableAddMacAclEntry add_mac_acl_entry;
-    std::optional<CAPWAPTimers> capwap_timers;
-    WritableDecryptionErrorReportPeriodArray decryption_error_report_periods;
-    WritableDeleteMacAclEntry delete_mac_acl_entry;
-    std::optional<IdleTimeout> idle_timeout;
-    std::optional<WritableLocationData> location_data;
-    WritableRadioAdministrativeStateArray radio_states;
-    std::optional<StatisticsTimer> statistics_timer;
-    std::optional<WTPFallback> wtp_fallback;
-    std::optional<WritableWTPName> wtp_name;
-    std::optional<WTPStaticIPAddressInformation> wtp_static_ipaddress;
-    std::optional<WritableImageIdentifier> image_identifier;
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-
-    WritableConfigurationUpdateRequest write_data(ac_names_with_priority,
-                                                  ac_timestamp,
-                                                  add_mac_acl_entry,
-                                                  capwap_timers,
-                                                  decryption_error_report_periods,
-                                                  delete_mac_acl_entry,
-                                                  idle_timeout,
-                                                  location_data,
-                                                  radio_states,
-                                                  statistics_timer,
-                                                  wtp_fallback,
-                                                  wtp_name,
-                                                  wtp_static_ipaddress,
-                                                  image_identifier,
-                                                  vendor_specific_payloads);
-
-    CHECK_FALSE(write_data.Validate());
-}
-
-TEST(ConfigurationUpdateRequestTestsGroup,
-     Validate_returns_true_if_at_least_one_element_is_not_empty) {
-
-    WritableACNameWithPriorityArray ac_names_with_priority;
-    std::optional<ACTimestamp> ac_timestamp;
-    WritableAddMacAclEntry add_mac_acl_entry;
-    std::optional<CAPWAPTimers> capwap_timers;
-    WritableDecryptionErrorReportPeriodArray decryption_error_report_periods;
-    WritableDeleteMacAclEntry delete_mac_acl_entry;
-    std::optional<IdleTimeout> idle_timeout{ std::in_place, 12345 };
-    std::optional<WritableLocationData> location_data;
-    WritableRadioAdministrativeStateArray radio_states;
-    std::optional<StatisticsTimer> statistics_timer;
-    std::optional<WTPFallback> wtp_fallback;
-    std::optional<WritableWTPName> wtp_name;
-    std::optional<WTPStaticIPAddressInformation> wtp_static_ipaddress;
-    std::optional<WritableImageIdentifier> image_identifier;
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-
-    WritableConfigurationUpdateRequest write_data(ac_names_with_priority,
-                                                  ac_timestamp,
-                                                  add_mac_acl_entry,
-                                                  capwap_timers,
-                                                  decryption_error_report_periods,
-                                                  delete_mac_acl_entry,
-                                                  idle_timeout,
-                                                  location_data,
-                                                  radio_states,
-                                                  statistics_timer,
-                                                  wtp_fallback,
-                                                  wtp_name,
-                                                  wtp_static_ipaddress,
-                                                  image_identifier,
-                                                  vendor_specific_payloads);
-
-    CHECK_TRUE(write_data.Validate());
 }

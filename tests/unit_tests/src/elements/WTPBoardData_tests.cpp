@@ -53,41 +53,6 @@ TEST(WTPBoardDataTestsGroup, WTPBoardDataHeader_serialize) {
     CHECK_EQUAL(305419896, element->GetVendorIdentifier());
 }
 
-TEST(WTPBoardDataTestsGroup, BoardDataSubElementHeader_deserialize) {
-    uint8_t data[] = {
-        // Board Data Sub-Element #1 (Model Number)
-        0x00, 0x00,                          // Type: 0 (Model Number)
-        0x00, 0x07,                          // Length: 7
-        'A',  'P',  '-', '2', '0', '0', '0', // Value: "AP-2000"
-    };
-    RawData raw_data{ data, data + sizeof(data) };
-    auto element = BoardDataSubElementHeader::Deserialize(&raw_data);
-
-    CHECK(element != nullptr);
-    CHECK_EQUAL(raw_data.current + 7, raw_data.end);
-    STRNCMP_EQUAL("AP-2000", (char *)raw_data.current, 7);
-    CHECK_EQUAL(BoardDataSubElementHeader::Type::WTPModelNumber, element->GetType());
-    CHECK_EQUAL(7, element->GetLength());
-}
-
-TEST(WTPBoardDataTestsGroup, BoardDataSubElementHeader_serialize) {
-    uint8_t buffer[256] = {};
-    BoardDataSubElementHeader element_0{ BoardDataSubElementHeader::Type::BoardID, 10 };
-    RawData raw_data{ buffer, buffer + sizeof(buffer) };
-
-    element_0.Serialize(&raw_data);
-    CHECK_EQUAL(&buffer[0] + 4, raw_data.current);
-    const uint8_t reference[] = { 0x00, 0x02, 0x00, 0x0a };
-    MEMCMP_EQUAL(buffer, reference, sizeof(reference));
-
-    raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = BoardDataSubElementHeader::Deserialize(&raw_data);
-    CHECK(element != nullptr);
-    CHECK_EQUAL(&buffer[0] + 4, raw_data.current);
-    CHECK_EQUAL(BoardDataSubElementHeader::Type::BoardID, element->GetType());
-    CHECK_EQUAL(10, element->GetLength());
-}
-
 TEST(WTPBoardDataTestsGroup, WTPBoardData_serialize) {
     uint8_t buffer[256] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };

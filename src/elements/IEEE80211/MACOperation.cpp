@@ -60,31 +60,8 @@ bool MACOperation::Validate() const {
     return true;
 }
 
-void MACOperation::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(MACOperation) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(MACOperation));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(MACOperation);
-}
-
-MACOperation *MACOperation::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(MACOperation) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (MACOperation *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(MACOperation);
-    return res;
-}
-
 WritableMACOperationArray::WritableMACOperationArray() {
+    static_assert(sizeof(items[0]) == 20);
     items.reserve(ReadableMACOperationArray::max_count);
 }
 
@@ -111,8 +88,10 @@ void WritableMACOperationArray::Clear() {
 }
 
 void WritableMACOperationArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -134,17 +113,30 @@ void WritableMACOperationArray::Log() const {
 ReadableMACOperationArray::ReadableMACOperationArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableMACOperationArray::GetElementType() const {
+    return ElementHeader::MACOperation;
+}
+
+bool ReadableMACOperationArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableMACOperationArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableMACOperationArray::Deserialize elements count exceeds");
         return false;
     }
-
-    auto op = MACOperation::Deserialize(raw_data);
-    if (op == nullptr) {
+    if (raw_data->current + sizeof(MACOperation) > raw_data->end) {
         return false;
     }
-    items[count] = op;
+
+    auto item = (MACOperation *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(MACOperation);
+    items[count] = item;
     count++;
     return true;
 }

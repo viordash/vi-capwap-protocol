@@ -33,38 +33,34 @@ bool StationQoSProfile::Validate() const {
     return true;
 }
 
-void StationQoSProfile::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(StationQoSProfile) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(StationQoSProfile));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(StationQoSProfile);
-}
-
-StationQoSProfile *StationQoSProfile::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(StationQoSProfile) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (StationQoSProfile *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(StationQoSProfile);
-    return res;
-}
-
 WritableStationQoSProfileArray::WritableStationQoSProfileArray() {
+    static_assert(sizeof(items[0]) == 12);
     items.reserve(ReadableStationQoSProfileArray::max_count);
 }
 
 void WritableStationQoSProfileArray::Add(StationQoSProfile element) {
     ASSERT(items.size() + 1 <= ReadableStationQoSProfileArray::max_count);
 
-    items.emplace_back(std::move(element));
+    auto it_exists =
+        std::find_if(items.begin(), items.end(), [&element](const StationQoSProfile &item) {
+            return memcmp(item.GetMACAddress(),
+                          element.GetMACAddress(),
+                          StationQoSProfile::mac_address_size)
+                == 0;
+        });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("StationQoSProfile: replace MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+              (*it_exists).GetMACAddress()[0],
+              (*it_exists).GetMACAddress()[1],
+              (*it_exists).GetMACAddress()[2],
+              (*it_exists).GetMACAddress()[3],
+              (*it_exists).GetMACAddress()[4],
+              (*it_exists).GetMACAddress()[5]);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableStationQoSProfileArray::Empty() const {
@@ -76,8 +72,10 @@ void WritableStationQoSProfileArray::Clear() {
 }
 
 void WritableStationQoSProfileArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -98,17 +96,31 @@ void WritableStationQoSProfileArray::Log() const {
 ReadableStationQoSProfileArray::ReadableStationQoSProfileArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableStationQoSProfileArray::GetElementType() const {
+    return ElementHeader::StationQoSProfile;
+}
+
+bool ReadableStationQoSProfileArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableStationQoSProfileArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableStationQoSProfileArray::Deserialize elements count exceeds");
         return false;
     }
 
-    auto profile = StationQoSProfile::Deserialize(raw_data);
-    if (profile == nullptr) {
+    if (raw_data->current + sizeof(StationQoSProfile) > raw_data->end) {
         return false;
     }
-    items[count] = profile;
+
+    auto item = (StationQoSProfile *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(StationQoSProfile);
+    items[count] = item;
     count++;
     return true;
 }

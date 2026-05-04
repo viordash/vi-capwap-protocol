@@ -51,9 +51,12 @@ TEST(ACDescriptorTestsGroup, ACDescriptor_serialize) {
 
     raw_data = { buffer, buffer + sizeof(buffer) };
     ReadableACDescriptor read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(&buffer[0] + sizeof(reference), raw_data.current);
+    CHECK_EQUAL(ElementHeader::ElementType::ACDescriptor, read_data.GetElementType());
+
     CHECK_EQUAL(3, read_data.header->GetStations());
     CHECK_EQUAL(5, read_data.header->GetLimit());
     CHECK_EQUAL(4, read_data.header->GetActiveWTPs());
@@ -78,6 +81,7 @@ TEST(ACDescriptorTestsGroup, ACDescriptor_serialize) {
                 read_data.Get()[1]->GetType());
     CHECK_EQUAL(9, read_data.Get()[1]->GetLength());
     CHECK_EQUAL(5678, read_data.Get()[1]->GetVendorIdentifier());
+    CHECK_TRUE(read_data.IsPresent());
 }
 
 TEST(ACDescriptorTestsGroup, ACDescriptor_deserialize) {

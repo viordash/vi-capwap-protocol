@@ -1,6 +1,7 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -32,8 +33,6 @@ struct __attribute__((packed)) EncryptionSubElement {
     EncryptionSubElement(uint16_t encryption_capabilities);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static EncryptionSubElement *Deserialize(RawData *raw_data);
 };
 
 struct __attribute__((packed)) DescriptorSubElementHeader {
@@ -63,11 +62,9 @@ struct __attribute__((packed)) DescriptorSubElementHeader {
     Type GetType() const;
     uint16_t GetLength() const;
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static DescriptorSubElementHeader *Deserialize(RawData *raw_data);
 };
 
-struct WritableWTPDescriptor {
+struct WritableWTPDescriptor : IWritableElement {
   public:
     struct __attribute__((packed)) SubElement {
         const char *utf8_value;
@@ -95,13 +92,13 @@ struct WritableWTPDescriptor {
                           const nonstd::span<const EncryptionSubElement> &encr_items,
                           const nonstd::span<const SubElement> &desc_items);
 
-    void Serialize(RawData *raw_data) const;
+    void Serialize(RawData *raw_data) const override final;
     uint16_t GetTotalLength() const;
     const WTPDescriptorHeader &GetHeader() const;
-    void Log() const;
+    void Log() const override final;
 };
 
-struct ReadableWTPDescriptor {
+struct ReadableWTPDescriptor : IReadableElement {
   public:
     static const size_t encr_max_count = 4;
     static const size_t desc_max_count = 8; //DescriptorSubElementHeader::Type * 2
@@ -116,8 +113,10 @@ struct ReadableWTPDescriptor {
     ReadableWTPDescriptor(const ReadableWTPDescriptor &) = delete;
     ReadableWTPDescriptor();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     const nonstd::span<const EncryptionSubElement *> GetEncryptions();
     const nonstd::span<const DescriptorSubElementHeader *> GetDescriptors();
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

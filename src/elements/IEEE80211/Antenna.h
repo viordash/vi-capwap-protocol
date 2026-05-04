@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -32,7 +33,6 @@ struct __attribute__((packed)) Antenna : ElementHeader {
 
   public:
     // Antenna Selection: One 8-bit antenna configuration value per antenna in the WTP.
-    AntennaSelection antenna_selection[];
 
     Antenna(const Antenna &) = default;
     Antenna(uint8_t radio_id, Diversity diversity, Combiner combiner, uint8_t antenna_count);
@@ -42,11 +42,9 @@ struct __attribute__((packed)) Antenna : ElementHeader {
     Combiner GetCombiner() const;
     uint8_t GetAntennaCount() const;
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static Antenna *Deserialize(RawData *raw_data);
 };
 
-struct WritableAntennaArray {
+struct WritableAntennaArray : IWritableElement {
   public:
     struct Item {
         nonstd::span<const Antenna::AntennaSelection> selections;
@@ -74,23 +72,30 @@ struct WritableAntennaArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableAntennaArray {
+struct ReadableAntennaArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
+    struct Item : Antenna {
+        AntennaSelection antenna_selection[];
+        Item(const Item &) = delete;
+    };
+
   protected:
-    std::array<const Antenna *, max_count> items;
+    std::array<const Item *, max_count> items;
     size_t count;
 
   public:
     ReadableAntennaArray(const ReadableAntennaArray &) = delete;
     ReadableAntennaArray();
 
-    bool Deserialize(RawData *raw_data);
-    nonstd::span<const Antenna *const> Get() const;
-    void Log() const;
+    bool Deserialize(RawData *raw_data) override final;
+    nonstd::span<const ReadableAntennaArray::Item *const> Get() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

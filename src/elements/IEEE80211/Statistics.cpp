@@ -134,31 +134,8 @@ bool Statistics::Validate() const {
     return true;
 }
 
-void Statistics::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(Statistics) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(Statistics));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(Statistics);
-}
-
-Statistics *Statistics::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(Statistics) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (Statistics *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(Statistics);
-    return res;
-}
-
 WritableStatisticsArray::WritableStatisticsArray() {
+    static_assert(sizeof(items[0]) == 84);
     items.reserve(ReadableStatisticsArray::max_count);
 }
 
@@ -185,8 +162,10 @@ void WritableStatisticsArray::Clear() {
 }
 
 void WritableStatisticsArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -207,17 +186,31 @@ void WritableStatisticsArray::Log() const {
 ReadableStatisticsArray::ReadableStatisticsArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableStatisticsArray::GetElementType() const {
+    return ElementHeader::Statistics;
+}
+
+bool ReadableStatisticsArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableStatisticsArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableStatisticsArray::Deserialize elements count exceeds");
         return false;
     }
 
-    auto stats = Statistics::Deserialize(raw_data);
-    if (stats == nullptr) {
+    if (raw_data->current + sizeof(Statistics) > raw_data->end) {
         return false;
     }
-    items[count] = stats;
+
+    auto item = (Statistics *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(Statistics);
+    items[count] = item;
     count++;
     return true;
 }

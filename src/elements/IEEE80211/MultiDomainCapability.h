@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -50,11 +51,9 @@ struct __attribute__((packed)) MultiDomainCapability : ElementHeader {
     uint16_t GetMaxTxPowerLevel() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static MultiDomainCapability *Deserialize(RawData *raw_data);
 };
 
-struct WritableMultiDomainCapabilityArray {
+struct WritableMultiDomainCapabilityArray : IWritableElement {
   protected:
     std::vector<MultiDomainCapability> items;
 
@@ -66,11 +65,11 @@ struct WritableMultiDomainCapabilityArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override;
+    void Log() const override;
 };
 
-struct ReadableMultiDomainCapabilityArray {
+struct ReadableMultiDomainCapabilityArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -82,7 +81,9 @@ struct ReadableMultiDomainCapabilityArray {
     ReadableMultiDomainCapabilityArray(const ReadableMultiDomainCapabilityArray &) = delete;
     ReadableMultiDomainCapabilityArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override;
+    ElementHeader::ElementType GetElementType() const override;
+    bool IsPresent() const override;
     nonstd::span<const MultiDomainCapability *const> Get() const;
-    void Log() const;
+    void Log() const override;
 };

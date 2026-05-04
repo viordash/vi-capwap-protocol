@@ -82,38 +82,35 @@ bool RSNAErrorReportFromStation::Validate() const {
     return true;
 }
 
-void RSNAErrorReportFromStation::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(RSNAErrorReportFromStation) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(RSNAErrorReportFromStation));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(RSNAErrorReportFromStation);
-}
-
-RSNAErrorReportFromStation *RSNAErrorReportFromStation::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(RSNAErrorReportFromStation) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (RSNAErrorReportFromStation *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(RSNAErrorReportFromStation);
-    return res;
-}
-
 WritableRSNAErrorReportFromStationArray::WritableRSNAErrorReportFromStationArray() {
+    static_assert(sizeof(items[0]) == 44);
     items.reserve(ReadableRSNAErrorReportFromStationArray::max_count);
 }
 
 void WritableRSNAErrorReportFromStationArray::Add(RSNAErrorReportFromStation element) {
     ASSERT(items.size() + 1 <= ReadableRSNAErrorReportFromStationArray::max_count);
 
-    items.emplace_back(std::move(element));
+    auto it_exists = std::find_if(items.begin(),
+                                  items.end(),
+                                  [&element](const RSNAErrorReportFromStation &item) {
+                                      return memcmp(item.GetClientMACAddress(),
+                                                    element.GetClientMACAddress(),
+                                                    RSNAErrorReportFromStation::mac_address_size)
+                                          == 0;
+                                  });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("RSNAErrorReportFromStation: replace MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+              (*it_exists).GetClientMACAddress()[0],
+              (*it_exists).GetClientMACAddress()[1],
+              (*it_exists).GetClientMACAddress()[2],
+              (*it_exists).GetClientMACAddress()[3],
+              (*it_exists).GetClientMACAddress()[4],
+              (*it_exists).GetClientMACAddress()[5]);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableRSNAErrorReportFromStationArray::Empty() const {
@@ -125,8 +122,10 @@ void WritableRSNAErrorReportFromStationArray::Clear() {
 }
 
 void WritableRSNAErrorReportFromStationArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -155,17 +154,31 @@ void WritableRSNAErrorReportFromStationArray::Log() const {
 ReadableRSNAErrorReportFromStationArray::ReadableRSNAErrorReportFromStationArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableRSNAErrorReportFromStationArray::GetElementType() const {
+    return ElementHeader::RSNAErrorReportFromStation;
+}
+
+bool ReadableRSNAErrorReportFromStationArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableRSNAErrorReportFromStationArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableRSNAErrorReportFromStationArray::Deserialize elements count exceeds");
         return false;
     }
 
-    auto report = RSNAErrorReportFromStation::Deserialize(raw_data);
-    if (report == nullptr) {
+    if (raw_data->current + sizeof(RSNAErrorReportFromStation) > raw_data->end) {
         return false;
     }
-    items[count] = report;
+
+    auto item = (RSNAErrorReportFromStation *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(RSNAErrorReportFromStation);
+    items[count] = item;
     count++;
     return true;
 }

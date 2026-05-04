@@ -2,55 +2,86 @@
 #include "LocationData.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <cstring>
 #include <string.h>
 
-WritableLocationData::WritableLocationData(std::string_view str) : data{ str.begin(), str.end() } {
-    ASSERT(data.size() <= ReadableLocationData::max_data_size);
+LocationData::LocationData(uint16_t length)
+    : ElementHeader(ElementHeader::LocationData,
+                    (sizeof(LocationData) - sizeof(ElementHeader)) + length) {
+}
+
+uint16_t LocationData::GetDataLenght() const {
+    return GetLength();
+}
+
+bool LocationData::Validate() const {
+    static_assert(sizeof(LocationData) == 4);
+    if (ElementHeader::GetElementType() != ElementHeader::LocationData) {
+        return false;
+    }
+    if (GetDataLenght() > LocationData::max_data_size) {
+        return false;
+    }
+    return true;
+}
+
+WritableLocationData::WritableLocationData(const std::string_view location)
+    : element{ (uint16_t)location.size() }, data{ location } {
+    static_assert(sizeof(element) == 4);
+    ASSERT(data.size() <= LocationData::max_data_size);
 }
 
 void WritableLocationData::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(ElementHeader) + data.size() <= raw_data->end);
+    ASSERT(raw_data->current + sizeof(ElementHeader) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
 
-    RawData header_raw_data = *raw_data;
-    raw_data->current += sizeof(ElementHeader);
-
-    memcpy(raw_data->current, data.data(), data.size());
+    std::memcpy(raw_data->current, data.data(), data.size());
     raw_data->current += data.size();
-
-    ElementHeader header(ElementHeader::LocationData, (uint16_t)data.size());
-    memcpy(header_raw_data.current, &header, sizeof(header));
 }
 
 void WritableLocationData::Log() const {
     log_i("ME LocationData :%.*s", (int)data.size(), data.data());
 }
 
-ReadableLocationData::ReadableLocationData() : ElementHeader(ElementHeader::LocationData, 0) {
-}
-bool ReadableLocationData::Validate() const {
-    static_assert(sizeof(ReadableLocationData) == 4);
-    return ElementHeader::GetElementType() == ElementHeader::LocationData
-        && GetLength() <= ReadableLocationData::max_data_size
-                              + (sizeof(ReadableLocationData) - sizeof(ElementHeader));
-}
-
-ReadableLocationData *ReadableLocationData::Deserialize(RawData *raw_data) {
+bool ReadableLocationData::Deserialize(RawData *raw_data) {
     if (raw_data->current + sizeof(ElementHeader) > raw_data->end) {
-        return nullptr;
+        return false;
     }
 
-    auto res = (ReadableLocationData *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    if (raw_data->current + sizeof(ElementHeader) + res->GetLength() > raw_data->end) {
-        return nullptr;
+    if (raw_data->current + sizeof(ReadableLocationData::Element) > raw_data->end) {
+        return false;
     }
 
-    raw_data->current += sizeof(ElementHeader) + res->GetLength();
-    return res;
+    auto item = (ReadableLocationData::Element *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    element = item;
+    is_present = true;
+    return true;
+}
+
+const ReadableLocationData::Element *const ReadableLocationData::Get() const {
+    return element;
 }
 
 void ReadableLocationData::Log() const {
-    log_i("ME LocationData :%.*s", GetLength(), data);
+    ASSERT(element != nullptr);
+    log_i("ME LocationData :%.*s", (int)element->GetDataLenght(), element->data);
+}
+
+ElementHeader::ElementType ReadableLocationData::GetElementType() const {
+    return ElementHeader::LocationData;
+}
+
+bool ReadableLocationData::IsPresent() const {
+    return is_present;
 }

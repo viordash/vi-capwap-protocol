@@ -55,37 +55,32 @@ bool UpdateStationQoS::Validate() const {
     return true;
 }
 
-void UpdateStationQoS::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(UpdateStationQoS) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(UpdateStationQoS));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(UpdateStationQoS);
-}
-
-UpdateStationQoS *UpdateStationQoS::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(UpdateStationQoS) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (UpdateStationQoS *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(UpdateStationQoS);
-    return res;
-}
-
 WritableUpdateStationQoSArray::WritableUpdateStationQoSArray() {
+    static_assert(sizeof(items[0]) == 13);
     items.reserve(ReadableUpdateStationQoSArray::max_count);
 }
 
 void WritableUpdateStationQoSArray::Add(UpdateStationQoS element) {
     ASSERT(items.size() + 1 <= ReadableUpdateStationQoSArray::max_count);
-    items.emplace_back(std::move(element));
+
+    auto it_exists =
+        std::find_if(items.begin(), items.end(), [&element](const UpdateStationQoS &item) {
+            return memcmp(item.MACAddress, element.MACAddress, UpdateStationQoS::mac_address_size)
+                == 0;
+        });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("UpdateStationQoS: replace MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+              (*it_exists).MACAddress[0],
+              (*it_exists).MACAddress[1],
+              (*it_exists).MACAddress[2],
+              (*it_exists).MACAddress[3],
+              (*it_exists).MACAddress[4],
+              (*it_exists).MACAddress[5]);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableUpdateStationQoSArray::Empty() const {
@@ -97,8 +92,10 @@ void WritableUpdateStationQoSArray::Clear() {
 }
 
 void WritableUpdateStationQoSArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -122,17 +119,31 @@ void WritableUpdateStationQoSArray::Log() const {
 ReadableUpdateStationQoSArray::ReadableUpdateStationQoSArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableUpdateStationQoSArray::GetElementType() const {
+    return ElementHeader::UpdateStationQoS;
+}
+
+bool ReadableUpdateStationQoSArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableUpdateStationQoSArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableUpdateStationQoSArray::Deserialize elements count exceeds");
         return false;
     }
 
-    auto usq = UpdateStationQoS::Deserialize(raw_data);
-    if (usq == nullptr) {
+    if (raw_data->current + sizeof(UpdateStationQoS) > raw_data->end) {
         return false;
     }
-    items[count] = usq;
+
+    auto item = (UpdateStationQoS *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(UpdateStationQoS);
+    items[count] = item;
     count++;
     return true;
 }

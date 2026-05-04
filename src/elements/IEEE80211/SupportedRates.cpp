@@ -4,8 +4,10 @@
 #include <algorithm>
 #include <cstring>
 
-SupportedRates::SupportedRates(uint8_t radio_id, uint8_t rates_count)
-    : ElementHeader(ElementHeader::SupportedRates, 1 + rates_count), radio_id{ radio_id } {
+SupportedRates::SupportedRates(uint8_t radio_id, uint16_t length)
+    : ElementHeader(ElementHeader::SupportedRates,
+                    sizeof(SupportedRates) - sizeof(ElementHeader) + length),
+      radio_id{ radio_id } {
 }
 
 uint8_t SupportedRates::GetRadioID() const {
@@ -17,6 +19,7 @@ uint8_t SupportedRates::GetRatesCount() const {
 }
 
 bool SupportedRates::Validate() const {
+    static_assert(sizeof(SupportedRates) == 5);
     if (ElementHeader::GetElementType() != ElementHeader::SupportedRates) {
         return false;
     }
@@ -33,50 +36,24 @@ bool SupportedRates::Validate() const {
     return true;
 }
 
-void SupportedRates::Serialize(RawData *raw_data) const {
-    size_t total_size = sizeof(ElementHeader) + ElementHeader::GetLength();
-    ASSERT(raw_data->current + total_size <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, total_size);
-#pragma GCC diagnostic pop
-    raw_data->current += total_size;
-}
-
-SupportedRates *SupportedRates::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(ElementHeader) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (SupportedRates *)raw_data->current;
-    size_t total_size = sizeof(ElementHeader) + res->GetLength();
-    if (raw_data->current + total_size > raw_data->end) {
-        return nullptr;
-    }
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += total_size;
-    return res;
-}
-
-WritableSupportedRatesArray::Item::Item(uint8_t radio_id, nonstd::span<const uint8_t> rates)
-    : rates_data(rates), header(radio_id, rates_data.size()) {
-}
-
-uint8_t WritableSupportedRatesArray::Item::GetRadioID() const {
-    return header.GetRadioID();
-}
-
 WritableSupportedRatesArray::WritableSupportedRatesArray() {
+    static_assert(sizeof(Item::header) == 5);
     items.reserve(ReadableSupportedRatesArray::max_count);
 }
 
 void WritableSupportedRatesArray::Add(Item element) {
     ASSERT(items.size() + 1 <= ReadableSupportedRatesArray::max_count);
-    items.emplace_back(std::move(element));
+
+    auto it_exists = std::find_if(items.begin(), items.end(), [&element](const Item &item) {
+        return item.header.GetRadioID() == element.header.GetRadioID();
+    });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("SupportedRates: replace RadioID: %u", (*it_exists).header.GetRadioID());
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableSupportedRatesArray::Empty() const {
@@ -88,11 +65,14 @@ void WritableSupportedRatesArray::Clear() {
 }
 
 void WritableSupportedRatesArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
-        memcpy(raw_data->current - elem.rates_data.size(),
-               elem.rates_data.data(),
-               elem.rates_data.size());
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
+        uint16_t data_size =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.data.data(), data_size);
+        raw_data->current += data_size;
     }
 }
 
@@ -100,8 +80,8 @@ void WritableSupportedRatesArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
         log_i("ME SupportedRates #%zu RadioID:%u, Rates count:%zu",
               i,
-              items[i].GetRadioID(),
-              items[i].rates_data.size());
+              items[i].header.GetRadioID(),
+              items[i].data.size());
     }
 }
 
@@ -114,16 +94,28 @@ bool ReadableSupportedRatesArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto sr = SupportedRates::Deserialize(raw_data);
-    if (sr == nullptr) {
+    if (raw_data->current + sizeof(SupportedRates) > raw_data->end) {
         return false;
     }
-    items[count] = sr;
+
+    auto item = (ReadableSupportedRatesArray::Item *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    items[count] = item;
     count++;
     return true;
 }
 
-nonstd::span<const SupportedRates *const> ReadableSupportedRatesArray::Get() const {
+nonstd::span<const ReadableSupportedRatesArray::Item *const>
+ReadableSupportedRatesArray::Get() const {
     nonstd::span span(items.begin(), count);
     return span;
 }
@@ -135,4 +127,12 @@ void ReadableSupportedRatesArray::Log() const {
               items[i]->GetRadioID(),
               items[i]->GetRatesCount());
     }
+}
+
+ElementHeader::ElementType ReadableSupportedRatesArray::GetElementType() const {
+    return ElementHeader::SupportedRates;
+}
+
+bool ReadableSupportedRatesArray::IsPresent() const {
+    return count > 0;
 }

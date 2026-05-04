@@ -26,29 +26,15 @@ TEST(LocationDataTestsGroup, LocationData_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto read_data = ReadableLocationData::Deserialize(&raw_data);
-    CHECK(read_data != nullptr);
+    ReadableLocationData read_data;
+    CHECK_FALSE(read_data.IsPresent());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(&buffer[0] + sizeof(reference), raw_data.current);
-    CHECK_EQUAL(16, read_data->GetLength());
-    STRNCMP_EQUAL("abcdefабвгд", (char *)read_data->data, 16);
-}
-
-TEST(LocationDataTestsGroup, LocationData_take_ownership) {
-    uint8_t buffer[256] = {};
-    RawData raw_data{ buffer, buffer + sizeof(buffer) };
-
-    std::string str("abcdefабвгд");
-
-    WritableLocationData write_data{ str };
-
-    str.clear();
-
-    write_data.Serialize(&raw_data);
-    CHECK_EQUAL(&buffer[0] + 4 + 16, raw_data.current);
-    const uint8_t reference[] = { 0x00, 0x1C, 0x00, 0x10, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66,
-                                  0xD0, 0xB0, 0xD0, 0xB1, 0xD0, 0xB2, 0xD0, 0xB3, 0xD0, 0xB4 };
-    MEMCMP_EQUAL(buffer, reference, sizeof(reference));
+    CHECK_EQUAL(ElementHeader::ElementType::LocationData, read_data.GetElementType());
+    CHECK_EQUAL(16, read_data.Get()->GetLength());
+    STRNCMP_EQUAL("abcdefабвгд", (char *)read_data.Get()->data, 16);
+    CHECK_TRUE(read_data.IsPresent());
 }
 
 TEST(LocationDataTestsGroup, LocationData_deserialize_ascii) {
@@ -68,11 +54,11 @@ TEST(LocationDataTestsGroup, LocationData_deserialize_ascii) {
 
     RawData raw_data{ data, data + sizeof(data) };
 
-    auto read_data = ReadableLocationData::Deserialize(&raw_data);
-    CHECK(read_data != nullptr);
+    ReadableLocationData read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(14, read_data->GetLength());
-    STRNCMP_EQUAL("Corporate-AC-1", (char *)read_data->data, 14);
+    CHECK_EQUAL(14, read_data.Get()->GetLength());
+    STRNCMP_EQUAL("Corporate-AC-1", (char *)read_data.Get()->data, 14);
 }
 
 TEST(LocationDataTestsGroup, LocationData_deserialize_utf8) {
@@ -97,9 +83,9 @@ uint8_t data[] = {
 
     RawData raw_data{ data, data + sizeof(data) };
 
-    auto read_data = ReadableLocationData::Deserialize(&raw_data);
-    CHECK(read_data != nullptr);
+    ReadableLocationData read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(16, read_data->GetLength());
-    STRNCMP_EQUAL("München-AC-Main", (char *)read_data->data, 16);
+    CHECK_EQUAL(16, read_data.Get()->GetLength());
+    STRNCMP_EQUAL("München-AC-Main", (char *)read_data.Get()->data, 16);
 }

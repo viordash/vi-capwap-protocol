@@ -13,37 +13,58 @@ bool StatisticsTimer::Validate() const {
     return ElementHeader::GetElementType() == ElementHeader::StatisticsTimer
         && ElementHeader::GetLength() == (sizeof(StatisticsTimer) - sizeof(ElementHeader));
 }
-void StatisticsTimer::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(StatisticsTimer) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(StatisticsTimer));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(StatisticsTimer);
-}
-StatisticsTimer *StatisticsTimer::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(StatisticsTimer) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (StatisticsTimer *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(StatisticsTimer);
-    return res;
-}
 
 uint16_t StatisticsTimer::GetValue() const {
     return time.Get();
 }
 
-uint16_t StatisticsTimer::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
-}
-
 void StatisticsTimer::Log() const {
     log_i("ME StatisticsTimer :%u secs", GetValue());
+}
+
+WritableStatisticsTimer::WritableStatisticsTimer(uint16_t time) : element{ time } {
+    static_assert(sizeof(element) == 6);
+}
+
+void WritableStatisticsTimer::Serialize(RawData *raw_data) const {
+    ASSERT(raw_data->current + sizeof(StatisticsTimer) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
+}
+
+void WritableStatisticsTimer::Log() const {
+    element.Log();
+}
+
+bool ReadableStatisticsTimer::Deserialize(RawData *raw_data) {
+    if (raw_data->current + sizeof(StatisticsTimer) > raw_data->end) {
+        return false;
+    }
+
+    auto res = (StatisticsTimer *)raw_data->current;
+    if (!res->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(StatisticsTimer);
+
+    element = res;
+    is_present = true;
+    return true;
+}
+
+const StatisticsTimer *const ReadableStatisticsTimer::Get() const {
+    return element;
+}
+
+void ReadableStatisticsTimer::Log() const {
+    ASSERT(element != nullptr);
+    element->Log();
+}
+
+ElementHeader::ElementType ReadableStatisticsTimer::GetElementType() const {
+    return ElementHeader::StatisticsTimer;
+}
+
+bool ReadableStatisticsTimer::IsPresent() const {
+    return is_present;
 }

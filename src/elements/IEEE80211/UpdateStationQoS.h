@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -62,11 +63,9 @@ struct __attribute__((packed)) UpdateStationQoS : ElementHeader {
     void SetDscpTag(uint8_t tag);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static UpdateStationQoS *Deserialize(RawData *raw_data);
 };
 
-struct WritableUpdateStationQoSArray {
+struct WritableUpdateStationQoSArray : IWritableElement {
   private:
     std::vector<UpdateStationQoS> items;
 
@@ -78,11 +77,11 @@ struct WritableUpdateStationQoSArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override;
+    void Log() const override;
 };
 
-struct ReadableUpdateStationQoSArray {
+struct ReadableUpdateStationQoSArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -94,7 +93,9 @@ struct ReadableUpdateStationQoSArray {
     ReadableUpdateStationQoSArray(const ReadableUpdateStationQoSArray &) = delete;
     ReadableUpdateStationQoSArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override;
+    ElementHeader::ElementType GetElementType() const override;
+    bool IsPresent() const override;
     nonstd::span<const UpdateStationQoS *const> Get() const;
-    void Log() const;
+    void Log() const override;
 };

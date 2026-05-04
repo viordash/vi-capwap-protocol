@@ -1,6 +1,7 @@
 #include "WTPQualityOfService.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <algorithm>
 #include <cstring>
 
 uint8_t QoSSubElement::Get8021pTag() const {
@@ -111,37 +112,25 @@ bool WTPQualityOfService::Validate() const {
     return true;
 }
 
-void WTPQualityOfService::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(WTPQualityOfService) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(WTPQualityOfService));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(WTPQualityOfService);
-}
-
-WTPQualityOfService *WTPQualityOfService::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(WTPQualityOfService) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (WTPQualityOfService *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(WTPQualityOfService);
-    return res;
-}
-
 WritableWTPQualityOfServiceArray::WritableWTPQualityOfServiceArray() {
+    static_assert(sizeof(items[0]) == 38);
     items.reserve(ReadableWTPQualityOfServiceArray::max_count);
 }
 
 void WritableWTPQualityOfServiceArray::Add(WTPQualityOfService element) {
     ASSERT(items.size() + 1 <= ReadableWTPQualityOfServiceArray::max_count);
-    items.emplace_back(std::move(element));
+
+    auto it_exists =
+        std::find_if(items.begin(), items.end(), [&element](const WTPQualityOfService &item) {
+            return item.RadioID == element.RadioID;
+        });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("WTPQualityOfService: replace RadioID: %u", (*it_exists).RadioID);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableWTPQualityOfServiceArray::Empty() const {
@@ -153,8 +142,10 @@ void WritableWTPQualityOfServiceArray::Clear() {
 }
 
 void WritableWTPQualityOfServiceArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -170,17 +161,31 @@ void WritableWTPQualityOfServiceArray::Log() const {
 ReadableWTPQualityOfServiceArray::ReadableWTPQualityOfServiceArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableWTPQualityOfServiceArray::GetElementType() const {
+    return ElementHeader::WTPQualityOfService;
+}
+
+bool ReadableWTPQualityOfServiceArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableWTPQualityOfServiceArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableWTPQualityOfServiceArray::Deserialize elements count exceeds");
         return false;
     }
 
-    auto qos = WTPQualityOfService::Deserialize(raw_data);
-    if (qos == nullptr) {
+    if (raw_data->current + sizeof(WTPQualityOfService) > raw_data->end) {
         return false;
     }
-    items[count] = qos;
+
+    auto item = (WTPQualityOfService *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(WTPQualityOfService);
+    items[count] = item;
     count++;
     return true;
 }

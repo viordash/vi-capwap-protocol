@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -68,11 +69,9 @@ struct __attribute__((packed)) WTPRadioConfiguration : ElementHeader {
                           const char *country);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static WTPRadioConfiguration *Deserialize(RawData *raw_data);
 };
 
-struct WritableWTPRadioConfigurationArray {
+struct WritableWTPRadioConfigurationArray : IWritableElement {
   private:
     std::vector<WTPRadioConfiguration> items;
 
@@ -84,11 +83,11 @@ struct WritableWTPRadioConfigurationArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override;
+    void Log() const override;
 };
 
-struct ReadableWTPRadioConfigurationArray {
+struct ReadableWTPRadioConfigurationArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -100,7 +99,9 @@ struct ReadableWTPRadioConfigurationArray {
     ReadableWTPRadioConfigurationArray(const ReadableWTPRadioConfigurationArray &) = delete;
     ReadableWTPRadioConfigurationArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override;
+    ElementHeader::ElementType GetElementType() const override;
+    bool IsPresent() const override;
     nonstd::span<const WTPRadioConfiguration *const> Get() const;
-    void Log() const;
+    void Log() const override;
 };

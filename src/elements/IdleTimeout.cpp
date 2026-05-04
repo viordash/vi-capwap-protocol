@@ -2,6 +2,7 @@
 #include "IdleTimeout.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <cstring>
 #include <string.h>
 
 IdleTimeout::IdleTimeout(uint32_t timeout)
@@ -19,40 +20,53 @@ bool IdleTimeout::Validate() const {
         && GetLength() == (sizeof(IdleTimeout) - sizeof(ElementHeader));
 }
 
-uint16_t IdleTimeout::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
+void IdleTimeout::Log() const {
+    log_i("ME IdleTimeout timeout: %u", GetTimeout());
 }
 
-void IdleTimeout::Serialize(RawData *raw_data) const {
+WritableIdleTimeout::WritableIdleTimeout(uint32_t timeout) : element{ timeout } {
+    static_assert(sizeof(element) == 8);
+}
+
+void WritableIdleTimeout::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(IdleTimeout) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(IdleTimeout));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(IdleTimeout);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
 }
 
-IdleTimeout *IdleTimeout::Deserialize(RawData *raw_data) {
+void WritableIdleTimeout::Log() const {
+    element.Log();
+}
+
+bool ReadableIdleTimeout::Deserialize(RawData *raw_data) {
     if (raw_data->current + sizeof(IdleTimeout) > raw_data->end) {
-        return nullptr;
+        return false;
     }
 
     auto res = (IdleTimeout *)raw_data->current;
     if (!res->Validate()) {
-        return nullptr;
+        return false;
     }
+    raw_data->current += sizeof(IdleTimeout);
 
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current = last;
-    return res;
+    element = res;
+    is_present = true;
+    return true;
 }
 
-void IdleTimeout::Log() const {
-    log_i("ME IdleTimeout timeout: %u", GetTimeout());
+const IdleTimeout *const ReadableIdleTimeout::Get() const {
+    return element;
+}
+
+void ReadableIdleTimeout::Log() const {
+    ASSERT(element != nullptr);
+    element->Log();
+}
+
+ElementHeader::ElementType ReadableIdleTimeout::GetElementType() const {
+    return ElementHeader::IdleTimeout;
+}
+
+bool ReadableIdleTimeout::IsPresent() const {
+    return is_present;
 }

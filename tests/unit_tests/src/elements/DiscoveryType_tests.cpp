@@ -4,52 +4,52 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/ECNSupport.h"
+#include "elements/DiscoveryType.h"
 
 #include "CppUTest/TestHarness.h"
 
-TEST_GROUP(ECNSupportTestsGroup){ //
-                                  TEST_SETUP(){}
+TEST_GROUP(DiscoveryTypeTestsGroup){ //
+                                     TEST_SETUP(){}
 
-                                  TEST_TEARDOWN(){}
+                                     TEST_TEARDOWN(){}
 };
 
-TEST(ECNSupportTestsGroup, ECNSupport_deserialize) {
+TEST(DiscoveryTypeTestsGroup, DiscoveryType_deserialize) {
     // clang-format off
     uint8_t data[] = {
         // ---- Element Header (4 bytes) ----
-        0x00, 0x35, // Element Type: ECN Support (53)
+        0x00, 0x14, // Element Type: Discovery Type (20)
         0x00, 0x01, // Element Length: 1 byte
 
-        // ECN Support: Full and Limited ECN (1)
+        // Discovery Type: Static Configuration (1)
         0x01,
     };
     // clang-format on
     RawData raw_data{ data, data + sizeof(data) };
-    ReadableECNSupport read_data;
+    ReadableDiscoveryType read_data;
     CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::ECNSupport, read_data.GetElementType());
-    CHECK_EQUAL(ECNSupport::Type::FullAndLimitedECN, read_data.Get()->type);
+    CHECK_EQUAL(ElementHeader::ElementType::DiscoveryType, read_data.GetElementType());
+    CHECK_EQUAL(DiscoveryType::Type::StaticConfiguration, read_data.Get()->type);
     CHECK_TRUE(read_data.IsPresent());
 }
 
-TEST(ECNSupportTestsGroup, ECNSupport_serialize) {
+TEST(DiscoveryTypeTestsGroup, DiscoveryType_serialize) {
     uint8_t buffer[256] = {};
-    WritableECNSupport element_0{ ECNSupport::Type::LimitedECN };
+    WritableDiscoveryType element_0{ DiscoveryType::Type::DNS };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     element_0.Serialize(&raw_data);
     CHECK_EQUAL(&buffer[0] + 5, raw_data.current);
-    const uint8_t reference[] = { 0x00, 0x35, 0x00, 0x01, 0x00 };
+    const uint8_t reference[] = { 0x00, 0x14, 0x00, 0x01, 0x03 };
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    ReadableECNSupport read_data;
+    ReadableDiscoveryType read_data;
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(&buffer[0] + 5, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::ECNSupport, read_data.GetElementType());
-    CHECK_EQUAL(ECNSupport::Type::LimitedECN, read_data.Get()->type);
+    CHECK_EQUAL(ElementHeader::ElementType::DiscoveryType, read_data.GetElementType());
+    CHECK_EQUAL(DiscoveryType::Type::DNS, read_data.Get()->type);
 }

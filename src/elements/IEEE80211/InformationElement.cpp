@@ -7,9 +7,9 @@
 InformationElement::InformationElement(uint8_t radio_id,
                                        uint8_t wlan_id,
                                        uint8_t flags,
-                                       uint16_t ie_length)
+                                       uint16_t length)
     : ElementHeader(ElementHeader::InformationElement,
-                    (sizeof(InformationElement) - sizeof(ElementHeader)) + ie_length),
+                    (sizeof(InformationElement) - sizeof(ElementHeader)) + length),
       radio_id{ radio_id }, wlan_id{ wlan_id }, flags{ flags } {
 }
 
@@ -62,47 +62,6 @@ bool InformationElement::Validate() const {
     return true;
 }
 
-void InformationElement::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(InformationElement) <= raw_data->end);
-    InformationElement *dst = (InformationElement *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(InformationElement);
-}
-
-InformationElement *InformationElement::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(InformationElement) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (InformationElement *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current = last;
-    return res;
-}
-
-WritableInformationElementArray::Item::Item(uint8_t radio_id,
-                                            uint8_t wlan_id,
-                                            uint8_t flags,
-                                            std::vector<uint8_t> &&ie)
-    : ie_data{ std::move(ie) }, header{ radio_id, wlan_id, flags, (uint16_t)ie_data.size() } {
-}
-
-uint8_t WritableInformationElementArray::Item::GetRadioID() const {
-    return header.GetRadioID();
-}
-
-uint8_t WritableInformationElementArray::Item::GetWlanID() const {
-    return header.GetWlanID();
-}
-
 WritableInformationElementArray::WritableInformationElementArray() {
     items.reserve(ReadableInformationElementArray::max_count);
 }
@@ -110,7 +69,19 @@ WritableInformationElementArray::WritableInformationElementArray() {
 void WritableInformationElementArray::Add(WritableInformationElementArray::Item element) {
     ASSERT(items.size() + 1 <= ReadableInformationElementArray::max_count);
 
-    items.emplace_back(std::move(element));
+    auto it_exists = std::find_if(items.begin(), items.end(), [&element](const Item &item) {
+        return item.header.GetRadioID() == element.header.GetRadioID()
+            && item.header.GetWlanID() == element.header.GetWlanID();
+    });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("InformationElement: replace RadioID: %u, WlanID: %u",
+              (*it_exists).header.GetRadioID(),
+              (*it_exists).header.GetWlanID());
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableInformationElementArray::Empty() const {
@@ -122,12 +93,14 @@ void WritableInformationElementArray::Clear() {
 }
 
 void WritableInformationElementArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
-        uint16_t ie_size =
-            elem.header.GetLength() - (sizeof(InformationElement) - sizeof(ElementHeader));
-        memcpy(raw_data->current, elem.ie_data.data(), ie_size);
-        raw_data->current += ie_size;
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
+        uint16_t data_size =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.data.data(), item.data.size());
+        raw_data->current += data_size;
     }
 }
 
@@ -141,7 +114,7 @@ void WritableInformationElementArray::Log() const {
               items[i].header.GetFlags(),
               items[i].header.GetBeaconFlag() ? 1 : 0,
               items[i].header.GetProbeResponseFlag() ? 1 : 0,
-              items[i].ie_data.size());
+              items[i].data.size());
     }
 }
 
@@ -154,16 +127,28 @@ bool ReadableInformationElementArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto ie = InformationElement::Deserialize(raw_data);
-    if (ie == nullptr) {
+    if (raw_data->current + sizeof(InformationElement) > raw_data->end) {
         return false;
     }
-    items[count] = ie;
+
+    auto item = (ReadableInformationElementArray::Item *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    items[count] = item;
     count++;
     return true;
 }
 
-nonstd::span<const InformationElement *const> ReadableInformationElementArray::Get() const {
+nonstd::span<const ReadableInformationElementArray::Item *const>
+ReadableInformationElementArray::Get() const {
     nonstd::span span(items.begin(), count);
     return span;
 }
@@ -180,4 +165,12 @@ void ReadableInformationElementArray::Log() const {
               items[i]->GetProbeResponseFlag() ? 1 : 0,
               items[i]->GetIELength());
     }
+}
+
+ElementHeader::ElementType ReadableInformationElementArray::GetElementType() const {
+    return ElementHeader::InformationElement;
+}
+
+bool ReadableInformationElementArray::IsPresent() const {
+    return count > 0;
 }

@@ -83,6 +83,9 @@ make clean
       }
   };
   ```
+- Do NOT run all tests — only run tests related to current changes to minimize execution time
+  - Use `-sg <group_name>` to run a specific test group
+  - Use `-sn <test_name>` to run a specific test
 
 ## Code Quality
 

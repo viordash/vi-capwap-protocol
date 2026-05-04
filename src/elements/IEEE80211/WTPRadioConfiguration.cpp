@@ -46,37 +46,25 @@ bool WTPRadioConfiguration::Validate() const {
     return true;
 }
 
-void WTPRadioConfiguration::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(WTPRadioConfiguration) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(WTPRadioConfiguration));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(WTPRadioConfiguration);
-}
-
-WTPRadioConfiguration *WTPRadioConfiguration::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(WTPRadioConfiguration) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (WTPRadioConfiguration *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(WTPRadioConfiguration);
-    return res;
-}
-
 WritableWTPRadioConfigurationArray::WritableWTPRadioConfigurationArray() {
+    static_assert(sizeof(items[0]) == 20);
     items.reserve(ReadableWTPRadioConfigurationArray::max_count);
 }
 
 void WritableWTPRadioConfigurationArray::Add(WTPRadioConfiguration element) {
     ASSERT(items.size() + 1 <= ReadableWTPRadioConfigurationArray::max_count);
-    items.emplace_back(std::move(element));
+
+    auto it_exists =
+        std::find_if(items.begin(), items.end(), [&element](const WTPRadioConfiguration &item) {
+            return item.RadioID == element.RadioID;
+        });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("WTPRadioConfiguration: replace RadioID: %u", (*it_exists).RadioID);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableWTPRadioConfigurationArray::Empty() const {
@@ -88,8 +76,10 @@ void WritableWTPRadioConfigurationArray::Clear() {
 }
 
 void WritableWTPRadioConfigurationArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -108,17 +98,31 @@ void WritableWTPRadioConfigurationArray::Log() const {
 ReadableWTPRadioConfigurationArray::ReadableWTPRadioConfigurationArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableWTPRadioConfigurationArray::GetElementType() const {
+    return ElementHeader::WTPRadioConfiguration;
+}
+
+bool ReadableWTPRadioConfigurationArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableWTPRadioConfigurationArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableWTPRadioConfigurationArray::Deserialize elements count exceeds");
         return false;
     }
 
-    auto rc = WTPRadioConfiguration::Deserialize(raw_data);
-    if (rc == nullptr) {
+    if (raw_data->current + sizeof(WTPRadioConfiguration) > raw_data->end) {
         return false;
     }
-    items[count] = rc;
+
+    auto item = (WTPRadioConfiguration *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(WTPRadioConfiguration);
+    items[count] = item;
     count++;
     return true;
 }

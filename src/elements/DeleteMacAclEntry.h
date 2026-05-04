@@ -1,13 +1,14 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "elements/MacAclEntriesHeader.h"
 #include "elements/MacAddress.h"
 #include "span.hpp"
 #include <vector>
 
-struct WritableDeleteMacAclEntry {
+struct WritableDeleteMacAclEntry : IWritableConfigurationUpdateRequestOptionalElement {
 
   protected:
     std::vector<MacAddress> items;
@@ -20,12 +21,11 @@ struct WritableDeleteMacAclEntry {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    uint16_t GetTotalLength() const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableDeleteMacAclEntry {
+struct ReadableDeleteMacAclEntry : IReadableConfigurationUpdateRequestOptionalElement {
   public:
     MacAclEntriesHeader *header;
 
@@ -37,7 +37,9 @@ struct ReadableDeleteMacAclEntry {
     ReadableDeleteMacAclEntry(const ReadableDeleteMacAclEntry &) = delete;
     ReadableDeleteMacAclEntry();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
     nonstd::span<const ReadableMacAddress *const> Get() const;
-    void Log() const;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

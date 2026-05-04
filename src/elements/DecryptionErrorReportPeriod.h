@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -16,8 +17,6 @@ struct __attribute__((packed)) DecryptionErrorReportPeriod : ElementHeader {
     DecryptionErrorReportPeriod(uint8_t radio_id, uint16_t report_interval);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static DecryptionErrorReportPeriod *Deserialize(RawData *raw_data);
 
     // Radio ID:   The Radio Identifier refers to an interface index on the WTP, whose value is between one (1) and 31.
     uint8_t RadioID() const;
@@ -26,7 +25,8 @@ struct __attribute__((packed)) DecryptionErrorReportPeriod : ElementHeader {
     uint16_t ReportInterval() const;
 };
 
-struct WritableDecryptionErrorReportPeriodArray {
+struct WritableDecryptionErrorReportPeriodArray
+    : IWritableConfigurationUpdateRequestOptionalElement {
   private:
     std::vector<DecryptionErrorReportPeriod> items;
 
@@ -39,11 +39,12 @@ struct WritableDecryptionErrorReportPeriodArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableDecryptionErrorReportPeriodArray {
+struct ReadableDecryptionErrorReportPeriodArray
+    : IReadableConfigurationUpdateRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 
@@ -56,7 +57,9 @@ struct ReadableDecryptionErrorReportPeriodArray {
         delete;
     ReadableDecryptionErrorReportPeriodArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
     nonstd::span<const DecryptionErrorReportPeriod *const> Get() const;
-    void Log() const;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

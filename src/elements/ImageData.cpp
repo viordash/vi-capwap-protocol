@@ -2,24 +2,24 @@
 #include "ImageData.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <cstring>
 #include <string.h>
 
-ImageDataHeader::ImageDataHeader(ImageDataHeader::Type type, uint16_t length)
-    : ElementHeader(ElementHeader::ImageData,
-                    (sizeof(ImageDataHeader) - sizeof(ElementHeader)) + length),
+ImageData::ImageData(ImageData::Type type, uint16_t length)
+    : ElementHeader(ElementHeader::ImageData, (sizeof(ImageData) - sizeof(ElementHeader)) + length),
       type{ type } {
 }
 
-uint16_t ImageDataHeader::GetDataLenght() const {
-    return GetLength() - (sizeof(ImageDataHeader) - sizeof(ElementHeader));
+uint16_t ImageData::GetDataLenght() const {
+    return GetLength() - (sizeof(ImageData) - sizeof(ElementHeader));
 }
 
-bool ReadableImageData::Validate() const {
-    static_assert(sizeof(ReadableImageData) == 5);
+bool ImageData::Validate() const {
+    static_assert(sizeof(ImageData) == 5);
     if (ElementHeader::GetElementType() != ElementHeader::ImageData) {
         return false;
     }
-    if (GetDataLenght() > ImageDataHeader::max_data_size) {
+    if (GetDataLenght() > ImageData::max_data_size) {
         return false;
     }
 
@@ -35,46 +35,64 @@ bool ReadableImageData::Validate() const {
     return false;
 }
 
-ReadableImageData *ReadableImageData::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(ElementHeader) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (ReadableImageData *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    if (raw_data->current + sizeof(ElementHeader) + res->GetLength() > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current += sizeof(ElementHeader) + res->GetLength();
-    return res;
-}
-
-uint16_t ReadableImageData::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
-}
-
-void ReadableImageData::Log() const {
-    log_i("ME ImageData data lenght: %u, type: %u", GetDataLenght(), type);
-}
-
-WritableImageData::WritableImageData(ImageDataHeader::Type type,
-                                     const nonstd::span<const uint8_t> &data)
-    : data{ data.data() }, header{ type, (uint16_t)data.size() } {
+WritableImageData::WritableImageData(ImageData::Type type,
+                                     const nonstd::span<const uint8_t> image_data)
+    : element{ type, (uint16_t)image_data.size() }, data{ image_data } {
+    static_assert(sizeof(element) == 5);
+    ASSERT(image_data.size() <= ImageData::max_data_size);
 }
 
 void WritableImageData::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(ImageDataHeader) <= raw_data->end);
-    ImageDataHeader *dst = (ImageDataHeader *)raw_data->current;
-    *dst = header;
-    raw_data->current += sizeof(ImageDataHeader);
+    ASSERT(raw_data->current + sizeof(ImageData) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
 
-    uint16_t data_size = header.GetDataLenght();
-    memcpy(raw_data->current, data, data_size);
-    raw_data->current += data_size;
+    std::memcpy(raw_data->current, data.data(), data.size());
+    raw_data->current += data.size();
 }
-uint16_t WritableImageData::GetTotalLength() const {
-    return header.GetLength() + sizeof(ElementHeader);
+
+void WritableImageData::Log() const {
+    log_i("ME ImageData data lenght: %u, type: %u", element.GetDataLenght(), element.type);
+}
+
+bool ReadableImageData::Deserialize(RawData *raw_data) {
+    if (raw_data->current + sizeof(ElementHeader) > raw_data->end) {
+        return false;
+    }
+
+    if (raw_data->current + sizeof(ReadableImageData::Element) > raw_data->end) {
+        return false;
+    }
+
+    auto item = (ReadableImageData::Element *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    element = item;
+    is_present = true;
+    return true;
+}
+
+const ReadableImageData::Element *const ReadableImageData::Get() const {
+    return element;
+}
+
+void ReadableImageData::Log() const {
+    ASSERT(element != nullptr);
+    log_i("ME ImageData data lenght: %u, type: %u", element->GetDataLenght(), element->type);
+}
+
+ElementHeader::ElementType ReadableImageData::GetElementType() const {
+    return ElementHeader::ImageData;
+}
+
+bool ReadableImageData::IsPresent() const {
+    return is_present;
 }

@@ -1,5 +1,6 @@
 #include "SessionId.h"
 #include "Logging.h"
+#include <cstring>
 #include <iomanip>
 #include <sstream>
 #include <string.h>
@@ -15,33 +16,63 @@ SessionId::SessionId(const AlignedSessionId &aligned_id) : SessionId() {
 
 bool SessionId::Validate() const {
     static_assert(sizeof(SessionId) == 20);
-    return ElementHeader::GetElementType() == ElementHeader::SessionID
-        && ElementHeader::GetLength() == (sizeof(SessionId) - sizeof(ElementHeader));
-}
-void SessionId::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(SessionId) <= raw_data->end);
-    SessionId *dst = (SessionId *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(SessionId);
-}
-SessionId *SessionId::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(SessionId) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (SessionId *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(SessionId);
-    return res;
-}
-uint16_t SessionId::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
+    return GetElementType() == ElementHeader::SessionID
+        && GetLength() == (sizeof(SessionId) - sizeof(ElementHeader));
 }
 
 void SessionId::Log() const {
     log_i("ME SessionId: %s", ToString().c_str());
+}
+
+WritableSessionId::WritableSessionId(const SessionId &session_id) : element{ session_id } {
+    static_assert(sizeof(SessionId) == 20);
+}
+
+void WritableSessionId::Serialize(RawData *raw_data) const {
+    ASSERT(raw_data->current + sizeof(SessionId) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(SessionId));
+    raw_data->current += sizeof(SessionId);
+}
+
+void WritableSessionId::Log() const {
+    element.Log();
+}
+
+const SessionId &WritableSessionId::Get() const {
+    return element;
+}
+
+bool ReadableSessionId::Deserialize(RawData *raw_data) {
+    if (raw_data->current + sizeof(SessionId) > raw_data->end) {
+        return false;
+    }
+
+    auto res = (SessionId *)raw_data->current;
+    if (!res->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(SessionId);
+
+    element = res;
+    is_present = true;
+    return true;
+}
+
+const SessionId *const ReadableSessionId::Get() const {
+    return element;
+}
+
+void ReadableSessionId::Log() const {
+    ASSERT(element != nullptr);
+    element->Log();
+}
+
+ElementHeader::ElementType ReadableSessionId::GetElementType() const {
+    return ElementHeader::SessionID;
+}
+
+bool ReadableSessionId::IsPresent() const {
+    return is_present;
 }
 
 std::string SessionId::ToString(const nonstd::span<const uint8_t> &session_id) {

@@ -14,7 +14,7 @@ TEST_GROUP(WTPRebootStatisticsTestsGroup){ //
                                            TEST_TEARDOWN(){}
 };
 
-TEST(WTPRebootStatisticsTestsGroup, WTPRebootStatistics_deserialize) {
+TEST(WTPRebootStatisticsTestsGroup, Wrapper_WTPRebootStatistics_deserialize) {
     // clang-format off
     // Юнит-тест: WTP Reboot Statistics - Пример 2 (проблемная WTP)
     // Тип элемента = 48, Длина = 15
@@ -35,28 +35,30 @@ TEST(WTPRebootStatisticsTestsGroup, WTPRebootStatistics_deserialize) {
     };
     // clang-format on
     RawData raw_data{ data, data + sizeof(data) };
-    auto element = WTPRebootStatistics::Deserialize(&raw_data);
+    ReadableWTPRebootStatistics read_data;
+    CHECK_FALSE(read_data.IsPresent());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK(element != nullptr);
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::WTPRebootStatistics, element->GetElementType());
-    CHECK_EQUAL(300, element->GetRebootCount());
-    CHECK_EQUAL(4, element->GetACInitiatedCount());
-    CHECK_EQUAL(12, element->GetLinkFailureCount());
-    CHECK_EQUAL(298, element->GetSWFailureCount());
-    CHECK_EQUAL(1, element->GetHWFailureCount());
-    CHECK_EQUAL(0, element->GetOtherFailureCount());
-    CHECK_EQUAL(1, element->GetUnknownFailureCount());
+    CHECK_EQUAL(ElementHeader::ElementType::WTPRebootStatistics, read_data.GetElementType());
+    CHECK_EQUAL(300, read_data.Get()->GetRebootCount());
+    CHECK_EQUAL(4, read_data.Get()->GetACInitiatedCount());
+    CHECK_EQUAL(12, read_data.Get()->GetLinkFailureCount());
+    CHECK_EQUAL(298, read_data.Get()->GetSWFailureCount());
+    CHECK_EQUAL(1, read_data.Get()->GetHWFailureCount());
+    CHECK_EQUAL(0, read_data.Get()->GetOtherFailureCount());
+    CHECK_EQUAL(1, read_data.Get()->GetUnknownFailureCount());
     CHECK_EQUAL(WTPRebootStatistics::LastFailureType::SoftwareFailure,
-                element->GetLastFailureType());
+                read_data.Get()->GetLastFailureType());
+    CHECK_TRUE(read_data.IsPresent());
 }
 
-TEST(WTPRebootStatisticsTestsGroup, WTPRebootStatistics_serialize) {
+TEST(WTPRebootStatisticsTestsGroup, Wrapper_WTPRebootStatistics_serialize) {
     uint8_t buffer[256] = {};
-    WTPRebootStatistics element_0{ 12340, 12341,
-                                   12342, 12343,
-                                   12344, 12345,
-                                   12346, WTPRebootStatistics::LastFailureType::LinkFailure };
+    WritableWTPRebootStatistics element_0{
+        12340, 12341, 12342, 12343,
+        12344, 12345, 12346, WTPRebootStatistics::LastFailureType::LinkFailure
+    };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     element_0.Serialize(&raw_data);
@@ -66,9 +68,13 @@ TEST(WTPRebootStatisticsTestsGroup, WTPRebootStatistics_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = WTPRebootStatistics::Deserialize(&raw_data);
-    CHECK(element != nullptr);
+
+    ReadableWTPRebootStatistics read_data;
+    CHECK_FALSE(read_data.IsPresent());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+
     CHECK_EQUAL(&buffer[0] + 19, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::WTPRebootStatistics, element->GetElementType());
-    CHECK_EQUAL(12340, element->GetRebootCount());
+    CHECK_EQUAL(ElementHeader::ElementType::WTPRebootStatistics, read_data.GetElementType());
+    CHECK_EQUAL(12340, read_data.Get()->GetRebootCount());
+    CHECK_TRUE(read_data.IsPresent());
 }

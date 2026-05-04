@@ -1,6 +1,7 @@
 #pragma once
 
 #include "CapwapMessage.h"
+#include "IElement.h"
 #include "elements/ACName.h"
 #include "elements/ACNameWithPriority.h"
 #include "elements/CapwapTransportProtocol.h"
@@ -11,19 +12,16 @@
 #include "elements/WTPStaticIPAddressInformation.h"
 #include "span.hpp"
 #include <limits>
-#include <vector>
+#include <unordered_map>
 
 struct WritableConfigurationStatusRequest : WritableCapwapRequest {
   private:
     const WritableACName ac_name;
     WritableRadioAdministrativeStateArray &radio_states;
-    const StatisticsTimer statistics_timer;
+    const WritableStatisticsTimer statistics_timer;
     const WTPRebootStatistics &wtp_reboot_statistics;
 
-    WritableACNameWithPriorityArray &ac_names_with_priority;
-    const CapwapTransportProtocol *capwap_transport_protocol;
-    const WTPStaticIPAddressInformation *wtp_static_ipaddress;
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads;
+    nonstd::span<IWritableConfigurationStatusRequestOptionalElement *const> optional_elements;
 
   public:
     WritableConfigurationStatusRequest(const WritableConfigurationStatusRequest &) = delete;
@@ -32,10 +30,15 @@ struct WritableConfigurationStatusRequest : WritableCapwapRequest {
         WritableRadioAdministrativeStateArray &radio_states,
         const uint16_t statistics_timer,
         const WTPRebootStatistics &wtp_reboot_statistics,
-        WritableACNameWithPriorityArray &ac_names_with_priority,
-        const CapwapTransportProtocol *capwap_transport_protocol,
-        const WTPStaticIPAddressInformation *wtp_static_ipaddress,
-        WritableVendorSpecificPayloadArray &vendor_specific_payloads);
+        nonstd::span<IWritableConfigurationStatusRequestOptionalElement *const> optional_elements);
+
+    WritableConfigurationStatusRequest(
+        const std::string_view ac_name,
+        WritableRadioAdministrativeStateArray &radio_states,
+        const uint16_t statistics_timer,
+        const WTPRebootStatistics &wtp_reboot_statistics,
+        std::initializer_list<IWritableConfigurationStatusRequestOptionalElement *>
+            optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
@@ -43,20 +46,31 @@ struct WritableConfigurationStatusRequest : WritableCapwapRequest {
 };
 
 struct ReadableConfigurationStatusRequest : ReadableCapwapRequest {
-    ReadableACName *ac_name;
-    ReadableRadioAdministrativeStateArray radio_states;
-    StatisticsTimer *statistics_timer;
-    WTPRebootStatistics *wtp_reboot_statistics;
+  protected:
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableConfigurationStatusRequestOptionalElement *const>
+        key_optional_elements;
 
-    ReadableACNameWithPriorityArray ac_names_with_priority;
-    CapwapTransportProtocol *capwap_transport_protocol;
-    WTPStaticIPAddressInformation *wtp_static_ipaddress;
-    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableConfigurationStatusRequestOptionalElement *const>
+    MapOptionalsElements(
+        nonstd::span<IReadableConfigurationStatusRequestOptionalElement *const> optional_elements);
+
+  public:
+    ReadableACName ac_name;
+    ReadableRadioAdministrativeStateArray radio_states;
+    ReadableStatisticsTimer statistics_timer;
+    ReadableWTPRebootStatistics wtp_reboot_statistics;
 
     size_t unknown_elements;
 
     ReadableConfigurationStatusRequest(const ReadableConfigurationStatusRequest &) = delete;
-    ReadableConfigurationStatusRequest();
+    ReadableConfigurationStatusRequest(
+        nonstd::span<IReadableConfigurationStatusRequestOptionalElement *const> optional_elements);
+
+    ReadableConfigurationStatusRequest(
+        std::initializer_list<IReadableConfigurationStatusRequestOptionalElement *>
+            optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

@@ -15,7 +15,7 @@ Station::Station(uint8_t radio_id,
                     (sizeof(Station) - sizeof(ElementHeader)) + supported_rates_length),
       radio_id{ radio_id }, association_id{ association_id }, flags{ flags },
       capabilities{ capabilities }, wlan_id{ wlan_id } {
-    memcpy(this->mac_address, mac_address, mac_address_size);
+    std::memcpy(this->mac_address, mac_address, mac_address_size);
 }
 
 uint8_t Station::GetRadioID() const {
@@ -68,64 +68,35 @@ bool Station::Validate() const {
     return true;
 }
 
-void Station::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(Station) <= raw_data->end);
-    Station *dst = (Station *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(Station);
-}
-
-Station *Station::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(Station) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (Station *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current = last;
-    return res;
-}
-
-WritableStationArray::Item::Item(uint8_t radio_id,
-                                 uint16_t association_id,
-                                 uint8_t flags,
-                                 const uint8_t *mac_address,
-                                 uint16_t capabilities,
-                                 uint8_t wlan_id,
-                                 nonstd::span<const uint8_t> supported_rates)
-    : supported_rates_data{ supported_rates }, header{ radio_id,
-                                                       association_id,
-                                                       flags,
-                                                       mac_address,
-                                                       capabilities,
-                                                       wlan_id,
-                                                       (uint16_t)supported_rates_data.size() } {
-}
-
-const uint8_t *WritableStationArray::Item::GetMACAddress() const {
-    return header.GetMACAddress();
-}
-
-uint8_t WritableStationArray::Item::GetRadioID() const {
-    return header.GetRadioID();
-}
-
 WritableStationArray::WritableStationArray() {
+    static_assert(sizeof(Item::header) == 17);
     items.reserve(ReadableStationArray::max_count);
 }
 
 void WritableStationArray::Add(WritableStationArray::Item element) {
     ASSERT(items.size() + 1 <= ReadableStationArray::max_count);
 
-    items.emplace_back(std::move(element));
+    auto it_exists = std::find_if(items.begin(), items.end(), [&element](const Item &item) {
+        return item.header.GetRadioID() == element.header.GetRadioID()
+            && memcmp(item.header.GetMACAddress(),
+                      element.header.GetMACAddress(),
+                      Station::mac_address_size)
+                   == 0;
+    });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("Station: replace RadioID: %u, MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+              (*it_exists).header.GetRadioID(),
+              (*it_exists).header.GetMACAddress()[0],
+              (*it_exists).header.GetMACAddress()[1],
+              (*it_exists).header.GetMACAddress()[2],
+              (*it_exists).header.GetMACAddress()[3],
+              (*it_exists).header.GetMACAddress()[4],
+              (*it_exists).header.GetMACAddress()[5]);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableStationArray::Empty() const {
@@ -137,11 +108,14 @@ void WritableStationArray::Clear() {
 }
 
 void WritableStationArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
-        uint16_t rates_size = elem.header.GetLength() - (sizeof(Station) - sizeof(ElementHeader));
-        memcpy(raw_data->current, elem.supported_rates_data.data(), rates_size);
-        raw_data->current += rates_size;
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
+        uint16_t data_size =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.data.data(), data_size);
+        raw_data->current += data_size;
     }
 }
 
@@ -159,7 +133,7 @@ void WritableStationArray::Log() const {
               items[i].header.GetMACAddress()[4],
               items[i].header.GetMACAddress()[5],
               items[i].header.GetWlanID(),
-              items[i].supported_rates_data.size());
+              items[i].data.size());
     }
 }
 
@@ -172,16 +146,27 @@ bool ReadableStationArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto station = Station::Deserialize(raw_data);
-    if (station == nullptr) {
+    if (raw_data->current + sizeof(Station) > raw_data->end) {
         return false;
     }
-    items[count] = station;
+
+    auto item = (ReadableStationArray::Item *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    items[count] = item;
     count++;
     return true;
 }
 
-nonstd::span<const Station *const> ReadableStationArray::Get() const {
+nonstd::span<const ReadableStationArray::Item *const> ReadableStationArray::Get() const {
     nonstd::span span(items.begin(), count);
     return span;
 }
@@ -202,4 +187,12 @@ void ReadableStationArray::Log() const {
               items[i]->GetWlanID(),
               items[i]->GetSupportedRatesLength());
     }
+}
+
+ElementHeader::ElementType ReadableStationArray::GetElementType() const {
+    return ElementHeader::Station;
+}
+
+bool ReadableStationArray::IsPresent() const {
+    return count > 0;
 }

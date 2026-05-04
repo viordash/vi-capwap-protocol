@@ -3,6 +3,7 @@
 #include "Logging.h"
 #include "lassert.h"
 #include <algorithm>
+#include <cstring>
 #include <string.h>
 
 ReturnedMessageElement::ReturnedMessageElement(Reasons reason, uint16_t data_length)
@@ -44,35 +45,10 @@ bool ReturnedMessageElement::Validate() const {
     return true;
 }
 
-void ReturnedMessageElement::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(ReturnedMessageElement) <= raw_data->end);
-    ReturnedMessageElement *dst = (ReturnedMessageElement *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(ReturnedMessageElement);
-}
-
-ReturnedMessageElement *ReturnedMessageElement::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(ReturnedMessageElement) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (ReturnedMessageElement *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current = last;
-    return res;
-}
-
 WritableReturnedMessageElementArray::WritableReturnedMessageElementArray(
     const nonstd::span<const Item> &items)
     : items(items.begin(), items.end()) {
+    static_assert(sizeof(Item::header) == 6);
     ASSERT(items.size() <= ReadableReturnedMessageElementArray::max_count);
 }
 
@@ -110,11 +86,13 @@ void WritableReturnedMessageElementArray::Clear() {
 }
 
 void WritableReturnedMessageElementArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
         uint16_t data_size =
-            elem.header.GetLength() - (sizeof(ReturnedMessageElement) - sizeof(ElementHeader));
-        memcpy(raw_data->current, elem.data.data(), data_size);
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.data.data(), data_size);
         raw_data->current += data_size;
     }
 }
@@ -138,6 +116,10 @@ void WritableReturnedMessageElementArray::Log() const {
     }
 }
 
+ElementHeader::ElementType WritableReturnedMessageElementArray::GetElementType() const {
+    return ElementHeader::ReturnedMessageElement;
+}
+
 ReadableReturnedMessageElementArray::ReadableReturnedMessageElementArray() : count{ 0 } {
 }
 
@@ -155,8 +137,13 @@ bool ReadableReturnedMessageElementArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += item->GetLength() + sizeof(ElementHeader);
 
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
     items[count] = item;
     count++;
     return true;
@@ -175,4 +162,12 @@ void ReadableReturnedMessageElementArray::Log() const {
               items[i]->GetReason(),
               items[i]->GetDataLength());
     }
+}
+
+ElementHeader::ElementType ReadableReturnedMessageElementArray::GetElementType() const {
+    return ElementHeader::ReturnedMessageElement;
+}
+
+bool ReadableReturnedMessageElementArray::IsPresent() const {
+    return count > 0;
 }

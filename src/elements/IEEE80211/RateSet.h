@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -31,24 +32,22 @@ struct __attribute__((packed)) RateSet : ElementHeader {
     // Rate Set: The AC generates the Rate Set that the WTP is to include
     // in its Beacon and Probe messages. The length of this field is
     // between 2 and 8 bytes.
-    uint8_t rate_set_data[];
 
     RateSet(const RateSet &) = default;
-    RateSet(uint8_t radio_id, nonstd::span<const uint8_t> rate_set_data);
+    RateSet(uint8_t radio_id, uint16_t length);
 
     uint8_t GetRadioID() const;
-    nonstd::span<const uint8_t> GetRateSetData() const;
-
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static RateSet *Deserialize(RawData *raw_data);
 };
 
-struct WritableRateSetArray {
+struct WritableRateSetArray : IWritableElement {
   public:
     struct Item {
-        uint8_t radio_id;
-        nonstd::span<const uint8_t> rate_set_data;
+        nonstd::span<const uint8_t> data;
+        RateSet header;
+        Item(const Item &) = default;
+        Item(uint8_t radio_id, nonstd::span<const uint8_t> rate_set_data)
+            : data{ rate_set_data }, header{ radio_id, (uint16_t)data.size() } {};
     };
 
   protected:
@@ -62,23 +61,30 @@ struct WritableRateSetArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableRateSetArray {
+struct ReadableRateSetArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
+    struct Item : RateSet {
+        uint8_t data[];
+        Item(const Item &) = delete;
+    };
+
   protected:
-    std::array<const RateSet *, max_count> items;
+    std::array<const Item *, max_count> items;
     size_t count;
 
   public:
     ReadableRateSetArray(const ReadableRateSetArray &) = delete;
     ReadableRateSetArray();
 
-    bool Deserialize(RawData *raw_data);
-    nonstd::span<const RateSet *const> Get() const;
-    void Log() const;
+    bool Deserialize(RawData *raw_data) override final;
+    nonstd::span<const ReadableRateSetArray::Item *const> Get() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

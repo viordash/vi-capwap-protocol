@@ -37,50 +37,24 @@ bool TxPowerLevel::Validate() const {
     return true;
 }
 
-void TxPowerLevel::Serialize(RawData *raw_data) const {
-    size_t total_size = sizeof(ElementHeader) + ElementHeader::GetLength();
-    ASSERT(raw_data->current + total_size <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, total_size);
-#pragma GCC diagnostic pop
-    raw_data->current += total_size;
-}
-
-TxPowerLevel *TxPowerLevel::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(ElementHeader) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (TxPowerLevel *)raw_data->current;
-    size_t total_size = sizeof(ElementHeader) + res->GetLength();
-    if (raw_data->current + total_size > raw_data->end) {
-        return nullptr;
-    }
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += total_size;
-    return res;
-}
-
-WritableTxPowerLevelArray::Item::Item(uint8_t radio_id, nonstd::span<const int16_t> levels)
-    : levels_data(levels), header(radio_id, levels_data.size()) {
-}
-
-uint8_t WritableTxPowerLevelArray::Item::GetRadioID() const {
-    return header.GetRadioID();
-}
-
 WritableTxPowerLevelArray::WritableTxPowerLevelArray() {
+    static_assert(sizeof(Item::header) == 6);
     items.reserve(ReadableTxPowerLevelArray::max_count);
 }
 
 void WritableTxPowerLevelArray::Add(Item element) {
     ASSERT(items.size() + 1 <= ReadableTxPowerLevelArray::max_count);
-    items.emplace_back(std::move(element));
+
+    auto it_exists = std::find_if(items.begin(), items.end(), [&element](const Item &item) {
+        return item.header.GetRadioID() == element.header.GetRadioID();
+    });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("TxPowerLevel: replace RadioID: %u", (*it_exists).header.GetRadioID());
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableTxPowerLevelArray::Empty() const {
@@ -92,13 +66,14 @@ void WritableTxPowerLevelArray::Clear() {
 }
 
 void WritableTxPowerLevelArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
-        auto *levels_ptr = raw_data->current - elem.levels_data.size() * sizeof(NetworkS16);
-        for (size_t i = 0; i < elem.levels_data.size(); i++) {
-            NetworkS16 net_value{ elem.levels_data[i] };
-            memcpy(levels_ptr + i * sizeof(NetworkS16), &net_value, sizeof(NetworkS16));
-        }
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
+        uint16_t data_size =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.data.data(), data_size);
+        raw_data->current += data_size;
     }
 }
 
@@ -106,8 +81,8 @@ void WritableTxPowerLevelArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
         log_i("ME TxPowerLevel #%zu RadioID:%u, NumLevels:%zu",
               i,
-              items[i].GetRadioID(),
-              items[i].levels_data.size());
+              items[i].header.GetRadioID(),
+              items[i].data.size());
     }
 }
 
@@ -120,16 +95,27 @@ bool ReadableTxPowerLevelArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto tpl = TxPowerLevel::Deserialize(raw_data);
-    if (tpl == nullptr) {
+    if (raw_data->current + sizeof(TxPowerLevel) > raw_data->end) {
         return false;
     }
-    items[count] = tpl;
+
+    auto item = (ReadableTxPowerLevelArray::Item *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    items[count] = item;
     count++;
     return true;
 }
 
-nonstd::span<const TxPowerLevel *const> ReadableTxPowerLevelArray::Get() const {
+nonstd::span<const ReadableTxPowerLevelArray::Item *const> ReadableTxPowerLevelArray::Get() const {
     nonstd::span span(items.begin(), count);
     return span;
 }
@@ -141,4 +127,12 @@ void ReadableTxPowerLevelArray::Log() const {
               items[i]->GetRadioID(),
               items[i]->GetNumLevels());
     }
+}
+
+ElementHeader::ElementType ReadableTxPowerLevelArray::GetElementType() const {
+    return ElementHeader::TxPowerLevel;
+}
+
+bool ReadableTxPowerLevelArray::IsPresent() const {
+    return count > 0;
 }

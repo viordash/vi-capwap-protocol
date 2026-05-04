@@ -2,54 +2,81 @@
 #include "ACName.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <cstring>
 #include <string.h>
 
-WritableACName::WritableACName(std::string_view name)
-    : ElementHeader(ElementHeader::ACName, name.size()), name{ name.data() } {
+ACName::ACName(uint16_t length)
+    : ElementHeader(ElementHeader::ACName, (sizeof(ACName) - sizeof(ElementHeader)) + length) {
+}
+
+uint16_t ACName::GetDataLenght() const {
+    return GetLength();
+}
+
+bool ACName::Validate() const {
+    static_assert(sizeof(ACName) == 4);
+    if (ElementHeader::GetElementType() != ElementHeader::ACName) {
+        return false;
+    }
+    if (GetDataLenght() > ACName::max_data_size) {
+        return false;
+    }
+    return true;
+}
+
+WritableACName::WritableACName(const std::string_view name)
+    : element{ (uint16_t)name.size() }, name{ name } {
+    static_assert(sizeof(element) == 4);
+    ASSERT(name.size() <= ACName::max_data_size);
 }
 
 void WritableACName::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(ElementHeader) + GetLength() <= raw_data->end);
-    ElementHeader *dst = (ElementHeader *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(ElementHeader);
-    memcpy(raw_data->current, name, GetLength());
-    raw_data->current += GetLength();
-}
-uint16_t WritableACName::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
+    ASSERT(raw_data->current + sizeof(ElementHeader) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
+
+    std::memcpy(raw_data->current, name.data(), name.size());
+    raw_data->current += name.size();
 }
 
 void WritableACName::Log() const {
-    log_i("ME ACName :%.*s", GetLength(), name);
+    log_i("ME ACName :%.*s", (int)name.size(), name.data());
 }
 
-ReadableACName::ReadableACName() : ElementHeader(ElementHeader::ACName, 0) {
-}
-bool ReadableACName::Validate() const {
-    static_assert(sizeof(ReadableACName) == 4);
-    return ElementHeader::GetElementType() == ElementHeader::ACName
-        && GetLength()
-               <= ReadableACName::max_data_size + (sizeof(ReadableACName) - sizeof(ElementHeader));
-}
-
-ReadableACName *ReadableACName::Deserialize(RawData *raw_data) {
+bool ReadableACName::Deserialize(RawData *raw_data) {
     if (raw_data->current + sizeof(ElementHeader) > raw_data->end) {
-        return nullptr;
+        return false;
     }
 
-    auto res = (ReadableACName *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    if (raw_data->current + sizeof(ElementHeader) + res->GetLength() > raw_data->end) {
-        return nullptr;
+    auto item = (ReadableACName::Element *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
     }
 
-    raw_data->current += sizeof(ElementHeader) + res->GetLength();
-    return res;
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    element = item;
+    is_present = true;
+    return true;
+}
+
+const ReadableACName::Element *const ReadableACName::Get() const {
+    return element;
 }
 
 void ReadableACName::Log() const {
-    log_i("ME ACName :%.*s", GetLength(), name);
+    ASSERT(element != nullptr);
+    log_i("ME ACName :%.*s", (int)element->GetDataLenght(), element->name);
+}
+
+ElementHeader::ElementType ReadableACName::GetElementType() const {
+    return ElementHeader::ACName;
+}
+
+bool ReadableACName::IsPresent() const {
+    return is_present;
 }

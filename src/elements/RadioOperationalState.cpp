@@ -3,6 +3,7 @@
 #include "lassert.h"
 #include <algorithm>
 #include <arpa/inet.h>
+#include <cstring>
 
 RadioOperationalState::RadioOperationalState(const uint8_t radio_id,
                                              const States state,
@@ -44,26 +45,9 @@ bool RadioOperationalState::Validate() const {
 
     return true;
 }
-void RadioOperationalState::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(RadioOperationalState) <= raw_data->end);
-    RadioOperationalState *dst = (RadioOperationalState *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(RadioOperationalState);
-}
-RadioOperationalState *RadioOperationalState::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(RadioOperationalState) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (RadioOperationalState *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(RadioOperationalState);
-    return res;
-}
 
 WritableRadioOperationalStateArray::WritableRadioOperationalStateArray() {
+    static_assert(sizeof(items[0]) == 7);
     items.reserve(ReadableRadioOperationalStateArray::max_count);
 }
 
@@ -91,8 +75,10 @@ void WritableRadioOperationalStateArray::Clear() {
 }
 
 void WritableRadioOperationalStateArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -115,11 +101,17 @@ bool ReadableRadioOperationalStateArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto ip_address = RadioOperationalState::Deserialize(raw_data);
-    if (ip_address == nullptr) {
+    if (raw_data->current + sizeof(RadioOperationalState) > raw_data->end) {
         return false;
     }
-    items[count] = ip_address;
+
+    auto element = (RadioOperationalState *)raw_data->current;
+    if (!element->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(RadioOperationalState);
+    items[count] = element;
     count++;
     return true;
 }
@@ -137,4 +129,12 @@ void ReadableRadioOperationalStateArray::Log() const {
               items[i]->State,
               items[i]->Cause);
     }
+}
+
+ElementHeader::ElementType ReadableRadioOperationalStateArray::GetElementType() const {
+    return ElementHeader::RadioOperationalState;
+}
+
+bool ReadableRadioOperationalStateArray::IsPresent() const {
+    return count > 0;
 }

@@ -2,7 +2,7 @@
 #include "ImageInformation.h"
 #include "Logging.h"
 #include "lassert.h"
-#include <string.h>
+#include <cstring>
 
 ImageInformation::ImageInformation()
     : ElementHeader(ElementHeader::ImageInformation,
@@ -28,36 +28,6 @@ bool ImageInformation::Validate() const {
         && GetLength() == (sizeof(ImageInformation) - sizeof(ElementHeader));
 }
 
-uint16_t ImageInformation::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
-}
-
-void ImageInformation::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(ImageInformation) <= raw_data->end);
-    ImageInformation *dst = (ImageInformation *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(ImageInformation);
-}
-
-ImageInformation *ImageInformation::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(ImageInformation) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (ImageInformation *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current = last;
-    return res;
-}
-
 void ImageInformation::Log() const {
     log_i("ME ImageInformation FileSize: %u, hash: "
           "%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
@@ -78,4 +48,58 @@ void ImageInformation::Log() const {
           file_hash[13],
           file_hash[14],
           file_hash[15]);
+}
+
+WritableImageInformation::WritableImageInformation(uint32_t file_size,
+                                                   const nonstd::span<const uint8_t> &hash)
+    : element{ file_size, hash } {
+    static_assert(sizeof(element) == 24);
+}
+
+void WritableImageInformation::Serialize(RawData *raw_data) const {
+    ASSERT(raw_data->current + sizeof(ImageInformation) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
+}
+
+void WritableImageInformation::Log() const {
+    element.Log();
+}
+
+bool ReadableImageInformation::Deserialize(RawData *raw_data) {
+    if (raw_data->current + sizeof(ImageInformation) > raw_data->end) {
+        return false;
+    }
+
+    auto res = (ImageInformation *)raw_data->current;
+    if (!res->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    element = res;
+    is_present = true;
+    return true;
+}
+
+const ImageInformation *const ReadableImageInformation::Get() const {
+    return element;
+}
+
+void ReadableImageInformation::Log() const {
+    ASSERT(element != nullptr);
+    element->Log();
+}
+
+ElementHeader::ElementType ReadableImageInformation::GetElementType() const {
+    return ElementHeader::ImageInformation;
+}
+
+bool ReadableImageInformation::IsPresent() const {
+    return is_present;
 }

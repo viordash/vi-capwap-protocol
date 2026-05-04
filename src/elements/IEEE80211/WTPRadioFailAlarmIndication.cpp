@@ -1,6 +1,7 @@
 #include "WTPRadioFailAlarmIndication.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <algorithm>
 #include <cstring>
 
 WTPRadioFailAlarmIndication::WTPRadioFailAlarmIndication(uint8_t radio_id,
@@ -44,37 +45,26 @@ bool WTPRadioFailAlarmIndication::Validate() const {
     return true;
 }
 
-void WTPRadioFailAlarmIndication::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(WTPRadioFailAlarmIndication) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(WTPRadioFailAlarmIndication));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(WTPRadioFailAlarmIndication);
-}
-
-WTPRadioFailAlarmIndication *WTPRadioFailAlarmIndication::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(WTPRadioFailAlarmIndication) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (WTPRadioFailAlarmIndication *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(WTPRadioFailAlarmIndication);
-    return res;
-}
-
 WritableWTPRadioFailAlarmIndicationArray::WritableWTPRadioFailAlarmIndicationArray() {
+    static_assert(sizeof(items[0]) == 8);
     items.reserve(ReadableWTPRadioFailAlarmIndicationArray::max_count);
 }
 
 void WritableWTPRadioFailAlarmIndicationArray::Add(WTPRadioFailAlarmIndication element) {
     ASSERT(items.size() + 1 <= ReadableWTPRadioFailAlarmIndicationArray::max_count);
-    items.emplace_back(std::move(element));
+
+    auto it_exists = std::find_if(items.begin(),
+                                  items.end(),
+                                  [&element](const WTPRadioFailAlarmIndication &item) {
+                                      return item.RadioID == element.RadioID;
+                                  });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("WTPRadioFailAlarmIndication: replace RadioID: %u", (*it_exists).RadioID);
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableWTPRadioFailAlarmIndicationArray::Empty() const {
@@ -86,8 +76,10 @@ void WritableWTPRadioFailAlarmIndicationArray::Clear() {
 }
 
 void WritableWTPRadioFailAlarmIndicationArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -104,17 +96,31 @@ void WritableWTPRadioFailAlarmIndicationArray::Log() const {
 ReadableWTPRadioFailAlarmIndicationArray::ReadableWTPRadioFailAlarmIndicationArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableWTPRadioFailAlarmIndicationArray::GetElementType() const {
+    return ElementHeader::WTPRadioFailAlarmIndication;
+}
+
+bool ReadableWTPRadioFailAlarmIndicationArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableWTPRadioFailAlarmIndicationArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableWTPRadioFailAlarmIndicationArray::Deserialize elements count exceeds");
         return false;
     }
 
-    auto rfai = WTPRadioFailAlarmIndication::Deserialize(raw_data);
-    if (rfai == nullptr) {
+    if (raw_data->current + sizeof(WTPRadioFailAlarmIndication) > raw_data->end) {
         return false;
     }
-    items[count] = rfai;
+
+    auto item = (WTPRadioFailAlarmIndication *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(WTPRadioFailAlarmIndication);
+    items[count] = item;
     count++;
     return true;
 }

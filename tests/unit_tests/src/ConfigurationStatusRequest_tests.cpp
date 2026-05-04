@@ -18,38 +18,42 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize)
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
-    WritableRadioAdministrativeStateArray radio_states;
-    radio_states.Add({ 0, RadioAdministrativeState::States::Enabled });
-    radio_states.Add({ 1, RadioAdministrativeState::States::Disabled });
+    {
+        WritableRadioAdministrativeStateArray radio_states;
+        radio_states.Add({ 0, RadioAdministrativeState::States::Enabled });
+        radio_states.Add({ 1, RadioAdministrativeState::States::Disabled });
 
-    WTPRebootStatistics wtp_reboot_statistics{
-        21, 22, 23, 24, 25, 26, 27, WTPRebootStatistics::LastFailureType::HardwareFailure
-    };
+        WTPRebootStatistics wtp_reboot_statistics{
+            21, 22, 23, 24, 25, 26, 27, WTPRebootStatistics::LastFailureType::HardwareFailure
+        };
 
-    WritableACNameWithPriorityArray ac_names_with_priority;
-    ac_names_with_priority.Add(1, "ACNameWithPriority");
-    ac_names_with_priority.Add(2, "ACNameWithPriority2");
+        WritableACNameWithPriorityArray ac_names_with_priority;
+        ac_names_with_priority.Add(1, "ACNameWithPriority");
+        ac_names_with_priority.Add(2, "ACNameWithPriority2");
 
-    CapwapTransportProtocol capwap_transport_protocol{ CapwapTransportProtocol::Type::UDP };
+        WritableCapwapTransportProtocol capwap_transport_protocol{
+            CapwapTransportProtocol::Type::UDP
+        };
 
-    WTPStaticIPAddressInformation wtp_static_ipaddress{ inet_addr("192.168.100.10"),
-                                                        inet_addr("255.255.255.0"),
-                                                        inet_addr("192.168.1.1"),
-                                                        true };
+        WritableWTPStaticIPAddressInformation wtp_static_ipaddress{ inet_addr("192.168.100.10"),
+                                                                    inet_addr("255.255.255.0"),
+                                                                    inet_addr("192.168.1.1"),
+                                                                    true };
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-    WritableConfigurationStatusRequest write_data("abcdefабвгд",
-                                                  radio_states,
-                                                  12345,
-                                                  wtp_reboot_statistics,
-                                                  ac_names_with_priority,
-                                                  &capwap_transport_protocol,
-                                                  &wtp_static_ipaddress,
-                                                  vendor_specific_payloads);
+        WritableConfigurationStatusRequest write_data("abcdefабвгд",
+                                                      radio_states,
+                                                      12345,
+                                                      wtp_reboot_statistics,
+                                                      { &ac_names_with_priority,
+                                                        &capwap_transport_protocol,
+                                                        &wtp_static_ipaddress,
+                                                        &vendor_specific_payloads });
 
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 173 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = {
         0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x2A, 0x00, 0x9D,
@@ -71,10 +75,21 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize)
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 173 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableConfigurationStatusRequest read_data;
+
+    ReadableACNameWithPriorityArray ac_names_with_priority;
+    ReadableCapwapTransportProtocol capwap_transport_protocol;
+    ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+    ReadableConfigurationStatusRequest read_data({ &ac_names_with_priority,
+                                                   &capwap_transport_protocol,
+                                                   &wtp_static_ipaddress,
+                                                   &vendor_specific_payloads });
+
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    STRNCMP_EQUAL("abcdefабвгд", (char *)read_data.ac_name->name, 14);
+    CHECK_TRUE(read_data.ac_name.IsPresent());
+    STRNCMP_EQUAL("abcdefабвгд", (char *)read_data.ac_name.Get()->name, 14);
 
     CHECK_EQUAL(2, read_data.radio_states.Get().size());
     CHECK_EQUAL(0, read_data.radio_states.Get()[0]->RadioID);
@@ -84,43 +99,43 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize)
     CHECK_EQUAL(RadioAdministrativeState::States::Disabled,
                 read_data.radio_states.Get()[1]->AdminState);
 
-    CHECK_EQUAL(12345, read_data.statistics_timer->GetValue());
+    CHECK_TRUE(read_data.statistics_timer.IsPresent());
+    CHECK_EQUAL(12345, read_data.statistics_timer.Get()->GetValue());
 
-    CHECK_EQUAL(21, read_data.wtp_reboot_statistics->GetRebootCount());
-    CHECK_EQUAL(22, read_data.wtp_reboot_statistics->GetACInitiatedCount());
-    CHECK_EQUAL(23, read_data.wtp_reboot_statistics->GetLinkFailureCount());
-    CHECK_EQUAL(24, read_data.wtp_reboot_statistics->GetSWFailureCount());
-    CHECK_EQUAL(25, read_data.wtp_reboot_statistics->GetHWFailureCount());
-    CHECK_EQUAL(26, read_data.wtp_reboot_statistics->GetOtherFailureCount());
-    CHECK_EQUAL(27, read_data.wtp_reboot_statistics->GetUnknownFailureCount());
+    CHECK_TRUE(read_data.wtp_reboot_statistics.IsPresent());
+    CHECK_EQUAL(21, read_data.wtp_reboot_statistics.Get()->GetRebootCount());
+    CHECK_EQUAL(22, read_data.wtp_reboot_statistics.Get()->GetACInitiatedCount());
+    CHECK_EQUAL(23, read_data.wtp_reboot_statistics.Get()->GetLinkFailureCount());
+    CHECK_EQUAL(24, read_data.wtp_reboot_statistics.Get()->GetSWFailureCount());
+    CHECK_EQUAL(25, read_data.wtp_reboot_statistics.Get()->GetHWFailureCount());
+    CHECK_EQUAL(26, read_data.wtp_reboot_statistics.Get()->GetOtherFailureCount());
+    CHECK_EQUAL(27, read_data.wtp_reboot_statistics.Get()->GetUnknownFailureCount());
     CHECK_EQUAL(WTPRebootStatistics::LastFailureType::HardwareFailure,
-                read_data.wtp_reboot_statistics->GetLastFailureType());
+                read_data.wtp_reboot_statistics.Get()->GetLastFailureType());
 
-    CHECK_EQUAL(2, read_data.ac_names_with_priority.Get().size());
-    CHECK_EQUAL(1, read_data.ac_names_with_priority.Get()[0]->GetPriority());
-    STRNCMP_EQUAL("ACNameWithPriority",
-                  (char *)read_data.ac_names_with_priority.Get()[0]->name,
-                  18);
-    CHECK_EQUAL(18, read_data.ac_names_with_priority.Get()[0]->GetNameLenght());
-    CHECK_EQUAL(2, read_data.ac_names_with_priority.Get()[1]->GetPriority());
-    STRNCMP_EQUAL("ACNameWithPriority2",
-                  (char *)read_data.ac_names_with_priority.Get()[1]->name,
-                  19);
-    CHECK_EQUAL(19, read_data.ac_names_with_priority.Get()[1]->GetNameLenght());
+    CHECK_TRUE(ac_names_with_priority.IsPresent());
+    CHECK_EQUAL(2, ac_names_with_priority.Get().size());
+    CHECK_EQUAL(1, ac_names_with_priority.Get()[0]->GetPriority());
+    STRNCMP_EQUAL("ACNameWithPriority", (char *)ac_names_with_priority.Get()[0]->name, 18);
+    CHECK_EQUAL(18, ac_names_with_priority.Get()[0]->GetNameLenght());
+    CHECK_EQUAL(2, ac_names_with_priority.Get()[1]->GetPriority());
+    STRNCMP_EQUAL("ACNameWithPriority2", (char *)ac_names_with_priority.Get()[1]->name, 19);
+    CHECK_EQUAL(19, ac_names_with_priority.Get()[1]->GetNameLenght());
 
-    CHECK_EQUAL(CapwapTransportProtocol::Type::UDP, read_data.capwap_transport_protocol->type);
+    CHECK_TRUE(capwap_transport_protocol.IsPresent());
+    CHECK_EQUAL(CapwapTransportProtocol::Type::UDP, capwap_transport_protocol.Get()->type);
 
-    CHECK_EQUAL(inet_addr("192.168.100.10"), read_data.wtp_static_ipaddress->IpAddress);
-    CHECK_EQUAL(inet_addr("255.255.255.0"), read_data.wtp_static_ipaddress->Netmask);
-    CHECK_EQUAL(inet_addr("192.168.1.1"), read_data.wtp_static_ipaddress->Gateway);
-    CHECK_EQUAL(1, read_data.wtp_static_ipaddress->Static);
+    CHECK_TRUE(wtp_static_ipaddress.IsPresent());
+    CHECK_EQUAL(inet_addr("192.168.100.10"), wtp_static_ipaddress.Get()->IpAddress);
+    CHECK_EQUAL(inet_addr("255.255.255.0"), wtp_static_ipaddress.Get()->Netmask);
+    CHECK_EQUAL(inet_addr("192.168.1.1"), wtp_static_ipaddress.Get()->Gateway);
+    CHECK_EQUAL(1, wtp_static_ipaddress.Get()->Static);
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -222,14 +237,22 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_deserializ
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableConfigurationStatusRequest read_data;
+    ReadableACNameWithPriorityArray ac_names_with_priority;
+    ReadableCapwapTransportProtocol capwap_transport_protocol;
+    ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+    ReadableConfigurationStatusRequest read_data({ &ac_names_with_priority,
+                                                   &capwap_transport_protocol,
+                                                   &wtp_static_ipaddress,
+                                                   &vendor_specific_payloads });
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    STRNCMP_EQUAL("AC-Primary", (char *)read_data.ac_name->name, 10);
-    CHECK_EQUAL(10, read_data.ac_name->GetLength());
+    STRNCMP_EQUAL("AC-Primary", (char *)read_data.ac_name.Get()->name, 10);
+    CHECK_EQUAL(10, read_data.ac_name.Get()->GetLength());
 
     CHECK_EQUAL(3, read_data.radio_states.Get().size());
     CHECK_EQUAL(255, read_data.radio_states.Get()[0]->RadioID);
@@ -242,37 +265,40 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_deserializ
     CHECK_EQUAL(RadioAdministrativeState::States::Disabled,
                 read_data.radio_states.Get()[2]->AdminState);
 
-    CHECK_EQUAL(120, read_data.statistics_timer->GetValue());
+    CHECK_TRUE(read_data.statistics_timer.IsPresent());
+    CHECK_EQUAL(120, read_data.statistics_timer.Get()->GetValue());
 
-    CHECK_EQUAL(5, read_data.wtp_reboot_statistics->GetRebootCount());
-    CHECK_EQUAL(2, read_data.wtp_reboot_statistics->GetACInitiatedCount());
-    CHECK_EQUAL(1, read_data.wtp_reboot_statistics->GetLinkFailureCount());
-    CHECK_EQUAL(1, read_data.wtp_reboot_statistics->GetSWFailureCount());
-    CHECK_EQUAL(0, read_data.wtp_reboot_statistics->GetHWFailureCount());
-    CHECK_EQUAL(1, read_data.wtp_reboot_statistics->GetOtherFailureCount());
-    CHECK_EQUAL(0, read_data.wtp_reboot_statistics->GetUnknownFailureCount());
+    CHECK_TRUE(read_data.wtp_reboot_statistics.IsPresent());
+    CHECK_EQUAL(5, read_data.wtp_reboot_statistics.Get()->GetRebootCount());
+    CHECK_EQUAL(2, read_data.wtp_reboot_statistics.Get()->GetACInitiatedCount());
+    CHECK_EQUAL(1, read_data.wtp_reboot_statistics.Get()->GetLinkFailureCount());
+    CHECK_EQUAL(1, read_data.wtp_reboot_statistics.Get()->GetSWFailureCount());
+    CHECK_EQUAL(0, read_data.wtp_reboot_statistics.Get()->GetHWFailureCount());
+    CHECK_EQUAL(1, read_data.wtp_reboot_statistics.Get()->GetOtherFailureCount());
+    CHECK_EQUAL(0, read_data.wtp_reboot_statistics.Get()->GetUnknownFailureCount());
     CHECK_EQUAL(WTPRebootStatistics::LastFailureType::SoftwareFailure,
-                read_data.wtp_reboot_statistics->GetLastFailureType());
+                read_data.wtp_reboot_statistics.Get()->GetLastFailureType());
 
-    CHECK_EQUAL(2, read_data.ac_names_with_priority.Get().size());
-    CHECK_EQUAL(1, read_data.ac_names_with_priority.Get()[0]->GetPriority());
-    STRNCMP_EQUAL("AC-Primary", (char *)read_data.ac_names_with_priority.Get()[0]->name, 10);
-    CHECK_EQUAL(10, read_data.ac_names_with_priority.Get()[0]->GetNameLenght());
-    CHECK_EQUAL(2, read_data.ac_names_with_priority.Get()[1]->GetPriority());
-    STRNCMP_EQUAL(" AC-Secondary ", (char *)read_data.ac_names_with_priority.Get()[1]->name, 14);
-    CHECK_EQUAL(14, read_data.ac_names_with_priority.Get()[1]->GetNameLenght());
+    CHECK_EQUAL(2, ac_names_with_priority.Get().size());
+    CHECK_EQUAL(1, ac_names_with_priority.Get()[0]->GetPriority());
+    STRNCMP_EQUAL("AC-Primary", (char *)ac_names_with_priority.Get()[0]->name, 10);
+    CHECK_EQUAL(10, ac_names_with_priority.Get()[0]->GetNameLenght());
+    CHECK_EQUAL(2, ac_names_with_priority.Get()[1]->GetPriority());
+    STRNCMP_EQUAL(" AC-Secondary ", (char *)ac_names_with_priority.Get()[1]->name, 14);
+    CHECK_EQUAL(14, ac_names_with_priority.Get()[1]->GetNameLenght());
 
-    CHECK_EQUAL(CapwapTransportProtocol::Type::UDP, read_data.capwap_transport_protocol->type);
+    CHECK_EQUAL(CapwapTransportProtocol::Type::UDP, capwap_transport_protocol.Get()->type);
 
-    CHECK_EQUAL(inet_addr("192.168.1.100"), read_data.wtp_static_ipaddress->IpAddress);
-    CHECK_EQUAL(inet_addr("255.255.255.0"), read_data.wtp_static_ipaddress->Netmask);
-    CHECK_EQUAL(inet_addr("192.168.1.1"), read_data.wtp_static_ipaddress->Gateway);
-    CHECK_EQUAL(1, read_data.wtp_static_ipaddress->Static);
+    CHECK_EQUAL(inet_addr("192.168.1.100"), wtp_static_ipaddress.Get()->IpAddress);
+    CHECK_EQUAL(inet_addr("255.255.255.0"), wtp_static_ipaddress.Get()->Netmask);
+    CHECK_EQUAL(inet_addr("192.168.1.1"), wtp_static_ipaddress.Get()->Gateway);
+    CHECK_EQUAL(1, wtp_static_ipaddress.Get()->Static);
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(11134, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("TestData", (char *)read_data.vendor_specific_payloads.Get()[0]->value, 8);
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(11134, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("TestData", (char *)vendor_specific_payloads.Get()[0]->value, 8);
+
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -293,7 +319,7 @@ TEST(ConfigurationStatusRequestTestsGroup,
         // ===================================================================
         0x00, 0x00, 0x00, 0x05, // Message Type: 5 (Configuration Status Request)
         0x01,                   // Sequence Number: 1 (пример)
-        0x00, 0x33 + 10,             // Message Element Length: 51 + 10 байт 
+        0x00, 0x33 + 10,             // Message Element Length: 51 + 10 байт
         0x00,                   // Flags: 0
 
         // ===================================================================
@@ -345,7 +371,7 @@ TEST(ConfigurationStatusRequestTestsGroup,
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableConfigurationStatusRequest read_data;
+    ReadableConfigurationStatusRequest read_data({});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

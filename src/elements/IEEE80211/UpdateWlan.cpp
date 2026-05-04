@@ -10,8 +10,9 @@ UpdateWlan::UpdateWlan(uint8_t radio_id,
                        uint8_t key_index,
                        KeyStatus key_status,
                        uint16_t key_length)
-    : ElementHeader(ElementHeader::UpdateWlan, 8 + key_length), radio_id{ radio_id },
-      wlan_id{ wlan_id }, capability{ capability }, key_index{ key_index },
+    : ElementHeader(ElementHeader::UpdateWlan,
+                    sizeof(UpdateWlan) - sizeof(ElementHeader) + key_length),
+      radio_id{ radio_id }, wlan_id{ wlan_id }, capability{ capability }, key_index{ key_index },
       key_status{ key_status }, key_length{ key_length } {
 }
 
@@ -73,60 +74,27 @@ bool UpdateWlan::Validate() const {
     return true;
 }
 
-void UpdateWlan::Serialize(RawData *raw_data) const {
-    size_t total_size = sizeof(ElementHeader) + ElementHeader::GetLength();
-    ASSERT(raw_data->current + total_size <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, total_size);
-#pragma GCC diagnostic pop
-    raw_data->current += total_size;
-}
-
-UpdateWlan *UpdateWlan::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(ElementHeader) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (UpdateWlan *)raw_data->current;
-    size_t total_size = sizeof(ElementHeader) + res->GetLength();
-    if (raw_data->current + total_size > raw_data->end) {
-        return nullptr;
-    }
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += total_size;
-    return res;
-}
-
-WritableUpdateWlanArray::Item::Item(uint8_t radio_id,
-                                    uint8_t wlan_id,
-                                    uint16_t capability,
-                                    uint8_t key_index,
-                                    UpdateWlan::KeyStatus key_status,
-                                    nonstd::span<const uint8_t> key)
-    : key_data(key), radio_id(radio_id), wlan_id(wlan_id), capability(capability),
-      key_index(key_index), key_status(key_status) {
-}
-
-uint8_t WritableUpdateWlanArray::Item::GetRadioID() const {
-    return radio_id;
-}
-
-uint8_t WritableUpdateWlanArray::Item::GetWlanID() const {
-    return wlan_id;
-}
-
 WritableUpdateWlanArray::WritableUpdateWlanArray() {
+    static_assert(sizeof(Item::header) == 12);
     items.reserve(ReadableUpdateWlanArray::max_count);
 }
 
 void WritableUpdateWlanArray::Add(Item element) {
     ASSERT(items.size() + 1 <= ReadableUpdateWlanArray::max_count);
-    items.emplace_back(std::move(element));
+
+    auto it_exists = std::find_if(items.begin(), items.end(), [&element](const Item &item) {
+        return item.header.GetRadioID() == element.header.GetRadioID()
+            && item.header.GetWlanID() == element.header.GetWlanID();
+    });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("UpdateWlan: replace RadioID: %u, WlanID: %u",
+              (*it_exists).header.GetRadioID(),
+              (*it_exists).header.GetWlanID());
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableUpdateWlanArray::Empty() const {
@@ -138,20 +106,14 @@ void WritableUpdateWlanArray::Clear() {
 }
 
 void WritableUpdateWlanArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        UpdateWlan header(elem.radio_id,
-                          elem.wlan_id,
-                          elem.capability,
-                          elem.key_index,
-                          elem.key_status,
-                          elem.key_data.size());
-        header.Serialize(raw_data);
-        // Overwrite key data in the serialized buffer
-        if (!elem.key_data.empty()) {
-            memcpy(raw_data->current - elem.key_data.size(),
-                   elem.key_data.data(),
-                   elem.key_data.size());
-        }
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
+        uint16_t data_size =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.data.data(), data_size);
+        raw_data->current += data_size;
     }
 }
 
@@ -160,12 +122,12 @@ void WritableUpdateWlanArray::Log() const {
         log_i("ME UpdateWlan #%zu RadioID:%u, WlanID:%u, Capability:0x%04X, KeyIndex:%u, "
               "KeyStatus:%u, KeyLen:%zu",
               i,
-              items[i].radio_id,
-              items[i].wlan_id,
-              items[i].capability,
-              items[i].key_index,
-              items[i].key_status,
-              items[i].key_data.size());
+              items[i].header.GetRadioID(),
+              items[i].header.GetWlanID(),
+              items[i].header.GetCapability(),
+              items[i].header.GetKeyIndex(),
+              items[i].header.GetKeyStatus(),
+              items[i].data.size());
     }
 }
 
@@ -178,16 +140,27 @@ bool ReadableUpdateWlanArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto uw = UpdateWlan::Deserialize(raw_data);
-    if (uw == nullptr) {
+    if (raw_data->current + sizeof(UpdateWlan) > raw_data->end) {
         return false;
     }
-    items[count] = uw;
+
+    auto item = (ReadableUpdateWlanArray::Item *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    items[count] = item;
     count++;
     return true;
 }
 
-nonstd::span<const UpdateWlan *const> ReadableUpdateWlanArray::Get() const {
+nonstd::span<const ReadableUpdateWlanArray::Item *const> ReadableUpdateWlanArray::Get() const {
     nonstd::span span(items.begin(), count);
     return span;
 }
@@ -204,4 +177,12 @@ void ReadableUpdateWlanArray::Log() const {
               items[i]->GetKeyStatus(),
               items[i]->GetKeyLength());
     }
+}
+
+ElementHeader::ElementType ReadableUpdateWlanArray::GetElementType() const {
+    return ElementHeader::UpdateWlan;
+}
+
+bool ReadableUpdateWlanArray::IsPresent() const {
+    return count > 0;
 }

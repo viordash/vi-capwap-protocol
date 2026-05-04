@@ -11,24 +11,45 @@ WritableJoinRequest::WritableJoinRequest(
     const WritableWTPDescriptor &wtp_descriptor,
     const std::string_view wtp_name,
     const SessionId &session_id,
-    const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
+    const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
     const WTPMACType::Type mac_type,
     WritableWTPRadioInformationArray &wtp_radio_informations,
     const ECNSupport::Type ecn_support,
     const nonstd::span<const CAPWAPLocalIPv4Address> &ip_addresses,
-    const CapwapTransportProtocol *capwap_transport_protocol,
-    const MaximumMessageLength *maximum_message_length,
-    const WTPRebootStatistics *wtp_reboot_statistics,
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads)
+    nonstd::span<IWritableJoinRequestOptionalElement *const> optional_elements)
     : location_data{ location_data }, wtp_board_data{ wtp_board_data },
       wtp_descriptor{ wtp_descriptor }, wtp_name{ wtp_name }, session_id{ session_id },
       wtp_frame_tunnel_mode{ wtp_frame_tunnel_mode }, wtp_mac_type{ mac_type },
       wtp_radio_informations{ wtp_radio_informations }, ecn_support{ ecn_support },
-      ip_addresses{ ip_addresses }, capwap_transport_protocol{ capwap_transport_protocol },
-      maximum_message_length{ maximum_message_length },
-      wtp_reboot_statistics{ wtp_reboot_statistics },
-      vendor_specific_payloads{ vendor_specific_payloads } {
+      ip_addresses{ ip_addresses }, optional_elements{ optional_elements } {
     ASSERT(wtp_descriptor.GetHeader().RadiosInUse <= wtp_radio_informations.Size());
+}
+
+WritableJoinRequest::WritableJoinRequest(
+    const std::string_view location_data,
+    const WritableWTPBoardData &wtp_board_data,
+    const WritableWTPDescriptor &wtp_descriptor,
+    const std::string_view wtp_name,
+    const SessionId &session_id,
+    const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
+    const WTPMACType::Type mac_type,
+    WritableWTPRadioInformationArray &wtp_radio_informations,
+    const ECNSupport::Type ecn_support,
+    const nonstd::span<const CAPWAPLocalIPv4Address> &ip_addresses,
+    std::initializer_list<IWritableJoinRequestOptionalElement *> optional_elements)
+    : WritableJoinRequest(
+          location_data,
+          wtp_board_data,
+          wtp_descriptor,
+          wtp_name,
+          session_id,
+          wtp_frame_tunnel_mode,
+          mac_type,
+          wtp_radio_informations,
+          ecn_support,
+          ip_addresses,
+          nonstd::span<IWritableJoinRequestOptionalElement *const>(optional_elements.begin(),
+                                                                   optional_elements.size())) {
 }
 
 ControlHeader::MessageType WritableJoinRequest::GetMessageType() const {
@@ -50,29 +71,22 @@ void WritableJoinRequest::Serialize(RawData *raw_data) const {
     wtp_radio_informations.Serialize(raw_data);
     ecn_support.Serialize(raw_data);
     ip_addresses.Serialize(raw_data);
-    if (capwap_transport_protocol != nullptr) {
-        capwap_transport_protocol->Serialize(raw_data);
+
+    for (auto *elem : optional_elements) {
+        elem->Serialize(raw_data);
     }
-    if (maximum_message_length != nullptr) {
-        maximum_message_length->Serialize(raw_data);
-    }
-    if (wtp_reboot_statistics != nullptr) {
-        wtp_reboot_statistics->Serialize(raw_data);
-    }
-    vendor_specific_payloads.Serialize(raw_data);
 }
 
-ReadableJoinRequest::ReadableJoinRequest() : unknown_elements{} {
-    location_data = nullptr;
-    wtp_name = nullptr;
-    session_id = nullptr;
-    wtp_frame_tunnel_mode = nullptr;
-    wtp_mac_type = nullptr;
+ReadableJoinRequest::ReadableJoinRequest(
+    nonstd::span<IReadableJoinRequestOptionalElement *const> optional_elements)
+    : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
+}
 
-    ecn_support = nullptr;
-    capwap_transport_protocol = nullptr;
-    maximum_message_length = nullptr;
-    wtp_reboot_statistics = nullptr;
+ReadableJoinRequest::ReadableJoinRequest(
+    std::initializer_list<IReadableJoinRequestOptionalElement *> optional_elements)
+    : ReadableJoinRequest(
+          nonstd::span<IReadableJoinRequestOptionalElement *const>(optional_elements.begin(),
+                                                                   optional_elements.size())) {
 }
 
 ControlHeader::MessageType ReadableJoinRequest::GetMessageType() const {
@@ -85,8 +99,7 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
 
         switch (element->GetElementType()) {
             case ElementHeader::ElementType::LocationData:
-                location_data = ReadableLocationData::Deserialize(raw_data);
-                if (location_data == nullptr) {
+                if (!location_data.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -102,26 +115,22 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
                 break;
 
             case ElementHeader::ElementType::WTPName:
-                wtp_name = ReadableWTPName::Deserialize(raw_data);
-                if (wtp_name == nullptr) {
+                if (!wtp_name.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
             case ElementHeader::ElementType::SessionID:
-                session_id = SessionId::Deserialize(raw_data);
-                if (session_id == nullptr) {
+                if (!session_id.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
             case ElementHeader::ElementType::WTPFrameTunnelMode:
-                wtp_frame_tunnel_mode = WTPFrameTunnelMode::Deserialize(raw_data);
-                if (wtp_frame_tunnel_mode == nullptr) {
+                if (!wtp_frame_tunnel_mode.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
             case ElementHeader::ElementType::WTPMACType:
-                wtp_mac_type = WTPMACType::Deserialize(raw_data);
-                if (wtp_mac_type == nullptr) {
+                if (!wtp_mac_type.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -132,8 +141,7 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
                 break;
 
             case ElementHeader::ElementType::ECNSupport:
-                ecn_support = ECNSupport::Deserialize(raw_data);
-                if (ecn_support == nullptr) {
+                if (!ecn_support.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
@@ -142,31 +150,16 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
                     return false;
                 }
                 break;
-            case ElementHeader::ElementType::CAPWAPTransportProtocol:
-                capwap_transport_protocol = CapwapTransportProtocol::Deserialize(raw_data);
-                if (capwap_transport_protocol == nullptr) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::MaximumMessageLength:
-                maximum_message_length = MaximumMessageLength::Deserialize(raw_data);
-                if (maximum_message_length == nullptr) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::WTPRebootStatistics:
-                wtp_reboot_statistics = WTPRebootStatistics::Deserialize(raw_data);
-                if (wtp_reboot_statistics == nullptr) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::VendorSpecificPayload:
-                if (!vendor_specific_payloads.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
 
             default: {
+                auto it = key_optional_elements.find(element->GetElementType());
+                if (it != key_optional_elements.end()) {
+                    if (!it->second->Deserialize(raw_data)) {
+                        return false;
+                    }
+                    break;
+                }
+
                 auto unknownElement = UnrecognizedElement::Deserialize(raw_data);
                 if (unknownElement == nullptr) {
                     return false;
@@ -180,55 +173,54 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
         }
     }
 
-    return location_data != nullptr && wtp_board_data.header != nullptr
-        && wtp_descriptor.header != nullptr && wtp_name != nullptr && session_id != nullptr
-        && wtp_frame_tunnel_mode != nullptr && wtp_mac_type != nullptr
-        && wtp_radio_informations.Get().size() > 0 && ecn_support != nullptr
-        && ip_addresses.Get().size() > 0;
+    return location_data.IsPresent() && wtp_board_data.IsPresent() && wtp_descriptor.IsPresent()
+        && wtp_name.IsPresent() && session_id.IsPresent() && wtp_frame_tunnel_mode.IsPresent()
+        && wtp_mac_type.IsPresent() && wtp_radio_informations.Get().size() > 0
+        && ecn_support.IsPresent() && ip_addresses.Get().size() > 0;
 }
 
 void ReadableJoinRequest::Log() const {
     log_i("----------------------------------");
     log_i("ME JoinRequest:");
 
-    ASSERT(location_data != nullptr);
-    location_data->Log();
+    location_data.Log();
 
     wtp_board_data.Log();
     wtp_descriptor.Log();
 
-    ASSERT(wtp_name != nullptr);
-    wtp_name->Log();
+    wtp_name.Log();
 
-    ASSERT(session_id != nullptr);
-    session_id->Log();
+    session_id.Log();
 
-    ASSERT(wtp_frame_tunnel_mode != nullptr);
-    wtp_frame_tunnel_mode->Log();
+    wtp_frame_tunnel_mode.Log();
 
-    ASSERT(wtp_mac_type != nullptr);
-    wtp_mac_type->Log();
+    wtp_mac_type.Log();
 
     wtp_radio_informations.Log();
 
-    ASSERT(ecn_support != nullptr);
-    ecn_support->Log();
+    ecn_support.Log();
 
     ip_addresses.Log();
 
-    if (capwap_transport_protocol != nullptr) {
-        capwap_transport_protocol->Log();
+    for (const auto &[_, value] : key_optional_elements) {
+        value->Log();
     }
-    if (maximum_message_length != nullptr) {
-        maximum_message_length->Log();
-    }
-    if (wtp_reboot_statistics != nullptr) {
-        wtp_reboot_statistics->Log();
-    }
-    vendor_specific_payloads.Log();
 
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
+}
+
+std::unordered_map<ElementHeader::ElementType, IReadableJoinRequestOptionalElement *const>
+ReadableJoinRequest::MapOptionalsElements(
+    nonstd::span<IReadableJoinRequestOptionalElement *const> optional_elements) {
+
+    std::unordered_map<ElementHeader::ElementType, IReadableJoinRequestOptionalElement *const> map;
+
+    for (auto *elem : optional_elements) {
+        map.emplace(elem->GetElementType(), elem);
+    }
+
+    return map;
 }

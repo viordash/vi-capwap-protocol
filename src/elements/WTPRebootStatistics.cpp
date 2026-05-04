@@ -40,28 +40,6 @@ bool WTPRebootStatistics::Validate() const {
             return false;
     };
 }
-void WTPRebootStatistics::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(WTPRebootStatistics) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(WTPRebootStatistics));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(WTPRebootStatistics);
-}
-WTPRebootStatistics *WTPRebootStatistics::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(WTPRebootStatistics) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (WTPRebootStatistics *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(WTPRebootStatistics);
-    return res;
-}
 
 uint16_t WTPRebootStatistics::GetRebootCount() const {
     return reboot_count.Get();
@@ -95,10 +73,6 @@ WTPRebootStatistics::LastFailureType WTPRebootStatistics::GetLastFailureType() c
     return last_failure_type;
 }
 
-uint16_t WTPRebootStatistics::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
-}
-
 void WTPRebootStatistics::Log() const {
     log_i("ME WTPRebootStatistics Reboot Count:%u, AC Initiated Count:%u, Link Failure Count:%u, "
           "SW Failure Count:%u, HW Failure Count:%u, Other Failure Count:%u, Unknown Failure "
@@ -111,4 +85,60 @@ void WTPRebootStatistics::Log() const {
           GetOtherFailureCount(),
           GetUnknownFailureCount(),
           (unsigned)GetLastFailureType());
+}
+
+WritableWTPRebootStatistics::WritableWTPRebootStatistics(
+    uint16_t reboot_count,
+    uint16_t ac_initiated_count,
+    uint16_t link_failure_count,
+    uint16_t sw_failure_count,
+    uint16_t hw_failure_count,
+    uint16_t other_failure_count,
+    uint16_t unknown_failure_count,
+    WTPRebootStatistics::LastFailureType last_failure_type)
+    : element{ reboot_count,     ac_initiated_count,  link_failure_count,    sw_failure_count,
+               hw_failure_count, other_failure_count, unknown_failure_count, last_failure_type } {
+}
+
+void WritableWTPRebootStatistics::Serialize(RawData *raw_data) const {
+    ASSERT(raw_data->current + sizeof(WTPRebootStatistics) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
+}
+
+void WritableWTPRebootStatistics::Log() const {
+    element.Log();
+}
+
+bool ReadableWTPRebootStatistics::Deserialize(RawData *raw_data) {
+    if (raw_data->current + sizeof(WTPRebootStatistics) > raw_data->end) {
+        return false;
+    }
+
+    auto res = (WTPRebootStatistics *)raw_data->current;
+    if (!res->Validate()) {
+        return false;
+    }
+    raw_data->current += sizeof(WTPRebootStatistics);
+
+    element = res;
+    is_present = true;
+    return true;
+}
+
+const WTPRebootStatistics *const ReadableWTPRebootStatistics::Get() const {
+    return element;
+}
+
+void ReadableWTPRebootStatistics::Log() const {
+    ASSERT(element != nullptr);
+    element->Log();
+}
+
+ElementHeader::ElementType ReadableWTPRebootStatistics::GetElementType() const {
+    return ElementHeader::WTPRebootStatistics;
+}
+
+bool ReadableWTPRebootStatistics::IsPresent() const {
+    return is_present;
 }

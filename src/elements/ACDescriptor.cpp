@@ -2,7 +2,7 @@
 #include "ACDescriptor.h"
 #include "Logging.h"
 #include "lassert.h"
-#include <string.h>
+#include <cstring>
 
 ACDescriptorHeader::ACDescriptorHeader(uint16_t stations,
                                        uint16_t limit,
@@ -41,8 +41,7 @@ bool ACDescriptorHeader::Validate() const {
 
 void ACDescriptorHeader::Serialize(RawData *raw_data) const {
     ASSERT(raw_data->current + sizeof(ACDescriptorHeader) + GetLength() <= raw_data->end);
-    ACDescriptorHeader *dst = (ACDescriptorHeader *)raw_data->current;
-    *dst = *this;
+    std::memcpy(raw_data->current, this, sizeof(ACDescriptorHeader));
     raw_data->current += sizeof(ACDescriptorHeader);
 }
 
@@ -257,4 +256,12 @@ void ReadableACDescriptor::Log() const {
               items[i]->GetLength(),
               items[i]->data);
     }
+}
+
+ElementHeader::ElementType ReadableACDescriptor::GetElementType() const {
+    return ElementHeader::ACDescriptor;
+}
+
+bool ReadableACDescriptor::IsPresent() const {
+    return count > 0;
 }

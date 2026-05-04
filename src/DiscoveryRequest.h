@@ -1,31 +1,32 @@
 #pragma once
 
 #include "CapwapMessage.h"
+#include "IElement.h"
 #include "elements/DiscoveryType.h"
+#include "elements/IEEE80211/WTPRadioInformation.h"
 #include "elements/MTUDiscoveryPadding.h"
 #include "elements/VendorSpecificPayload.h"
 #include "elements/WTPBoardData.h"
 #include "elements/WTPDescriptor.h"
 #include "elements/WTPFrameTunnelMode.h"
 #include "elements/WTPMACType.h"
-#include "elements/IEEE80211/WTPRadioInformation.h"
 #include "span.hpp"
 #include <limits>
-#include <vector>
+#include <unordered_map>
 
 struct WritableDiscoveryRequest : WritableCapwapRequest {
 
   private:
-    const DiscoveryType discovery_type;
+    const WritableDiscoveryType discovery_type;
     const WritableWTPBoardData &wtp_board_data;
     const WritableWTPDescriptor &wtp_descriptor;
-    const WTPFrameTunnelMode &wtp_frame_tunnel_mode;
-    const WTPMACType wtp_mac_type;
+    const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode;
+    const WritableWTPMACType wtp_mac_type;
     WritableWTPRadioInformationArray &wtp_radio_informations;
 
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads;
+    nonstd::span<IWritableDiscoveryRequestOptionalElement *const> optional_elements;
 
-    const MTUDiscoveryPadding padding;
+    const WritableMTUDiscoveryPadding padding;
 
     uint16_t CalcTotalSize();
     uint16_t CalcMessageLength(uint16_t probe_mtu_size);
@@ -35,14 +36,25 @@ struct WritableDiscoveryRequest : WritableCapwapRequest {
     static const uint16_t no_probe_mtu_size = std::numeric_limits<uint16_t>::min();
 
     WritableDiscoveryRequest(const WritableDiscoveryRequest &) = delete;
-    WritableDiscoveryRequest(const DiscoveryType::Type discovery_type,
-                             const WritableWTPBoardData &wtp_board_data,
-                             const WritableWTPDescriptor &wtp_descriptor,
-                             const WTPFrameTunnelMode &wtp_frame_tunnel_mode,
-                             const WTPMACType::Type mac_type,
-                             WritableWTPRadioInformationArray &wtp_radio_informations,
-                             WritableVendorSpecificPayloadArray &vendor_specific_payloads,
-                             const uint16_t probe_mtu_size = no_probe_mtu_size);
+    WritableDiscoveryRequest(
+        const DiscoveryType::Type discovery_type,
+        const WritableWTPBoardData &wtp_board_data,
+        const WritableWTPDescriptor &wtp_descriptor,
+        const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
+        const WTPMACType::Type mac_type,
+        WritableWTPRadioInformationArray &wtp_radio_informations,
+        nonstd::span<IWritableDiscoveryRequestOptionalElement *const> optional_elements,
+        const uint16_t probe_mtu_size = no_probe_mtu_size);
+
+    WritableDiscoveryRequest(
+        const DiscoveryType::Type discovery_type,
+        const WritableWTPBoardData &wtp_board_data,
+        const WritableWTPDescriptor &wtp_descriptor,
+        const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
+        const WTPMACType::Type mac_type,
+        WritableWTPRadioInformationArray &wtp_radio_informations,
+        std::initializer_list<IWritableDiscoveryRequestOptionalElement *const> optional_elements,
+        const uint16_t probe_mtu_size = no_probe_mtu_size);
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
@@ -50,20 +62,32 @@ struct WritableDiscoveryRequest : WritableCapwapRequest {
 };
 
 struct ReadableDiscoveryRequest : ReadableCapwapRequest {
-    DiscoveryType *discovery_type;
+  protected:
+    std::unordered_map<ElementHeader::ElementType, IReadableDiscoveryRequestOptionalElement *const>
+        key_optional_elements;
+
+    std::unordered_map<ElementHeader::ElementType, IReadableDiscoveryRequestOptionalElement *const>
+    MapOptionalsElements(
+        nonstd::span<IReadableDiscoveryRequestOptionalElement *const> optional_elements);
+
+  public:
+    ReadableDiscoveryType discovery_type;
     ReadableWTPBoardData wtp_board_data;
     ReadableWTPDescriptor wtp_descriptor;
-    WTPFrameTunnelMode *wtp_frame_tunnel_mode;
-    WTPMACType *wtp_mac_type;
+    ReadableWTPFrameTunnelMode wtp_frame_tunnel_mode;
+    ReadableWTPMACType wtp_mac_type;
     ReadableWTPRadioInformationArray wtp_radio_informations;
 
-    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    MTUDiscoveryPadding *padding;
+    ReadableMTUDiscoveryPadding padding;
 
     size_t unknown_elements;
 
     ReadableDiscoveryRequest(const ReadableDiscoveryRequest &) = delete;
-    ReadableDiscoveryRequest();
+    ReadableDiscoveryRequest(
+        nonstd::span<IReadableDiscoveryRequestOptionalElement *const> optional_elements);
+
+    ReadableDiscoveryRequest(
+        std::initializer_list<IReadableDiscoveryRequestOptionalElement *> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

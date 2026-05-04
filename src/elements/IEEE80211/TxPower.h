@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -35,11 +36,9 @@ struct __attribute__((packed)) TxPower : ElementHeader {
     TxPower(uint8_t radio_id, uint16_t current_tx_power);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static TxPower *Deserialize(RawData *raw_data);
 };
 
-struct WritableTxPowerArray {
+struct WritableTxPowerArray : IWritableElement {
   private:
     std::vector<TxPower> items;
 
@@ -51,11 +50,11 @@ struct WritableTxPowerArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override;
+    void Log() const override;
 };
 
-struct ReadableTxPowerArray {
+struct ReadableTxPowerArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -67,7 +66,9 @@ struct ReadableTxPowerArray {
     ReadableTxPowerArray(const ReadableTxPowerArray &) = delete;
     ReadableTxPowerArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override;
+    ElementHeader::ElementType GetElementType() const override;
+    bool IsPresent() const override;
     nonstd::span<const TxPower *const> Get() const;
-    void Log() const;
+    void Log() const override;
 };

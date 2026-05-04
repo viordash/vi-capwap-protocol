@@ -10,7 +10,7 @@
 struct WritableResetResponse : WritableCapwapResponse {
 
   private:
-    const ResultCode result_code;
+    const WritableResultCode result_code;
 
     WritableVendorSpecificPayloadArray &vendor_specific_payloads;
 
@@ -25,7 +25,7 @@ struct WritableResetResponse : WritableCapwapResponse {
 };
 
 struct ReadableResetResponse : ReadableCapwapResponse {
-    ResultCode *result_code;
+    ReadableResultCode result_code;
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 

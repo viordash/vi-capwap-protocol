@@ -44,38 +44,25 @@ bool MultiDomainCapability::Validate() const {
     return true;
 }
 
-void MultiDomainCapability::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(MultiDomainCapability) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(MultiDomainCapability));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(MultiDomainCapability);
-}
-
-MultiDomainCapability *MultiDomainCapability::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(MultiDomainCapability) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (MultiDomainCapability *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(MultiDomainCapability);
-    return res;
-}
-
 WritableMultiDomainCapabilityArray::WritableMultiDomainCapabilityArray() {
+    static_assert(sizeof(items[0]) == 12);
     items.reserve(ReadableMultiDomainCapabilityArray::max_count);
 }
 
 void WritableMultiDomainCapabilityArray::Add(MultiDomainCapability element) {
     ASSERT(items.size() + 1 <= ReadableMultiDomainCapabilityArray::max_count);
 
-    items.emplace_back(std::move(element));
+    auto it_exists =
+        std::find_if(items.begin(), items.end(), [&element](const MultiDomainCapability &item) {
+            return item.GetRadioID() == element.GetRadioID();
+        });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(element);
+        log_i("MultiDomainCapability: replace RadioID: %u", (*it_exists).GetRadioID());
+    } else {
+        items.emplace_back(std::move(element));
+    }
 }
 
 bool WritableMultiDomainCapabilityArray::Empty() const {
@@ -87,8 +74,10 @@ void WritableMultiDomainCapabilityArray::Clear() {
 }
 
 void WritableMultiDomainCapabilityArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -107,17 +96,30 @@ void WritableMultiDomainCapabilityArray::Log() const {
 ReadableMultiDomainCapabilityArray::ReadableMultiDomainCapabilityArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableMultiDomainCapabilityArray::GetElementType() const {
+    return ElementHeader::MultiDomainCapability;
+}
+
+bool ReadableMultiDomainCapabilityArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableMultiDomainCapabilityArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableMultiDomainCapabilityArray::Deserialize elements count exceeds");
         return false;
     }
-
-    auto capability = MultiDomainCapability::Deserialize(raw_data);
-    if (capability == nullptr) {
+    if (raw_data->current + sizeof(MultiDomainCapability) > raw_data->end) {
         return false;
     }
-    items[count] = capability;
+
+    auto item = (MultiDomainCapability *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(MultiDomainCapability);
+    items[count] = item;
     count++;
     return true;
 }

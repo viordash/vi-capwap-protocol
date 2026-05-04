@@ -17,13 +17,14 @@ TEST_GROUP(WTPEventResponseTestsGroup){ //
 TEST(WTPEventResponseTestsGroup, WTPEventResponse_serialize) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    {
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        WritableWTPEventResponse write_data({ &vendor_specific_payloads });
 
-    WritableWTPEventResponse write_data(vendor_specific_payloads);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 47 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = { 00,   0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                   0x00, 0x0A, 0x2A, 0x00, 0x1F, 0x00, 0x00, 0x25, 0x00, 0x1B,
@@ -36,15 +37,15 @@ TEST(WTPEventResponseTestsGroup, WTPEventResponse_serialize) {
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 47 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableWTPEventResponse read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableWTPEventResponse read_data({ &vendor_specific_payloads });
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -86,17 +87,19 @@ TEST(WTPEventResponseTestsGroup, WTPEventResponse_deserialize_image_data) {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableWTPEventResponse read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableWTPEventResponse read_data({ &vendor_specific_payloads });
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(9, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(0x2001, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    CHECK_EQUAL(7, read_data.vendor_specific_payloads.Get()[0]->GetLength());
-    CHECK_EQUAL(0x01, read_data.vendor_specific_payloads.Get()[0]->value[0]);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(9, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(0x2001, vendor_specific_payloads.Get()[0]->GetElementId());
+    CHECK_EQUAL(7, vendor_specific_payloads.Get()[0]->GetLength());
+    CHECK_EQUAL(0x01, vendor_specific_payloads.Get()[0]->value[0]);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -131,7 +134,7 @@ TEST(WTPEventResponseTestsGroup, WTPEventResponse_deserialize_handle_unknown_ele
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableWTPEventResponse read_data;
+    ReadableWTPEventResponse read_data({});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);

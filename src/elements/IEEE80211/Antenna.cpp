@@ -6,7 +6,8 @@
 
 Antenna::Antenna(uint8_t radio_id, Diversity diversity, Combiner combiner, uint8_t antenna_count)
     : ElementHeader(ElementHeader::Antenna,
-                    (sizeof(Antenna) - sizeof(ElementHeader)) + antenna_count),
+                    (sizeof(Antenna) - sizeof(ElementHeader))
+                        + antenna_count * sizeof(Antenna::AntennaSelection)),
       radio_id{ radio_id }, diversity{ diversity }, combiner{ combiner },
       antenna_count{ antenna_count } {
 }
@@ -60,42 +61,7 @@ bool Antenna::Validate() const {
         default:
             return false;
     }
-    for (size_t i = 0; i < antenna_count; i++) {
-        switch (antenna_selection[i]) {
-            case Antenna::AntennaSelection::Internal:
-            case Antenna::AntennaSelection::External:
-                break;
-            default:
-                return false;
-        }
-    }
     return true;
-}
-
-void Antenna::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(Antenna) <= raw_data->end);
-    Antenna *dst = (Antenna *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(Antenna);
-}
-
-Antenna *Antenna::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(Antenna) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (Antenna *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current = last;
-    return res;
 }
 
 WritableAntennaArray::WritableAntennaArray() {
@@ -131,10 +97,14 @@ void WritableAntennaArray::Clear() {
 }
 
 void WritableAntennaArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.header.Serialize(raw_data);
-        auto selection_count = elem.header.GetLength() - (sizeof(Antenna) - sizeof(ElementHeader));
-        memcpy(raw_data->current, elem.selections.data(), selection_count);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
+
+        auto selection_count =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.selections.data(), selection_count);
         raw_data->current += selection_count;
     }
 }
@@ -159,16 +129,27 @@ bool ReadableAntennaArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto antenna = Antenna::Deserialize(raw_data);
-    if (antenna == nullptr) {
+    if (raw_data->current + sizeof(Antenna) > raw_data->end) {
         return false;
     }
-    items[count] = antenna;
+
+    auto item = (ReadableAntennaArray::Item *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    items[count] = item;
     count++;
     return true;
 }
 
-nonstd::span<const Antenna *const> ReadableAntennaArray::Get() const {
+nonstd::span<const ReadableAntennaArray::Item *const> ReadableAntennaArray::Get() const {
     nonstd::span span(items.begin(), count);
     return span;
 }
@@ -182,4 +163,12 @@ void ReadableAntennaArray::Log() const {
               items[i]->GetCombiner(),
               items[i]->GetAntennaCount());
     }
+}
+
+ElementHeader::ElementType ReadableAntennaArray::GetElementType() const {
+    return ElementHeader::Antenna;
+}
+
+bool ReadableAntennaArray::IsPresent() const {
+    return count > 0;
 }

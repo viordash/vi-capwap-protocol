@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include <cstdint>
 
@@ -55,7 +56,6 @@ struct __attribute__((packed)) WTPRebootStatistics : ElementHeader {
 
   public:
     WTPRebootStatistics(const WTPRebootStatistics &) = default;
-    WTPRebootStatistics(WTPRebootStatistics &&) = default;
     WTPRebootStatistics(uint16_t reboot_count,
                         uint16_t ac_initiated_count,
                         uint16_t link_failure_count,
@@ -66,8 +66,6 @@ struct __attribute__((packed)) WTPRebootStatistics : ElementHeader {
                         LastFailureType last_failure_type);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static WTPRebootStatistics *Deserialize(RawData *raw_data);
 
     uint16_t GetRebootCount() const;
     uint16_t GetACInitiatedCount() const;
@@ -77,6 +75,40 @@ struct __attribute__((packed)) WTPRebootStatistics : ElementHeader {
     uint16_t GetOtherFailureCount() const;
     uint16_t GetUnknownFailureCount() const;
     LastFailureType GetLastFailureType() const;
-    uint16_t GetTotalLength() const;
     void Log() const;
+};
+
+struct WritableWTPRebootStatistics : IWritableConfigurationStatusRequestOptionalElement,
+                                     IWritableJoinRequestOptionalElement,
+                                     IWritableWTPEventRequestOptionalElement {
+  protected:
+    WTPRebootStatistics element;
+
+  public:
+    WritableWTPRebootStatistics(uint16_t reboot_count,
+                                uint16_t ac_initiated_count,
+                                uint16_t link_failure_count,
+                                uint16_t sw_failure_count,
+                                uint16_t hw_failure_count,
+                                uint16_t other_failure_count,
+                                uint16_t unknown_failure_count,
+                                WTPRebootStatistics::LastFailureType last_failure_type);
+
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
+};
+
+struct ReadableWTPRebootStatistics : IReadableConfigurationStatusRequestOptionalElement,
+                                     IReadableJoinRequestOptionalElement,
+                                     IReadableWTPEventRequestOptionalElement {
+  protected:
+    WTPRebootStatistics *element = nullptr;
+    bool is_present = false;
+
+  public:
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
+    const WTPRebootStatistics *const Get() const;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

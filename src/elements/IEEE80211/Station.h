@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -52,7 +53,6 @@ struct __attribute__((packed)) Station : ElementHeader {
 
   public:
     // Supported Rates: Variable-length field with supported rates
-    uint8_t supported_rates_data[];
 
     Station(const Station &) = default;
     Station(uint8_t radio_id,
@@ -72,14 +72,12 @@ struct __attribute__((packed)) Station : ElementHeader {
     uint16_t GetSupportedRatesLength() const;
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static Station *Deserialize(RawData *raw_data);
 };
 
-struct WritableStationArray {
+struct WritableStationArray : IWritableElement {
   public:
     struct Item {
-        nonstd::span<const uint8_t> supported_rates_data;
+        nonstd::span<const uint8_t> data;
         Station header;
 
         Item(const Item &) = default;
@@ -89,10 +87,10 @@ struct WritableStationArray {
              const uint8_t *mac_address,
              uint16_t capabilities,
              uint8_t wlan_id,
-             nonstd::span<const uint8_t> supported_rates);
-
-        const uint8_t *GetMACAddress() const;
-        uint8_t GetRadioID() const;
+             nonstd::span<const uint8_t> supported_rates)
+            : data{ supported_rates },
+              header{ radio_id, association_id,       flags, mac_address, capabilities,
+                      wlan_id,  (uint16_t)data.size() } {};
     };
 
   private:
@@ -106,23 +104,30 @@ struct WritableStationArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableStationArray {
+struct ReadableStationArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
+    struct Item : Station {
+        uint8_t data[];
+        Item(const Item &) = delete;
+    };
+
   protected:
-    std::array<const Station *, max_count> items;
+    std::array<const Item *, max_count> items;
     size_t count;
 
   public:
     ReadableStationArray(const ReadableStationArray &) = delete;
     ReadableStationArray();
 
-    bool Deserialize(RawData *raw_data);
-    nonstd::span<const Station *const> Get() const;
-    void Log() const;
+    bool Deserialize(RawData *raw_data) override final;
+    nonstd::span<const ReadableStationArray::Item *const> Get() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

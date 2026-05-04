@@ -17,18 +17,20 @@ TEST_GROUP(CAPWAPTimersTestsGroup){ //
 TEST(CAPWAPTimersTestsGroup, CAPWAPTimers_deserialize) {
     uint8_t data[] = { 0x00, 0x0C, 0x00, 0x02, 42, 19 };
     RawData raw_data{ data, data + sizeof(data) };
-    auto element = CAPWAPTimers::Deserialize(&raw_data);
+    ReadableCAPWAPTimers read_data;
+    CHECK_FALSE(read_data.IsPresent());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK(element != nullptr);
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::CAPWAPTimers, element->GetElementType());
-    CHECK_EQUAL(42, element->Discovery);
-    CHECK_EQUAL(19, element->EchoInterval);
+    CHECK_EQUAL(ElementHeader::ElementType::CAPWAPTimers, read_data.GetElementType());
+    CHECK_EQUAL(42, read_data.Get()->Discovery);
+    CHECK_EQUAL(19, read_data.Get()->EchoInterval);
+    CHECK_TRUE(read_data.IsPresent());
 }
 
 TEST(CAPWAPTimersTestsGroup, CAPWAPTimers_serialize) {
     uint8_t buffer[256] = {};
-    CAPWAPTimers element_0{ 42, 19 };
+    WritableCAPWAPTimers element_0{ 42, 19 };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     element_0.Serialize(&raw_data);
@@ -37,10 +39,11 @@ TEST(CAPWAPTimersTestsGroup, CAPWAPTimers_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = CAPWAPTimers::Deserialize(&raw_data);
-    CHECK(element != nullptr);
+
+    ReadableCAPWAPTimers read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(&buffer[0] + 6, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::CAPWAPTimers, element->GetElementType());
-    CHECK_EQUAL(42, element->Discovery);
-    CHECK_EQUAL(19, element->EchoInterval);
+    CHECK_EQUAL(ElementHeader::ElementType::CAPWAPTimers, read_data.GetElementType());
+    CHECK_EQUAL(42, read_data.Get()->Discovery);
+    CHECK_EQUAL(19, read_data.Get()->EchoInterval);
 }

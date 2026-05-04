@@ -30,38 +30,27 @@ bool MICCountermeasures::Validate() const {
     return true;
 }
 
-void MICCountermeasures::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(MICCountermeasures) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(MICCountermeasures));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(MICCountermeasures);
-}
-
-MICCountermeasures *MICCountermeasures::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(MICCountermeasures) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (MICCountermeasures *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(MICCountermeasures);
-    return res;
-}
-
 WritableMICCountermeasuresArray::WritableMICCountermeasuresArray() {
+    static_assert(sizeof(items[0]) == 12);
     items.reserve(ReadableMICCountermeasuresArray::max_count);
 }
 
 void WritableMICCountermeasuresArray::Add(MICCountermeasures cm) {
     ASSERT(items.size() + 1 <= ReadableMICCountermeasuresArray::max_count);
 
-    items.emplace_back(std::move(cm));
+    auto it_exists =
+        std::find_if(items.begin(), items.end(), [&cm](const MICCountermeasures &item) {
+            return item.RadioID == cm.RadioID && item.WlanID == cm.WlanID;
+        });
+
+    if (it_exists != items.end()) {
+        *it_exists = std::move(cm);
+        log_i("MICCountermeasures: replace RadioID: %u, WlanID: %u",
+              (*it_exists).RadioID,
+              (*it_exists).WlanID);
+    } else {
+        items.emplace_back(std::move(cm));
+    }
 }
 
 bool WritableMICCountermeasuresArray::Empty() const {
@@ -73,8 +62,10 @@ void WritableMICCountermeasuresArray::Clear() {
 }
 
 void WritableMICCountermeasuresArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -97,17 +88,30 @@ void WritableMICCountermeasuresArray::Log() const {
 ReadableMICCountermeasuresArray::ReadableMICCountermeasuresArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableMICCountermeasuresArray::GetElementType() const {
+    return ElementHeader::MICCountermeasures;
+}
+
+bool ReadableMICCountermeasuresArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableMICCountermeasuresArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableMICCountermeasuresArray::Deserialize elements count exceeds");
         return false;
     }
-
-    auto cm = MICCountermeasures::Deserialize(raw_data);
-    if (cm == nullptr) {
+    if (raw_data->current + sizeof(MICCountermeasures) > raw_data->end) {
         return false;
     }
-    items[count] = cm;
+
+    auto item = (MICCountermeasures *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(MICCountermeasures);
+    items[count] = item;
     count++;
     return true;
 }

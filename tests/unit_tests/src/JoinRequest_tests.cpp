@@ -17,66 +17,67 @@ TEST_GROUP(JoinRequestTestsGroup){ //
 TEST(JoinRequestTestsGroup, JoinRequest_serialize) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    {
+        WritableWTPBoardData::SubElement wtpboarddata_elements[] = {
+            { BoardDataSubElementHeader::Type::WTPModelNumber, "abcd" },
+            { BoardDataSubElementHeader::Type::WTPSerialNumber, "efghijklm" },
+        };
+        WritableWTPBoardData wtpboarddata{ 1234, wtpboarddata_elements };
 
-    WritableWTPBoardData::SubElement wtpboarddata_elements[] = {
-        { BoardDataSubElementHeader::Type::WTPModelNumber, "abcd" },
-        { BoardDataSubElementHeader::Type::WTPSerialNumber, "efghijklm" },
-    };
-    WritableWTPBoardData wtpboarddata{ 1234, wtpboarddata_elements };
+        EncryptionSubElement wtpdescriptor_encr_elements[] = { { 0 } };
 
-    EncryptionSubElement wtpdescriptor_encr_elements[] = { { 0 } };
+        WritableWTPDescriptor::SubElement wtpdescriptor_descr_elements[] = {
+            { 1234, DescriptorSubElementHeader::Type::ActiveSoftwareVersion, "abcd" },
+            { 5678, DescriptorSubElementHeader::Type::BootVersion, "efghijklm" },
+            { 9012,
+              DescriptorSubElementHeader::Type::OtherSoftwareVersion,
+              "01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF" },
+            { 3456, DescriptorSubElementHeader::Type::HardwareVersion, "1" }
+        };
 
-    WritableWTPDescriptor::SubElement wtpdescriptor_descr_elements[] = {
-        { 1234, DescriptorSubElementHeader::Type::ActiveSoftwareVersion, "abcd" },
-        { 5678, DescriptorSubElementHeader::Type::BootVersion, "efghijklm" },
-        { 9012,
-          DescriptorSubElementHeader::Type::OtherSoftwareVersion,
-          "01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF" },
-        { 3456, DescriptorSubElementHeader::Type::HardwareVersion, "1" }
-    };
+        WritableWTPDescriptor wtpdescriptor{ 10,
+                                             4,
+                                             wtpdescriptor_encr_elements,
+                                             wtpdescriptor_descr_elements };
 
-    WritableWTPDescriptor wtpdescriptor{ 10,
-                                         4,
-                                         wtpdescriptor_encr_elements,
-                                         wtpdescriptor_descr_elements };
+        WritableWTPRadioInformationArray wtp_radio_informations;
+        wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
+        wtp_radio_informations.Add({ 1, true, true, false, false, false, false, false });
+        wtp_radio_informations.Add({ 2, false, false, false, false, false, false, false });
+        wtp_radio_informations.Add({ 3, true, true, false, true, false, false, false });
 
-    WritableWTPRadioInformationArray wtp_radio_informations;
-    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
-    wtp_radio_informations.Add({ 1, true, true, false, false, false, false, false });
-    wtp_radio_informations.Add({ 2, false, false, false, false, false, false, false });
-    wtp_radio_informations.Add({ 3, true, true, false, true, false, false, false });
+        CAPWAPLocalIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10") } };
 
-    CAPWAPLocalIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10") } };
+        WritableCapwapTransportProtocol capwap_transport_protocol{
+            CapwapTransportProtocol::Type::UDP
+        };
+        WritableMaximumMessageLength maximum_message_length{ 65000 };
+        WritableWTPRebootStatistics wtp_reboot_statistics{
+            100, 101, 1001, 1002, 333, 444, 555, WTPRebootStatistics::LastFailureType::LinkFailure
+        };
 
-    CapwapTransportProtocol capwap_transport_protocol{ CapwapTransportProtocol::Type::UDP };
-    MaximumMessageLength maximum_message_length{ 65000 };
-    WTPRebootStatistics wtp_reboot_statistics{
-        100, 101, 1001, 1002, 333, 444, 555, WTPRebootStatistics::LastFailureType::LinkFailure
-    };
+        const uint8_t id[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                               0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        SessionId session_id;
+        std::memcpy(session_id.session_id, id, sizeof(session_id.session_id));
 
-    const uint8_t id[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-                           0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
-    SessionId session_id;
-    std::memcpy(session_id.session_id, id, sizeof(session_id.session_id));
+        WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
-    WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
+        WritableJoinRequest write_data(
+            "location_data",
+            wtpboarddata,
+            wtpdescriptor,
+            "wtp_name",
+            session_id,
+            wtp_frame_tunnel_mode,
+            WTPMACType::Local_MAC,
+            wtp_radio_informations,
+            ECNSupport::Type::FullAndLimitedECN,
+            ip_addresses,
+            { &capwap_transport_protocol, &maximum_message_length, &wtp_reboot_statistics });
 
-    WritableJoinRequest write_data("location_data",
-                                   wtpboarddata,
-                                   wtpdescriptor,
-                                   "wtp_name",
-                                   session_id,
-                                   wtp_frame_tunnel_mode,
-                                   WTPMACType::Local_MAC,
-                                   wtp_radio_informations,
-                                   ECNSupport::Type::FullAndLimitedECN,
-                                   ip_addresses,
-                                   &capwap_transport_protocol,
-                                   &maximum_message_length,
-                                   &wtp_reboot_statistics,
-                                   VendorSpecificPayload::Dummy);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 307 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = {
         0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x2A, 0x01, 0x23,
@@ -106,7 +107,15 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize) {
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 307 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableJoinRequest read_data;
+    ReadableCapwapTransportProtocol capwap_transport_protocol;
+    ReadableMaximumMessageLength maximum_message_length;
+    ReadableWTPRebootStatistics wtp_reboot_statistics;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+    ReadableJoinRequest read_data({ &capwap_transport_protocol,
+                                    &maximum_message_length,
+                                    &wtp_reboot_statistics,
+                                    &vendor_specific_payloads });
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(4, read_data.wtp_radio_informations.Get().size());
@@ -142,64 +151,68 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize) {
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[3]->AC);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[3]->AX);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[3]->BE);
+
+    CHECK_TRUE(capwap_transport_protocol.IsPresent());
+    CHECK_TRUE(maximum_message_length.IsPresent());
+    CHECK_TRUE(wtp_reboot_statistics.IsPresent());
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
+
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
 TEST(JoinRequestTestsGroup, JoinRequest_serialize_with_VendorSpecificPayload) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    {
+        WritableWTPBoardData::SubElement wtpboarddata_elements[] = {
+            { BoardDataSubElementHeader::Type::WTPModelNumber, "abcd" },
+            { BoardDataSubElementHeader::Type::WTPSerialNumber, "1234" },
+        };
+        WritableWTPBoardData wtpboarddata{ 1234, wtpboarddata_elements };
 
-    WritableWTPBoardData::SubElement wtpboarddata_elements[] = {
-        { BoardDataSubElementHeader::Type::WTPModelNumber, "abcd" },
-        { BoardDataSubElementHeader::Type::WTPSerialNumber, "1234" },
-    };
-    WritableWTPBoardData wtpboarddata{ 1234, wtpboarddata_elements };
+        EncryptionSubElement wtpdescriptor_encr_elements[] = { { 0 } };
 
-    EncryptionSubElement wtpdescriptor_encr_elements[] = { { 0 } };
+        WritableWTPDescriptor::SubElement wtpdescriptor_descr_elements[] = {
+            { 1234, DescriptorSubElementHeader::Type::HardwareVersion, "0001" },
+            { 1234, DescriptorSubElementHeader::Type::ActiveSoftwareVersion, "abcd" },
+            { 1234, DescriptorSubElementHeader::Type::BootVersion, "1234" }
+        };
 
-    WritableWTPDescriptor::SubElement wtpdescriptor_descr_elements[] = {
-        { 1234, DescriptorSubElementHeader::Type::HardwareVersion, "0001" },
-        { 1234, DescriptorSubElementHeader::Type::ActiveSoftwareVersion, "abcd" },
-        { 1234, DescriptorSubElementHeader::Type::BootVersion, "1234" }
-    };
+        WritableWTPDescriptor wtpdescriptor{ 10,
+                                             1,
+                                             wtpdescriptor_encr_elements,
+                                             wtpdescriptor_descr_elements };
 
-    WritableWTPDescriptor wtpdescriptor{ 10,
-                                         1,
-                                         wtpdescriptor_encr_elements,
-                                         wtpdescriptor_descr_elements };
+        WritableWTPRadioInformationArray wtp_radio_informations;
+        wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
 
-    WritableWTPRadioInformationArray wtp_radio_informations;
-    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
+        CAPWAPLocalIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10") } };
 
-    CAPWAPLocalIPv4Address ip_addresses[] = { { inet_addr("192.168.100.10") } };
+        const uint8_t id[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
+                               0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
+        SessionId session_id;
+        std::memcpy(session_id.session_id, id, sizeof(session_id.session_id));
 
-    const uint8_t id[] = { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07,
-                           0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F };
-    SessionId session_id;
-    std::memcpy(session_id.session_id, id, sizeof(session_id.session_id));
+        WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
-    WTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        vendor_specific_payloads.Add(1, 2, "01234567890A");
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
-    vendor_specific_payloads.Add(1, 2, "01234567890A");
+        WritableJoinRequest write_data("location_data",
+                                       wtpboarddata,
+                                       wtpdescriptor,
+                                       "wtp_name",
+                                       session_id,
+                                       wtp_frame_tunnel_mode,
+                                       WTPMACType::Local_MAC,
+                                       wtp_radio_informations,
+                                       ECNSupport::Type::FullAndLimitedECN,
+                                       ip_addresses,
+                                       { &vendor_specific_payloads });
 
-    WritableJoinRequest write_data("location_data",
-                                   wtpboarddata,
-                                   wtpdescriptor,
-                                   "wtp_name",
-                                   session_id,
-                                   wtp_frame_tunnel_mode,
-                                   WTPMACType::Local_MAC,
-                                   wtp_radio_informations,
-                                   ECNSupport::Type::FullAndLimitedECN,
-                                   ip_addresses,
-                                   nullptr,
-                                   nullptr,
-                                   nullptr,
-                                   vendor_specific_payloads);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 220 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = {
         0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x2A, 0x00, 0xB6,
@@ -223,18 +236,23 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_with_VendorSpecificPayload) {
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 220 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableJoinRequest read_data;
+    ReadableCapwapTransportProtocol capwap_transport_protocol;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+    ReadableJoinRequest read_data({ &capwap_transport_protocol, &vendor_specific_payloads });
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(2, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get()[1]->GetVendorIdentifier());
-    CHECK_EQUAL(2, read_data.vendor_specific_payloads.Get()[1]->GetElementId());
-    STRNCMP_EQUAL("01234567890A", (char *)read_data.vendor_specific_payloads.Get()[1]->value, 12);
+    CHECK_FALSE(capwap_transport_protocol.IsPresent());
+
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(2, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
+    CHECK_EQUAL(1, vendor_specific_payloads.Get()[1]->GetVendorIdentifier());
+    CHECK_EQUAL(2, vendor_specific_payloads.Get()[1]->GetElementId());
+    STRNCMP_EQUAL("01234567890A", (char *)vendor_specific_payloads.Get()[1]->value, 12);
+
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -244,7 +262,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
     // Общая длина полезной нагрузки CAPWAP (заголовок + элементы): 8 + 8 + 140 = 156 байт
     uint8_t data[] = {
     // === Заголовок CAPWAP (8 байт) ===
-        0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00,
     //=========================================================================
     // 2. Control Header (8 байт)
     //-------------------------------------------------------------------------
@@ -338,7 +356,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
     0x00, 0x1D, 0x00, 0x02, 0x40, 0x00, // Value = 16384 (в Big Endian)
 
     // WTP Reboot Statistics
-    0x00, 0x30, 0x00, 0x0F, 
+    0x00, 0x30, 0x00, 0x0F,
     // --- Value (15 байт) ---
     0x01, 0x2C,       // Reboot Count (сбои): 300 (0x012C)
     0x00, 0x04,       // AC Initiated Count: 4
@@ -358,13 +376,22 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableJoinRequest read_data;
+    ReadableCapwapTransportProtocol capwap_transport_protocol;
+    ReadableMaximumMessageLength maximum_message_length;
+    ReadableWTPRebootStatistics wtp_reboot_statistics;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+    ReadableJoinRequest read_data({ &capwap_transport_protocol,
+                                    &maximum_message_length,
+                                    &wtp_reboot_statistics,
+                                    &vendor_specific_payloads });
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    STRNCMP_EQUAL("Lab", (char *)read_data.location_data->data, 3);
+    CHECK_TRUE(read_data.location_data.IsPresent());
+    STRNCMP_EQUAL("Lab", (char *)read_data.location_data.Get()->data, 3);
 
     CHECK_EQUAL(2, read_data.wtp_board_data.Get().size());
     CHECK_EQUAL(9279, read_data.wtp_board_data.header->GetVendorIdentifier());
@@ -399,17 +426,20 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
                 read_data.wtp_descriptor.GetDescriptors()[2]->GetType());
     CHECK_EQUAL(1, read_data.wtp_descriptor.GetDescriptors()[2]->GetLength());
 
-    STRNCMP_EQUAL("WAP-01", (char *)read_data.wtp_name->name, 6);
+    CHECK_TRUE(read_data.wtp_name.IsPresent());
+    STRNCMP_EQUAL("WAP-01", (char *)read_data.wtp_name.Get()->name, 6);
 
     const uint8_t session_id[] = { 0xDE, 0xC0, 0xAD, 0xDE, 0x12, 0x34, 0x56, 0x78,
                                    0x90, 0xAB, 0xCD, 0xEF, 0xFE, 0xED, 0xDA, 0xBE };
-    MEMCMP_EQUAL(session_id, read_data.session_id->session_id, sizeof(session_id));
+    MEMCMP_EQUAL(session_id, read_data.session_id.Get()->session_id, sizeof(session_id));
 
-    CHECK_TRUE(read_data.wtp_frame_tunnel_mode->L);
-    CHECK_FALSE(read_data.wtp_frame_tunnel_mode->E);
-    CHECK_FALSE(read_data.wtp_frame_tunnel_mode->N);
+    CHECK_TRUE(read_data.wtp_frame_tunnel_mode.IsPresent());
+    CHECK_TRUE(read_data.wtp_frame_tunnel_mode.Get()->L);
+    CHECK_FALSE(read_data.wtp_frame_tunnel_mode.Get()->E);
+    CHECK_FALSE(read_data.wtp_frame_tunnel_mode.Get()->N);
 
-    CHECK_EQUAL(WTPMACType::Type::Local_MAC, read_data.wtp_mac_type->type);
+    CHECK_TRUE(read_data.wtp_mac_type.IsPresent());
+    CHECK_EQUAL(WTPMACType::Type::Local_MAC, read_data.wtp_mac_type.Get()->type);
 
     CHECK_EQUAL(1, read_data.wtp_radio_informations.Get().size());
     CHECK_EQUAL(1, read_data.wtp_radio_informations.Get()[0]->RadioID);
@@ -418,31 +448,36 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
     CHECK_TRUE(read_data.wtp_radio_informations.Get()[0]->G);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[0]->N);
 
-    CHECK_EQUAL(ECNSupport::Type::LimitedECN, read_data.ecn_support->type);
+    CHECK_EQUAL(ECNSupport::Type::LimitedECN, read_data.ecn_support.Get()->type);
 
     CHECK_EQUAL(1, read_data.ip_addresses.Get().size());
     CHECK_EQUAL(inet_addr("172.16.1.10"), read_data.ip_addresses.Get()[0]->GetIPAddress());
 
-    CHECK_EQUAL(CapwapTransportProtocol::Type::UDPLite, read_data.capwap_transport_protocol->type);
-    CHECK_EQUAL(16384, read_data.maximum_message_length->GetValue());
+    CHECK_TRUE(capwap_transport_protocol.IsPresent());
+    CHECK_EQUAL(CapwapTransportProtocol::Type::UDPLite, capwap_transport_protocol.Get()->type);
 
-    CHECK_EQUAL(300, read_data.wtp_reboot_statistics->GetRebootCount());
-    CHECK_EQUAL(4, read_data.wtp_reboot_statistics->GetACInitiatedCount());
-    CHECK_EQUAL(12, read_data.wtp_reboot_statistics->GetLinkFailureCount());
-    CHECK_EQUAL(298, read_data.wtp_reboot_statistics->GetSWFailureCount());
-    CHECK_EQUAL(1, read_data.wtp_reboot_statistics->GetHWFailureCount());
-    CHECK_EQUAL(0, read_data.wtp_reboot_statistics->GetOtherFailureCount());
-    CHECK_EQUAL(1, read_data.wtp_reboot_statistics->GetUnknownFailureCount());
+    CHECK_TRUE(maximum_message_length.IsPresent());
+    CHECK_EQUAL(16384, maximum_message_length.Get()->GetValue());
+
+    CHECK_TRUE(wtp_reboot_statistics.IsPresent());
+    CHECK_EQUAL(300, wtp_reboot_statistics.Get()->GetRebootCount());
+    CHECK_EQUAL(4, wtp_reboot_statistics.Get()->GetACInitiatedCount());
+    CHECK_EQUAL(12, wtp_reboot_statistics.Get()->GetLinkFailureCount());
+    CHECK_EQUAL(298, wtp_reboot_statistics.Get()->GetSWFailureCount());
+    CHECK_EQUAL(1, wtp_reboot_statistics.Get()->GetHWFailureCount());
+    CHECK_EQUAL(0, wtp_reboot_statistics.Get()->GetOtherFailureCount());
+    CHECK_EQUAL(1, wtp_reboot_statistics.Get()->GetUnknownFailureCount());
     CHECK_EQUAL(WTPRebootStatistics::LastFailureType::SoftwareFailure,
-                read_data.wtp_reboot_statistics->GetLastFailureType());
+                wtp_reboot_statistics.Get()->GetLastFailureType());
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(9, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(0xDEAD, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(9, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(0xDEAD, vendor_specific_payloads.Get()[0]->GetElementId());
     CHECK_EQUAL(1,
-                read_data.vendor_specific_payloads.Get()[0]->GetLength()
+                vendor_specific_payloads.Get()[0]->GetLength()
                     - (sizeof(VendorSpecificPayload) - sizeof(ElementHeader)));
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get()[0]->value[0]);
+    CHECK_EQUAL(1, vendor_specific_payloads.Get()[0]->value[0]);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -452,7 +487,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize_handle_unknown_element) {
     // Общая длина полезной нагрузки CAPWAP (заголовок + элементы): 8 + 8 + 140 = 156+5+5 байт
     uint8_t data[] = {
     // === Заголовок CAPWAP (8 байт) ===
-        0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 
+        0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00,
     //=========================================================================
     // 2. Control Header (8 байт)
     //-------------------------------------------------------------------------
@@ -546,7 +581,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize_handle_unknown_element) {
     0x00, 0x1D, 0x00, 0x02, 0x40, 0x00, // Value = 16384 (в Big Endian)
 
     // WTP Reboot Statistics
-    0x00, 0x30, 0x00, 0x0F, 
+    0x00, 0x30, 0x00, 0x0F,
     // --- Value (15 байт) ---
     0x01, 0x2C,       // Reboot Count (сбои): 300 (0x012C)
     0x00, 0x04,       // AC Initiated Count: 4
@@ -563,14 +598,22 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize_handle_unknown_element) {
     0xDE, 0xAD, // Element ID: 0xDEAD
     0x01,  // Data: 1 байт (например, флаг отладки)
     //  Unknown (5 байт)
-    0xFF, 0xFF, 0x00, 0x01, 0x00, 
+    0xFF, 0xFF, 0x00, 0x01, 0x00,
     //  Unknown (5 байт)
-    0xFF, 0xFE, 0x00, 0x01, 0x00, 
+    0xFF, 0xFE, 0x00, 0x01, 0x00,
     };
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableJoinRequest read_data;
+    ReadableCapwapTransportProtocol capwap_transport_protocol;
+    ReadableMaximumMessageLength maximum_message_length;
+    ReadableWTPRebootStatistics wtp_reboot_statistics;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+    ReadableJoinRequest read_data({ &capwap_transport_protocol,
+                                    &maximum_message_length,
+                                    &wtp_reboot_statistics,
+                                    &vendor_specific_payloads });
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
