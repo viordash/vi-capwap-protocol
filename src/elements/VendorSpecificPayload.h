@@ -9,7 +9,6 @@
 #include <string_view>
 #include <vector>
 
-struct WritableVendorSpecificPayloadArray;
 struct __attribute__((packed)) VendorSpecificPayload : ElementHeader {
   protected:
     // SMI Network Management Private Enterprise Codes. MUST NOT be set to zero
@@ -25,7 +24,6 @@ struct __attribute__((packed)) VendorSpecificPayload : ElementHeader {
     uint32_t GetElementId() const;
     bool Validate() const;
     uint16_t GetTotalLength() const;
-    static WritableVendorSpecificPayloadArray Dummy;
 };
 
 struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestOptionalElement,

@@ -6,8 +6,6 @@
 #include <cstring>
 #include <string.h>
 
-WritableVendorSpecificPayloadArray VendorSpecificPayload::Dummy;
-
 VendorSpecificPayload::VendorSpecificPayload(uint32_t vendor_identifier,
                                              uint16_t element_id,
                                              uint16_t data_size)
