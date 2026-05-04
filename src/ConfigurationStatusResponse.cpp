@@ -52,6 +52,7 @@ void WritableConfigurationStatusResponse::Serialize(RawData *raw_data) const {
     ac_ipv4_list.Serialize(raw_data);
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         elem->Serialize(raw_data);
     }
 }
@@ -163,6 +164,7 @@ ReadableConfigurationStatusResponse::MapOptionalsElements(
         map;
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         map.emplace(elem->GetElementType(), elem);
     }
 

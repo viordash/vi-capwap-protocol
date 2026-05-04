@@ -58,6 +58,7 @@ uint16_t WritableDiscoveryRequest::CalcTotalSize() {
     total += wtp_radio_informations.GetTotalLength();
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         total += elem->GetTotalLength();
     }
 
@@ -97,6 +98,7 @@ void WritableDiscoveryRequest::Serialize(RawData *raw_data) const {
     wtp_radio_informations.Serialize(raw_data);
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         elem->Serialize(raw_data);
     }
 
@@ -223,6 +225,7 @@ ReadableDiscoveryRequest::MapOptionalsElements(
         map;
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         map.emplace(elem->GetElementType(), elem);
     }
 

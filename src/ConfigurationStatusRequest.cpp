@@ -55,6 +55,7 @@ void WritableConfigurationStatusRequest::Serialize(RawData *raw_data) const {
         .Serialize(raw_data);
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         elem->Serialize(raw_data);
     }
 }
@@ -160,6 +161,7 @@ ReadableConfigurationStatusRequest::MapOptionalsElements(
         map;
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         map.emplace(elem->GetElementType(), elem);
     }
 

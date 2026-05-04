@@ -32,6 +32,7 @@ void WritableResetRequest::Serialize(RawData *raw_data) const {
     image_identifier.Serialize(raw_data);
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         elem->Serialize(raw_data);
     }
 }
@@ -110,6 +111,7 @@ ReadableResetRequest::MapOptionalsElements(
     std::unordered_map<ElementHeader::ElementType, IReadableResetRequestOptionalElement *const> map;
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         map.emplace(elem->GetElementType(), elem);
     }
 

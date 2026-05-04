@@ -59,6 +59,7 @@ void WritableJoinResponse::Serialize(RawData *raw_data) const {
     local_ip_addresses.Serialize(raw_data);
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         elem->Serialize(raw_data);
     }
 }
@@ -180,6 +181,7 @@ ReadableJoinResponse::MapOptionalsElements(
     std::unordered_map<ElementHeader::ElementType, IReadableJoinResponseOptionalElement *const> map;
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         map.emplace(elem->GetElementType(), elem);
     }
 

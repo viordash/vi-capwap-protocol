@@ -27,6 +27,7 @@ ControlHeader::MessageType WritableWTPEventRequest::GetResponseMessageType() con
 
 void WritableWTPEventRequest::Serialize(RawData *raw_data) const {
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         elem->Serialize(raw_data);
     }
 }
@@ -100,6 +101,7 @@ ReadableWTPEventRequest::MapOptionalsElements(
         map;
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         map.emplace(elem->GetElementType(), elem);
     }
 

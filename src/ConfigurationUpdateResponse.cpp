@@ -33,6 +33,7 @@ void WritableConfigurationUpdateResponse::Serialize(RawData *raw_data) const {
     result_code.Serialize(raw_data);
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         elem->Serialize(raw_data);
     }
 }
@@ -116,6 +117,7 @@ ReadableConfigurationUpdateResponse::MapOptionalsElements(
         map;
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         map.emplace(elem->GetElementType(), elem);
     }
 

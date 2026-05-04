@@ -40,6 +40,7 @@ void WritableChangeStateEventRequest::Serialize(RawData *raw_data) const {
     radio_operational_states.Serialize(raw_data);
     WritableResultCode{ result_code.type }.Serialize(raw_data);
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         elem->Serialize(raw_data);
     }
 }
@@ -50,6 +51,7 @@ ResultCode::Type WritableChangeStateEventRequest::GetResultCode() {
 
 void WritableChangeStateEventRequest::ValidateReturnedMessageElement() {
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         if (elem->GetElementType() == ElementHeader::ReturnedMessageElement) {
             auto *returned_message_elements =
                 static_cast<WritableReturnedMessageElementArray *>(elem);
@@ -149,6 +151,7 @@ ReadableChangeStateEventRequest::MapOptionalsElements(
         map;
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         map.emplace(elem->GetElementType(), elem);
     }
 

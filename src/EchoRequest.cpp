@@ -26,6 +26,7 @@ ControlHeader::MessageType WritableEchoRequest::GetResponseMessageType() const {
 
 void WritableEchoRequest::Serialize(RawData *raw_data) const {
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         elem->Serialize(raw_data);
     }
 }
@@ -96,6 +97,7 @@ ReadableEchoRequest::MapOptionalsElements(
     std::unordered_map<ElementHeader::ElementType, IReadableEchoRequestOptionalElement *const> map;
 
     for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
         map.emplace(elem->GetElementType(), elem);
     }
 
