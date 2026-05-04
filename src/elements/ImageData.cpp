@@ -80,7 +80,7 @@ bool ReadableImageData::Deserialize(RawData *raw_data) {
     return true;
 }
 
-const ReadableImageData::Element *const ReadableImageData::Get() const {
+ReadableImageData::Element *const ReadableImageData::Get() const {
     return element;
 }
 

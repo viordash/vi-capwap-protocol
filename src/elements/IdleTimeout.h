@@ -41,7 +41,7 @@ struct ReadableIdleTimeout : IReadableConfigurationUpdateRequestOptionalElement 
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    const IdleTimeout *const Get() const;
+    IdleTimeout *const Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };

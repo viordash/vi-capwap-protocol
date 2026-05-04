@@ -36,7 +36,7 @@ struct ReadableWTPMACType : IReadableElement {
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    const WTPMACType *const Get() const;
+    WTPMACType *const Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };

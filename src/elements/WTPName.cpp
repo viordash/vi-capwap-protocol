@@ -64,7 +64,7 @@ bool ReadableWTPName::Deserialize(RawData *raw_data) {
     return true;
 }
 
-const ReadableWTPName::Element *const ReadableWTPName::Get() const {
+ReadableWTPName::Element *const ReadableWTPName::Get() const {
     return element;
 }
 

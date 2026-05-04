@@ -87,7 +87,7 @@ bool ReadableImageInformation::Deserialize(RawData *raw_data) {
     return true;
 }
 
-const ImageInformation *const ReadableImageInformation::Get() const {
+ImageInformation *const ReadableImageInformation::Get() const {
     return element;
 }
 

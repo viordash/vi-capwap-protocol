@@ -49,7 +49,7 @@ bool ReadableCAPWAPTimers::Deserialize(RawData *raw_data) {
     return true;
 }
 
-const CAPWAPTimers *const ReadableCAPWAPTimers::Get() const {
+CAPWAPTimers *const ReadableCAPWAPTimers::Get() const {
     return element;
 }
 

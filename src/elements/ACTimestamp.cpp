@@ -54,7 +54,7 @@ bool ReadableACTimestamp::Deserialize(RawData *raw_data) {
     return true;
 }
 
-const ACTimestamp *const ReadableACTimestamp::Get() const {
+ACTimestamp *const ReadableACTimestamp::Get() const {
     return element;
 }
 

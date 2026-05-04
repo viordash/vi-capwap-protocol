@@ -126,7 +126,7 @@ bool ReadableWTPRebootStatistics::Deserialize(RawData *raw_data) {
     return true;
 }
 
-const WTPRebootStatistics *const ReadableWTPRebootStatistics::Get() const {
+WTPRebootStatistics *const ReadableWTPRebootStatistics::Get() const {
     return element;
 }
 

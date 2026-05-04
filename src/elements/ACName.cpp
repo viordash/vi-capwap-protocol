@@ -64,7 +64,7 @@ bool ReadableACName::Deserialize(RawData *raw_data) {
     return true;
 }
 
-const ReadableACName::Element *const ReadableACName::Get() const {
+ReadableACName::Element *const ReadableACName::Get() const {
     return element;
 }
 

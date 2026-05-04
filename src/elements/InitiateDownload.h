@@ -30,7 +30,7 @@ struct ReadableInitiateDownload : IReadableImageDataRequestOptionalElement {
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    const InitiateDownload *const Get() const;
+    InitiateDownload *const Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };
