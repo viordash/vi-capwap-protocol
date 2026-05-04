@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -99,7 +100,7 @@ struct __attribute__((packed)) AddWlanTail {
     bool Validate() const;
 };
 
-struct WritableAddWlanArray {
+struct WritableAddWlanArray : IWritableWlanConfigurationRequestOptionalElement {
   public:
     struct Item {
         AddWlanHeader header;
@@ -139,11 +140,11 @@ struct WritableAddWlanArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override;
+    void Log() const override;
 };
 
-struct ReadableAddWlanArray {
+struct ReadableAddWlanArray : IReadableWlanConfigurationRequestOptionalElement {
   public:
     static const size_t max_count = 16;
 
@@ -163,7 +164,9 @@ struct ReadableAddWlanArray {
     ReadableAddWlanArray(const ReadableAddWlanArray &) = delete;
     ReadableAddWlanArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override;
+    ElementHeader::ElementType GetElementType() const override;
+    bool IsPresent() const override;
     nonstd::span<const Item> Get() const;
-    void Log() const;
+    void Log() const override;
 };

@@ -294,6 +294,14 @@ nonstd::span<const ReadableAddWlanArray::Item> ReadableAddWlanArray::Get() const
     return { items.begin(), count };
 }
 
+ElementHeader::ElementType ReadableAddWlanArray::GetElementType() const {
+    return ElementHeader::AddWlan;
+}
+
+bool ReadableAddWlanArray::IsPresent() const {
+    return count > 0;
+}
+
 void ReadableAddWlanArray::Log() const {
     for (size_t i = 0; i < count; i++) {
         log_i(

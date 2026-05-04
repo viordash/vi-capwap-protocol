@@ -57,7 +57,9 @@ TEST(AddWlanTestsGroup, Array_Serialize_Deserialize) {
     raw_data = { buffer, buffer + data_size };
 
     ReadableAddWlanArray r_wlans;
+    CHECK_FALSE(r_wlans.IsPresent());
     CHECK_TRUE(r_wlans.Deserialize(&raw_data));
+    CHECK_TRUE(r_wlans.IsPresent());
     CHECK_TRUE(r_wlans.Deserialize(&raw_data));
     CHECK_FALSE(r_wlans.Deserialize(&raw_data));
 
