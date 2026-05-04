@@ -42,7 +42,7 @@ struct __attribute__((packed)) InformationElement : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableInformationElementArray : IWritableElement {
+struct WritableInformationElementArray : IWritableWlanConfigurationRequestOptionalElement {
   public:
     struct Item {
         nonstd::span<const uint8_t> data;
@@ -67,7 +67,7 @@ struct WritableInformationElementArray : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableInformationElementArray : IReadableElement {
+struct ReadableInformationElementArray : IReadableWlanConfigurationRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

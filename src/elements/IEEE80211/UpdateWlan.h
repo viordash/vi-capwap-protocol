@@ -75,7 +75,7 @@ struct __attribute__((packed)) UpdateWlan : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableUpdateWlanArray : IWritableElement {
+struct WritableUpdateWlanArray : IWritableWlanConfigurationRequestOptionalElement {
   public:
     struct Item {
         nonstd::span<const uint8_t> data;
@@ -106,7 +106,7 @@ struct WritableUpdateWlanArray : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableUpdateWlanArray : IReadableElement {
+struct ReadableUpdateWlanArray : IReadableWlanConfigurationRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

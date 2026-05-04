@@ -21,7 +21,7 @@ struct __attribute__((packed)) DeleteWlan : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableDeleteWlanArray : IWritableElement {
+struct WritableDeleteWlanArray : IWritableWlanConfigurationRequestOptionalElement {
   private:
     std::vector<DeleteWlan> items;
 
@@ -37,7 +37,7 @@ struct WritableDeleteWlanArray : IWritableElement {
     void Log() const override;
 };
 
-struct ReadableDeleteWlanArray : IReadableElement {
+struct ReadableDeleteWlanArray : IReadableWlanConfigurationRequestOptionalElement {
   public:
     static const size_t max_count = 32;
 

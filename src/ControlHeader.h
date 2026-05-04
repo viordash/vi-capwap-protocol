@@ -33,6 +33,8 @@ struct __attribute__((packed)) ControlHeader {
         ClearConfigurationResponse = 0x18000000,
         StationConfigurationRequest = 0x19000000,
         StationConfigurationResponse = 0x1A000000,
+        WlanConfigurationRequest = 0x01DD3300,
+        WlanConfigurationResponse = 0x02DD3300,
     };
 
   private:
