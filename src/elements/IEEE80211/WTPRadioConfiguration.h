@@ -72,6 +72,7 @@ struct __attribute__((packed)) WTPRadioConfiguration : ElementHeader {
 };
 
 struct WritableWTPRadioConfigurationArray : IWritableConfigurationStatusRequestOptionalElement,
+                                            IWritableConfigurationStatusResponseOptionalElement,
                                             IWritableConfigurationUpdateRequestOptionalElement {
   private:
     std::vector<WTPRadioConfiguration> items;
@@ -89,6 +90,7 @@ struct WritableWTPRadioConfigurationArray : IWritableConfigurationStatusRequestO
 };
 
 struct ReadableWTPRadioConfigurationArray : IReadableConfigurationStatusRequestOptionalElement,
+                                            IReadableConfigurationStatusResponseOptionalElement,
                                             IReadableConfigurationUpdateRequestOptionalElement {
   public:
     static const size_t max_count = 32;
