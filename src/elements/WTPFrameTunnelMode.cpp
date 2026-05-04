@@ -59,7 +59,7 @@ bool ReadableWTPFrameTunnelMode::Deserialize(RawData *raw_data) {
     return true;
 }
 
-WTPFrameTunnelMode *const ReadableWTPFrameTunnelMode::Get() const {
+const WTPFrameTunnelMode *const ReadableWTPFrameTunnelMode::Get() const {
     return element;
 }
 

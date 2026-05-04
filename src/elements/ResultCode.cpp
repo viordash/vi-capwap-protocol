@@ -49,7 +49,7 @@ bool ReadableResultCode::Deserialize(RawData *raw_data) {
     return true;
 }
 
-ResultCode *const ReadableResultCode::Get() const {
+const ResultCode *const ReadableResultCode::Get() const {
     return element;
 }
 

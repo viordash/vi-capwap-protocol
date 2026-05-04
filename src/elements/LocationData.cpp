@@ -69,7 +69,7 @@ bool ReadableLocationData::Deserialize(RawData *raw_data) {
     return true;
 }
 
-ReadableLocationData::Element *const ReadableLocationData::Get() const {
+const ReadableLocationData::Element *const ReadableLocationData::Get() const {
     return element;
 }
 

@@ -52,7 +52,7 @@ bool ReadableWTPFallback::Deserialize(RawData *raw_data) {
     return true;
 }
 
-WTPFallback *const ReadableWTPFallback::Get() const {
+const WTPFallback *const ReadableWTPFallback::Get() const {
     return element;
 }
 

@@ -41,7 +41,7 @@ struct ReadableMaximumMessageLength : IReadableJoinRequestOptionalElement,
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    MaximumMessageLength *const Get() const;
+    const MaximumMessageLength *const Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };

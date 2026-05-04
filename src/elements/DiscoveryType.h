@@ -37,7 +37,7 @@ struct ReadableDiscoveryType : IReadableElement {
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    DiscoveryType *const Get() const;
+    const DiscoveryType *const Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };

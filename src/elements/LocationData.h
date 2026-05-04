@@ -42,7 +42,7 @@ struct ReadableLocationData : IReadableConfigurationUpdateRequestOptionalElement
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    ReadableLocationData::Element *const Get() const;
+    const ReadableLocationData::Element *const Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };

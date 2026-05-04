@@ -74,7 +74,7 @@ bool ReadableACIPv4List::Deserialize(RawData *raw_data) {
     return true;
 }
 
-ReadableACIPv4List::Element *const ReadableACIPv4List::Get() const {
+const ReadableACIPv4List::Element *const ReadableACIPv4List::Get() const {
     return element;
 }
 

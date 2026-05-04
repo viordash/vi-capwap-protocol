@@ -68,7 +68,7 @@ bool ReadableImageIdentifier::Deserialize(RawData *raw_data) {
     return true;
 }
 
-ReadableImageIdentifier::Element *const ReadableImageIdentifier::Get() const {
+const ReadableImageIdentifier::Element *const ReadableImageIdentifier::Get() const {
     return element;
 }
 

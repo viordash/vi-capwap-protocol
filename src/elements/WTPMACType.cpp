@@ -56,7 +56,7 @@ bool ReadableWTPMACType::Deserialize(RawData *raw_data) {
     return true;
 }
 
-WTPMACType *const ReadableWTPMACType::Get() const {
+const WTPMACType *const ReadableWTPMACType::Get() const {
     return element;
 }
 

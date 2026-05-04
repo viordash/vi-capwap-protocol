@@ -71,7 +71,7 @@ bool ReadableMTUDiscoveryPadding::Deserialize(RawData *raw_data) {
     return true;
 }
 
-ReadableMTUDiscoveryPadding::Element *const ReadableMTUDiscoveryPadding::Get() const {
+const ReadableMTUDiscoveryPadding::Element *const ReadableMTUDiscoveryPadding::Get() const {
     return element;
 }
 

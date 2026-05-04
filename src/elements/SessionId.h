@@ -58,7 +58,7 @@ struct ReadableSessionId : IReadableElement {
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    SessionId *const Get() const;
+    const SessionId *const Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };

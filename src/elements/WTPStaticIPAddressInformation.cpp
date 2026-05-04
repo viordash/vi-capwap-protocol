@@ -61,7 +61,7 @@ bool ReadableWTPStaticIPAddressInformation::Deserialize(RawData *raw_data) {
     return true;
 }
 
-WTPStaticIPAddressInformation *const ReadableWTPStaticIPAddressInformation::Get() const {
+const WTPStaticIPAddressInformation *const ReadableWTPStaticIPAddressInformation::Get() const {
     return element;
 }
 

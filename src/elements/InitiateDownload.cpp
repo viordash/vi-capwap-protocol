@@ -44,7 +44,7 @@ bool ReadableInitiateDownload::Deserialize(RawData *raw_data) {
     return true;
 }
 
-InitiateDownload *const ReadableInitiateDownload::Get() const {
+const InitiateDownload *const ReadableInitiateDownload::Get() const {
     return element;
 }
 

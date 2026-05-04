@@ -51,7 +51,7 @@ bool ReadableCapwapTransportProtocol::Deserialize(RawData *raw_data) {
     return true;
 }
 
-CapwapTransportProtocol *const ReadableCapwapTransportProtocol::Get() const {
+const CapwapTransportProtocol *const ReadableCapwapTransportProtocol::Get() const {
     return element;
 }
 

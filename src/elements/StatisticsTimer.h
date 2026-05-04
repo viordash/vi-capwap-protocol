@@ -39,7 +39,7 @@ struct ReadableStatisticsTimer : IReadableConfigurationUpdateRequestOptionalElem
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    StatisticsTimer *const Get() const;
+    const StatisticsTimer *const Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };

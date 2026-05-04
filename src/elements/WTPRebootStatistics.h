@@ -108,7 +108,7 @@ struct ReadableWTPRebootStatistics : IReadableConfigurationStatusRequestOptional
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    WTPRebootStatistics *const Get() const;
+    const WTPRebootStatistics *const Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };

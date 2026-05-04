@@ -63,7 +63,7 @@ bool ReadableMaximumMessageLength::Deserialize(RawData *raw_data) {
     return is_present;
 }
 
-MaximumMessageLength *const ReadableMaximumMessageLength::Get() const {
+const MaximumMessageLength *const ReadableMaximumMessageLength::Get() const {
     return element;
 }
 

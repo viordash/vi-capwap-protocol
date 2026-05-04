@@ -41,7 +41,7 @@ struct ReadableACTimestamp : IReadableConfigurationUpdateRequestOptionalElement 
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    ACTimestamp *const Get() const;
+    const ACTimestamp *const Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };
