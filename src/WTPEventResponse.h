@@ -1,20 +1,24 @@
 #pragma once
 
 #include "CapwapMessage.h"
+#include "IElement.h"
 #include "elements/RadioOperationalState.h"
 #include "elements/ResultCode.h"
 #include "elements/VendorSpecificPayload.h"
 #include "span.hpp"
 #include <limits>
-#include <vector>
+#include <unordered_map>
 
 struct WritableWTPEventResponse : WritableCapwapResponse {
   private:
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads;
+    nonstd::span<IWritableWTPEventResponseOptionalElement *const> optional_elements;
 
   public:
     WritableWTPEventResponse(const WritableWTPEventResponse &) = delete;
-    WritableWTPEventResponse(WritableVendorSpecificPayloadArray &vendor_specific_payloads);
+    WritableWTPEventResponse(
+        nonstd::span<IWritableWTPEventResponseOptionalElement *const> optional_elements);
+    WritableWTPEventResponse(
+        std::initializer_list<IWritableWTPEventResponseOptionalElement *const> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -22,12 +26,22 @@ struct WritableWTPEventResponse : WritableCapwapResponse {
 };
 
 struct ReadableWTPEventResponse : ReadableCapwapResponse {
-    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+  protected:
+    std::unordered_map<ElementHeader::ElementType, IReadableWTPEventResponseOptionalElement *const>
+        key_optional_elements;
 
+    std::unordered_map<ElementHeader::ElementType, IReadableWTPEventResponseOptionalElement *const>
+    MapOptionalsElements(
+        nonstd::span<IReadableWTPEventResponseOptionalElement *const> optional_elements);
+
+  public:
     size_t unknown_elements;
 
     ReadableWTPEventResponse(const ReadableWTPEventResponse &) = delete;
-    ReadableWTPEventResponse();
+    ReadableWTPEventResponse(
+        nonstd::span<IReadableWTPEventResponseOptionalElement *const> optional_elements);
+    ReadableWTPEventResponse(
+        std::initializer_list<IReadableWTPEventResponseOptionalElement *> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

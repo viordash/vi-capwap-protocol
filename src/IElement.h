@@ -59,3 +59,6 @@ struct IReadableResetRequestOptionalElement : IReadableElement {};
 
 struct IWritableWTPEventRequestOptionalElement : IWritableElement {};
 struct IReadableWTPEventRequestOptionalElement : IReadableElement {};
+
+struct IWritableWTPEventResponseOptionalElement : IWritableElement {};
+struct IReadableWTPEventResponseOptionalElement : IReadableElement {};
