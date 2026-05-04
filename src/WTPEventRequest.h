@@ -46,7 +46,6 @@ struct ReadableWTPEventRequest : ReadableCapwapRequest {
     ReadableWTPEventRequest(
         std::initializer_list<IReadableWTPEventRequestOptionalElement *> optional_elements);
 
-
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;
     void Log() const;

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "IElement.h"
 #include "CapwapMessage.h"
+#include "IElement.h"
 #include "elements/RadioOperationalState.h"
 #include "elements/ResultCode.h"
 #include "elements/VendorSpecificPayload.h"
@@ -23,7 +23,8 @@ struct WritableConfigurationUpdateResponse : WritableCapwapResponse {
         nonstd::span<IWritableConfigurationUpdateResponseOptionalElement *const> optional_elements);
     WritableConfigurationUpdateResponse(
         const ResultCode::Type result_code,
-        std::initializer_list<IWritableConfigurationUpdateResponseOptionalElement *const> optional_elements);
+        std::initializer_list<IWritableConfigurationUpdateResponseOptionalElement *const>
+            optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -31,11 +32,13 @@ struct WritableConfigurationUpdateResponse : WritableCapwapResponse {
 };
 
 struct ReadableConfigurationUpdateResponse : ReadableCapwapResponse {
-    protected:
-    std::unordered_map<ElementHeader::ElementType, IReadableConfigurationUpdateResponseOptionalElement *const>
+  protected:
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableConfigurationUpdateResponseOptionalElement *const>
         key_optional_elements;
 
-    std::unordered_map<ElementHeader::ElementType, IReadableConfigurationUpdateResponseOptionalElement *const>
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableConfigurationUpdateResponseOptionalElement *const>
     MapOptionalsElements(
         nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const> optional_elements);
 
@@ -48,7 +51,8 @@ struct ReadableConfigurationUpdateResponse : ReadableCapwapResponse {
     ReadableConfigurationUpdateResponse(
         nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const> optional_elements);
     ReadableConfigurationUpdateResponse(
-        std::initializer_list<IReadableConfigurationUpdateResponseOptionalElement *> optional_elements);
+        std::initializer_list<IReadableConfigurationUpdateResponseOptionalElement *>
+            optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

@@ -162,7 +162,6 @@ bool ReadableRSNAErrorReportFromStationArray::IsPresent() const {
     return count > 0;
 }
 
-
 bool ReadableRSNAErrorReportFromStationArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableRSNAErrorReportFromStationArray::Deserialize elements count exceeds");

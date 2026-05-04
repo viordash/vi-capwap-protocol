@@ -15,8 +15,7 @@ struct WritableEchoRequest : WritableCapwapRequest {
 
   public:
     WritableEchoRequest(const WritableEchoRequest &) = delete;
-    WritableEchoRequest(
-        nonstd::span<IWritableEchoRequestOptionalElement *const> optional_elements);
+    WritableEchoRequest(nonstd::span<IWritableEchoRequestOptionalElement *const> optional_elements);
     WritableEchoRequest(
         std::initializer_list<IWritableEchoRequestOptionalElement *const> optional_elements);
 
@@ -25,7 +24,8 @@ struct WritableEchoRequest : WritableCapwapRequest {
     void Serialize(RawData *raw_data) const override final;
 };
 
-struct ReadableEchoRequest : ReadableCapwapRequest {  protected:
+struct ReadableEchoRequest : ReadableCapwapRequest {
+  protected:
     std::unordered_map<ElementHeader::ElementType, IReadableEchoRequestOptionalElement *const>
         key_optional_elements;
 
@@ -34,12 +34,10 @@ struct ReadableEchoRequest : ReadableCapwapRequest {  protected:
         nonstd::span<IReadableEchoRequestOptionalElement *const> optional_elements);
 
   public:
-
     size_t unknown_elements;
 
     ReadableEchoRequest(const ReadableEchoRequest &) = delete;
-    ReadableEchoRequest(
-        nonstd::span<IReadableEchoRequestOptionalElement *const> optional_elements);
+    ReadableEchoRequest(nonstd::span<IReadableEchoRequestOptionalElement *const> optional_elements);
     ReadableEchoRequest(
         std::initializer_list<IReadableEchoRequestOptionalElement *> optional_elements);
 

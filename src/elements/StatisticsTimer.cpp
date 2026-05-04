@@ -22,11 +22,7 @@ void StatisticsTimer::Log() const {
     log_i("ME StatisticsTimer :%u secs", GetValue());
 }
 
-
-
-
-WritableStatisticsTimer::WritableStatisticsTimer(uint16_t time)
-    : element{ time } {
+WritableStatisticsTimer::WritableStatisticsTimer(uint16_t time) : element{ time } {
     static_assert(sizeof(element) == 6);
 }
 

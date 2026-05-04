@@ -45,7 +45,6 @@ bool WTPRadioFailAlarmIndication::Validate() const {
     return true;
 }
 
-
 WritableWTPRadioFailAlarmIndicationArray::WritableWTPRadioFailAlarmIndicationArray() {
     static_assert(sizeof(items[0]) == 8);
     items.reserve(ReadableWTPRadioFailAlarmIndicationArray::max_count);
@@ -104,7 +103,6 @@ ElementHeader::ElementType ReadableWTPRadioFailAlarmIndicationArray::GetElementT
 bool ReadableWTPRadioFailAlarmIndicationArray::IsPresent() const {
     return count > 0;
 }
-
 
 bool ReadableWTPRadioFailAlarmIndicationArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {

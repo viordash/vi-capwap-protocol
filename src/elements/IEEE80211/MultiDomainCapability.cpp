@@ -44,7 +44,6 @@ bool MultiDomainCapability::Validate() const {
     return true;
 }
 
-
 WritableMultiDomainCapabilityArray::WritableMultiDomainCapabilityArray() {
     static_assert(sizeof(items[0]) == 12);
     items.reserve(ReadableMultiDomainCapabilityArray::max_count);
@@ -53,11 +52,10 @@ WritableMultiDomainCapabilityArray::WritableMultiDomainCapabilityArray() {
 void WritableMultiDomainCapabilityArray::Add(MultiDomainCapability element) {
     ASSERT(items.size() + 1 <= ReadableMultiDomainCapabilityArray::max_count);
 
-    auto it_exists = std::find_if(items.begin(),
-                                  items.end(),
-                                  [&element](const MultiDomainCapability &item) {
-                                      return item.GetRadioID() == element.GetRadioID();
-                                  });
+    auto it_exists =
+        std::find_if(items.begin(), items.end(), [&element](const MultiDomainCapability &item) {
+            return item.GetRadioID() == element.GetRadioID();
+        });
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
@@ -105,7 +103,6 @@ ElementHeader::ElementType ReadableMultiDomainCapabilityArray::GetElementType() 
 bool ReadableMultiDomainCapabilityArray::IsPresent() const {
     return count > 0;
 }
-
 
 bool ReadableMultiDomainCapabilityArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {

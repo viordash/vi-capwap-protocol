@@ -55,11 +55,9 @@ void WritableWTPRadioConfigurationArray::Add(WTPRadioConfiguration element) {
     ASSERT(items.size() + 1 <= ReadableWTPRadioConfigurationArray::max_count);
 
     auto it_exists =
-        std::find_if(items.begin(),
-                     items.end(),
-                     [&element](const WTPRadioConfiguration &item) {
-                         return item.RadioID == element.RadioID;
-                     });
+        std::find_if(items.begin(), items.end(), [&element](const WTPRadioConfiguration &item) {
+            return item.RadioID == element.RadioID;
+        });
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
@@ -107,7 +105,6 @@ ElementHeader::ElementType ReadableWTPRadioConfigurationArray::GetElementType() 
 bool ReadableWTPRadioConfigurationArray::IsPresent() const {
     return count > 0;
 }
-
 
 bool ReadableWTPRadioConfigurationArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {

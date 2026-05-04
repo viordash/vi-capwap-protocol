@@ -108,7 +108,7 @@ bool ReadableAssignedWtpBssidArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    
+
     raw_data->current += sizeof(AssignedWtpBssid);
     items[count] = item;
     count++;

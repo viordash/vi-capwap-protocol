@@ -54,10 +54,12 @@ struct ReadableConfigurationUpdateRequest : ReadableCapwapRequest {
     size_t unknown_elements;
 
     ReadableConfigurationUpdateRequest(const ReadableConfigurationUpdateRequest &) = delete;
-    ReadableConfigurationUpdateRequest(nonstd::span<IReadableConfigurationUpdateRequestOptionalElement *const> optional_elements);
+    ReadableConfigurationUpdateRequest(
+        nonstd::span<IReadableConfigurationUpdateRequestOptionalElement *const> optional_elements);
 
     ReadableConfigurationUpdateRequest(
-        std::initializer_list<IReadableConfigurationUpdateRequestOptionalElement *> optional_elements);
+        std::initializer_list<IReadableConfigurationUpdateRequestOptionalElement *>
+            optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

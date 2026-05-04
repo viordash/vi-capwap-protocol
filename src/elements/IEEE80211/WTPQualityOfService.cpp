@@ -169,7 +169,6 @@ bool ReadableWTPQualityOfServiceArray::IsPresent() const {
     return count > 0;
 }
 
-
 bool ReadableWTPQualityOfServiceArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableWTPQualityOfServiceArray::Deserialize elements count exceeds");

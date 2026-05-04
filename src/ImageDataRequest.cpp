@@ -94,7 +94,8 @@ std::unordered_map<ElementHeader::ElementType, IReadableImageDataRequestOptional
 ReadableImageDataRequest::MapOptionalsElements(
     nonstd::span<IReadableImageDataRequestOptionalElement *const> optional_elements) {
 
-    std::unordered_map<ElementHeader::ElementType, IReadableImageDataRequestOptionalElement *const> map;
+    std::unordered_map<ElementHeader::ElementType, IReadableImageDataRequestOptionalElement *const>
+        map;
 
     for (auto *elem : optional_elements) {
         map.emplace(elem->GetElementType(), elem);

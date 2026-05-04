@@ -55,7 +55,6 @@ bool UpdateStationQoS::Validate() const {
     return true;
 }
 
-
 WritableUpdateStationQoSArray::WritableUpdateStationQoSArray() {
     static_assert(sizeof(items[0]) == 13);
     items.reserve(ReadableUpdateStationQoSArray::max_count);
@@ -127,7 +126,6 @@ ElementHeader::ElementType ReadableUpdateStationQoSArray::GetElementType() const
 bool ReadableUpdateStationQoSArray::IsPresent() const {
     return count > 0;
 }
-
 
 bool ReadableUpdateStationQoSArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {

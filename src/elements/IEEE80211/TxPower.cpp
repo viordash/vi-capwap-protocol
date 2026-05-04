@@ -23,7 +23,6 @@ bool TxPower::Validate() const {
     return true;
 }
 
-
 WritableTxPowerArray::WritableTxPowerArray() {
     static_assert(sizeof(items[0]) == 8);
     items.reserve(ReadableTxPowerArray::max_count);
@@ -79,7 +78,6 @@ ElementHeader::ElementType ReadableTxPowerArray::GetElementType() const {
 bool ReadableTxPowerArray::IsPresent() const {
     return count > 0;
 }
-
 
 bool ReadableTxPowerArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {

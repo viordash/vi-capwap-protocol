@@ -121,7 +121,6 @@ bool ReadableMACOperationArray::IsPresent() const {
     return count > 0;
 }
 
-
 bool ReadableMACOperationArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableMACOperationArray::Deserialize elements count exceeds");

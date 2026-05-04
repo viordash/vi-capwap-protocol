@@ -194,7 +194,6 @@ bool ReadableStatisticsArray::IsPresent() const {
     return count > 0;
 }
 
-
 bool ReadableStatisticsArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableStatisticsArray::Deserialize elements count exceeds");

@@ -13,13 +13,14 @@
 struct WritableImageDataRequest : WritableCapwapRequest {
 
   private:
-
     nonstd::span<IWritableImageDataRequestOptionalElement *const> optional_elements;
 
   public:
     WritableImageDataRequest(const WritableImageDataRequest &) = delete;
-    WritableImageDataRequest(nonstd::span<IWritableImageDataRequestOptionalElement *const> optional_elements);
-    WritableImageDataRequest(std::initializer_list<IWritableImageDataRequestOptionalElement *const> optional_elements);
+    WritableImageDataRequest(
+        nonstd::span<IWritableImageDataRequestOptionalElement *const> optional_elements);
+    WritableImageDataRequest(
+        std::initializer_list<IWritableImageDataRequestOptionalElement *const> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
@@ -35,10 +36,11 @@ struct ReadableImageDataRequest : ReadableCapwapRequest {
     MapOptionalsElements(
         nonstd::span<IReadableImageDataRequestOptionalElement *const> optional_elements);
 
-  public:  
+  public:
     size_t unknown_elements;
     ReadableImageDataRequest(const ReadableImageDataRequest &) = delete;
-    ReadableImageDataRequest(nonstd::span<IReadableImageDataRequestOptionalElement *const> optional_elements);
+    ReadableImageDataRequest(
+        nonstd::span<IReadableImageDataRequestOptionalElement *const> optional_elements);
 
     ReadableImageDataRequest(
         std::initializer_list<IReadableImageDataRequestOptionalElement *> optional_elements);

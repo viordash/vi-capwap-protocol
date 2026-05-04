@@ -24,7 +24,8 @@ void WTPFrameTunnelMode::Log() const {
     log_i("ME WTPFrameTunnelMode L:%u, E:%u, N:%u", L, E, N);
 }
 
-WritableWTPFrameTunnelMode::WritableWTPFrameTunnelMode(bool l, bool e, bool n) : element{ l, e, n } {
+WritableWTPFrameTunnelMode::WritableWTPFrameTunnelMode(bool l, bool e, bool n)
+    : element{ l, e, n } {
     static_assert(sizeof(element) == 5);
 }
 

@@ -173,11 +173,10 @@ bool ReadableJoinRequest::Deserialize(RawData *raw_data) {
         }
     }
 
-    return location_data.IsPresent() && wtp_board_data.IsPresent()
-        && wtp_descriptor.IsPresent() && wtp_name.IsPresent() && session_id.IsPresent()
-        && wtp_frame_tunnel_mode.IsPresent() && wtp_mac_type.IsPresent()
-        && wtp_radio_informations.Get().size() > 0 && ecn_support.IsPresent()
-        && ip_addresses.Get().size() > 0;
+    return location_data.IsPresent() && wtp_board_data.IsPresent() && wtp_descriptor.IsPresent()
+        && wtp_name.IsPresent() && session_id.IsPresent() && wtp_frame_tunnel_mode.IsPresent()
+        && wtp_mac_type.IsPresent() && wtp_radio_informations.Get().size() > 0
+        && ecn_support.IsPresent() && ip_addresses.Get().size() > 0;
 }
 
 void ReadableJoinRequest::Log() const {
