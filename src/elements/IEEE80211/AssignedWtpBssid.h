@@ -26,7 +26,7 @@ struct __attribute__((packed)) AssignedWtpBssid : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableAssignedWtpBssidArray : IWritableElement {
+struct WritableAssignedWtpBssidArray : IWritableWlanConfigurationResponseOptionalElement {
   private:
     std::vector<AssignedWtpBssid> items;
 
@@ -38,11 +38,11 @@ struct WritableAssignedWtpBssidArray : IWritableElement {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const override;
-    void Log() const override;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableAssignedWtpBssidArray : IReadableElement {
+struct ReadableAssignedWtpBssidArray : IReadableWlanConfigurationResponseOptionalElement {
   public:
     static const size_t max_count = 32;
 
@@ -54,9 +54,9 @@ struct ReadableAssignedWtpBssidArray : IReadableElement {
     ReadableAssignedWtpBssidArray(const ReadableAssignedWtpBssidArray &) = delete;
     ReadableAssignedWtpBssidArray();
 
-    bool Deserialize(RawData *raw_data) override;
-    ElementHeader::ElementType GetElementType() const override;
-    bool IsPresent() const override;
+    bool Deserialize(RawData *raw_data) override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
     nonstd::span<const AssignedWtpBssid *const> Get() const;
-    void Log() const override;
+    void Log() const override final;
 };

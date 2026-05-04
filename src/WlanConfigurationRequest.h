@@ -6,6 +6,7 @@
 #include "elements/IEEE80211/DeleteWlan.h"
 #include "elements/IEEE80211/InformationElement.h"
 #include "elements/IEEE80211/UpdateWlan.h"
+#include "elements/VendorSpecificPayload.h"
 #include "span.hpp"
 #include <limits>
 #include <unordered_map>

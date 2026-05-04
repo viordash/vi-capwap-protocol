@@ -23,6 +23,7 @@
 #include "WTPEventRequest.cpp"
 #include "WTPEventResponse.cpp"
 #include "WlanConfigurationRequest.cpp"
+#include "WlanConfigurationResponse.cpp"
 #include "elements/ACDescriptor.cpp"
 #include "elements/ACIPv4List.cpp"
 #include "elements/ACName.cpp"
