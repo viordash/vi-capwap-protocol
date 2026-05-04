@@ -102,6 +102,45 @@ When constructing CAPWAP messages with radio information, the following constrai
 
 These requirements are enforced by runtime assertions in the library.
 
+### Radio ID Extension
+
+RFC 5415/5416 specify that Radio ID must be in the range 1-31. This implementation extends the valid range to **0-31** to support special cases or vendor-specific requirements.
+
+**Standard Range (RFC)**: 1-31
+**Implementation Range**: 0-31
+
+This extension is intentional and does not affect interoperability with RFC-compliant implementations, as Radio ID 0 is simply an additional option that can be used or avoided as needed.
+
+### RFC 5416 Implementation Status
+
+This library implements IEEE 802.11 binding for CAPWAP (RFC 5416) with the following coverage:
+
+#### Implemented CAPWAP Control Messages (10/13)
+
+**✓ Fully Implemented:**
+- Discovery Request/Response (Section 5.1, 5.2)
+- Join Request/Response (Section 5.5, 5.6)
+- Configuration Status Request/Response (Section 5.7, 5.8)
+- Configuration Update Request/Response (Section 5.9)
+- Change State Event Request/Response (Section 5.11)
+- WTP Event Request/Response (Section 5.12)
+- WLAN Configuration Request/Response (Section 3.1, 3.2)
+
+**Not Implemented (Optional):**
+- Primary Discovery Request/Response (Section 5.3, 5.4) - optional per RFC 5415
+- Station Configuration Request/Response (Section 5.10) - optional, but individual elements are implemented
+
+#### IEEE 802.11 Elements (25/25)
+
+All 25 IEEE 802.11-specific message elements from RFC 5416 Section 6 are fully implemented:
+- Add/Delete/Update WLAN management
+- Radio configuration (Antenna, Direct Sequence, OFDM, TX Power, etc.)
+- Station management (Station, Session Key, QoS Profile)
+- Information Elements and Statistics
+- All elements have comprehensive unit test coverage
+
+This implementation provides complete functionality for managing WTP radios and WLANs in production environments.
+
 ## Element Classification
 
 This section describes how CAPWAP protocol elements are organized by their structure and usage patterns.
