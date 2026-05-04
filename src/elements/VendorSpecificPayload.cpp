@@ -104,6 +104,10 @@ void WritableVendorSpecificPayloadArray::Log() const {
     }
 }
 
+ElementHeader::ElementType WritableVendorSpecificPayloadArray::GetElementType() const {
+    return ElementHeader::VendorSpecificPayload;
+}
+
 ReadableVendorSpecificPayloadArray::ReadableVendorSpecificPayloadArray() : count{ 0 } {
 }
 

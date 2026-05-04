@@ -116,6 +116,10 @@ void WritableReturnedMessageElementArray::Log() const {
     }
 }
 
+ElementHeader::ElementType WritableReturnedMessageElementArray::GetElementType() const {
+    return ElementHeader::ReturnedMessageElement;
+}
+
 ReadableReturnedMessageElementArray::ReadableReturnedMessageElementArray() : count{ 0 } {
 }
 

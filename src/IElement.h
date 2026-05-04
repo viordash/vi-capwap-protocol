@@ -62,3 +62,8 @@ struct IReadableWTPEventRequestOptionalElement : IReadableElement {};
 
 struct IWritableWTPEventResponseOptionalElement : IWritableElement {};
 struct IReadableWTPEventResponseOptionalElement : IReadableElement {};
+
+struct IWritableChangeStateEventRequestOptionalElement : IWritableElement {
+    virtual ElementHeader::ElementType GetElementType() const = 0;
+};
+struct IReadableChangeStateEventRequestOptionalElement : IReadableElement {};

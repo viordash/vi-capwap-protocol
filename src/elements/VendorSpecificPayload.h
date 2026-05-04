@@ -42,7 +42,8 @@ struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestO
                                             IWritableImageDataResponseOptionalElement,
                                             IWritableResetRequestOptionalElement,
                                             IWritableWTPEventRequestOptionalElement,
-                                            IWritableWTPEventResponseOptionalElement {
+                                            IWritableWTPEventResponseOptionalElement,
+                                            IWritableChangeStateEventRequestOptionalElement {
   public:
     struct Item {
         std::vector<char> value;
@@ -69,6 +70,7 @@ struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestO
     void Serialize(RawData *raw_data) const override final;
     uint16_t GetTotalLength() const override final;
     void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
 };
 
 struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestOptionalElement,
@@ -85,7 +87,8 @@ struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestO
                                             IReadableImageDataResponseOptionalElement,
                                             IReadableResetRequestOptionalElement,
                                             IReadableWTPEventRequestOptionalElement,
-                                            IReadableWTPEventResponseOptionalElement {
+                                            IReadableWTPEventResponseOptionalElement,
+                                            IReadableChangeStateEventRequestOptionalElement {
   public:
     static const size_t max_data_size = 2048;
     static const size_t max_count = 16;

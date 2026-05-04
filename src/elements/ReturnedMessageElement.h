@@ -39,7 +39,7 @@ struct __attribute__((packed)) ReturnedMessageElement : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableReturnedMessageElementArray : IWritableElement {
+struct WritableReturnedMessageElementArray : IWritableChangeStateEventRequestOptionalElement {
   public:
     struct Item {
         std::vector<uint8_t> data;
@@ -65,9 +65,10 @@ struct WritableReturnedMessageElementArray : IWritableElement {
 
     bool Validate() const;
     void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
 };
 
-struct ReadableReturnedMessageElementArray : IReadableElement {
+struct ReadableReturnedMessageElementArray : IReadableChangeStateEventRequestOptionalElement {
     static const size_t max_count = 32;
 
   protected:

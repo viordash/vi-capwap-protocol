@@ -4,22 +4,28 @@
 #include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
+#include <algorithm>
 
 WritableChangeStateEventRequest::WritableChangeStateEventRequest(
     WritableRadioOperationalStateArray &radio_operational_states,
     ResultCode &result_code,
-    WritableReturnedMessageElementArray &returned_message_elements,
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads)
+    nonstd::span<IWritableChangeStateEventRequestOptionalElement *const> optional_elements)
     : radio_operational_states{ radio_operational_states }, result_code{ result_code },
-      returned_message_elements{ returned_message_elements },
-      vendor_specific_payloads{ vendor_specific_payloads } {
+      optional_elements{ optional_elements } {
 
-    if (!this->returned_message_elements.Validate()) {
-        this->returned_message_elements.Clear();
-        log_e("ChangeStateEventRequest: invalid one of Returned Message Element. Switch ResultCode "
-              "to Failure_UnrecognizedMessageElement");
-        this->result_code = { ResultCode::Type::Failure_UnrecognizedMessageElement };
-    }
+    ValidateReturnedMessageElement();
+}
+
+WritableChangeStateEventRequest::WritableChangeStateEventRequest(
+    WritableRadioOperationalStateArray &radio_operational_states,
+    ResultCode &result_code,
+    std::initializer_list<IWritableChangeStateEventRequestOptionalElement *const> optional_elements)
+    : WritableChangeStateEventRequest(
+          radio_operational_states,
+          result_code,
+          nonstd::span<IWritableChangeStateEventRequestOptionalElement *const>(
+              optional_elements.begin(),
+              optional_elements.size())) {
 }
 
 ControlHeader::MessageType WritableChangeStateEventRequest::GetMessageType() const {
@@ -33,31 +39,43 @@ ControlHeader::MessageType WritableChangeStateEventRequest::GetResponseMessageTy
 void WritableChangeStateEventRequest::Serialize(RawData *raw_data) const {
     radio_operational_states.Serialize(raw_data);
     WritableResultCode{ result_code.type }.Serialize(raw_data);
-    returned_message_elements.Serialize(raw_data);
-    vendor_specific_payloads.Serialize(raw_data);
+    for (auto *elem : optional_elements) {
+        elem->Serialize(raw_data);
+    }
 }
 
 ResultCode::Type WritableChangeStateEventRequest::GetResultCode() {
     return result_code.type;
 }
 
-void WritableChangeStateEventRequest::Clear() {
-    radio_operational_states.Clear();
-    returned_message_elements.Clear();
-    vendor_specific_payloads.Clear();
+void WritableChangeStateEventRequest::ValidateReturnedMessageElement() {
+    for (auto *elem : optional_elements) {
+        if (elem->GetElementType() == ElementHeader::ReturnedMessageElement) {
+            auto *returned_message_elements =
+                static_cast<WritableReturnedMessageElementArray *>(elem);
+            if (!returned_message_elements->Validate()) {
+                returned_message_elements->Clear();
+                log_e("ChangeStateEventRequest: invalid one of Returned Message Element. Switch "
+                      "ResultCode "
+                      "to Failure_UnrecognizedMessageElement");
+                this->result_code = { ResultCode::Type::Failure_UnrecognizedMessageElement };
+            }
+            break;
+        }
+    }
 }
 
-bool WritableChangeStateEventRequest::Validate() {
-    if (radio_operational_states.Empty()) {
-        return false;
-    }
-    if (!result_code.Validate()) {
-        return false;
-    }
-    return true;
+ReadableChangeStateEventRequest::ReadableChangeStateEventRequest(
+    nonstd::span<IReadableChangeStateEventRequestOptionalElement *const> optional_elements)
+    : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableChangeStateEventRequest::ReadableChangeStateEventRequest() : unknown_elements{} {
+ReadableChangeStateEventRequest::ReadableChangeStateEventRequest(
+    std::initializer_list<IReadableChangeStateEventRequestOptionalElement *> optional_elements)
+    : ReadableChangeStateEventRequest(
+          nonstd::span<IReadableChangeStateEventRequestOptionalElement *const>(
+              optional_elements.begin(),
+              optional_elements.size())) {
 }
 
 ControlHeader::MessageType ReadableChangeStateEventRequest::GetMessageType() const {
@@ -80,19 +98,15 @@ bool ReadableChangeStateEventRequest::Deserialize(RawData *raw_data) {
                 }
                 break;
 
-            case ElementHeader::ElementType::ReturnedMessageElement:
-                if (!returned_message_elements.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-
-            case ElementHeader::ElementType::VendorSpecificPayload:
-                if (!vendor_specific_payloads.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-
             default: {
+                auto it = key_optional_elements.find(element->GetElementType());
+                if (it != key_optional_elements.end()) {
+                    if (!it->second->Deserialize(raw_data)) {
+                        return false;
+                    }
+                    break;
+                }
+
                 auto unknownElement = UnrecognizedElement::Deserialize(raw_data);
                 if (unknownElement == nullptr) {
                     return false;
@@ -116,12 +130,27 @@ void ReadableChangeStateEventRequest::Log() const {
 
     result_code.Log();
 
-    returned_message_elements.Log();
-
-    vendor_specific_payloads.Log();
-
+    for (const auto &[_, value] : key_optional_elements) {
+        value->Log();
+    }
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
+}
+
+std::unordered_map<ElementHeader::ElementType,
+                   IReadableChangeStateEventRequestOptionalElement *const>
+ReadableChangeStateEventRequest::MapOptionalsElements(
+    nonstd::span<IReadableChangeStateEventRequestOptionalElement *const> optional_elements) {
+
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableChangeStateEventRequestOptionalElement *const>
+        map;
+
+    for (auto *elem : optional_elements) {
+        map.emplace(elem->GetElementType(), elem);
+    }
+
+    return map;
 }
