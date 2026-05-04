@@ -67,3 +67,6 @@ struct IWritableChangeStateEventRequestOptionalElement : IWritableElement {
     virtual ElementHeader::ElementType GetElementType() const = 0;
 };
 struct IReadableChangeStateEventRequestOptionalElement : IReadableElement {};
+
+struct IWritableChangeStateEventResponseOptionalElement : IWritableElement {};
+struct IReadableChangeStateEventResponseOptionalElement : IReadableElement {};
