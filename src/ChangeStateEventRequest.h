@@ -2,6 +2,7 @@
 
 #include "CapwapMessage.h"
 #include "IElement.h"
+#include "elements/IEEE80211/WTPRadioFailAlarmIndication.h"
 #include "elements/RadioOperationalState.h"
 #include "elements/ResultCode.h"
 #include "elements/ReturnedMessageElement.h"

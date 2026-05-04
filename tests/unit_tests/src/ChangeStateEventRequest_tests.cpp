@@ -342,3 +342,45 @@ TEST(ChangeStateEventRequestTestsGroup,
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, read_data.unknown_elements);
 }
+
+TEST(ChangeStateEventRequestTestsGroup, IEEE80211_specific_message_elements) {
+    uint8_t buffer[4096] = {};
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+
+    {
+        WritableRadioOperationalStateArray radio_operational_states;
+        radio_operational_states.Add({ 0,
+                                       RadioOperationalState::States::Enabled,
+                                       RadioOperationalState::Causes::AdministrativelySet });
+        ResultCode result_code = ResultCode::Type::Success;
+
+        WritableWTPRadioFailAlarmIndicationArray w_alarms;
+        w_alarms.Add(
+            { 1, WTPRadioFailAlarmIndication::Receiver, WTPRadioFailAlarmIndication::Minor });
+
+        WritableChangeStateEventRequest write_data(radio_operational_states,
+                                                   result_code,
+                                                   { &w_alarms });
+
+        write_data.Serialize(&raw_data);
+    }
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableWTPRadioFailAlarmIndicationArray r_alarms;
+    ReadableChangeStateEventRequest read_data({ &r_alarms });
+
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+
+    CHECK_TRUE(read_data.radio_operational_states.IsPresent());
+    CHECK_TRUE(read_data.result_code.IsPresent());
+
+    CHECK_TRUE(r_alarms.IsPresent());
+    CHECK_EQUAL(1, r_alarms.Get().size());
+    CHECK_EQUAL(1, r_alarms.Get()[0]->RadioID);
+    CHECK_EQUAL(WTPRadioFailAlarmIndication::Receiver, r_alarms.Get()[0]->Type);
+    CHECK_EQUAL(WTPRadioFailAlarmIndication::Minor, r_alarms.Get()[0]->Status);
+
+    CHECK_EQUAL(0, read_data.unknown_elements);
+}
