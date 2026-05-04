@@ -377,3 +377,183 @@ TEST(ConfigurationStatusRequestTestsGroup,
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, read_data.unknown_elements);
 }
+
+TEST(ConfigurationStatusRequestTestsGroup, IEEE80211_specific_message_elements) {
+    uint8_t buffer[4096] = {};
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+
+    std::vector<uint8_t> rates_0 = { 0x82, 0x84 };
+    std::vector<int16_t> levels_0 = { 20 };
+    const uint8_t bssid1[] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0x01 };
+
+    {
+        WritableRadioAdministrativeStateArray radio_states;
+        radio_states.Add({ 0, RadioAdministrativeState::States::Enabled });
+
+        WTPRebootStatistics wtp_reboot_statistics{
+            21, 22, 23, 24, 25, 26, 27, WTPRebootStatistics::LastFailureType::HardwareFailure
+        };
+
+        WritableAntennaArray w_antennas;
+        std::vector<Antenna::AntennaSelection> selection_0 = {
+            Antenna::AntennaSelection::Internal
+        };
+        w_antennas.Add(1,
+                       Antenna::Diversity::Enabled,
+                       Antenna::Combiner::SectorizedLeft,
+                       selection_0);
+
+        WritableDirectSequenceControlArray w_ctrls;
+        w_ctrls.Add({ 1, 1, DirectSequenceControl::CCAMode::EdOnly, 100 });
+
+        WritableMACOperationArray w_ops;
+        w_ops.Add({ 1, 2347, 7, 4, 2346, 512, 512 });
+
+        WritableMultiDomainCapabilityArray w_capabilities;
+        w_capabilities.Add({ 1, 1, 13, 20 });
+
+        WritableOFDMControlArray w_controls;
+        w_controls.Add({ 1, 36, 0x01, 100 });
+
+        WritableSupportedRatesArray w_rates;
+        w_rates.Add({ 1, rates_0 });
+
+        WritableTxPowerArray w_tps;
+        w_tps.Add({ 1, 20 });
+
+        WritableTxPowerLevelArray w_levels;
+        w_levels.Add({ 1, levels_0 });
+
+        WritableWTPRadioConfigurationArray w_configs;
+        w_configs.Add({ 1, 1, 4, 2, bssid1, 100, "US " });
+
+        WritableWTPRadioInformationArray w_infos;
+        w_infos.Add({ 1, true, false, true, true, false, false, false }); // b/g/n
+
+        WritableConfigurationStatusRequest write_data("abcdefабвгд",
+                                                      radio_states,
+                                                      12345,
+                                                      wtp_reboot_statistics,
+                                                      { &w_antennas,
+                                                        &w_ctrls,
+                                                        &w_ops,
+                                                        &w_capabilities,
+                                                        &w_controls,
+                                                        &w_rates,
+                                                        &w_tps,
+                                                        &w_levels,
+                                                        &w_configs,
+                                                        &w_infos });
+
+        write_data.Serialize(&raw_data);
+    }
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableAntennaArray r_antennas;
+    ReadableDirectSequenceControlArray r_ctrls;
+    ReadableMACOperationArray r_ops;
+    ReadableMultiDomainCapabilityArray r_capabilities;
+    ReadableOFDMControlArray r_controls;
+    ReadableSupportedRatesArray r_rates;
+    ReadableTxPowerArray r_tps;
+    ReadableTxPowerLevelArray r_levels;
+    ReadableWTPRadioConfigurationArray r_configs;
+    ReadableWTPRadioInformationArray r_infos;
+    ReadableConfigurationStatusRequest read_data({ &r_antennas,
+                                                   &r_ctrls,
+                                                   &r_ops,
+                                                   &r_capabilities,
+                                                   &r_controls,
+                                                   &r_rates,
+                                                   &r_tps,
+                                                   &r_levels,
+                                                   &r_configs,
+                                                   &r_infos });
+
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+
+    CHECK_TRUE(read_data.ac_name.IsPresent());
+    CHECK_TRUE(read_data.radio_states.IsPresent());
+    CHECK_TRUE(read_data.statistics_timer.IsPresent());
+    CHECK_TRUE(read_data.wtp_reboot_statistics.IsPresent());
+
+    CHECK_TRUE(r_antennas.IsPresent());
+    CHECK_EQUAL(1, r_antennas.Get().size());
+    CHECK_EQUAL(1, r_antennas.Get()[0]->GetRadioID());
+    CHECK_EQUAL(Antenna::Diversity::Enabled, r_antennas.Get()[0]->GetDiversity());
+    CHECK_EQUAL(Antenna::Combiner::SectorizedLeft, r_antennas.Get()[0]->GetCombiner());
+    CHECK_EQUAL(1, r_antennas.Get()[0]->GetAntennaCount());
+    CHECK_EQUAL(Antenna::AntennaSelection::Internal, r_antennas.Get()[0]->antenna_selection[0]);
+
+    CHECK_TRUE(r_ctrls.IsPresent());
+    CHECK_EQUAL(1, r_ctrls.Get().size());
+    CHECK_EQUAL(1, r_ctrls.Get()[0]->GetRadioID());
+    CHECK_EQUAL(1, r_ctrls.Get()[0]->GetCurrentChannel());
+    CHECK_EQUAL(DirectSequenceControl::CCAMode::EdOnly, r_ctrls.Get()[0]->GetCurrentCCA());
+    CHECK_EQUAL(100, r_ctrls.Get()[0]->GetEnergyDetectThreshold());
+
+    CHECK_TRUE(r_ops.IsPresent());
+    CHECK_EQUAL(1, r_ops.Get().size());
+    CHECK_EQUAL(1, r_ops.Get()[0]->GetRadioID());
+    CHECK_EQUAL(2347, r_ops.Get()[0]->GetRTSThreshold());
+    CHECK_EQUAL(7, r_ops.Get()[0]->GetShortRetry());
+    CHECK_EQUAL(4, r_ops.Get()[0]->GetLongRetry());
+    CHECK_EQUAL(2346, r_ops.Get()[0]->GetFragmentationThreshold());
+    CHECK_EQUAL(512, r_ops.Get()[0]->GetTxMSDULifetime());
+    CHECK_EQUAL(512, r_ops.Get()[0]->GetRxMSDULifetime());
+
+    CHECK_TRUE(r_capabilities.IsPresent());
+    CHECK_EQUAL(1, r_capabilities.Get().size());
+    CHECK_EQUAL(1, r_capabilities.Get()[0]->GetRadioID());
+    CHECK_EQUAL(1, r_capabilities.Get()[0]->GetFirstChannel());
+    CHECK_EQUAL(13, r_capabilities.Get()[0]->GetNumberOfChannels());
+    CHECK_EQUAL(20, r_capabilities.Get()[0]->GetMaxTxPowerLevel());
+
+    CHECK_TRUE(r_controls.IsPresent());
+    CHECK_EQUAL(1, r_controls.Get().size());
+    CHECK_EQUAL(1, r_controls.Get()[0]->GetRadioID());
+    CHECK_EQUAL(36, r_controls.Get()[0]->GetCurrentChannel());
+    CHECK_EQUAL(0x01, r_controls.Get()[0]->GetBandSupport());
+    CHECK_EQUAL(100, r_controls.Get()[0]->GetTIThreshold());
+
+    CHECK_TRUE(r_rates.IsPresent());
+    CHECK_EQUAL(1, r_rates.Get().size());
+    CHECK_EQUAL(1, r_rates.Get()[0]->GetRadioID());
+    CHECK_EQUAL(2, r_rates.Get()[0]->GetRatesCount());
+    CHECK_EQUAL(2 + 1, r_rates.Get()[0]->GetLength());
+    MEMCMP_EQUAL(rates_0.data(), r_rates.Get()[0]->data, 2);
+
+    CHECK_TRUE(r_tps.IsPresent());
+    CHECK_EQUAL(1, r_tps.Get().size());
+    CHECK_EQUAL(1, r_tps.Get()[0]->RadioID);
+    CHECK_EQUAL(20, r_tps.Get()[0]->CurrentTxPower.Get());
+
+    CHECK_TRUE(r_levels.IsPresent());
+    CHECK_EQUAL(1, r_levels.Get().size());
+    CHECK_EQUAL(1, r_levels.Get()[0]->GetRadioID());
+    CHECK_EQUAL(1, r_levels.Get()[0]->GetNumLevels());
+    CHECK_EQUAL(2 + 2, r_levels.Get()[0]->GetLength());
+    MEMCMP_EQUAL(levels_0.data(), r_levels.Get()[0]->data, 2);
+
+    CHECK_TRUE(r_configs.IsPresent());
+    CHECK_EQUAL(1, r_configs.Get().size());
+    CHECK_EQUAL(1, r_configs.Get()[0]->RadioID);
+    CHECK_EQUAL(1, r_configs.Get()[0]->ShortPreamble);
+    CHECK_EQUAL(4, r_configs.Get()[0]->NumBSSIDs);
+    CHECK_EQUAL(2, r_configs.Get()[0]->DTIMPeriod);
+    MEMCMP_EQUAL(bssid1, r_configs.Get()[0]->BSSID, 6);
+    CHECK_EQUAL(100, r_configs.Get()[0]->BeaconPeriod.Get());
+
+    CHECK_TRUE(r_infos.IsPresent());
+    CHECK_EQUAL(1, r_infos.Get().size());
+    CHECK_EQUAL(1, r_infos.Get()[0]->RadioID);
+    CHECK_TRUE(r_infos.Get()[0]->B);
+    CHECK_FALSE(r_infos.Get()[0]->A);
+    CHECK_TRUE(r_infos.Get()[0]->G);
+    CHECK_TRUE(r_infos.Get()[0]->N);
+    CHECK_FALSE(r_infos.Get()[0]->AC);
+
+    CHECK_EQUAL(0, read_data.unknown_elements);
+}
