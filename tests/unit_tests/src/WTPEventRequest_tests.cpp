@@ -423,3 +423,76 @@ TEST(WTPEventRequestTestsGroup, One_or_more_serialize) {
 
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
+
+TEST(WTPEventRequestTestsGroup, IEEE80211_specific_message_elements) {
+    uint8_t buffer[4096] = {};
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+
+    const uint8_t mac_0[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 };
+    uint8_t client_mac1[6] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+    uint8_t bssid1[6] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+
+    {
+        WritableMICCountermeasuresArray w_cms;
+        w_cms.Add({ 1, 1, mac_0 });
+
+        WritableRSNAErrorReportFromStationArray w_reports;
+        w_reports.Add({ client_mac1, bssid1, 1, 5, 10, 20, 30, 40, 50, 60 });
+
+        WritableStatisticsArray w_stats;
+        w_stats.Add(
+            { 1, 100, 200, 10, 20, 5, 3, 500, 2, 7, 150, 300, 4, 1000, 1, 2, 25, 50, 6, 8 });
+
+        WritableWTPEventRequest write_data({ &w_cms, &w_reports, &w_stats });
+
+        write_data.Serialize(&raw_data);
+    }
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableMICCountermeasuresArray r_cms;
+    ReadableRSNAErrorReportFromStationArray r_reports;
+    ReadableStatisticsArray r_stats;
+    ReadableWTPEventRequest read_data({ &r_cms, &r_reports, &r_stats });
+
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+
+    CHECK_TRUE(r_cms.IsPresent());
+    CHECK_EQUAL(1, r_cms.Get().size());
+    CHECK_EQUAL(1, r_cms.Get()[0]->RadioID);
+    CHECK_EQUAL(1, r_cms.Get()[0]->WlanID);
+    MEMCMP_EQUAL(mac_0, r_cms.Get()[0]->MACAddress, sizeof(mac_0));
+
+    CHECK_TRUE(r_reports.IsPresent());
+    CHECK_EQUAL(1, r_reports.Get().size());
+    CHECK_EQUAL(1, r_reports.Get()[0]->GetRadioID());
+    CHECK_EQUAL(5, r_reports.Get()[0]->GetWlanID());
+    CHECK_EQUAL(10, r_reports.Get()[0]->GetTKIPICVErrors());
+    CHECK_EQUAL(60, r_reports.Get()[0]->GetTKIPReplays());
+
+    CHECK_TRUE(r_stats.IsPresent());
+    CHECK_EQUAL(1, r_stats.Get().size());
+    CHECK_EQUAL(1, r_stats.Get()[0]->GetRadioID());
+    CHECK_EQUAL(100, r_stats.Get()[0]->GetTxFragmentCount());
+    CHECK_EQUAL(200, r_stats.Get()[0]->GetMulticastTxCount());
+    CHECK_EQUAL(10, r_stats.Get()[0]->GetFailedCount());
+    CHECK_EQUAL(20, r_stats.Get()[0]->GetRetryCount());
+    CHECK_EQUAL(5, r_stats.Get()[0]->GetMultipleRetryCount());
+    CHECK_EQUAL(3, r_stats.Get()[0]->GetFrameDuplicateCount());
+    CHECK_EQUAL(500, r_stats.Get()[0]->GetRTSSuccessCount());
+    CHECK_EQUAL(2, r_stats.Get()[0]->GetRTSFailureCount());
+    CHECK_EQUAL(7, r_stats.Get()[0]->GetACKFailureCount());
+    CHECK_EQUAL(150, r_stats.Get()[0]->GetRxFragmentCount());
+    CHECK_EQUAL(300, r_stats.Get()[0]->GetMulticastRxCount());
+    CHECK_EQUAL(4, r_stats.Get()[0]->GetFCSErrorCount());
+    CHECK_EQUAL(1000, r_stats.Get()[0]->GetTxFrameCount());
+    CHECK_EQUAL(1, r_stats.Get()[0]->GetDecryptionErrors());
+    CHECK_EQUAL(2, r_stats.Get()[0]->GetDiscardedQoSFragmentCount());
+    CHECK_EQUAL(25, r_stats.Get()[0]->GetAssociatedStationCount());
+    CHECK_EQUAL(50, r_stats.Get()[0]->GetQoSCFPollsReceivedCount());
+    CHECK_EQUAL(6, r_stats.Get()[0]->GetQoSCFPollsUnusedCount());
+    CHECK_EQUAL(8, r_stats.Get()[0]->GetQoSCFPollsUnusableCount());
+
+    CHECK_EQUAL(0, read_data.unknown_elements);
+}
