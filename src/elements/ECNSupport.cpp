@@ -52,7 +52,7 @@ bool ReadableECNSupport::Deserialize(RawData *raw_data) {
     return true;
 }
 
-const ECNSupport *const ReadableECNSupport::Get() const {
+const ECNSupport *ReadableECNSupport::Get() const {
     return element;
 }
 

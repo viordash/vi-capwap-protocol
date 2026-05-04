@@ -58,7 +58,7 @@ bool ReadableSessionId::Deserialize(RawData *raw_data) {
     return true;
 }
 
-const SessionId *const ReadableSessionId::Get() const {
+const SessionId *ReadableSessionId::Get() const {
     return element;
 }
 

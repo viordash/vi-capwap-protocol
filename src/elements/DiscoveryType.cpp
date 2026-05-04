@@ -56,7 +56,7 @@ bool ReadableDiscoveryType::Deserialize(RawData *raw_data) {
     return true;
 }
 
-const DiscoveryType *const ReadableDiscoveryType::Get() const {
+const DiscoveryType *ReadableDiscoveryType::Get() const {
     return element;
 }
 

@@ -54,7 +54,7 @@ bool ReadableIdleTimeout::Deserialize(RawData *raw_data) {
     return true;
 }
 
-const IdleTimeout *const ReadableIdleTimeout::Get() const {
+const IdleTimeout *ReadableIdleTimeout::Get() const {
     return element;
 }
 

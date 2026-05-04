@@ -44,7 +44,7 @@ struct ReadableWTPFrameTunnelMode : IReadableElement {
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    const WTPFrameTunnelMode *const Get() const;
+    const WTPFrameTunnelMode *Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };

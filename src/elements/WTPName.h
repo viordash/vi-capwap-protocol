@@ -43,7 +43,7 @@ struct ReadableWTPName : IReadableConfigurationUpdateRequestOptionalElement {
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    const ReadableWTPName::Element *const Get() const;
+    const ReadableWTPName::Element *Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };

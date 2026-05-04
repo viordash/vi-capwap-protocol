@@ -38,7 +38,7 @@ struct ReadableMTUDiscoveryPadding : IReadableElement {
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    const ReadableMTUDiscoveryPadding::Element *const Get() const;
+    const ReadableMTUDiscoveryPadding::Element *Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };

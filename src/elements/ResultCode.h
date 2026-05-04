@@ -59,7 +59,7 @@ struct ReadableResultCode : IReadableElement {
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    const ResultCode *const Get() const;
+    const ResultCode *Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };

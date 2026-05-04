@@ -52,7 +52,7 @@ bool ReadableStatisticsTimer::Deserialize(RawData *raw_data) {
     return true;
 }
 
-const StatisticsTimer *const ReadableStatisticsTimer::Get() const {
+const StatisticsTimer *ReadableStatisticsTimer::Get() const {
     return element;
 }
 

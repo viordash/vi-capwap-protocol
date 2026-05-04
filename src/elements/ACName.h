@@ -43,7 +43,7 @@ struct ReadableACName : IReadableElement {
   public:
     bool Deserialize(RawData *raw_data) override final;
     void Log() const override final;
-    const ReadableACName::Element *const Get() const;
+    const ReadableACName::Element *Get() const;
     ElementHeader::ElementType GetElementType() const override final;
     bool IsPresent() const override final;
 };
