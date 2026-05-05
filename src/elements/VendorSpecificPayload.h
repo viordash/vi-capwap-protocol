@@ -44,7 +44,8 @@ struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestO
                                             IWritableChangeStateEventRequestOptionalElement,
                                             IWritableChangeStateEventResponseOptionalElement,
                                             IWritableWlanConfigurationRequestOptionalElement,
-                                            IWritableWlanConfigurationResponseOptionalElement {
+                                            IWritableWlanConfigurationResponseOptionalElement,
+                                            IWritableResetResponseOptionalElement {
   public:
     struct Item {
         std::vector<char> value;
@@ -92,7 +93,8 @@ struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestO
                                             IReadableChangeStateEventRequestOptionalElement,
                                             IReadableChangeStateEventResponseOptionalElement,
                                             IReadableWlanConfigurationRequestOptionalElement,
-                                            IReadableWlanConfigurationResponseOptionalElement {
+                                            IReadableWlanConfigurationResponseOptionalElement,
+                                            IReadableResetResponseOptionalElement {
   public:
     static const size_t max_data_size = 2048;
     static const size_t max_count = 16;

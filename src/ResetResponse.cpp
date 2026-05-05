@@ -6,9 +6,15 @@
 #include "lassert.h"
 
 WritableResetResponse::WritableResetResponse(
-    const ResultCode::Type result_code,
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads)
-    : result_code{ result_code }, vendor_specific_payloads{ vendor_specific_payloads } {
+    nonstd::span<IWritableResetResponseOptionalElement *const> optional_elements)
+    : optional_elements{ optional_elements } {
+}
+
+WritableResetResponse::WritableResetResponse(
+    std::initializer_list<IWritableResetResponseOptionalElement *const> optional_elements)
+    : WritableResetResponse(
+          nonstd::span<IWritableResetResponseOptionalElement *const>(optional_elements.begin(),
+                                                                     optional_elements.size())) {
 }
 
 ControlHeader::MessageType WritableResetResponse::GetMessageType() const {
@@ -20,11 +26,22 @@ ControlHeader::MessageType WritableResetResponse::GetRequestMessageType() const 
 }
 
 void WritableResetResponse::Serialize(RawData *raw_data) const {
-    result_code.Serialize(raw_data);
-    vendor_specific_payloads.Serialize(raw_data);
+    for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
+        elem->Serialize(raw_data);
+    }
 }
 
-ReadableResetResponse::ReadableResetResponse() : unknown_elements{} {
+ReadableResetResponse::ReadableResetResponse(
+    nonstd::span<IReadableResetResponseOptionalElement *const> optional_elements)
+    : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
+}
+
+ReadableResetResponse::ReadableResetResponse(
+    std::initializer_list<IReadableResetResponseOptionalElement *> optional_elements)
+    : ReadableResetResponse(
+          nonstd::span<IReadableResetResponseOptionalElement *const>(optional_elements.begin(),
+                                                                     optional_elements.size())) {
 }
 
 ControlHeader::MessageType ReadableResetResponse::GetMessageType() const {
@@ -36,18 +53,15 @@ bool ReadableResetResponse::Deserialize(RawData *raw_data) {
         ElementHeader *element = (ElementHeader *)raw_data->current;
 
         switch (element->GetElementType()) {
-            case ElementHeader::ElementType::ResultCode:
-                if (!result_code.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::VendorSpecificPayload:
-                if (!vendor_specific_payloads.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-
             default: {
+                auto it = key_optional_elements.find(element->GetElementType());
+                if (it != key_optional_elements.end()) {
+                    if (!it->second->Deserialize(raw_data)) {
+                        return false;
+                    }
+                    break;
+                }
+
                 auto unknownElement = UnrecognizedElement::Deserialize(raw_data);
                 if (unknownElement == nullptr) {
                     return false;
@@ -61,18 +75,33 @@ bool ReadableResetResponse::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return result_code.IsPresent();
+    return true;
 }
 
 void ReadableResetResponse::Log() const {
     log_i("----------------------------------");
     log_i("ME ResetResponse:");
 
-    result_code.Log();
-
-    vendor_specific_payloads.Log();
+    for (const auto &[_, value] : key_optional_elements) {
+        value->Log();
+    }
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
+}
+
+std::unordered_map<ElementHeader::ElementType, IReadableResetResponseOptionalElement *const>
+ReadableResetResponse::MapOptionalsElements(
+    nonstd::span<IReadableResetResponseOptionalElement *const> optional_elements) {
+
+    std::unordered_map<ElementHeader::ElementType, IReadableResetResponseOptionalElement *const>
+        map;
+
+    for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
+        map.emplace(elem->GetElementType(), elem);
+    }
+
+    return map;
 }

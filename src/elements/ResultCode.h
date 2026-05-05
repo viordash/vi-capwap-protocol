@@ -40,7 +40,7 @@ struct __attribute__((packed)) ResultCode : ElementHeader {
     void Log() const;
 };
 
-struct WritableResultCode : IWritableElement {
+struct WritableResultCode : IWritableResetResponseOptionalElement {
   protected:
     ResultCode element;
 
@@ -51,7 +51,7 @@ struct WritableResultCode : IWritableElement {
     void Log() const override final;
 };
 
-struct ReadableResultCode : IReadableElement {
+struct ReadableResultCode : IReadableResetResponseOptionalElement {
   protected:
     ResultCode *element = nullptr;
     bool is_present = false;
