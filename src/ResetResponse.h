@@ -1,7 +1,7 @@
 #pragma once
 
-#include "IElement.h"
 #include "CapwapMessage.h"
+#include "IElement.h"
 #include "elements/ResultCode.h"
 #include "elements/VendorSpecificPayload.h"
 #include "span.hpp"
@@ -35,7 +35,6 @@ struct ReadableResetResponse : ReadableCapwapResponse {
         nonstd::span<IReadableResetResponseOptionalElement *const> optional_elements);
 
   public:
-
     size_t unknown_elements;
 
     ReadableResetResponse(const ReadableResetResponse &) = delete;
