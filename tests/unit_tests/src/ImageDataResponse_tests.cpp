@@ -162,3 +162,14 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_deserialize_handle_unknown_e
     CHECK_FALSE(image_information.IsPresent());
     CHECK_EQUAL(2, read_data.unknown_elements);
 }
+TEST(ImageDataResponseTestsGroup, GetOptionalElement) {
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableImageDataResponse read_data({ &vendor_specific_payloads });
+
+    CHECK_EQUAL(&vendor_specific_payloads,
+                read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
+                    ElementHeader::VendorSpecificPayload));
+
+    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
+          nullptr);
+}

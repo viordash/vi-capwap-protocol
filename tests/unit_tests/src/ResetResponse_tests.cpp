@@ -169,3 +169,17 @@ TEST(ResetResponseTestsGroup, ResetResponse_deserialize_handle_unknown_element) 
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, read_data.unknown_elements);
 }
+
+TEST(ResetResponseTestsGroup, GetOptionalElement) {
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableResultCode result_code;
+    ReadableResetResponse read_data({ &vendor_specific_payloads, &result_code });
+
+    CHECK_EQUAL(&vendor_specific_payloads,
+                read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
+                    ElementHeader::VendorSpecificPayload));
+
+    CHECK_EQUAL(&result_code,
+                read_data.GetOptionalElement<ReadableResultCode>(ElementHeader::ResultCode));
+    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)9) == nullptr);
+}

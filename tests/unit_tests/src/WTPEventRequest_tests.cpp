@@ -496,3 +496,14 @@ TEST(WTPEventRequestTestsGroup, IEEE80211_specific_message_elements) {
 
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
+TEST(WTPEventRequestTestsGroup, GetOptionalElement) {
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableWTPEventRequest read_data({ &vendor_specific_payloads });
+
+    CHECK_EQUAL(&vendor_specific_payloads,
+                read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
+                    ElementHeader::VendorSpecificPayload));
+
+    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
+          nullptr);
+}

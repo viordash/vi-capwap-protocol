@@ -356,3 +356,14 @@ uint8_t data[] = {
     CHECK_EQUAL(2, read_data.unknown_elements);
     CHECK_FALSE(vendor_specific_payloads.IsPresent());
 }
+TEST(DiscoveryResponseTestsGroup, GetOptionalElement) {
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableDiscoveryResponse read_data({ &vendor_specific_payloads });
+
+    CHECK_EQUAL(&vendor_specific_payloads,
+                read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
+                    ElementHeader::VendorSpecificPayload));
+
+    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
+          nullptr);
+}

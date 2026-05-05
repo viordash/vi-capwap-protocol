@@ -182,3 +182,14 @@ TEST(WlanConfigurationResponseTestsGroup,
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, read_data.unknown_elements);
 }
+TEST(WlanConfigurationResponseTestsGroup, GetOptionalElement) {
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableWlanConfigurationResponse read_data({ &vendor_specific_payloads });
+
+    CHECK_EQUAL(&vendor_specific_payloads,
+                read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
+                    ElementHeader::VendorSpecificPayload));
+
+    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
+          nullptr);
+}
