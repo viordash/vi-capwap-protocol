@@ -250,3 +250,10 @@ TEST(WlanConfigurationRequestTestsGroup, GetOptionalElement) {
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
           nullptr);
 }
+
+TEST(WlanConfigurationRequestTestsGroup, MessageTypeIdentification) {
+    WritableAddWlanArray add_wlan;
+    WritableWlanConfigurationRequest write_data(&add_wlan, {});
+
+    CHECK_EQUAL(ControlHeader::WlanConfigurationRequest, write_data.GetMessageType());
+}

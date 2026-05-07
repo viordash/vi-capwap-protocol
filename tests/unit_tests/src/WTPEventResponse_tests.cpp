@@ -151,3 +151,10 @@ TEST(WTPEventResponseTestsGroup, GetOptionalElement) {
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
           nullptr);
 }
+
+TEST(WTPEventResponseTestsGroup, MessageTypeIdentification) {
+    WritableWTPEventResponse write_data({});
+
+    CHECK_EQUAL(ControlHeader::WTPEventResponse, write_data.GetMessageType());
+    CHECK_EQUAL(ControlHeader::WTPEventRequest, write_data.GetRequestMessageType());
+}

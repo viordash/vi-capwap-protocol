@@ -139,3 +139,10 @@ TEST(EchoResponseTestsGroup, GetOptionalElement) {
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
           nullptr);
 }
+
+TEST(EchoResponseTestsGroup, MessageTypeIdentification) {
+    WritableEchoResponse write_data({});
+
+    CHECK_EQUAL(ControlHeader::EchoResponse, write_data.GetMessageType());
+    CHECK_EQUAL(ControlHeader::EchoRequest, write_data.GetRequestMessageType());
+}

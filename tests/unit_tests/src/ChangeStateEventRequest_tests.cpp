@@ -395,3 +395,11 @@ TEST(ChangeStateEventRequestTestsGroup, GetOptionalElement) {
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
           nullptr);
 }
+
+TEST(ChangeStateEventRequestTestsGroup, MessageTypeIdentification) {
+    WritableRadioOperationalStateArray radio_operational_states;
+    ResultCode result_code = ResultCode::Type::Success;
+    WritableChangeStateEventRequest write_data(radio_operational_states, result_code, {});
+
+    CHECK_EQUAL(ControlHeader::ChangeStateEventRequest, write_data.GetMessageType());
+}

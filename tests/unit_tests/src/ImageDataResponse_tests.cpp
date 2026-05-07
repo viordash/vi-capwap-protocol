@@ -173,3 +173,10 @@ TEST(ImageDataResponseTestsGroup, GetOptionalElement) {
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
           nullptr);
 }
+
+TEST(ImageDataResponseTestsGroup, MessageTypeIdentification) {
+    WritableImageDataResponse write_data(ResultCode::Type::Success, {});
+
+    CHECK_EQUAL(ControlHeader::ImageDataResponse, write_data.GetMessageType());
+    CHECK_EQUAL(ControlHeader::ImageDataRequest, write_data.GetRequestMessageType());
+}

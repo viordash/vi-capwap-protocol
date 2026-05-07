@@ -167,3 +167,10 @@ TEST(ResetRequestTestsGroup, GetOptionalElement) {
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
           nullptr);
 }
+
+TEST(ResetRequestTestsGroup, MessageTypeIdentification) {
+    WritableImageIdentifier image_identifier{ 1, "img" };
+    WritableResetRequest write_data(image_identifier, {});
+
+    CHECK_EQUAL(ControlHeader::ResetRequest, write_data.GetMessageType());
+}

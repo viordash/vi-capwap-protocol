@@ -466,6 +466,7 @@ TEST(ConfigurationStatusResponseTestsGroup, IEEE80211_specific_message_elements)
 
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
+
 TEST(ConfigurationStatusResponseTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
     ReadableConfigurationStatusResponse read_data({ &vendor_specific_payloads });
@@ -474,6 +475,28 @@ TEST(ConfigurationStatusResponseTestsGroup, GetOptionalElement) {
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
                     ElementHeader::VendorSpecificPayload));
 
-    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
-          nullptr);
+    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF)
+          == nullptr);
+}
+
+TEST(ConfigurationStatusResponseTestsGroup, MessageTypeIdentification) {
+    WritableCAPWAPTimers capwap_timers{ 42, 19 };
+    WritableDecryptionErrorReportPeriodArray decryption_error_report_periods;
+
+    uint32_t idle_timeout = 1234;
+    WTPFallback::Mode wtp_fallback = WTPFallback::Mode::Enabled;
+
+    uint32_t ac_ipv4_list[] = {
+        { inet_addr("192.168.1.110") },
+    };
+
+    WritableConfigurationStatusResponse write_data(capwap_timers,
+                                                   decryption_error_report_periods,
+                                                   idle_timeout,
+                                                   wtp_fallback,
+                                                   ac_ipv4_list,
+                                                   {});
+
+    CHECK_EQUAL(ControlHeader::ConfigurationStatusResponse, write_data.GetMessageType());
+    CHECK_EQUAL(ControlHeader::ConfigurationStatusRequest, write_data.GetRequestMessageType());
 }

@@ -234,3 +234,10 @@ TEST(ConfigurationUpdateResponseTestsGroup, GetOptionalElement) {
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
           nullptr);
 }
+
+TEST(ConfigurationUpdateResponseTestsGroup, MessageTypeIdentification) {
+    WritableConfigurationUpdateResponse write_data(ResultCode::Type::Success, {});
+
+    CHECK_EQUAL(ControlHeader::ConfigurationUpdateResponse, write_data.GetMessageType());
+    CHECK_EQUAL(ControlHeader::ConfigurationUpdateRequest, write_data.GetRequestMessageType());
+}

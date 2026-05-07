@@ -691,3 +691,9 @@ TEST(ConfigurationUpdateRequestTestsGroup, GetOptionalElement) {
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
           nullptr);
 }
+
+TEST(ConfigurationUpdateRequestTestsGroup, MessageTypeIdentification) {
+    WritableConfigurationUpdateRequest write_data({});
+
+    CHECK_EQUAL(ControlHeader::ConfigurationUpdateRequest, write_data.GetMessageType());
+}

@@ -142,3 +142,10 @@ TEST(ChangeStateEventResponseTestsGroup, GetOptionalElement) {
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
           nullptr);
 }
+
+TEST(ChangeStateEventResponseTestsGroup, MessageTypeIdentification) {
+    WritableChangeStateEventResponse write_data({});
+
+    CHECK_EQUAL(ControlHeader::ChangeStateEventResponse, write_data.GetMessageType());
+    CHECK_EQUAL(ControlHeader::ChangeStateEventRequest, write_data.GetRequestMessageType());
+}

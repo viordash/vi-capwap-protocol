@@ -367,3 +367,24 @@ TEST(DiscoveryResponseTestsGroup, GetOptionalElement) {
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
           nullptr);
 }
+
+TEST(DiscoveryResponseTestsGroup, MessageTypeIdentification) {
+    WritableACDescriptor::SubElement info_elements[] = {
+        { 1, ACInformationSubElementHeader::Type::SoftwareVersion, "v" },
+    };
+    WritableACDescriptor ac_descriptor{
+        1, 1, 1, 1, true, false, ACDescriptorHeader::RMACField::Supported,
+        true, false, info_elements
+    };
+
+    WritableWTPRadioInformationArray wtp_radio_informations;
+    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
+
+    CAPWAPControlIPv4Address ip_addresses[] = { { inet_addr("127.0.0.1"), 1 } };
+
+    WritableDiscoveryResponse write_data(
+        ac_descriptor, "ac", wtp_radio_informations, ip_addresses, {});
+
+    CHECK_EQUAL(ControlHeader::DiscoveryResponse, write_data.GetMessageType());
+    CHECK_EQUAL(ControlHeader::DiscoveryRequest, write_data.GetRequestMessageType());
+}

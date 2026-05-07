@@ -183,3 +183,10 @@ TEST(ResetResponseTestsGroup, GetOptionalElement) {
                 read_data.GetOptionalElement<ReadableResultCode>(ElementHeader::ResultCode));
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)9) == nullptr);
 }
+
+TEST(ResetResponseTestsGroup, MessageTypeIdentification) {
+    WritableResetResponse write_data({});
+
+    CHECK_EQUAL(ControlHeader::ResetResponse, write_data.GetMessageType());
+    CHECK_EQUAL(ControlHeader::ResetRequest, write_data.GetRequestMessageType());
+}

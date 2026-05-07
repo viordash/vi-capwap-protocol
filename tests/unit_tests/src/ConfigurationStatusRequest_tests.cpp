@@ -568,3 +568,14 @@ TEST(ConfigurationStatusRequestTestsGroup, GetOptionalElement) {
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
           nullptr);
 }
+
+TEST(ConfigurationStatusRequestTestsGroup, MessageTypeIdentification) {
+    WritableRadioAdministrativeStateArray radio_states;
+    WTPRebootStatistics wtp_reboot_statistics{
+        0, 0, 0, 0, 0, 0, 0, WTPRebootStatistics::LastFailureType::Unknown
+    };
+    WritableConfigurationStatusRequest write_data(
+        "ac", radio_states, 0, wtp_reboot_statistics, {});
+
+    CHECK_EQUAL(ControlHeader::ConfigurationStatusRequest, write_data.GetMessageType());
+}

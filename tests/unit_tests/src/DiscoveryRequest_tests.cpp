@@ -505,3 +505,31 @@ TEST(DiscoveryRequestTestsGroup, GetOptionalElement) {
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
           nullptr);
 }
+
+TEST(DiscoveryRequestTestsGroup, MessageTypeIdentification) {
+    WritableWTPBoardData::SubElement wtpboarddata_elements[] = {
+        { BoardDataSubElementHeader::Type::WTPModelNumber, "abcd" },
+    };
+    WritableWTPBoardData wtpboarddata{ 1, wtpboarddata_elements };
+
+    EncryptionSubElement encr[] = { { 0 } };
+    WritableWTPDescriptor::SubElement descr[] = {
+        { 1, DescriptorSubElementHeader::Type::ActiveSoftwareVersion, "v" }
+    };
+    WritableWTPDescriptor wtpdescriptor{ 1, 1, encr, descr };
+
+    WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
+
+    WritableWTPRadioInformationArray wtp_radio_informations;
+    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
+
+    WritableDiscoveryRequest write_data(DiscoveryType::Type::DHCP,
+                                        wtpboarddata,
+                                        wtpdescriptor,
+                                        wtp_frame_tunnel_mode,
+                                        WTPMACType::Local_MAC,
+                                        wtp_radio_informations,
+                                        {});
+
+    CHECK_EQUAL(ControlHeader::DiscoveryRequest, write_data.GetMessageType());
+}

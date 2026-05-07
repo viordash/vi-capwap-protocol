@@ -631,3 +631,38 @@ TEST(JoinRequestTestsGroup, GetOptionalElement) {
     CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
           nullptr);
 }
+
+TEST(JoinRequestTestsGroup, MessageTypeIdentification) {
+    WritableWTPBoardData::SubElement wtpboarddata_elements[] = {
+        { BoardDataSubElementHeader::Type::WTPModelNumber, "abcd" },
+    };
+    WritableWTPBoardData wtpboarddata{ 1, wtpboarddata_elements };
+
+    EncryptionSubElement encr[] = { { 0 } };
+    WritableWTPDescriptor::SubElement descr[] = {
+        { 1, DescriptorSubElementHeader::Type::ActiveSoftwareVersion, "v" }
+    };
+    WritableWTPDescriptor wtpdescriptor{ 1, 1, encr, descr };
+
+    WritableWTPRadioInformationArray wtp_radio_informations;
+    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
+
+    CAPWAPLocalIPv4Address ip_addresses[] = { { inet_addr("127.0.0.1") } };
+
+    SessionId session_id{};
+    WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
+
+    WritableJoinRequest write_data("loc",
+                                   wtpboarddata,
+                                   wtpdescriptor,
+                                   "wtp",
+                                   session_id,
+                                   wtp_frame_tunnel_mode,
+                                   WTPMACType::Local_MAC,
+                                   wtp_radio_informations,
+                                   ECNSupport::Type::FullAndLimitedECN,
+                                   ip_addresses,
+                                   {});
+
+    CHECK_EQUAL(ControlHeader::JoinRequest, write_data.GetMessageType());
+}
