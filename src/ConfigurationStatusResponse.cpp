@@ -41,7 +41,7 @@ ControlHeader::MessageType WritableConfigurationStatusResponse::GetMessageType()
 }
 
 ControlHeader::MessageType WritableConfigurationStatusResponse::GetRequestMessageType() const {
-    return ControlHeader::ConfigurationStatusResponse;
+    return ControlHeader::ConfigurationStatusRequest;
 }
 
 void WritableConfigurationStatusResponse::Serialize(RawData *raw_data) const {
