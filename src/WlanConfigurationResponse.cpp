@@ -26,7 +26,7 @@ ControlHeader::MessageType WritableWlanConfigurationResponse::GetMessageType() c
 }
 
 ControlHeader::MessageType WritableWlanConfigurationResponse::GetRequestMessageType() const {
-    return ControlHeader::WlanConfigurationResponse;
+    return ControlHeader::WlanConfigurationRequest;
 }
 
 void WritableWlanConfigurationResponse::Serialize(RawData *raw_data) const {
