@@ -6,11 +6,17 @@
 #include "lassert.h"
 
 WritableWlanConfigurationResponse::WritableWlanConfigurationResponse(
+    const ResultCode::Type result_code)
+    : WritableWlanConfigurationResponse(
+          result_code,
+          nonstd::span<IWritableWlanConfigurationResponseOptionalElement *const>{}) {
+}
+
+WritableWlanConfigurationResponse::WritableWlanConfigurationResponse(
     const ResultCode::Type result_code,
     nonstd::span<IWritableWlanConfigurationResponseOptionalElement *const> optional_elements)
     : result_code{ result_code }, optional_elements{ optional_elements } {
 }
-
 
 ControlHeader::MessageType WritableWlanConfigurationResponse::GetMessageType() const {
     return ControlHeader::WlanConfigurationResponse;
@@ -29,11 +35,15 @@ void WritableWlanConfigurationResponse::Serialize(RawData *raw_data) const {
     }
 }
 
+ReadableWlanConfigurationResponse::ReadableWlanConfigurationResponse()
+    : ReadableWlanConfigurationResponse(
+          nonstd::span<IReadableWlanConfigurationResponseOptionalElement *const>{}) {
+}
+
 ReadableWlanConfigurationResponse::ReadableWlanConfigurationResponse(
     nonstd::span<IReadableWlanConfigurationResponseOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
-
 
 ControlHeader::MessageType ReadableWlanConfigurationResponse::GetMessageType() const {
     return ControlHeader::WlanConfigurationResponse;

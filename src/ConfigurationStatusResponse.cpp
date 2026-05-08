@@ -10,6 +10,21 @@ WritableConfigurationStatusResponse::WritableConfigurationStatusResponse(
     WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods,
     const uint32_t idle_timeout,
     const WTPFallback::Mode wtp_fallback,
+    const nonstd::span<const uint32_t> &ac_ipv4_list)
+    : WritableConfigurationStatusResponse(
+          capwap_timers,
+          decryption_error_report_periods,
+          idle_timeout,
+          wtp_fallback,
+          ac_ipv4_list,
+          nonstd::span<IWritableConfigurationStatusResponseOptionalElement *const>{}) {
+}
+
+WritableConfigurationStatusResponse::WritableConfigurationStatusResponse(
+    const WritableCAPWAPTimers &capwap_timers,
+    WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods,
+    const uint32_t idle_timeout,
+    const WTPFallback::Mode wtp_fallback,
     const nonstd::span<const uint32_t> &ac_ipv4_list,
     nonstd::span<IWritableConfigurationStatusResponseOptionalElement *const> optional_elements)
     : capwap_timers{ capwap_timers },
@@ -17,7 +32,6 @@ WritableConfigurationStatusResponse::WritableConfigurationStatusResponse(
       idle_timeout{ idle_timeout }, wtp_fallback{ wtp_fallback }, ac_ipv4_list{ ac_ipv4_list },
       optional_elements{ optional_elements } {
 }
-
 
 ControlHeader::MessageType WritableConfigurationStatusResponse::GetMessageType() const {
     return ControlHeader::ConfigurationStatusResponse;
@@ -40,11 +54,15 @@ void WritableConfigurationStatusResponse::Serialize(RawData *raw_data) const {
     }
 }
 
+ReadableConfigurationStatusResponse::ReadableConfigurationStatusResponse()
+    : ReadableConfigurationStatusResponse(
+          nonstd::span<IReadableConfigurationStatusResponseOptionalElement *const>{}) {
+}
+
 ReadableConfigurationStatusResponse::ReadableConfigurationStatusResponse(
     nonstd::span<IReadableConfigurationStatusResponseOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
-
 
 ControlHeader::MessageType ReadableConfigurationStatusResponse::GetMessageType() const {
     return ControlHeader::ConfigurationStatusResponse;

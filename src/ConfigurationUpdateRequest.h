@@ -39,9 +39,9 @@ struct WritableConfigurationUpdateRequest : WritableCapwapRequest {
   public:
     WritableConfigurationUpdateRequest(const WritableConfigurationUpdateRequest &) = delete;
 
+    WritableConfigurationUpdateRequest();
     WritableConfigurationUpdateRequest(
         nonstd::span<IWritableConfigurationUpdateRequestOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
@@ -63,10 +63,9 @@ struct ReadableConfigurationUpdateRequest : ReadableCapwapRequest {
     size_t unknown_elements;
 
     ReadableConfigurationUpdateRequest(const ReadableConfigurationUpdateRequest &) = delete;
+    ReadableConfigurationUpdateRequest();
     ReadableConfigurationUpdateRequest(
         nonstd::span<IReadableConfigurationUpdateRequestOptionalElement *const> optional_elements);
-
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

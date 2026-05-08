@@ -6,6 +6,13 @@
 #include "lassert.h"
 
 WritableConfigurationUpdateResponse::WritableConfigurationUpdateResponse(
+    const ResultCode::Type result_code)
+    : WritableConfigurationUpdateResponse(
+          result_code,
+          nonstd::span<IWritableConfigurationUpdateResponseOptionalElement *const>{}) {
+}
+
+WritableConfigurationUpdateResponse::WritableConfigurationUpdateResponse(
     const ResultCode::Type result_code,
     nonstd::span<IWritableConfigurationUpdateResponseOptionalElement *const> optional_elements)
     : result_code{ result_code }, optional_elements{ optional_elements } {
@@ -28,11 +35,15 @@ void WritableConfigurationUpdateResponse::Serialize(RawData *raw_data) const {
     }
 }
 
+ReadableConfigurationUpdateResponse::ReadableConfigurationUpdateResponse()
+    : ReadableConfigurationUpdateResponse(
+          nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const>{}) {
+}
+
 ReadableConfigurationUpdateResponse::ReadableConfigurationUpdateResponse(
     nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
-
 
 ControlHeader::MessageType ReadableConfigurationUpdateResponse::GetMessageType() const {
     return ControlHeader::ConfigurationUpdateResponse;

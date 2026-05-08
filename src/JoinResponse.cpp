@@ -12,6 +12,24 @@ WritableJoinResponse::WritableJoinResponse(
     WritableWTPRadioInformationArray &wtp_radio_informations,
     const ECNSupport::Type ecn_support,
     const nonstd::span<const CAPWAPControlIPv4Address> &control_ip_addresses,
+    const nonstd::span<const CAPWAPLocalIPv4Address> &local_ip_addresses)
+    : WritableJoinResponse(result_code,
+                           ac_descriptor,
+                           ac_name,
+                           wtp_radio_informations,
+                           ecn_support,
+                           control_ip_addresses,
+                           local_ip_addresses,
+                           nonstd::span<IWritableJoinResponseOptionalElement *const>{}) {
+}
+
+WritableJoinResponse::WritableJoinResponse(
+    const ResultCode::Type result_code,
+    const WritableACDescriptor &ac_descriptor,
+    const std::string_view ac_name,
+    WritableWTPRadioInformationArray &wtp_radio_informations,
+    const ECNSupport::Type ecn_support,
+    const nonstd::span<const CAPWAPControlIPv4Address> &control_ip_addresses,
     const nonstd::span<const CAPWAPLocalIPv4Address> &local_ip_addresses,
     nonstd::span<IWritableJoinResponseOptionalElement *const> optional_elements)
     : result_code{ result_code }, ac_descriptor{ ac_descriptor }, ac_name{ ac_name },
@@ -19,7 +37,6 @@ WritableJoinResponse::WritableJoinResponse(
       control_ip_addresses{ control_ip_addresses }, local_ip_addresses{ local_ip_addresses },
       optional_elements{ optional_elements } {
 }
-
 
 ControlHeader::MessageType WritableJoinResponse::GetMessageType() const {
     return ControlHeader::JoinResponse;
@@ -44,11 +61,14 @@ void WritableJoinResponse::Serialize(RawData *raw_data) const {
     }
 }
 
+ReadableJoinResponse::ReadableJoinResponse()
+    : ReadableJoinResponse(nonstd::span<IReadableJoinResponseOptionalElement *const>{}) {
+}
+
 ReadableJoinResponse::ReadableJoinResponse(
     nonstd::span<IReadableJoinResponseOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
-
 
 ControlHeader::MessageType ReadableJoinResponse::GetMessageType() const {
     return ControlHeader::JoinResponse;

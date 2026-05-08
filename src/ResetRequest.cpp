@@ -5,12 +5,16 @@
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
 
+WritableResetRequest::WritableResetRequest(WritableImageIdentifier &image_identifier)
+    : WritableResetRequest(image_identifier,
+                           nonstd::span<IWritableResetRequestOptionalElement *const>{}) {
+}
+
 WritableResetRequest::WritableResetRequest(
     WritableImageIdentifier &image_identifier,
     nonstd::span<IWritableResetRequestOptionalElement *const> optional_elements)
     : image_identifier{ image_identifier }, optional_elements{ optional_elements } {
 }
-
 
 ControlHeader::MessageType WritableResetRequest::GetMessageType() const {
     return ControlHeader::ResetRequest;
@@ -27,6 +31,10 @@ void WritableResetRequest::Serialize(RawData *raw_data) const {
         ASSERT(elem != nullptr);
         elem->Serialize(raw_data);
     }
+}
+
+ReadableResetRequest::ReadableResetRequest()
+    : ReadableResetRequest(nonstd::span<IReadableResetRequestOptionalElement *const>{}) {
 }
 
 ReadableResetRequest::ReadableResetRequest(

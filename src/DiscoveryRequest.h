@@ -36,6 +36,13 @@ struct WritableDiscoveryRequest : WritableCapwapRequest {
     static const uint16_t no_probe_mtu_size = std::numeric_limits<uint16_t>::min();
 
     WritableDiscoveryRequest(const WritableDiscoveryRequest &) = delete;
+    WritableDiscoveryRequest(const DiscoveryType::Type discovery_type,
+                             const WritableWTPBoardData &wtp_board_data,
+                             const WritableWTPDescriptor &wtp_descriptor,
+                             const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
+                             const WTPMACType::Type mac_type,
+                             WritableWTPRadioInformationArray &wtp_radio_informations,
+                             const uint16_t probe_mtu_size = no_probe_mtu_size);
     WritableDiscoveryRequest(
         const DiscoveryType::Type discovery_type,
         const WritableWTPBoardData &wtp_board_data,
@@ -45,8 +52,6 @@ struct WritableDiscoveryRequest : WritableCapwapRequest {
         WritableWTPRadioInformationArray &wtp_radio_informations,
         nonstd::span<IWritableDiscoveryRequestOptionalElement *const> optional_elements,
         const uint16_t probe_mtu_size = no_probe_mtu_size);
-
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
@@ -75,10 +80,9 @@ struct ReadableDiscoveryRequest : ReadableCapwapRequest {
     size_t unknown_elements;
 
     ReadableDiscoveryRequest(const ReadableDiscoveryRequest &) = delete;
+    ReadableDiscoveryRequest();
     ReadableDiscoveryRequest(
         nonstd::span<IReadableDiscoveryRequestOptionalElement *const> optional_elements);
-
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

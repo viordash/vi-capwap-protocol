@@ -15,6 +15,30 @@ WritableJoinRequest::WritableJoinRequest(
     const WTPMACType::Type mac_type,
     WritableWTPRadioInformationArray &wtp_radio_informations,
     const ECNSupport::Type ecn_support,
+    const nonstd::span<const CAPWAPLocalIPv4Address> &ip_addresses)
+    : WritableJoinRequest(location_data,
+                          wtp_board_data,
+                          wtp_descriptor,
+                          wtp_name,
+                          session_id,
+                          wtp_frame_tunnel_mode,
+                          mac_type,
+                          wtp_radio_informations,
+                          ecn_support,
+                          ip_addresses,
+                          nonstd::span<IWritableJoinRequestOptionalElement *const>{}) {
+}
+
+WritableJoinRequest::WritableJoinRequest(
+    const std::string_view location_data,
+    const WritableWTPBoardData &wtp_board_data,
+    const WritableWTPDescriptor &wtp_descriptor,
+    const std::string_view wtp_name,
+    const SessionId &session_id,
+    const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
+    const WTPMACType::Type mac_type,
+    WritableWTPRadioInformationArray &wtp_radio_informations,
+    const ECNSupport::Type ecn_support,
     const nonstd::span<const CAPWAPLocalIPv4Address> &ip_addresses,
     nonstd::span<IWritableJoinRequestOptionalElement *const> optional_elements)
     : location_data{ location_data }, wtp_board_data{ wtp_board_data },
@@ -24,7 +48,6 @@ WritableJoinRequest::WritableJoinRequest(
       ip_addresses{ ip_addresses }, optional_elements{ optional_elements } {
     ASSERT(wtp_descriptor.GetHeader().RadiosInUse <= wtp_radio_informations.Size());
 }
-
 
 ControlHeader::MessageType WritableJoinRequest::GetMessageType() const {
     return ControlHeader::JoinRequest;
@@ -52,11 +75,14 @@ void WritableJoinRequest::Serialize(RawData *raw_data) const {
     }
 }
 
+ReadableJoinRequest::ReadableJoinRequest()
+    : ReadableJoinRequest(nonstd::span<IReadableJoinRequestOptionalElement *const>{}) {
+}
+
 ReadableJoinRequest::ReadableJoinRequest(
     nonstd::span<IReadableJoinRequestOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
-
 
 ControlHeader::MessageType ReadableJoinRequest::GetMessageType() const {
     return ControlHeader::JoinRequest;

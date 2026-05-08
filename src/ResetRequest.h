@@ -18,10 +18,10 @@ struct WritableResetRequest : WritableCapwapRequest {
 
   public:
     WritableResetRequest(const WritableResetRequest &) = delete;
+    WritableResetRequest(WritableImageIdentifier &image_identifier);
     WritableResetRequest(
         WritableImageIdentifier &image_identifier,
         nonstd::span<IWritableResetRequestOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
@@ -43,9 +43,9 @@ struct ReadableResetRequest : ReadableCapwapRequest {
     size_t unknown_elements;
 
     ReadableResetRequest(const ReadableResetRequest &) = delete;
+    ReadableResetRequest();
     ReadableResetRequest(
         nonstd::span<IReadableResetRequestOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

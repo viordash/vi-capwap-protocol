@@ -5,11 +5,15 @@
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
 
+WritableChangeStateEventResponse::WritableChangeStateEventResponse()
+    : WritableChangeStateEventResponse(
+          nonstd::span<IWritableChangeStateEventResponseOptionalElement *const>{}) {
+}
+
 WritableChangeStateEventResponse::WritableChangeStateEventResponse(
     nonstd::span<IWritableChangeStateEventResponseOptionalElement *const> optional_elements)
     : optional_elements{ optional_elements } {
 }
-
 
 ControlHeader::MessageType WritableChangeStateEventResponse::GetMessageType() const {
     return ControlHeader::ChangeStateEventResponse;
@@ -26,11 +30,15 @@ void WritableChangeStateEventResponse::Serialize(RawData *raw_data) const {
     }
 }
 
+ReadableChangeStateEventResponse::ReadableChangeStateEventResponse()
+    : ReadableChangeStateEventResponse(
+          nonstd::span<IReadableChangeStateEventResponseOptionalElement *const>{}) {
+}
+
 ReadableChangeStateEventResponse::ReadableChangeStateEventResponse(
     nonstd::span<IReadableChangeStateEventResponseOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
-
 
 ControlHeader::MessageType ReadableChangeStateEventResponse::GetMessageType() const {
     return ControlHeader::ChangeStateEventResponse;

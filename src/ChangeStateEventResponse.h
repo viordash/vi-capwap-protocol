@@ -13,9 +13,9 @@ struct WritableChangeStateEventResponse : WritableCapwapResponse {
 
   public:
     WritableChangeStateEventResponse(const WritableChangeStateEventResponse &) = delete;
+    WritableChangeStateEventResponse();
     WritableChangeStateEventResponse(
         nonstd::span<IWritableChangeStateEventResponseOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -37,9 +37,9 @@ struct ReadableChangeStateEventResponse : ReadableCapwapResponse {
     size_t unknown_elements;
 
     ReadableChangeStateEventResponse(const ReadableChangeStateEventResponse &) = delete;
+    ReadableChangeStateEventResponse();
     ReadableChangeStateEventResponse(
         nonstd::span<IReadableChangeStateEventResponseOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

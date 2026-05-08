@@ -5,11 +5,14 @@
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
 
+WritableWTPEventResponse::WritableWTPEventResponse()
+    : WritableWTPEventResponse(nonstd::span<IWritableWTPEventResponseOptionalElement *const>{}) {
+}
+
 WritableWTPEventResponse::WritableWTPEventResponse(
     nonstd::span<IWritableWTPEventResponseOptionalElement *const> optional_elements)
     : optional_elements{ optional_elements } {
 }
-
 
 ControlHeader::MessageType WritableWTPEventResponse::GetMessageType() const {
     return ControlHeader::WTPEventResponse;
@@ -26,11 +29,14 @@ void WritableWTPEventResponse::Serialize(RawData *raw_data) const {
     }
 }
 
+ReadableWTPEventResponse::ReadableWTPEventResponse()
+    : ReadableWTPEventResponse(nonstd::span<IReadableWTPEventResponseOptionalElement *const>{}) {
+}
+
 ReadableWTPEventResponse::ReadableWTPEventResponse(
     nonstd::span<IReadableWTPEventResponseOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
-
 
 ControlHeader::MessageType ReadableWTPEventResponse::GetMessageType() const {
     return ControlHeader::WTPEventResponse;

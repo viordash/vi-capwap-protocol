@@ -5,11 +5,15 @@
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
 
+WritableConfigurationUpdateRequest::WritableConfigurationUpdateRequest()
+    : WritableConfigurationUpdateRequest(
+          nonstd::span<IWritableConfigurationUpdateRequestOptionalElement *const>{}) {
+}
+
 WritableConfigurationUpdateRequest::WritableConfigurationUpdateRequest(
     nonstd::span<IWritableConfigurationUpdateRequestOptionalElement *const> optional_elements)
     : optional_elements{ optional_elements } {
 }
-
 
 ControlHeader::MessageType WritableConfigurationUpdateRequest::GetMessageType() const {
     return ControlHeader::ConfigurationUpdateRequest;
@@ -26,11 +30,15 @@ void WritableConfigurationUpdateRequest::Serialize(RawData *raw_data) const {
     }
 }
 
+ReadableConfigurationUpdateRequest::ReadableConfigurationUpdateRequest()
+    : ReadableConfigurationUpdateRequest(
+          nonstd::span<IReadableConfigurationUpdateRequestOptionalElement *const>{}) {
+}
+
 ReadableConfigurationUpdateRequest::ReadableConfigurationUpdateRequest(
     nonstd::span<IReadableConfigurationUpdateRequestOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
-
 
 ControlHeader::MessageType ReadableConfigurationUpdateRequest::GetMessageType() const {
     return ControlHeader::ConfigurationUpdateRequest;

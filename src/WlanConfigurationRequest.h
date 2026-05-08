@@ -21,14 +21,17 @@ struct WritableWlanConfigurationRequest : WritableCapwapRequest {
 
   public:
     WritableWlanConfigurationRequest(const WritableWlanConfigurationRequest &) = delete;
+    WritableWlanConfigurationRequest(WritableAddWlanArray *add_wlan);
     WritableWlanConfigurationRequest(
         WritableAddWlanArray *add_wlan,
         nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const> optional_elements);
 
+    WritableWlanConfigurationRequest(WritableDeleteWlanArray *delete_wlan);
     WritableWlanConfigurationRequest(
         WritableDeleteWlanArray *delete_wlan,
         nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const> optional_elements);
 
+    WritableWlanConfigurationRequest(WritableUpdateWlanArray *update_wlan);
     WritableWlanConfigurationRequest(
         WritableUpdateWlanArray *update_wlan,
         nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const> optional_elements);
@@ -57,10 +60,9 @@ struct ReadableWlanConfigurationRequest : ReadableCapwapRequest {
     size_t unknown_elements;
 
     ReadableWlanConfigurationRequest(const ReadableWlanConfigurationRequest &) = delete;
+    ReadableWlanConfigurationRequest();
     ReadableWlanConfigurationRequest(
         nonstd::span<IReadableWlanConfigurationRequestOptionalElement *const> optional_elements);
-
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

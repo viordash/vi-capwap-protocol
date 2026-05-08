@@ -40,10 +40,14 @@ struct WritableConfigurationStatusResponse : WritableCapwapResponse {
         WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods,
         const uint32_t idle_timeout,
         const WTPFallback::Mode wtp_fallback,
+        const nonstd::span<const uint32_t> &ac_ipv4_list);
+    WritableConfigurationStatusResponse(
+        const WritableCAPWAPTimers &capwap_timers,
+        WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods,
+        const uint32_t idle_timeout,
+        const WTPFallback::Mode wtp_fallback,
         const nonstd::span<const uint32_t> &ac_ipv4_list,
         nonstd::span<IWritableConfigurationStatusResponseOptionalElement *const> optional_elements);
-
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -71,10 +75,9 @@ struct ReadableConfigurationStatusResponse : ReadableCapwapResponse {
     size_t unknown_elements;
 
     ReadableConfigurationStatusResponse(const ReadableConfigurationStatusResponse &) = delete;
+    ReadableConfigurationStatusResponse();
     ReadableConfigurationStatusResponse(
         nonstd::span<IReadableConfigurationStatusResponseOptionalElement *const> optional_elements);
-
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

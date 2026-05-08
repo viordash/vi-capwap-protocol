@@ -13,9 +13,9 @@ struct WritableEchoResponse : WritableCapwapResponse {
 
   public:
     WritableEchoResponse(const WritableEchoResponse &) = delete;
+    WritableEchoResponse();
     WritableEchoResponse(
         nonstd::span<IWritableEchoResponseOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -35,9 +35,9 @@ struct ReadableEchoResponse : ReadableCapwapResponse {
     size_t unknown_elements;
 
     ReadableEchoResponse(const ReadableEchoResponse &) = delete;
+    ReadableEchoResponse();
     ReadableEchoResponse(
         nonstd::span<IReadableEchoResponseOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

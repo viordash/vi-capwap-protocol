@@ -12,6 +12,24 @@ WritableDiscoveryRequest::WritableDiscoveryRequest(
     const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
     const WTPMACType::Type mac_type,
     WritableWTPRadioInformationArray &wtp_radio_informations,
+    const uint16_t probe_mtu_size)
+    : WritableDiscoveryRequest(discovery_type,
+                               wtp_board_data,
+                               wtp_descriptor,
+                               wtp_frame_tunnel_mode,
+                               mac_type,
+                               wtp_radio_informations,
+                               nonstd::span<IWritableDiscoveryRequestOptionalElement *const>{},
+                               probe_mtu_size) {
+}
+
+WritableDiscoveryRequest::WritableDiscoveryRequest(
+    const DiscoveryType::Type discovery_type,
+    const WritableWTPBoardData &wtp_board_data,
+    const WritableWTPDescriptor &wtp_descriptor,
+    const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
+    const WTPMACType::Type mac_type,
+    WritableWTPRadioInformationArray &wtp_radio_informations,
     nonstd::span<IWritableDiscoveryRequestOptionalElement *const> optional_elements,
     const uint16_t probe_mtu_size)
     : discovery_type{ discovery_type }, wtp_board_data{ wtp_board_data },
@@ -19,7 +37,6 @@ WritableDiscoveryRequest::WritableDiscoveryRequest(
       wtp_mac_type{ mac_type }, wtp_radio_informations{ wtp_radio_informations },
       optional_elements{ optional_elements }, padding{ CalcMTUPadding(probe_mtu_size) } {
 }
-
 
 ControlHeader::MessageType WritableDiscoveryRequest::GetMessageType() const {
     return ControlHeader::DiscoveryRequest;
@@ -87,11 +104,14 @@ void WritableDiscoveryRequest::Serialize(RawData *raw_data) const {
     }
 }
 
+ReadableDiscoveryRequest::ReadableDiscoveryRequest()
+    : ReadableDiscoveryRequest(nonstd::span<IReadableDiscoveryRequestOptionalElement *const>{}) {
+}
+
 ReadableDiscoveryRequest::ReadableDiscoveryRequest(
     nonstd::span<IReadableDiscoveryRequestOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
-
 
 ControlHeader::MessageType ReadableDiscoveryRequest::GetMessageType() const {
     return ControlHeader::DiscoveryRequest;

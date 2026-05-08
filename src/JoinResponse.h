@@ -35,6 +35,13 @@ struct WritableJoinResponse : WritableCapwapResponse {
 
   public:
     WritableJoinResponse(const WritableJoinResponse &) = delete;
+    WritableJoinResponse(const ResultCode::Type result_code,
+                         const WritableACDescriptor &ac_descriptor,
+                         const std::string_view ac_name,
+                         WritableWTPRadioInformationArray &wtp_radio_informations,
+                         const ECNSupport::Type ecn_support,
+                         const nonstd::span<const CAPWAPControlIPv4Address> &control_ip_addresses,
+                         const nonstd::span<const CAPWAPLocalIPv4Address> &local_ip_addresses);
     WritableJoinResponse(
         const ResultCode::Type result_code,
         const WritableACDescriptor &ac_descriptor,
@@ -44,8 +51,6 @@ struct WritableJoinResponse : WritableCapwapResponse {
         const nonstd::span<const CAPWAPControlIPv4Address> &control_ip_addresses,
         const nonstd::span<const CAPWAPLocalIPv4Address> &local_ip_addresses,
         nonstd::span<IWritableJoinResponseOptionalElement *const> optional_elements);
-
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -73,9 +78,9 @@ struct ReadableJoinResponse : ReadableCapwapResponse {
     size_t unknown_elements;
 
     ReadableJoinResponse(const ReadableJoinResponse &) = delete;
+    ReadableJoinResponse();
     ReadableJoinResponse(
         nonstd::span<IReadableJoinResponseOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

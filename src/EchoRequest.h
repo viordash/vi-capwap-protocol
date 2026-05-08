@@ -15,8 +15,8 @@ struct WritableEchoRequest : WritableCapwapRequest {
 
   public:
     WritableEchoRequest(const WritableEchoRequest &) = delete;
+    WritableEchoRequest();
     WritableEchoRequest(nonstd::span<IWritableEchoRequestOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
@@ -36,8 +36,8 @@ struct ReadableEchoRequest : ReadableCapwapRequest {
     size_t unknown_elements;
 
     ReadableEchoRequest(const ReadableEchoRequest &) = delete;
+    ReadableEchoRequest();
     ReadableEchoRequest(nonstd::span<IReadableEchoRequestOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

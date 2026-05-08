@@ -5,12 +5,16 @@
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
 
+WritableImageDataResponse::WritableImageDataResponse(const ResultCode::Type result_code)
+    : WritableImageDataResponse(result_code,
+                                nonstd::span<IWritableImageDataResponseOptionalElement *const>{}) {
+}
+
 WritableImageDataResponse::WritableImageDataResponse(
     const ResultCode::Type result_code,
     nonstd::span<IWritableImageDataResponseOptionalElement *const> optional_elements)
     : result_code{ result_code }, optional_elements{ optional_elements } {
 }
-
 
 ControlHeader::MessageType WritableImageDataResponse::GetMessageType() const {
     return ControlHeader::ImageDataResponse;
@@ -29,11 +33,14 @@ void WritableImageDataResponse::Serialize(RawData *raw_data) const {
     }
 }
 
+ReadableImageDataResponse::ReadableImageDataResponse()
+    : ReadableImageDataResponse(nonstd::span<IReadableImageDataResponseOptionalElement *const>{}) {
+}
+
 ReadableImageDataResponse::ReadableImageDataResponse(
     nonstd::span<IReadableImageDataResponseOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
-
 
 ControlHeader::MessageType ReadableImageDataResponse::GetMessageType() const {
     return ControlHeader::ImageDataResponse;

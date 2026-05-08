@@ -5,11 +5,14 @@
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
 
+WritableEchoResponse::WritableEchoResponse()
+    : WritableEchoResponse(nonstd::span<IWritableEchoResponseOptionalElement *const>{}) {
+}
+
 WritableEchoResponse::WritableEchoResponse(
     nonstd::span<IWritableEchoResponseOptionalElement *const> optional_elements)
     : optional_elements{ optional_elements } {
 }
-
 
 ControlHeader::MessageType WritableEchoResponse::GetMessageType() const {
     return ControlHeader::EchoResponse;
@@ -26,11 +29,14 @@ void WritableEchoResponse::Serialize(RawData *raw_data) const {
     }
 }
 
+ReadableEchoResponse::ReadableEchoResponse()
+    : ReadableEchoResponse(nonstd::span<IReadableEchoResponseOptionalElement *const>{}) {
+}
+
 ReadableEchoResponse::ReadableEchoResponse(
     nonstd::span<IReadableEchoResponseOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
-
 
 ControlHeader::MessageType ReadableEchoResponse::GetMessageType() const {
     return ControlHeader::EchoResponse;

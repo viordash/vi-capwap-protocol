@@ -18,6 +18,7 @@ struct WritableConfigurationUpdateResponse : WritableCapwapResponse {
 
   public:
     WritableConfigurationUpdateResponse(const WritableConfigurationUpdateResponse &) = delete;
+    WritableConfigurationUpdateResponse(const ResultCode::Type result_code);
     WritableConfigurationUpdateResponse(
         const ResultCode::Type result_code,
         nonstd::span<IWritableConfigurationUpdateResponseOptionalElement *const> optional_elements);
@@ -44,6 +45,7 @@ struct ReadableConfigurationUpdateResponse : ReadableCapwapResponse {
     size_t unknown_elements;
 
     ReadableConfigurationUpdateResponse(const ReadableConfigurationUpdateResponse &) = delete;
+    ReadableConfigurationUpdateResponse();
     ReadableConfigurationUpdateResponse(
         nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const> optional_elements);
 

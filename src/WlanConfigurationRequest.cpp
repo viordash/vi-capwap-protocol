@@ -6,12 +6,31 @@
 #include "lassert.h"
 
 WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
+    WritableUpdateWlanArray *update_wlan)
+    : WritableWlanConfigurationRequest(
+          update_wlan,
+          nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const>{}) {
+}
+
+WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
+    WritableDeleteWlanArray *delete_wlan)
+    : WritableWlanConfigurationRequest(
+          delete_wlan,
+          nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const>{}) {
+}
+
+WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(WritableAddWlanArray *add_wlan)
+    : WritableWlanConfigurationRequest(
+          add_wlan,
+          nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const>{}) {
+}
+
+WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
     WritableAddWlanArray *add_wlan,
     nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const> optional_elements)
     : add_wlan{ add_wlan }, delete_wlan{ nullptr }, update_wlan{ nullptr },
       optional_elements{ optional_elements } {
 }
-
 
 WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
     WritableDeleteWlanArray *delete_wlan,
@@ -20,14 +39,12 @@ WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
       optional_elements{ optional_elements } {
 }
 
-
 WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
     WritableUpdateWlanArray *update_wlan,
     nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const> optional_elements)
     : add_wlan{ nullptr }, delete_wlan{ nullptr }, update_wlan{ update_wlan },
       optional_elements{ optional_elements } {
 }
-
 
 ControlHeader::MessageType WritableWlanConfigurationRequest::GetMessageType() const {
     return ControlHeader::WlanConfigurationRequest;
@@ -54,11 +71,15 @@ void WritableWlanConfigurationRequest::Serialize(RawData *raw_data) const {
     }
 }
 
+ReadableWlanConfigurationRequest::ReadableWlanConfigurationRequest()
+    : ReadableWlanConfigurationRequest(
+          nonstd::span<IReadableWlanConfigurationRequestOptionalElement *const>{}) {
+}
+
 ReadableWlanConfigurationRequest::ReadableWlanConfigurationRequest(
     nonstd::span<IReadableWlanConfigurationRequestOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
-
 
 ControlHeader::MessageType ReadableWlanConfigurationRequest::GetMessageType() const {
     return ControlHeader::WlanConfigurationRequest;

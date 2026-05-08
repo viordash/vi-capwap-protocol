@@ -5,11 +5,14 @@
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
 
+WritableResetResponse::WritableResetResponse()
+    : WritableResetResponse(nonstd::span<IWritableResetResponseOptionalElement *const>{}) {
+}
+
 WritableResetResponse::WritableResetResponse(
     nonstd::span<IWritableResetResponseOptionalElement *const> optional_elements)
     : optional_elements{ optional_elements } {
 }
-
 
 ControlHeader::MessageType WritableResetResponse::GetMessageType() const {
     return ControlHeader::ResetResponse;
@@ -26,11 +29,14 @@ void WritableResetResponse::Serialize(RawData *raw_data) const {
     }
 }
 
+ReadableResetResponse::ReadableResetResponse()
+    : ReadableResetResponse(nonstd::span<IReadableResetResponseOptionalElement *const>{}) {
+}
+
 ReadableResetResponse::ReadableResetResponse(
     nonstd::span<IReadableResetResponseOptionalElement *const> optional_elements)
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
-
 
 ControlHeader::MessageType ReadableResetResponse::GetMessageType() const {
     return ControlHeader::ResetResponse;

@@ -20,10 +20,10 @@ struct WritableImageDataResponse : WritableCapwapResponse {
 
   public:
     WritableImageDataResponse(const WritableImageDataResponse &) = delete;
+    WritableImageDataResponse(const ResultCode::Type result_code);
     WritableImageDataResponse(
         const ResultCode::Type result_code,
         nonstd::span<IWritableImageDataResponseOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -45,9 +45,9 @@ struct ReadableImageDataResponse : ReadableCapwapResponse {
     size_t unknown_elements;
 
     ReadableImageDataResponse(const ReadableImageDataResponse &) = delete;
+    ReadableImageDataResponse();
     ReadableImageDataResponse(
         nonstd::span<IReadableImageDataResponseOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

@@ -15,9 +15,9 @@ struct WritableWTPEventResponse : WritableCapwapResponse {
 
   public:
     WritableWTPEventResponse(const WritableWTPEventResponse &) = delete;
+    WritableWTPEventResponse();
     WritableWTPEventResponse(
         nonstd::span<IWritableWTPEventResponseOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -37,9 +37,9 @@ struct ReadableWTPEventResponse : ReadableCapwapResponse {
     size_t unknown_elements;
 
     ReadableWTPEventResponse(const ReadableWTPEventResponse &) = delete;
+    ReadableWTPEventResponse();
     ReadableWTPEventResponse(
         nonstd::span<IReadableWTPEventResponseOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

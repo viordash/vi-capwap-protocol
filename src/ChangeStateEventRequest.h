@@ -23,11 +23,12 @@ struct WritableChangeStateEventRequest : WritableCapwapRequest {
     static const uint16_t no_probe_mtu_size = std::numeric_limits<uint16_t>::min();
 
     WritableChangeStateEventRequest(const WritableChangeStateEventRequest &) = delete;
+    WritableChangeStateEventRequest(WritableRadioOperationalStateArray &radio_operational_states,
+                                    ResultCode &result_code);
     WritableChangeStateEventRequest(
         WritableRadioOperationalStateArray &radio_operational_states,
         ResultCode &result_code,
         nonstd::span<IWritableChangeStateEventRequestOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
@@ -54,9 +55,9 @@ struct ReadableChangeStateEventRequest : ReadableCapwapRequest {
     size_t unknown_elements;
 
     ReadableChangeStateEventRequest(const ReadableChangeStateEventRequest &) = delete;
+    ReadableChangeStateEventRequest();
     ReadableChangeStateEventRequest(
         nonstd::span<IReadableChangeStateEventRequestOptionalElement *const> optional_elements);
-
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;
