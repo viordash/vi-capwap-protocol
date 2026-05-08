@@ -204,7 +204,9 @@ void ReadableDiscoveryRequest::Log() const {
         value->Log();
     }
 
-    padding.Log();
+    if (padding.IsPresent()) {
+        padding.Log();
+    }
 
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
