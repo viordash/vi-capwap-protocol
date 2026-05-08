@@ -148,6 +148,7 @@ void ReadableWlanConfigurationRequest::Log() const {
     }
 
     for (const auto &[_, value] : key_optional_elements) {
+        (void)_;
         value->Log();
     }
 

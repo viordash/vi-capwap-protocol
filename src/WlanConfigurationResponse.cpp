@@ -92,6 +92,7 @@ void ReadableWlanConfigurationResponse::Log() const {
     result_code.Log();
 
     for (const auto &[_, value] : key_optional_elements) {
+        (void)_;
         value->Log();
     }
 

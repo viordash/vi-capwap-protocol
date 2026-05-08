@@ -139,6 +139,7 @@ void ReadableConfigurationStatusResponse::Log() const {
     ac_ipv4_list.Log();
 
     for (const auto &[_, value] : key_optional_elements) {
+        (void)_;
         value->Log();
     }
 

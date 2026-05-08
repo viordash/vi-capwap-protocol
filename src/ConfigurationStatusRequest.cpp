@@ -136,6 +136,7 @@ void ReadableConfigurationStatusRequest::Log() const {
     wtp_reboot_statistics.Log();
 
     for (const auto &[_, value] : key_optional_elements) {
+        (void)_;
         value->Log();
     }
 

@@ -78,6 +78,7 @@ void ReadableWTPEventRequest::Log() const {
     log_i("ME WTPEventRequest:");
 
     for (const auto &[_, value] : key_optional_elements) {
+        (void)_;
         value->Log();
     }
 

@@ -79,6 +79,7 @@ void ReadableChangeStateEventResponse::Log() const {
     log_i("ME ChangeStateEventResponse:");
 
     for (const auto &[_, value] : key_optional_elements) {
+        (void)_;
         value->Log();
     }
 

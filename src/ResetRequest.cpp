@@ -89,6 +89,7 @@ void ReadableResetRequest::Log() const {
     image_identifier.Log();
 
     for (const auto &[_, value] : key_optional_elements) {
+        (void)_;
         value->Log();
     }
 

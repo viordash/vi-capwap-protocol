@@ -77,6 +77,7 @@ void ReadableResetResponse::Log() const {
     log_i("ME ResetResponse:");
 
     for (const auto &[_, value] : key_optional_elements) {
+        (void)_;
         value->Log();
     }
     if (unknown_elements > 0) {
