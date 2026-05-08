@@ -1,13 +1,15 @@
 #pragma once
 
 #include "CapwapMessage.h"
+#include "IElement.h"
+#include "elements/IEEE80211/WTPRadioFailAlarmIndication.h"
 #include "elements/RadioOperationalState.h"
 #include "elements/ResultCode.h"
 #include "elements/ReturnedMessageElement.h"
 #include "elements/VendorSpecificPayload.h"
 #include "span.hpp"
 #include <limits>
-#include <vector>
+#include <unordered_map>
 
 struct WritableChangeStateEventRequest : WritableCapwapRequest {
 
@@ -15,39 +17,57 @@ struct WritableChangeStateEventRequest : WritableCapwapRequest {
     WritableRadioOperationalStateArray &radio_operational_states;
     ResultCode &result_code;
 
-    WritableReturnedMessageElementArray &returned_message_elements;
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads;
+    nonstd::span<IWritableChangeStateEventRequestOptionalElement *const> optional_elements;
 
   public:
     static const uint16_t no_probe_mtu_size = std::numeric_limits<uint16_t>::min();
 
     WritableChangeStateEventRequest(const WritableChangeStateEventRequest &) = delete;
     WritableChangeStateEventRequest(WritableRadioOperationalStateArray &radio_operational_states,
-                                    ResultCode &result_code,
-                                    WritableReturnedMessageElementArray &returned_message_elements,
-                                    WritableVendorSpecificPayloadArray &vendor_specific_payloads);
+                                    ResultCode &result_code);
+    WritableChangeStateEventRequest(
+        WritableRadioOperationalStateArray &radio_operational_states,
+        ResultCode &result_code,
+        nonstd::span<IWritableChangeStateEventRequestOptionalElement *const> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
     void Serialize(RawData *raw_data) const override final;
     ResultCode::Type GetResultCode();
-    void Clear();
-    bool Validate();
+    void ValidateReturnedMessageElement();
 };
 
 struct ReadableChangeStateEventRequest : ReadableCapwapRequest {
-    ReadableRadioOperationalStateArray radio_operational_states;
-    ResultCode *result_code;
+  protected:
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableChangeStateEventRequestOptionalElement *const>
+        key_optional_elements;
 
-    ReadableReturnedMessageElementArray returned_message_elements;
-    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableChangeStateEventRequestOptionalElement *const>
+    MapOptionalsElements(
+        nonstd::span<IReadableChangeStateEventRequestOptionalElement *const> optional_elements);
+
+  public:
+    ReadableRadioOperationalStateArray radio_operational_states;
+    ReadableResultCode result_code;
 
     size_t unknown_elements;
 
     ReadableChangeStateEventRequest(const ReadableChangeStateEventRequest &) = delete;
     ReadableChangeStateEventRequest();
+    ReadableChangeStateEventRequest(
+        nonstd::span<IReadableChangeStateEventRequestOptionalElement *const> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;
     void Log() const;
+
+    template <typename T> T *GetOptionalElement(ElementHeader::ElementType element_type) {
+        auto it = key_optional_elements.find(element_type);
+        if (it != key_optional_elements.end()) {
+            return static_cast<T *>(it->second);
+        }
+        return nullptr;
+    }
 };

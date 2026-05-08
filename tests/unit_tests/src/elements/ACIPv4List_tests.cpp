@@ -40,17 +40,20 @@ TEST(ACIPv4ListTestsGroup, ACIPv4List_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto read_data = ReadableACIPv4List::Deserialize(&raw_data);
-    CHECK(read_data != nullptr);
+
+    ReadableACIPv4List read_data;
+    CHECK_FALSE(read_data.IsPresent());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
 
     CHECK_EQUAL(&buffer[0] + sizeof(reference), raw_data.current);
-    CHECK_EQUAL(40, read_data->GetLength());
-    CHECK_EQUAL(ElementHeader::ElementType::ACIPv4List, read_data->GetElementType());
-    CHECK_EQUAL(10, read_data->GetCount());
-    CHECK_EQUAL(inet_addr("192.168.1.110"), read_data->addresses[0]);
-    CHECK_EQUAL(inet_addr("192.168.1.111"), read_data->addresses[1]);
-    CHECK_EQUAL(inet_addr("192.168.1.119"), read_data->addresses[8]);
-    CHECK_EQUAL(inet_addr("192.168.1.120"), read_data->addresses[9]);
+    CHECK_EQUAL(40, read_data.Get()->GetLength());
+    CHECK_EQUAL(ElementHeader::ElementType::ACIPv4List, read_data.GetElementType());
+    CHECK_EQUAL(10, read_data.Get()->GetCount());
+    CHECK_EQUAL(inet_addr("192.168.1.110"), read_data.Get()->addresses[0]);
+    CHECK_EQUAL(inet_addr("192.168.1.111"), read_data.Get()->addresses[1]);
+    CHECK_EQUAL(inet_addr("192.168.1.119"), read_data.Get()->addresses[8]);
+    CHECK_EQUAL(inet_addr("192.168.1.120"), read_data.Get()->addresses[9]);
 }
 
 TEST(ACIPv4ListTestsGroup, ACIPv4List_deserialize) {
@@ -67,12 +70,15 @@ TEST(ACIPv4ListTestsGroup, ACIPv4List_deserialize) {
 
     RawData raw_data{ data, data + sizeof(data) };
 
-    auto read_data = ReadableACIPv4List::Deserialize(&raw_data);
-    CHECK(read_data != nullptr);
+    ReadableACIPv4List read_data;
+    CHECK_FALSE(read_data.IsPresent());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
+
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(12, read_data->GetLength());
-    CHECK_EQUAL(3, read_data->GetCount());
-    CHECK_EQUAL(inet_addr("10.10.10.100"), read_data->addresses[0]);
-    CHECK_EQUAL(inet_addr("10.10.10.101"), read_data->addresses[1]);
-    CHECK_EQUAL(inet_addr("10.10.20.254"), read_data->addresses[2]);
+    CHECK_EQUAL(12, read_data.Get()->GetLength());
+    CHECK_EQUAL(3, read_data.Get()->GetCount());
+    CHECK_EQUAL(inet_addr("10.10.10.100"), read_data.Get()->addresses[0]);
+    CHECK_EQUAL(inet_addr("10.10.10.101"), read_data.Get()->addresses[1]);
+    CHECK_EQUAL(inet_addr("10.10.20.254"), read_data.Get()->addresses[2]);
 }

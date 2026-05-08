@@ -48,10 +48,10 @@ TEST(ChangeStateEventRequestTestsGroup, ChangeStateEventRequest_serialize_deseri
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
+    IWritableChangeStateEventRequestOptionalElement *const elems_1[] = { &returned_elements, &vendor_specific_payloads };
     WritableChangeStateEventRequest write_data(radio_operational_states,
                                                result_code,
-                                               returned_elements,
-                                               vendor_specific_payloads);
+        elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -59,7 +59,11 @@ TEST(ChangeStateEventRequestTestsGroup, ChangeStateEventRequest_serialize_deseri
         ankerl::nanobench::doNotOptimizeAway(raw_data);
 
         raw_data = { buffer, buffer + 148 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-        ReadableChangeStateEventRequest read_data;
+        ReadableReturnedMessageElementArray returned_elements;
+        ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+        IReadableChangeStateEventRequestOptionalElement *const elems_2[] = { &returned_elements, &vendor_specific_payloads };
+        ReadableChangeStateEventRequest read_data(
+            elems_2);
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

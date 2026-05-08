@@ -39,6 +39,7 @@ TEST(AddMacAclEntryTestsGroup, AddMacAclEntry_serialize) {
 
     raw_data = { buffer, buffer + sizeof(reference) };
     ReadableAddMacAclEntry read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(&buffer[0] + sizeof(reference), raw_data.current);
@@ -51,6 +52,7 @@ TEST(AddMacAclEntryTestsGroup, AddMacAclEntry_serialize) {
     MEMCMP_EQUAL(mac_8_1, (char *)read_data.Get()[2]->MACAddresses, sizeof(mac_8_1));
     CHECK_EQUAL(6, read_data.Get()[3]->Length);
     MEMCMP_EQUAL(mac_6_1, (char *)read_data.Get()[3]->MACAddresses, sizeof(mac_6_1));
+    CHECK_TRUE(read_data.IsPresent());
 }
 
 TEST(AddMacAclEntryTestsGroup, AddMacAclEntry_deserialize) {

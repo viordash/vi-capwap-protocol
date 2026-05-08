@@ -2,8 +2,8 @@
 #include "WTPRadioInformation.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <cstring>
 #include <sstream>
-#include <string.h>
 
 WTPRadioInformation::WTPRadioInformation(uint8_t radio_id,
                                          bool b,
@@ -23,24 +23,6 @@ bool WTPRadioInformation::Validate() const {
     return ElementHeader::GetElementType() == ElementHeader::WTPRadioInformation
         && ElementHeader::GetLength() == (sizeof(WTPRadioInformation) - sizeof(ElementHeader)) //
         && RadioID <= 31 && Reservd_0 == 0;
-}
-void WTPRadioInformation::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(WTPRadioInformation) <= raw_data->end);
-    WTPRadioInformation *dst = (WTPRadioInformation *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(WTPRadioInformation);
-}
-WTPRadioInformation *WTPRadioInformation::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(WTPRadioInformation) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (WTPRadioInformation *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(WTPRadioInformation);
-    return res;
 }
 uint16_t WTPRadioInformation::GetTotalLength() const {
     return GetLength() + sizeof(ElementHeader);
@@ -75,6 +57,7 @@ std::string WTPRadioInformation::ToString() const {
 }
 
 WritableWTPRadioInformationArray::WritableWTPRadioInformationArray() {
+    static_assert(sizeof(items[0]) == 9);
     items.reserve(ReadableWTPRadioInformationArray::max_count);
 }
 
@@ -106,8 +89,10 @@ size_t WritableWTPRadioInformationArray::Size() {
 }
 
 void WritableWTPRadioInformationArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 uint16_t WritableWTPRadioInformationArray::GetTotalLength() const {
@@ -130,17 +115,31 @@ void WritableWTPRadioInformationArray::Log() const {
 ReadableWTPRadioInformationArray::ReadableWTPRadioInformationArray() : count{ 0 } {
 }
 
+ElementHeader::ElementType ReadableWTPRadioInformationArray::GetElementType() const {
+    return ElementHeader::WTPRadioInformation;
+}
+
+bool ReadableWTPRadioInformationArray::IsPresent() const {
+    return count > 0;
+}
+
 bool ReadableWTPRadioInformationArray::Deserialize(RawData *raw_data) {
     if (count >= max_count) {
         log_e("ReadableWTPRadioInformationArray::Deserialize elements count exceeds");
         return false;
     }
 
-    auto radio_info = WTPRadioInformation::Deserialize(raw_data);
-    if (radio_info == nullptr) {
+    if (raw_data->current + sizeof(WTPRadioInformation) > raw_data->end) {
         return false;
     }
-    items[count] = radio_info;
+
+    auto item = (WTPRadioInformation *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(WTPRadioInformation);
+    items[count] = item;
     count++;
     return true;
 }

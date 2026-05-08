@@ -1,6 +1,7 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -34,13 +35,11 @@ struct __attribute__((packed)) WTPRadioInformation : ElementHeader {
                         bool be);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static WTPRadioInformation *Deserialize(RawData *raw_data);
     uint16_t GetTotalLength() const;
     std::string ToString() const;
 };
 
-struct WritableWTPRadioInformationArray {
+struct WritableWTPRadioInformationArray : IWritableConfigurationStatusRequestOptionalElement {
   private:
     std::vector<WTPRadioInformation> items;
 
@@ -53,12 +52,12 @@ struct WritableWTPRadioInformationArray {
     void Clear();
     size_t Size();
 
-    void Serialize(RawData *raw_data) const;
+    void Serialize(RawData *raw_data) const override;
     uint16_t GetTotalLength() const;
-    void Log() const;
+    void Log() const override;
 };
 
-struct ReadableWTPRadioInformationArray {
+struct ReadableWTPRadioInformationArray : IReadableConfigurationStatusRequestOptionalElement {
   public:
     static const size_t max_count = 32; //Radio ID
 
@@ -70,7 +69,9 @@ struct ReadableWTPRadioInformationArray {
     ReadableWTPRadioInformationArray(const ReadableWTPRadioInformationArray &) = delete;
     ReadableWTPRadioInformationArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override;
+    ElementHeader::ElementType GetElementType() const override;
+    bool IsPresent() const override;
     nonstd::span<const WTPRadioInformation *const> Get() const;
-    void Log() const;
+    void Log() const override;
 };

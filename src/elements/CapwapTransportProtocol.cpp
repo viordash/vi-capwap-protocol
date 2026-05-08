@@ -1,6 +1,7 @@
 #include "CapwapTransportProtocol.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <cstring>
 
 CapwapTransportProtocol::CapwapTransportProtocol(Type type)
     : ElementHeader(ElementHeader::CAPWAPTransportProtocol,
@@ -14,28 +15,55 @@ bool CapwapTransportProtocol::Validate() const {
                == (sizeof(CapwapTransportProtocol) - sizeof(ElementHeader)) //
         && type >= UDPLite && type <= UDP;
 }
-void CapwapTransportProtocol::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(CapwapTransportProtocol) <= raw_data->end);
-    CapwapTransportProtocol *dst = (CapwapTransportProtocol *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(CapwapTransportProtocol);
+
+void CapwapTransportProtocol::Log() const {
+    log_i("ME CapwapTransportProtocol Type:%u", (unsigned)type);
 }
-CapwapTransportProtocol *CapwapTransportProtocol::Deserialize(RawData *raw_data) {
+
+WritableCapwapTransportProtocol::WritableCapwapTransportProtocol(CapwapTransportProtocol::Type type)
+    : element{ type } {
+    static_assert(sizeof(element) == 5);
+}
+
+void WritableCapwapTransportProtocol::Serialize(RawData *raw_data) const {
+    ASSERT(raw_data->current + sizeof(CapwapTransportProtocol) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
+}
+
+void WritableCapwapTransportProtocol::Log() const {
+    element.Log();
+}
+
+bool ReadableCapwapTransportProtocol::Deserialize(RawData *raw_data) {
     if (raw_data->current + sizeof(CapwapTransportProtocol) > raw_data->end) {
-        return nullptr;
+        return false;
     }
 
     auto res = (CapwapTransportProtocol *)raw_data->current;
     if (!res->Validate()) {
-        return nullptr;
+        return false;
     }
     raw_data->current += sizeof(CapwapTransportProtocol);
-    return res;
-}
-uint16_t CapwapTransportProtocol::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
+
+    element = res;
+    is_present = true;
+    return true;
 }
 
-void CapwapTransportProtocol::Log() const {
-    log_i("ME CapwapTransportProtocol Type:%u", (unsigned)type);
+const CapwapTransportProtocol *ReadableCapwapTransportProtocol::Get() const {
+    return element;
+}
+
+void ReadableCapwapTransportProtocol::Log() const {
+    ASSERT(element != nullptr);
+    element->Log();
+}
+
+ElementHeader::ElementType ReadableCapwapTransportProtocol::GetElementType() const {
+    return ElementHeader::CAPWAPTransportProtocol;
+}
+
+bool ReadableCapwapTransportProtocol::IsPresent() const {
+    return is_present;
 }

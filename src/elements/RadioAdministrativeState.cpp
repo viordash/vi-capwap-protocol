@@ -32,28 +32,6 @@ bool RadioAdministrativeState::Validate() const {
     }
     return true;
 }
-void RadioAdministrativeState::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(RadioAdministrativeState) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(RadioAdministrativeState));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(RadioAdministrativeState);
-}
-RadioAdministrativeState *RadioAdministrativeState::Deserialize(RawData *raw_data) {
-    if (raw_data->current + sizeof(RadioAdministrativeState) > raw_data->end) {
-        return nullptr;
-    }
-
-    auto res = (RadioAdministrativeState *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    raw_data->current += sizeof(RadioAdministrativeState);
-    return res;
-}
 
 WritableRadioAdministrativeStateArray::WritableRadioAdministrativeStateArray() {
     items.reserve(ReadableRadioAdministrativeStateArray::max_count);
@@ -84,8 +62,10 @@ void WritableRadioAdministrativeStateArray::Clear() {
 }
 
 void WritableRadioAdministrativeStateArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
-        elem.Serialize(raw_data);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item) <= raw_data->end);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
 }
 
@@ -107,11 +87,17 @@ bool ReadableRadioAdministrativeStateArray::Deserialize(RawData *raw_data) {
         return false;
     }
 
-    auto ip_address = RadioAdministrativeState::Deserialize(raw_data);
-    if (ip_address == nullptr) {
+    if (raw_data->current + sizeof(RadioAdministrativeState) > raw_data->end) {
         return false;
     }
-    items[count] = ip_address;
+
+    auto item = (RadioAdministrativeState *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
+    }
+
+    raw_data->current += sizeof(RadioAdministrativeState);
+    items[count] = item;
     count++;
     return true;
 }
@@ -129,4 +115,12 @@ void ReadableRadioAdministrativeStateArray::Log() const {
               items[i]->RadioID,
               items[i]->AdminState);
     }
+}
+
+ElementHeader::ElementType ReadableRadioAdministrativeStateArray::GetElementType() const {
+    return ElementHeader::RadioAdministrativeState;
+}
+
+bool ReadableRadioAdministrativeStateArray::IsPresent() const {
+    return count > 0;
 }

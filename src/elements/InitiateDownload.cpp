@@ -1,39 +1,62 @@
 #include "InitiateDownload.h"
 #include "Logging.h"
 #include "lassert.h"
-#include <string.h>
+#include <cstring>
 
 InitiateDownload::InitiateDownload()
     : ElementHeader(ElementHeader::InitiateDownload,
                     sizeof(InitiateDownload) - sizeof(ElementHeader)) {
 }
+
 bool InitiateDownload::Validate() const {
     static_assert(sizeof(InitiateDownload) == 4);
     return ElementHeader::GetElementType() == ElementHeader::InitiateDownload
         && ElementHeader::GetLength() == (sizeof(InitiateDownload) - sizeof(ElementHeader));
 }
-void InitiateDownload::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(InitiateDownload) <= raw_data->end);
-    InitiateDownload *dst = (InitiateDownload *)raw_data->current;
-    *dst = *this;
-    raw_data->current += sizeof(InitiateDownload);
+
+void InitiateDownload::Log() const {
+    log_i("ME InitiateDownload");
 }
-InitiateDownload *InitiateDownload::Deserialize(RawData *raw_data) {
+
+void WritableInitiateDownload::Serialize(RawData *raw_data) const {
+    ASSERT(raw_data->current + sizeof(InitiateDownload) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
+}
+
+void WritableInitiateDownload::Log() const {
+    element.Log();
+}
+
+bool ReadableInitiateDownload::Deserialize(RawData *raw_data) {
     if (raw_data->current + sizeof(InitiateDownload) > raw_data->end) {
-        return nullptr;
+        return false;
     }
 
     auto res = (InitiateDownload *)raw_data->current;
     if (!res->Validate()) {
-        return nullptr;
+        return false;
     }
     raw_data->current += sizeof(InitiateDownload);
-    return res;
-}
-uint16_t InitiateDownload::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
+
+    element = res;
+    is_present = true;
+    return true;
 }
 
-void InitiateDownload::Log() const {
-    log_i("ME InitiateDownload");
+const InitiateDownload *ReadableInitiateDownload::Get() const {
+    return element;
+}
+
+void ReadableInitiateDownload::Log() const {
+    ASSERT(element != nullptr);
+    element->Log();
+}
+
+ElementHeader::ElementType ReadableInitiateDownload::GetElementType() const {
+    return ElementHeader::InitiateDownload;
+}
+
+bool ReadableInitiateDownload::IsPresent() const {
+    return is_present;
 }

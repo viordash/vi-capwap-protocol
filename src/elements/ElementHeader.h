@@ -59,7 +59,31 @@ struct __attribute__((packed)) ElementHeader {
         CAPWAPTransportProtocol = 0x3300,       // 51
         MTUDiscoveryPadding = 0x3400,           // 52
         ECNSupport = 0x3500,                    // 53
-        WTPRadioInformation = 0x1804            // 1048
+        WTPRadioInformation = 0x1804,           // 1048
+        AddWlan = 0x0004,                       // 1024
+        Antenna = 0x0104,                       // 1025
+        AssignedWtpBssid = 0x0204,              // 1026
+        DeleteWlan = 0x0304,                    // 1027
+        DirectSequenceControl = 0x0404,         // 1028
+        InformationElement = 0x0504,            // 1029
+        MACOperation = 0x0604,                  // 1030
+        MICCountermeasures = 0x0704,            // 1031
+        SupportedRates = 0x1004,                // 1040
+        TxPower = 0x1104,                       // 1041
+        TxPowerLevel = 0x1204,                  // 1042
+        MultiDomainCapability = 0x0804,         // 1032
+        OFDMControl = 0x0904,                   // 1033
+        RateSet = 0x0A04,                       // 1034
+        RSNAErrorReportFromStation = 0x0B04,    // 1035
+        Station = 0x0C04,                       // 1036
+        StationQoSProfile = 0x0D04,             // 1037
+        StationSessionKey = 0x0E04,             // 1038
+        Statistics = 0x0F04,                    // 1039
+        UpdateStationQoS = 0x1304,              // 1043
+        UpdateWlan = 0x1404,                    // 1044
+        WTPQualityOfService = 0x1504,           // 1045
+        WTPRadioConfiguration = 0x1604,         // 1046
+        WTPRadioFailAlarmIndication = 0x1704    // 1047
     };
 
   private:

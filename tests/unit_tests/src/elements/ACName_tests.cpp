@@ -28,12 +28,13 @@ TEST(ACNameTestsGroup, ACName_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto read_data = ReadableACName::Deserialize(&raw_data);
-    CHECK(read_data != nullptr);
+    ReadableACName read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
 
     CHECK_EQUAL(&buffer[0] + sizeof(reference), raw_data.current);
-    CHECK_EQUAL(16, read_data->GetLength());
-    STRNCMP_EQUAL("abcdefабвгд", (char *)read_data->name, 16);
+    CHECK_EQUAL(16, read_data.Get()->GetLength());
+    STRNCMP_EQUAL("abcdefабвгд", (char *)read_data.Get()->name, 16);
 }
 
 TEST(ACNameTestsGroup, ACName_empty) {
@@ -48,11 +49,12 @@ TEST(ACNameTestsGroup, ACName_empty) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto read_data = ReadableACName::Deserialize(&raw_data);
-    CHECK(read_data != nullptr);
+    ReadableACName read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
 
     CHECK_EQUAL(&buffer[0] + sizeof(reference), raw_data.current);
-    CHECK_EQUAL(0, read_data->GetLength());
+    CHECK_EQUAL(0, read_data.Get()->GetLength());
 }
 
 TEST(ACNameTestsGroup, ACName_deserialize_ascii) {
@@ -72,11 +74,12 @@ TEST(ACNameTestsGroup, ACName_deserialize_ascii) {
 
     RawData raw_data{ data, data + sizeof(data) };
 
-    auto read_data = ReadableACName::Deserialize(&raw_data);
-    CHECK(read_data != nullptr);
+    ReadableACName read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(14, read_data->GetLength());
-    STRNCMP_EQUAL("Corporate-AC-1", (char *)read_data->name, 14);
+    CHECK_EQUAL(14, read_data.Get()->GetLength());
+    STRNCMP_EQUAL("Corporate-AC-1", (char *)read_data.Get()->name, 14);
 }
 
 TEST(ACNameTestsGroup, ACName_deserialize_utf8) {
@@ -101,9 +104,10 @@ uint8_t data[] = {
 
     RawData raw_data{ data, data + sizeof(data) };
 
-    auto read_data = ReadableACName::Deserialize(&raw_data);
-    CHECK(read_data != nullptr);
+    ReadableACName read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(16, read_data->GetLength());
-    STRNCMP_EQUAL("München-AC-Main", (char *)read_data->name, 16);
+    CHECK_EQUAL(16, read_data.Get()->GetLength());
+    STRNCMP_EQUAL("München-AC-Main", (char *)read_data.Get()->name, 16);
 }

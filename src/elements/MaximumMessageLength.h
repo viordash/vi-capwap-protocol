@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include <cstdint>
 
@@ -16,6 +17,31 @@ struct __attribute__((packed)) MaximumMessageLength : ElementHeader {
     static MaximumMessageLength *Deserialize(RawData *raw_data);
 
     uint16_t GetValue() const;
-    uint16_t GetTotalLength() const;
     void Log() const;
+};
+
+struct WritableMaximumMessageLength : IWritableJoinRequestOptionalElement,
+                                      IWritableJoinResponseOptionalElement {
+  protected:
+    MaximumMessageLength element;
+
+  public:
+    WritableMaximumMessageLength(uint16_t length);
+
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
+};
+
+struct ReadableMaximumMessageLength : IReadableJoinRequestOptionalElement,
+                                      IReadableJoinResponseOptionalElement {
+  protected:
+    MaximumMessageLength *element = nullptr;
+    bool is_present = false;
+
+  public:
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
+    const MaximumMessageLength *Get() const;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

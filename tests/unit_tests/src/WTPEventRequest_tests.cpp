@@ -23,48 +23,48 @@ TEST(WTPEventRequestTestsGroup, WTPEventRequest_serialize) {
     const uint8_t mac_6_2[] = { 0xAB, 0xBC, 0xCD, 0xDE, 0xEF, 0xFF };
     const uint8_t mac_8_0[] = { 0xAA, 0xBB, 0xCC, 0xFF, 0xFE, 0xDD, 0xEE, 0xFF };
     const uint8_t mac_8_1[] = { 0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0xEE, 0xFF };
+    {
+        WritableDecryptionErrorReportArray decryption_error_report;
+        decryption_error_report.Add(3, { { mac_6_0 }, { mac_8_0 } });
 
-    WritableDecryptionErrorReportArray decryption_error_report;
-    decryption_error_report.Add(3, { { mac_6_0 }, { mac_8_0 } });
+        WritableDuplicateIPv4AdrArray duplicate_ipv4_address;
+        duplicate_ipv4_address.Add(inet_addr("192.168.100.10"),
+                                   DuplicateStatus::Detected,
+                                   { mac_6_1 });
+        duplicate_ipv4_address.Add(inet_addr("192.168.100.11"),
+                                   DuplicateStatus::Cleared,
+                                   { mac_8_1 });
 
-    WritableDuplicateIPv4AdrArray duplicate_ipv4_address;
-    duplicate_ipv4_address.Add(inet_addr("192.168.100.10"), DuplicateStatus::Detected, { mac_6_1 });
-    duplicate_ipv4_address.Add(inet_addr("192.168.100.11"), DuplicateStatus::Cleared, { mac_8_1 });
+        WritableWTPRadioStatisticsArray wtp_radio_statistics;
+        wtp_radio_statistics.Add({ 1,
+                                   WTPRadioStatistics::LastFailureType::HardwareFailure,
+                                   40,
+                                   41,
+                                   42,
+                                   43,
+                                   44,
+                                   45,
+                                   46,
+                                   47,
+                                   -48 });
 
-    WritableWTPRadioStatisticsArray wtp_radio_statistics;
-    wtp_radio_statistics.Add({ 1,
-                               WTPRadioStatistics::LastFailureType::HardwareFailure,
-                               40,
-                               41,
-                               42,
-                               43,
-                               44,
-                               45,
-                               46,
-                               47,
-                               -48 });
+        WritableWTPRebootStatistics wtp_reboot_statistics{
+            12340, 12341, 12342, 12343,
+            12344, 12345, 12346, WTPRebootStatistics::LastFailureType::LinkFailure
+        };
 
-    std::optional<WTPRebootStatistics> wtp_reboot_statistics{
-        std::in_place, 12340, 12341,
-        12342,         12343, 12344,
-        12345,         12346, WTPRebootStatistics::LastFailureType::LinkFailure
-    };
+        WritableDeleteStationArray delete_station;
+        delete_station.Add(7, { mac_6_2 });
+        delete_station.Add(8, { mac_6_0 });
 
-    WritableDeleteStationArray delete_station;
-    delete_station.Add(7, { mac_6_2 });
-    delete_station.Add(8, { mac_6_0 });
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        IWritableWTPEventRequestOptionalElement *const elems_1[] = { &decryption_error_report, &duplicate_ipv4_address, &wtp_radio_statistics, &wtp_reboot_statistics, &delete_station, &vendor_specific_payloads };
+        WritableWTPEventRequest write_data(elems_1);
 
-    WritableWTPEventRequest write_data(decryption_error_report,
-                                       duplicate_ipv4_address,
-                                       wtp_radio_statistics,
-                                       wtp_reboot_statistics,
-                                       delete_station,
-                                       vendor_specific_payloads);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 170 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = {
         0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x09, 0x2A, 0x00, 0x9A,
@@ -86,82 +86,93 @@ TEST(WTPEventRequestTestsGroup, WTPEventRequest_serialize) {
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 170 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableWTPEventRequest read_data;
+
+    ReadableDecryptionErrorReportArray decryption_error_report;
+    ReadableDuplicateIPv4AdrArray duplicate_ipv4_address;
+    ReadableWTPRadioStatisticsArray wtp_radio_statistics;
+    ReadableWTPRebootStatistics wtp_reboot_statistics;
+    ReadableDeleteStationArray delete_station;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableWTPEventRequestOptionalElement *const elems_2[] = { &decryption_error_report, &duplicate_ipv4_address, &wtp_radio_statistics, &wtp_reboot_statistics, &delete_station, &vendor_specific_payloads };
+    ReadableWTPEventRequest read_data(elems_2);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(1, read_data.decryption_error_report.Get().size());
-    CHECK_EQUAL(3, read_data.decryption_error_report.Get()[0].GetRadioID());
-    CHECK_EQUAL(2, read_data.decryption_error_report.Get()[0].Get().size());
-    CHECK_EQUAL(6, read_data.decryption_error_report.Get()[0].Get()[0]->Length);
+    CHECK_TRUE(decryption_error_report.IsPresent());
+    CHECK_EQUAL(1, decryption_error_report.Get().size());
+    CHECK_EQUAL(3, decryption_error_report.Get()[0].GetRadioID());
+    CHECK_EQUAL(2, decryption_error_report.Get()[0].Get().size());
+    CHECK_EQUAL(6, decryption_error_report.Get()[0].Get()[0]->Length);
     MEMCMP_EQUAL(mac_6_0,
-                 (char *)read_data.decryption_error_report.Get()[0].Get()[0]->MACAddresses,
+                 (char *)decryption_error_report.Get()[0].Get()[0]->MACAddresses,
                  sizeof(mac_6_0));
-    CHECK_EQUAL(8, read_data.decryption_error_report.Get()[0].Get()[1]->Length);
+    CHECK_EQUAL(8, decryption_error_report.Get()[0].Get()[1]->Length);
     MEMCMP_EQUAL(mac_8_0,
-                 (char *)read_data.decryption_error_report.Get()[0].Get()[1]->MACAddresses,
+                 (char *)decryption_error_report.Get()[0].Get()[1]->MACAddresses,
                  sizeof(mac_8_0));
 
-    CHECK_EQUAL(2, read_data.duplicate_ipv4_address.Get().size());
+    CHECK_TRUE(duplicate_ipv4_address.IsPresent());
+    CHECK_EQUAL(2, duplicate_ipv4_address.Get().size());
 
-    CHECK_EQUAL(inet_addr("192.168.100.10"), read_data.duplicate_ipv4_address.Get()[0]->IPAddress);
-    CHECK_EQUAL(DuplicateStatus::Detected, read_data.duplicate_ipv4_address.Get()[0]->Status);
-    CHECK_EQUAL(6, read_data.duplicate_ipv4_address.Get()[0]->MACAddress.Length);
+    CHECK_EQUAL(inet_addr("192.168.100.10"), duplicate_ipv4_address.Get()[0]->IPAddress);
+    CHECK_EQUAL(DuplicateStatus::Detected, duplicate_ipv4_address.Get()[0]->Status);
+    CHECK_EQUAL(6, duplicate_ipv4_address.Get()[0]->MACAddress.Length);
     MEMCMP_EQUAL(mac_6_1,
-                 (char *)read_data.duplicate_ipv4_address.Get()[0]->MACAddress.MACAddresses,
+                 (char *)duplicate_ipv4_address.Get()[0]->MACAddress.MACAddresses,
                  sizeof(mac_6_1));
 
-    CHECK_EQUAL(inet_addr("192.168.100.11"), read_data.duplicate_ipv4_address.Get()[1]->IPAddress);
-    CHECK_EQUAL(DuplicateStatus::Cleared, read_data.duplicate_ipv4_address.Get()[1]->Status);
-    CHECK_EQUAL(8, read_data.duplicate_ipv4_address.Get()[1]->MACAddress.Length);
+    CHECK_EQUAL(inet_addr("192.168.100.11"), duplicate_ipv4_address.Get()[1]->IPAddress);
+    CHECK_EQUAL(DuplicateStatus::Cleared, duplicate_ipv4_address.Get()[1]->Status);
+    CHECK_EQUAL(8, duplicate_ipv4_address.Get()[1]->MACAddress.Length);
     MEMCMP_EQUAL(mac_8_1,
-                 (char *)read_data.duplicate_ipv4_address.Get()[1]->MACAddress.MACAddresses,
+                 (char *)duplicate_ipv4_address.Get()[1]->MACAddress.MACAddresses,
                  sizeof(mac_8_1));
 
-    CHECK_EQUAL(1, read_data.wtp_radio_statistics.Get().size());
+    CHECK_TRUE(wtp_radio_statistics.IsPresent());
+    CHECK_EQUAL(1, wtp_radio_statistics.Get().size());
     CHECK_EQUAL(ElementHeader::ElementType::WTPRadioStatistics,
-                read_data.wtp_radio_statistics.Get()[0]->GetElementType());
-    CHECK_EQUAL(1, read_data.wtp_radio_statistics.Get()[0]->GetRadioID());
+                wtp_radio_statistics.Get()[0]->GetElementType());
+    CHECK_EQUAL(1, wtp_radio_statistics.Get()[0]->GetRadioID());
     CHECK_EQUAL(WTPRadioStatistics::LastFailureType::HardwareFailure,
-                read_data.wtp_radio_statistics.Get()[0]->GetLastFailureType());
-    CHECK_EQUAL(40, read_data.wtp_radio_statistics.Get()[0]->GetResetCount());
-    CHECK_EQUAL(41, read_data.wtp_radio_statistics.Get()[0]->GetSWFailureCount());
-    CHECK_EQUAL(42, read_data.wtp_radio_statistics.Get()[0]->GetHWFailureCount());
-    CHECK_EQUAL(43, read_data.wtp_radio_statistics.Get()[0]->GetOtherFailureCount());
-    CHECK_EQUAL(44, read_data.wtp_radio_statistics.Get()[0]->GetUnknownFailureCount());
-    CHECK_EQUAL(45, read_data.wtp_radio_statistics.Get()[0]->GetConfigUpdateCount());
-    CHECK_EQUAL(46, read_data.wtp_radio_statistics.Get()[0]->GetChannelChangeCount());
-    CHECK_EQUAL(47, read_data.wtp_radio_statistics.Get()[0]->GetBandChangeCount());
-    CHECK_EQUAL(-48, read_data.wtp_radio_statistics.Get()[0]->GetCurrentNoiseFloor());
+                wtp_radio_statistics.Get()[0]->GetLastFailureType());
+    CHECK_EQUAL(40, wtp_radio_statistics.Get()[0]->GetResetCount());
+    CHECK_EQUAL(41, wtp_radio_statistics.Get()[0]->GetSWFailureCount());
+    CHECK_EQUAL(42, wtp_radio_statistics.Get()[0]->GetHWFailureCount());
+    CHECK_EQUAL(43, wtp_radio_statistics.Get()[0]->GetOtherFailureCount());
+    CHECK_EQUAL(44, wtp_radio_statistics.Get()[0]->GetUnknownFailureCount());
+    CHECK_EQUAL(45, wtp_radio_statistics.Get()[0]->GetConfigUpdateCount());
+    CHECK_EQUAL(46, wtp_radio_statistics.Get()[0]->GetChannelChangeCount());
+    CHECK_EQUAL(47, wtp_radio_statistics.Get()[0]->GetBandChangeCount());
+    CHECK_EQUAL(-48, wtp_radio_statistics.Get()[0]->GetCurrentNoiseFloor());
 
-    CHECK(read_data.wtp_reboot_statistics != nullptr);
-    CHECK_EQUAL(12340, read_data.wtp_reboot_statistics->GetRebootCount());
-    CHECK_EQUAL(12341, read_data.wtp_reboot_statistics->GetACInitiatedCount());
-    CHECK_EQUAL(12342, read_data.wtp_reboot_statistics->GetLinkFailureCount());
-    CHECK_EQUAL(12343, read_data.wtp_reboot_statistics->GetSWFailureCount());
-    CHECK_EQUAL(12344, read_data.wtp_reboot_statistics->GetHWFailureCount());
-    CHECK_EQUAL(12345, read_data.wtp_reboot_statistics->GetOtherFailureCount());
-    CHECK_EQUAL(12346, read_data.wtp_reboot_statistics->GetUnknownFailureCount());
+    CHECK(wtp_reboot_statistics.IsPresent());
+    CHECK_EQUAL(12340, wtp_reboot_statistics.Get()->GetRebootCount());
+    CHECK_EQUAL(12341, wtp_reboot_statistics.Get()->GetACInitiatedCount());
+    CHECK_EQUAL(12342, wtp_reboot_statistics.Get()->GetLinkFailureCount());
+    CHECK_EQUAL(12343, wtp_reboot_statistics.Get()->GetSWFailureCount());
+    CHECK_EQUAL(12344, wtp_reboot_statistics.Get()->GetHWFailureCount());
+    CHECK_EQUAL(12345, wtp_reboot_statistics.Get()->GetOtherFailureCount());
+    CHECK_EQUAL(12346, wtp_reboot_statistics.Get()->GetUnknownFailureCount());
     CHECK_EQUAL(WTPRebootStatistics::LastFailureType::LinkFailure,
-                read_data.wtp_reboot_statistics->GetLastFailureType());
+                wtp_reboot_statistics.Get()->GetLastFailureType());
 
-    CHECK_EQUAL(2, read_data.delete_station.Get().size());
-    CHECK_EQUAL(7, read_data.delete_station.Get()[0]->RadioID);
-    CHECK_EQUAL(6, read_data.delete_station.Get()[0]->MACAddress.Length);
+    CHECK_TRUE(delete_station.IsPresent());
+    CHECK_EQUAL(2, delete_station.Get().size());
+    CHECK_EQUAL(7, delete_station.Get()[0]->RadioID);
+    CHECK_EQUAL(6, delete_station.Get()[0]->MACAddress.Length);
     MEMCMP_EQUAL(mac_6_2,
-                 (char *)read_data.delete_station.Get()[0]->MACAddress.MACAddresses,
+                 (char *)delete_station.Get()[0]->MACAddress.MACAddresses,
                  sizeof(mac_6_2));
-    CHECK_EQUAL(8, read_data.delete_station.Get()[1]->RadioID);
-    CHECK_EQUAL(6, read_data.delete_station.Get()[1]->MACAddress.Length);
+    CHECK_EQUAL(8, delete_station.Get()[1]->RadioID);
+    CHECK_EQUAL(6, delete_station.Get()[1]->MACAddress.Length);
     MEMCMP_EQUAL(mac_6_0,
-                 (char *)read_data.delete_station.Get()[1]->MACAddress.MACAddresses,
+                 (char *)delete_station.Get()[1]->MACAddress.MACAddresses,
                  sizeof(mac_6_0));
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -233,54 +244,63 @@ TEST(WTPEventRequestTestsGroup, WTPEventRequest_deserialize_image_data) {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableWTPEventRequest read_data;
+    ReadableDecryptionErrorReportArray decryption_error_report;
+    ReadableDuplicateIPv4AdrArray duplicate_ipv4_address;
+    ReadableWTPRadioStatisticsArray wtp_radio_statistics;
+    ReadableWTPRebootStatistics wtp_reboot_statistics;
+    ReadableDeleteStationArray delete_station;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableWTPEventRequestOptionalElement *const elems_3[] = { &decryption_error_report, &duplicate_ipv4_address, &wtp_radio_statistics, &wtp_reboot_statistics, &delete_station, &vendor_specific_payloads };
+    ReadableWTPEventRequest read_data(elems_3);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    CHECK_EQUAL(1, read_data.decryption_error_report.Get().size());
-    CHECK_EQUAL(1, read_data.decryption_error_report.Get()[0].GetRadioID());
-    CHECK_EQUAL(1, read_data.decryption_error_report.Get()[0].Get().size());
+    CHECK_TRUE(decryption_error_report.IsPresent());
+    CHECK_EQUAL(1, decryption_error_report.Get().size());
+    CHECK_EQUAL(1, decryption_error_report.Get()[0].GetRadioID());
+    CHECK_EQUAL(1, decryption_error_report.Get()[0].Get().size());
     const uint8_t mac_decryption_error_report[] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
-    CHECK_EQUAL(6, read_data.decryption_error_report.Get()[0].Get()[0]->Length);
+    CHECK_EQUAL(6, decryption_error_report.Get()[0].Get()[0]->Length);
     MEMCMP_EQUAL(mac_decryption_error_report,
-                 (char *)read_data.decryption_error_report.Get()[0].Get()[0]->MACAddresses,
+                 (char *)decryption_error_report.Get()[0].Get()[0]->MACAddresses,
                  sizeof(mac_decryption_error_report));
 
-    CHECK_EQUAL(1, read_data.wtp_radio_statistics.Get().size());
+    CHECK_TRUE(wtp_radio_statistics.IsPresent());
+    CHECK_EQUAL(1, wtp_radio_statistics.Get().size());
     CHECK_EQUAL(ElementHeader::ElementType::WTPRadioStatistics,
-                read_data.wtp_radio_statistics.Get()[0]->GetElementType());
-    CHECK_EQUAL(2, read_data.wtp_radio_statistics.Get()[0]->GetRadioID());
+                wtp_radio_statistics.Get()[0]->GetElementType());
+    CHECK_EQUAL(2, wtp_radio_statistics.Get()[0]->GetRadioID());
     CHECK_EQUAL(WTPRadioStatistics::LastFailureType::SoftwareFailure,
-                read_data.wtp_radio_statistics.Get()[0]->GetLastFailureType());
-    CHECK_EQUAL(5, read_data.wtp_radio_statistics.Get()[0]->GetResetCount());
-    CHECK_EQUAL(2, read_data.wtp_radio_statistics.Get()[0]->GetSWFailureCount());
-    CHECK_EQUAL(0, read_data.wtp_radio_statistics.Get()[0]->GetHWFailureCount());
-    CHECK_EQUAL(0, read_data.wtp_radio_statistics.Get()[0]->GetOtherFailureCount());
-    CHECK_EQUAL(1, read_data.wtp_radio_statistics.Get()[0]->GetUnknownFailureCount());
-    CHECK_EQUAL(20, read_data.wtp_radio_statistics.Get()[0]->GetConfigUpdateCount());
-    CHECK_EQUAL(8, read_data.wtp_radio_statistics.Get()[0]->GetChannelChangeCount());
-    CHECK_EQUAL(0, read_data.wtp_radio_statistics.Get()[0]->GetBandChangeCount());
-    CHECK_EQUAL(-95, read_data.wtp_radio_statistics.Get()[0]->GetCurrentNoiseFloor());
+                wtp_radio_statistics.Get()[0]->GetLastFailureType());
+    CHECK_EQUAL(5, wtp_radio_statistics.Get()[0]->GetResetCount());
+    CHECK_EQUAL(2, wtp_radio_statistics.Get()[0]->GetSWFailureCount());
+    CHECK_EQUAL(0, wtp_radio_statistics.Get()[0]->GetHWFailureCount());
+    CHECK_EQUAL(0, wtp_radio_statistics.Get()[0]->GetOtherFailureCount());
+    CHECK_EQUAL(1, wtp_radio_statistics.Get()[0]->GetUnknownFailureCount());
+    CHECK_EQUAL(20, wtp_radio_statistics.Get()[0]->GetConfigUpdateCount());
+    CHECK_EQUAL(8, wtp_radio_statistics.Get()[0]->GetChannelChangeCount());
+    CHECK_EQUAL(0, wtp_radio_statistics.Get()[0]->GetBandChangeCount());
+    CHECK_EQUAL(-95, wtp_radio_statistics.Get()[0]->GetCurrentNoiseFloor());
 
-    CHECK(read_data.wtp_reboot_statistics == nullptr);
+    CHECK_FALSE(wtp_reboot_statistics.IsPresent());
 
-    CHECK_EQUAL(1, read_data.delete_station.Get().size());
-    CHECK_EQUAL(1, read_data.delete_station.Get()[0]->RadioID);
+    CHECK_TRUE(delete_station.IsPresent());
+    CHECK_EQUAL(1, delete_station.Get().size());
+    CHECK_EQUAL(1, delete_station.Get()[0]->RadioID);
     const uint8_t mac_delete_station[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xCA, 0xFE };
-    CHECK_EQUAL(6, read_data.delete_station.Get()[0]->MACAddress.Length);
+    CHECK_EQUAL(6, delete_station.Get()[0]->MACAddress.Length);
     MEMCMP_EQUAL(mac_delete_station,
-                 (char *)read_data.delete_station.Get()[0]->MACAddress.MACAddresses,
+                 (char *)delete_station.Get()[0]->MACAddress.MACAddresses,
                  sizeof(mac_delete_station));
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(9, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(0x1001, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(9, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(0x1001, vendor_specific_payloads.Get()[0]->GetElementId());
     const uint8_t vendor_payload[] = { 0x01, 0x02, 0x03, 0x04 };
-    MEMCMP_EQUAL(vendor_payload,
-                 read_data.vendor_specific_payloads.Get()[0]->value,
-                 sizeof(vendor_payload));
+    MEMCMP_EQUAL(vendor_payload, vendor_specific_payloads.Get()[0]->value, sizeof(vendor_payload));
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -325,82 +345,14 @@ TEST(WTPEventRequestTestsGroup, WTPEventRequest_deserialize_handle_unknown_eleme
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableWTPEventRequest read_data;
+    ReadableDecryptionErrorReportArray decryption_error_report;
+    IReadableWTPEventRequestOptionalElement *const elems_4[] = { &decryption_error_report };
+    ReadableWTPEventRequest read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(decryption_error_report.IsPresent());
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, read_data.unknown_elements);
-}
-
-TEST(WTPEventRequestTestsGroup, Serialization_clears_items) {
-    uint8_t buffer[4096] = {};
-    RawData raw_data{ buffer, buffer + sizeof(buffer) };
-
-    const uint8_t mac_6_0[] = { 0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E };
-    const uint8_t mac_6_1[] = { 0xAA, 0xBB, 0xCC, 0xFF, 0xFE, 0xDD };
-    const uint8_t mac_6_2[] = { 0xAB, 0xBC, 0xCD, 0xDE, 0xEF, 0xFF };
-    const uint8_t mac_8_0[] = { 0xAA, 0xBB, 0xCC, 0xFF, 0xFE, 0xDD, 0xEE, 0xFF };
-    const uint8_t mac_8_1[] = { 0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E, 0xEE, 0xFF };
-
-    WritableDecryptionErrorReportArray decryption_error_report;
-    decryption_error_report.Add(3, { { mac_6_0 }, { mac_8_0 } });
-
-    WritableDuplicateIPv4AdrArray duplicate_ipv4_address;
-    duplicate_ipv4_address.Add(inet_addr("192.168.100.10"), DuplicateStatus::Detected, { mac_6_1 });
-    duplicate_ipv4_address.Add(inet_addr("192.168.100.11"), DuplicateStatus::Cleared, { mac_8_1 });
-
-    WritableWTPRadioStatisticsArray wtp_radio_statistics;
-    wtp_radio_statistics.Add({ 1,
-                               WTPRadioStatistics::LastFailureType::HardwareFailure,
-                               40,
-                               41,
-                               42,
-                               43,
-                               44,
-                               45,
-                               46,
-                               47,
-                               -48 });
-
-    std::optional<WTPRebootStatistics> wtp_reboot_statistics{
-        std::in_place, 12340, 12341,
-        12342,         12343, 12344,
-        12345,         12346, WTPRebootStatistics::LastFailureType::LinkFailure
-    };
-
-    WritableDeleteStationArray delete_station;
-    delete_station.Add(7, { mac_6_2 });
-    delete_station.Add(8, { mac_6_0 });
-
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
-
-    WritableWTPEventRequest write_data(decryption_error_report,
-                                       duplicate_ipv4_address,
-                                       wtp_radio_statistics,
-                                       wtp_reboot_statistics,
-                                       delete_station,
-                                       vendor_specific_payloads);
-
-    CHECK_FALSE(decryption_error_report.Empty());
-    CHECK_FALSE(duplicate_ipv4_address.Empty());
-    CHECK_FALSE(wtp_radio_statistics.Empty());
-
-    CHECK_TRUE(wtp_reboot_statistics.has_value());
-
-    CHECK_FALSE(delete_station.Empty());
-    CHECK_FALSE(vendor_specific_payloads.Empty());
-
-    write_data.Serialize(&raw_data);
-    write_data.Clear();
-    CHECK_TRUE(decryption_error_report.Empty());
-    CHECK_TRUE(duplicate_ipv4_address.Empty());
-    CHECK_TRUE(wtp_radio_statistics.Empty());
-
-    CHECK_FALSE(wtp_reboot_statistics.has_value());
-
-    CHECK_TRUE(delete_station.Empty());
-    CHECK_TRUE(vendor_specific_payloads.Empty());
 }
 
 TEST(WTPEventRequestTestsGroup, One_or_more_serialize) {
@@ -408,24 +360,20 @@ TEST(WTPEventRequestTestsGroup, One_or_more_serialize) {
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     const uint8_t mac_6_0[] = { 0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E };
+    {
+        WritableDecryptionErrorReportArray decryption_error_report;
+        decryption_error_report.Add(3, { { mac_6_0 } });
 
-    WritableDecryptionErrorReportArray decryption_error_report;
-    decryption_error_report.Add(3, { { mac_6_0 } });
+        WritableDuplicateIPv4AdrArray duplicate_ipv4_address;
+        WritableWTPRadioStatisticsArray wtp_radio_statistics;
+        WritableDeleteStationArray delete_station;
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
 
-    WritableDuplicateIPv4AdrArray duplicate_ipv4_address;
-    WritableWTPRadioStatisticsArray wtp_radio_statistics;
-    std::optional<WTPRebootStatistics> wtp_reboot_statistics;
-    WritableDeleteStationArray delete_station;
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        IWritableWTPEventRequestOptionalElement *const elems_5[] = { &decryption_error_report };
+        WritableWTPEventRequest write_data(elems_5);
 
-    WritableWTPEventRequest write_data(decryption_error_report,
-                                       duplicate_ipv4_address,
-                                       wtp_radio_statistics,
-                                       wtp_reboot_statistics,
-                                       delete_station,
-                                       vendor_specific_payloads);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 13, raw_data.current);
     const uint8_t reference[] = { 0x00, 0x0F, 0x00, 0x09, 0x03, 0x01, 0x06,
                                   0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E };
@@ -433,21 +381,124 @@ TEST(WTPEventRequestTestsGroup, One_or_more_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + 13 };
-    ReadableWTPEventRequest read_data;
-    CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(1, read_data.decryption_error_report.Get().size());
-    CHECK_EQUAL(3, read_data.decryption_error_report.Get()[0].GetRadioID());
-    CHECK_EQUAL(1, read_data.decryption_error_report.Get()[0].Get().size());
-    CHECK_EQUAL(6, read_data.decryption_error_report.Get()[0].Get()[0]->Length);
+    ReadableDecryptionErrorReportArray decryption_error_report;
+    ReadableDuplicateIPv4AdrArray duplicate_ipv4_address;
+    ReadableWTPRadioStatisticsArray wtp_radio_statistics;
+    ReadableWTPRebootStatistics wtp_reboot_statistics;
+    ReadableDeleteStationArray delete_station;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableWTPEventRequestOptionalElement *const elems_6[] = { &decryption_error_report, &duplicate_ipv4_address, &wtp_radio_statistics, &wtp_reboot_statistics, &delete_station, &vendor_specific_payloads };
+    ReadableWTPEventRequest read_data(elems_6);
+
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(decryption_error_report.IsPresent());
+    CHECK_EQUAL(1, decryption_error_report.Get().size());
+    CHECK_EQUAL(3, decryption_error_report.Get()[0].GetRadioID());
+    CHECK_EQUAL(1, decryption_error_report.Get()[0].Get().size());
+    CHECK_EQUAL(6, decryption_error_report.Get()[0].Get()[0]->Length);
     MEMCMP_EQUAL(mac_6_0,
-                 (char *)read_data.decryption_error_report.Get()[0].Get()[0]->MACAddresses,
+                 (char *)decryption_error_report.Get()[0].Get()[0]->MACAddresses,
                  sizeof(mac_6_0));
 
-    CHECK_EQUAL(0, read_data.duplicate_ipv4_address.Get().size());
-    CHECK_EQUAL(0, read_data.wtp_radio_statistics.Get().size());
-    CHECK_EQUAL(nullptr, read_data.wtp_reboot_statistics);
-    CHECK_EQUAL(0, read_data.delete_station.Get().size());
-    CHECK_EQUAL(0, read_data.vendor_specific_payloads.Get().size());
+    CHECK_FALSE(duplicate_ipv4_address.IsPresent());
+    CHECK_FALSE(wtp_radio_statistics.IsPresent());
+    CHECK_FALSE(wtp_reboot_statistics.IsPresent());
+    CHECK_FALSE(delete_station.IsPresent());
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
+
     CHECK_EQUAL(0, read_data.unknown_elements);
+}
+
+TEST(WTPEventRequestTestsGroup, IEEE80211_specific_message_elements) {
+    uint8_t buffer[4096] = {};
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+
+    const uint8_t mac_0[] = { 0x00, 0x11, 0x22, 0x33, 0x44, 0x55 };
+    uint8_t client_mac1[6] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+    uint8_t bssid1[6] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF };
+
+    {
+        WritableMICCountermeasuresArray w_cms;
+        w_cms.Add({ 1, 1, mac_0 });
+
+        WritableRSNAErrorReportFromStationArray w_reports;
+        w_reports.Add({ client_mac1, bssid1, 1, 5, 10, 20, 30, 40, 50, 60 });
+
+        WritableStatisticsArray w_stats;
+        w_stats.Add(
+            { 1, 100, 200, 10, 20, 5, 3, 500, 2, 7, 150, 300, 4, 1000, 1, 2, 25, 50, 6, 8 });
+
+        IWritableWTPEventRequestOptionalElement *const elems_7[] = { &w_cms, &w_reports, &w_stats };
+        WritableWTPEventRequest write_data(elems_7);
+
+        write_data.Serialize(&raw_data);
+    }
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableMICCountermeasuresArray r_cms;
+    ReadableRSNAErrorReportFromStationArray r_reports;
+    ReadableStatisticsArray r_stats;
+    IReadableWTPEventRequestOptionalElement *const elems_8[] = { &r_cms, &r_reports, &r_stats };
+    ReadableWTPEventRequest read_data(elems_8);
+
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+
+    CHECK_TRUE(r_cms.IsPresent());
+    CHECK_EQUAL(1, r_cms.Get().size());
+    CHECK_EQUAL(1, r_cms.Get()[0]->RadioID);
+    CHECK_EQUAL(1, r_cms.Get()[0]->WlanID);
+    MEMCMP_EQUAL(mac_0, r_cms.Get()[0]->MACAddress, sizeof(mac_0));
+
+    CHECK_TRUE(r_reports.IsPresent());
+    CHECK_EQUAL(1, r_reports.Get().size());
+    CHECK_EQUAL(1, r_reports.Get()[0]->GetRadioID());
+    CHECK_EQUAL(5, r_reports.Get()[0]->GetWlanID());
+    CHECK_EQUAL(10, r_reports.Get()[0]->GetTKIPICVErrors());
+    CHECK_EQUAL(60, r_reports.Get()[0]->GetTKIPReplays());
+
+    CHECK_TRUE(r_stats.IsPresent());
+    CHECK_EQUAL(1, r_stats.Get().size());
+    CHECK_EQUAL(1, r_stats.Get()[0]->GetRadioID());
+    CHECK_EQUAL(100, r_stats.Get()[0]->GetTxFragmentCount());
+    CHECK_EQUAL(200, r_stats.Get()[0]->GetMulticastTxCount());
+    CHECK_EQUAL(10, r_stats.Get()[0]->GetFailedCount());
+    CHECK_EQUAL(20, r_stats.Get()[0]->GetRetryCount());
+    CHECK_EQUAL(5, r_stats.Get()[0]->GetMultipleRetryCount());
+    CHECK_EQUAL(3, r_stats.Get()[0]->GetFrameDuplicateCount());
+    CHECK_EQUAL(500, r_stats.Get()[0]->GetRTSSuccessCount());
+    CHECK_EQUAL(2, r_stats.Get()[0]->GetRTSFailureCount());
+    CHECK_EQUAL(7, r_stats.Get()[0]->GetACKFailureCount());
+    CHECK_EQUAL(150, r_stats.Get()[0]->GetRxFragmentCount());
+    CHECK_EQUAL(300, r_stats.Get()[0]->GetMulticastRxCount());
+    CHECK_EQUAL(4, r_stats.Get()[0]->GetFCSErrorCount());
+    CHECK_EQUAL(1000, r_stats.Get()[0]->GetTxFrameCount());
+    CHECK_EQUAL(1, r_stats.Get()[0]->GetDecryptionErrors());
+    CHECK_EQUAL(2, r_stats.Get()[0]->GetDiscardedQoSFragmentCount());
+    CHECK_EQUAL(25, r_stats.Get()[0]->GetAssociatedStationCount());
+    CHECK_EQUAL(50, r_stats.Get()[0]->GetQoSCFPollsReceivedCount());
+    CHECK_EQUAL(6, r_stats.Get()[0]->GetQoSCFPollsUnusedCount());
+    CHECK_EQUAL(8, r_stats.Get()[0]->GetQoSCFPollsUnusableCount());
+
+    CHECK_EQUAL(0, read_data.unknown_elements);
+}
+TEST(WTPEventRequestTestsGroup, GetOptionalElement) {
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableWTPEventRequestOptionalElement *const elems_9[] = { &vendor_specific_payloads };
+    ReadableWTPEventRequest read_data(elems_9);
+
+    CHECK_EQUAL(&vendor_specific_payloads,
+                read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
+                    ElementHeader::VendorSpecificPayload));
+
+    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
+          nullptr);
+}
+
+TEST(WTPEventRequestTestsGroup, MessageTypeIdentification) {
+    WritableWTPEventRequest write_data(nonstd::span<IWritableWTPEventRequestOptionalElement *const>{});
+
+    CHECK_EQUAL(ControlHeader::WTPEventRequest, write_data.GetMessageType());
 }

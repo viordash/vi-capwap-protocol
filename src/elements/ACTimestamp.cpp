@@ -2,6 +2,7 @@
 #include "ACTimestamp.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <cstring>
 #include <string.h>
 
 ACTimestamp::ACTimestamp(uint32_t timestamp)
@@ -19,36 +20,53 @@ bool ACTimestamp::Validate() const {
         && GetLength() == (sizeof(ACTimestamp) - sizeof(ElementHeader));
 }
 
-void ACTimestamp::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(ACTimestamp) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(ACTimestamp));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(ACTimestamp);
+void ACTimestamp::Log() const {
+    log_i("ME ACTimestamp timestamp: %u", GetTimestamp());
 }
 
-ACTimestamp *ACTimestamp::Deserialize(RawData *raw_data) {
+WritableACTimestamp::WritableACTimestamp(uint32_t timestamp) : element{ timestamp } {
+    static_assert(sizeof(element) == 8);
+}
+
+void WritableACTimestamp::Serialize(RawData *raw_data) const {
+    ASSERT(raw_data->current + sizeof(ACTimestamp) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
+}
+
+void WritableACTimestamp::Log() const {
+    element.Log();
+}
+
+bool ReadableACTimestamp::Deserialize(RawData *raw_data) {
     if (raw_data->current + sizeof(ACTimestamp) > raw_data->end) {
-        return nullptr;
+        return false;
     }
 
     auto res = (ACTimestamp *)raw_data->current;
     if (!res->Validate()) {
-        return nullptr;
+        return false;
     }
+    raw_data->current += sizeof(ACTimestamp);
 
-    uint8_t *last = raw_data->current + sizeof(ElementHeader) + res->GetLength();
-    if (last > raw_data->end) {
-        return nullptr;
-    }
-
-    raw_data->current = last;
-    return res;
+    element = res;
+    is_present = true;
+    return true;
 }
 
-void ACTimestamp::Log() const {
-    log_i("ME ACTimestamp timestamp: %u", GetTimestamp());
+const ACTimestamp *ReadableACTimestamp::Get() const {
+    return element;
+}
+
+void ReadableACTimestamp::Log() const {
+    ASSERT(element != nullptr);
+    element->Log();
+}
+
+ElementHeader::ElementType ReadableACTimestamp::GetElementType() const {
+    return ElementHeader::ACTimestamp;
+}
+
+bool ReadableACTimestamp::IsPresent() const {
+    return is_present;
 }

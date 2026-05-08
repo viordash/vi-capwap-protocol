@@ -1,38 +1,53 @@
 #pragma once
 
 #include "CapwapMessage.h"
+#include "IElement.h"
 #include "elements/ACIPv4List.h"
 #include "elements/CAPWAPTimers.h"
 #include "elements/DecryptionErrorReportPeriod.h"
+#include "elements/IEEE80211/Antenna.h"
+#include "elements/IEEE80211/DirectSequenceControl.h"
+#include "elements/IEEE80211/MACOperation.h"
+#include "elements/IEEE80211/MultiDomainCapability.h"
+#include "elements/IEEE80211/OFDMControl.h"
+#include "elements/IEEE80211/RateSet.h"
+#include "elements/IEEE80211/SupportedRates.h"
+#include "elements/IEEE80211/TxPower.h"
+#include "elements/IEEE80211/WTPQualityOfService.h"
+#include "elements/IEEE80211/WTPRadioConfiguration.h"
 #include "elements/IdleTimeout.h"
 #include "elements/VendorSpecificPayload.h"
 #include "elements/WTPFallback.h"
 #include "elements/WTPStaticIPAddressInformation.h"
 #include "span.hpp"
 #include <limits>
-#include <vector>
+#include <unordered_map>
 
 struct WritableConfigurationStatusResponse : WritableCapwapResponse {
   private:
-    const CAPWAPTimers &capwap_timers;
+    const WritableCAPWAPTimers &capwap_timers;
     WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods;
-    const IdleTimeout idle_timeout;
-    const WTPFallback wtp_fallback;
+    const WritableIdleTimeout idle_timeout;
+    const WritableWTPFallback wtp_fallback;
     const WritableACIPv4List ac_ipv4_list;
 
-    const WTPStaticIPAddressInformation *wtp_static_ipaddress;
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads;
+    nonstd::span<IWritableConfigurationStatusResponseOptionalElement *const> optional_elements;
 
   public:
     WritableConfigurationStatusResponse(const WritableConfigurationStatusResponse &) = delete;
     WritableConfigurationStatusResponse(
-        const CAPWAPTimers &capwap_timers,
+        const WritableCAPWAPTimers &capwap_timers,
+        WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods,
+        const uint32_t idle_timeout,
+        const WTPFallback::Mode wtp_fallback,
+        const nonstd::span<const uint32_t> &ac_ipv4_list);
+    WritableConfigurationStatusResponse(
+        const WritableCAPWAPTimers &capwap_timers,
         WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods,
         const uint32_t idle_timeout,
         const WTPFallback::Mode wtp_fallback,
         const nonstd::span<const uint32_t> &ac_ipv4_list,
-        const WTPStaticIPAddressInformation *wtp_static_ipaddress,
-        WritableVendorSpecificPayloadArray &vendor_specific_payloads);
+        nonstd::span<IWritableConfigurationStatusResponseOptionalElement *const> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -40,21 +55,39 @@ struct WritableConfigurationStatusResponse : WritableCapwapResponse {
 };
 
 struct ReadableConfigurationStatusResponse : ReadableCapwapResponse {
-    CAPWAPTimers *capwap_timers;
-    ReadableDecryptionErrorReportPeriodArray decryption_error_report_periods;
-    IdleTimeout *idle_timeout;
-    WTPFallback *wtp_fallback;
-    ReadableACIPv4List *ac_ipv4_list;
+  protected:
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableConfigurationStatusResponseOptionalElement *const>
+        key_optional_elements;
 
-    WTPStaticIPAddressInformation *wtp_static_ipaddress;
-    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableConfigurationStatusResponseOptionalElement *const>
+    MapOptionalsElements(
+        nonstd::span<IReadableConfigurationStatusResponseOptionalElement *const> optional_elements);
+
+  public:
+    ReadableCAPWAPTimers capwap_timers;
+    ReadableDecryptionErrorReportPeriodArray decryption_error_report_periods;
+    ReadableIdleTimeout idle_timeout;
+    ReadableWTPFallback wtp_fallback;
+    ReadableACIPv4List ac_ipv4_list;
 
     size_t unknown_elements;
 
     ReadableConfigurationStatusResponse(const ReadableConfigurationStatusResponse &) = delete;
     ReadableConfigurationStatusResponse();
+    ReadableConfigurationStatusResponse(
+        nonstd::span<IReadableConfigurationStatusResponseOptionalElement *const> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;
     void Log() const;
+
+    template <typename T> T *GetOptionalElement(ElementHeader::ElementType element_type) {
+        auto it = key_optional_elements.find(element_type);
+        if (it != key_optional_elements.end()) {
+            return static_cast<T *>(it->second);
+        }
+        return nullptr;
+    }
 };

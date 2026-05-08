@@ -5,12 +5,15 @@
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
 
+WritableImageDataResponse::WritableImageDataResponse(const ResultCode::Type result_code)
+    : WritableImageDataResponse(result_code,
+                                nonstd::span<IWritableImageDataResponseOptionalElement *const>{}) {
+}
+
 WritableImageDataResponse::WritableImageDataResponse(
     const ResultCode::Type result_code,
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads,
-    const ImageInformation *image_information)
-    : result_code{ result_code }, vendor_specific_payloads{ vendor_specific_payloads },
-      image_information{ image_information } {
+    nonstd::span<IWritableImageDataResponseOptionalElement *const> optional_elements)
+    : result_code{ result_code }, optional_elements{ optional_elements } {
 }
 
 ControlHeader::MessageType WritableImageDataResponse::GetMessageType() const {
@@ -23,15 +26,20 @@ ControlHeader::MessageType WritableImageDataResponse::GetRequestMessageType() co
 
 void WritableImageDataResponse::Serialize(RawData *raw_data) const {
     result_code.Serialize(raw_data);
-    vendor_specific_payloads.Serialize(raw_data);
-    if (image_information != nullptr) {
-        image_information->Serialize(raw_data);
+
+    for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
+        elem->Serialize(raw_data);
     }
 }
 
-ReadableImageDataResponse::ReadableImageDataResponse() : unknown_elements{} {
-    result_code = nullptr;
-    image_information = nullptr;
+ReadableImageDataResponse::ReadableImageDataResponse()
+    : ReadableImageDataResponse(nonstd::span<IReadableImageDataResponseOptionalElement *const>{}) {
+}
+
+ReadableImageDataResponse::ReadableImageDataResponse(
+    nonstd::span<IReadableImageDataResponseOptionalElement *const> optional_elements)
+    : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
 ControlHeader::MessageType ReadableImageDataResponse::GetMessageType() const {
@@ -44,26 +52,20 @@ bool ReadableImageDataResponse::Deserialize(RawData *raw_data) {
 
         switch (element->GetElementType()) {
             case ElementHeader::ElementType::ResultCode:
-                result_code = ResultCode::Deserialize(raw_data);
-                if (result_code == nullptr) {
-                    return false;
-                }
-                break;
-
-            case ElementHeader::ElementType::VendorSpecificPayload:
-                if (!vendor_specific_payloads.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-
-            case ElementHeader::ElementType::ImageInformation:
-                image_information = ImageInformation::Deserialize(raw_data);
-                if (image_information == nullptr) {
+                if (!result_code.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
 
             default: {
+                auto it = key_optional_elements.find(element->GetElementType());
+                if (it != key_optional_elements.end()) {
+                    if (!it->second->Deserialize(raw_data)) {
+                        return false;
+                    }
+                    break;
+                }
+
                 auto unknownElement = UnrecognizedElement::Deserialize(raw_data);
                 if (unknownElement == nullptr) {
                     return false;
@@ -76,23 +78,39 @@ bool ReadableImageDataResponse::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return result_code != nullptr;
+    return result_code.IsPresent();
 }
 
 void ReadableImageDataResponse::Log() const {
     log_i("----------------------------------");
     log_i("ME ImageDataResponse:");
 
-    ASSERT(result_code != nullptr);
-    result_code->Log();
+    result_code.Log();
 
-    vendor_specific_payloads.Log();
-    if (image_information != nullptr) {
-        image_information->Log();
+    for (const auto &[type, value] : key_optional_elements) {
+        if (value->IsPresent()) {
+            value->Log();
+        } else {
+            log_i("  expected optional element is missing, type: 0x%04X", (unsigned)type);
+        }
     }
-
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
+}
+
+std::unordered_map<ElementHeader::ElementType, IReadableImageDataResponseOptionalElement *const>
+ReadableImageDataResponse::MapOptionalsElements(
+    nonstd::span<IReadableImageDataResponseOptionalElement *const> optional_elements) {
+
+    std::unordered_map<ElementHeader::ElementType, IReadableImageDataResponseOptionalElement *const>
+        map;
+
+    for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
+        map.emplace(elem->GetElementType(), elem);
+    }
+
+    return map;
 }

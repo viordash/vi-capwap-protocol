@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Helpers.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -24,7 +25,7 @@ struct __attribute__((packed)) CAPWAPControlIPv4Address : ElementHeader {
     void Log() const;
 };
 
-struct WritableCAPWAPControlIPV4AdrArray {
+struct WritableCAPWAPControlIPV4AdrArray : IWritableElement {
   private:
     const nonstd::span<const CAPWAPControlIPv4Address> items;
 
@@ -32,12 +33,11 @@ struct WritableCAPWAPControlIPV4AdrArray {
     WritableCAPWAPControlIPV4AdrArray(const WritableCAPWAPControlIPV4AdrArray &) = delete;
     WritableCAPWAPControlIPV4AdrArray(const nonstd::span<const CAPWAPControlIPv4Address> &items);
 
-    void Serialize(RawData *raw_data) const;
-    uint16_t GetTotalLength() const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableCAPWAPControlIPV4AdrArray {
+struct ReadableCAPWAPControlIPV4AdrArray : IReadableElement {
   public:
     static const size_t max_count = 32;
 
@@ -49,7 +49,9 @@ struct ReadableCAPWAPControlIPV4AdrArray {
     ReadableCAPWAPControlIPV4AdrArray(const ReadableCAPWAPControlIPV4AdrArray &) = delete;
     ReadableCAPWAPControlIPV4AdrArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const CAPWAPControlIPv4Address *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

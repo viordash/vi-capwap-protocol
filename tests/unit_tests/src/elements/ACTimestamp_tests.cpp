@@ -26,17 +26,19 @@ TEST(ACTimestampTestsGroup, ACTimestamp_deserialize) {
     };
     // clang-format on
     RawData raw_data{ data, data + sizeof(data) };
-    auto element = ACTimestamp::Deserialize(&raw_data);
+    ReadableACTimestamp read_data;
+    CHECK_FALSE(read_data.IsPresent());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK(element != nullptr);
     CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::ACTimestamp, element->GetElementType());
-    CHECK_EQUAL(1048576, element->GetTimestamp());
+    CHECK_EQUAL(ElementHeader::ElementType::ACTimestamp, read_data.Get()->GetElementType());
+    CHECK_EQUAL(1048576, read_data.Get()->GetTimestamp());
+    CHECK_TRUE(read_data.IsPresent());
 }
 
 TEST(ACTimestampTestsGroup, ACTimestamp_serialize) {
     uint8_t buffer[256] = {};
-    ACTimestamp element_0{ 12345 };
+    WritableACTimestamp element_0{ 12345 };
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     element_0.Serialize(&raw_data);
@@ -45,9 +47,10 @@ TEST(ACTimestampTestsGroup, ACTimestamp_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = ACTimestamp::Deserialize(&raw_data);
-    CHECK(element != nullptr);
+
+    ReadableACTimestamp read_data;
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(&buffer[0] + 8, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::ACTimestamp, element->GetElementType());
-    CHECK_EQUAL(12345, element->GetTimestamp());
+    CHECK_EQUAL(ElementHeader::ElementType::ACTimestamp, read_data.Get()->GetElementType());
+    CHECK_EQUAL(12345, read_data.Get()->GetTimestamp());
 }

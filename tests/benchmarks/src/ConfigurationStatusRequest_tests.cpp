@@ -34,24 +34,22 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize_
     WritableACNameWithPriorityArray ac_names_with_priority;
     ac_names_with_priority.Add(1, "ACNameWithPriority");
 
-    CapwapTransportProtocol capwap_transport_protocol{ CapwapTransportProtocol::Type::UDP };
+    WritableCapwapTransportProtocol capwap_transport_protocol{ CapwapTransportProtocol::Type::UDP };
 
-    WTPStaticIPAddressInformation wtp_static_ipaddress{ inet_addr("192.168.100.10"),
-                                                        inet_addr("255.255.255.0"),
-                                                        inet_addr("192.168.1.1"),
-                                                        true };
+    WritableWTPStaticIPAddressInformation wtp_static_ipaddress{ inet_addr("192.168.100.10"),
+                                                                inet_addr("255.255.255.0"),
+                                                                inet_addr("192.168.1.1"),
+                                                                true };
 
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
+    IWritableConfigurationStatusRequestOptionalElement *const elems_1[] = { &ac_names_with_priority, &capwap_transport_protocol, &wtp_static_ipaddress, &vendor_specific_payloads };
     WritableConfigurationStatusRequest write_data("abcdefабвгд",
                                                   radio_states,
                                                   12345,
                                                   wtp_reboot_statistics,
-                                                  ac_names_with_priority,
-                                                  &capwap_transport_protocol,
-                                                  &wtp_static_ipaddress,
-                                                  vendor_specific_payloads);
+        elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -59,7 +57,14 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize_
         ankerl::nanobench::doNotOptimizeAway(raw_data);
 
         raw_data = { buffer, buffer + 149 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-        ReadableConfigurationStatusRequest read_data;
+
+        ReadableACNameWithPriorityArray ac_names_with_priority;
+        ReadableCapwapTransportProtocol capwap_transport_protocol;
+        ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
+        ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+        IReadableConfigurationStatusRequestOptionalElement *const elems_2[] = { &ac_names_with_priority, &capwap_transport_protocol, &wtp_static_ipaddress, &vendor_specific_payloads };
+        ReadableConfigurationStatusRequest read_data(elems_2);
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

@@ -35,7 +35,9 @@ TEST(DeleteStationTestsGroup, DeleteStation_serialize) {
 
     raw_data = { buffer, buffer + sizeof(reference) };
     ReadableDeleteStationArray read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(&buffer[0] + sizeof(reference), raw_data.current);
@@ -71,7 +73,9 @@ TEST(DeleteStationTestsGroup, DeleteStation_deserialize) {
     RawData raw_data{ data, data + sizeof(data) };
 
     ReadableDeleteStationArray read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(1, read_data.Get().size());
@@ -102,7 +106,9 @@ TEST(DeleteStationTestsGroup, Add_array_of_items_is_unique) {
     auto data_size = raw_data.current - buffer;
     raw_data = { buffer, buffer + data_size };
     ReadableDeleteStationArray read_data;
+    CHECK_FALSE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_TRUE(read_data.IsPresent());
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_FALSE(read_data.Deserialize(&raw_data));
 

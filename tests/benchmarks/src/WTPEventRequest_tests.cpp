@@ -56,10 +56,9 @@ TEST(WTPEventRequestTestsGroup, WTPEventRequest_serialize_deserialize_perf) {
                                47,
                                -48 });
 
-    std::optional<WTPRebootStatistics> wtp_reboot_statistics{
-        std::in_place, 12340, 12341,
-        12342,         12343, 12344,
-        12345,         12346, WTPRebootStatistics::LastFailureType::LinkFailure
+    WritableWTPRebootStatistics wtp_reboot_statistics{
+        12340, 12341, 12342, 12343,
+        12344, 12345, 12346, WTPRebootStatistics::LastFailureType::LinkFailure
     };
 
     delete_station.Add(7, { mac_6_2 });
@@ -72,17 +71,22 @@ TEST(WTPEventRequestTestsGroup, WTPEventRequest_serialize_deserialize_perf) {
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
-        WritableWTPEventRequest write_data(decryption_error_report,
-                                           duplicate_ipv4_address,
-                                           wtp_radio_statistics,
-                                           wtp_reboot_statistics,
-                                           delete_station,
-                                           vendor_specific_payloads);
+        IWritableWTPEventRequestOptionalElement *const elems_1[] = { &decryption_error_report, &duplicate_ipv4_address, &wtp_radio_statistics, &wtp_reboot_statistics, &delete_station, &vendor_specific_payloads };
+        WritableWTPEventRequest write_data(elems_1);
         write_data.Serialize(&raw_data);
         ankerl::nanobench::doNotOptimizeAway(raw_data);
 
         raw_data = { buffer, buffer + 170 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-        ReadableWTPEventRequest read_data;
+
+        ReadableDecryptionErrorReportArray decryption_error_report;
+        ReadableDuplicateIPv4AdrArray duplicate_ipv4_address;
+        ReadableWTPRadioStatisticsArray wtp_radio_statistics;
+        ReadableWTPRebootStatistics wtp_reboot_statistics;
+        ReadableDeleteStationArray delete_station;
+        ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+        IReadableWTPEventRequestOptionalElement *const elems_2[] = { &decryption_error_report, &duplicate_ipv4_address, &wtp_radio_statistics, &wtp_reboot_statistics, &delete_station, &vendor_specific_payloads };
+        ReadableWTPEventRequest read_data(elems_2);
+
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

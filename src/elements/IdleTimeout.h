@@ -1,6 +1,7 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -18,8 +19,29 @@ struct __attribute__((packed)) IdleTimeout : ElementHeader {
 
     uint32_t GetTimeout() const;
     bool Validate() const;
-    uint16_t GetTotalLength() const;
-    void Serialize(RawData *raw_data) const;
-    static IdleTimeout *Deserialize(RawData *raw_data);
     void Log() const;
+};
+
+struct WritableIdleTimeout : IWritableConfigurationUpdateRequestOptionalElement {
+  protected:
+    IdleTimeout element;
+
+  public:
+    WritableIdleTimeout(uint32_t timeout);
+
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
+};
+
+struct ReadableIdleTimeout : IReadableConfigurationUpdateRequestOptionalElement {
+  protected:
+    IdleTimeout *element = nullptr;
+    bool is_present = false;
+
+  public:
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
+    const IdleTimeout *Get() const;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

@@ -2,6 +2,7 @@
 #include "Logging.h"
 #include "NetworkUtils.h"
 #include "lassert.h"
+#include <cstring>
 
 CAPWAPControlIPv4Address::CAPWAPControlIPv4Address(uint32_t ipaddress, uint16_t wtp_count)
     : ElementHeader(ElementHeader::CAPWAPControlIPv4Address,
@@ -39,19 +40,11 @@ WritableCAPWAPControlIPV4AdrArray::WritableCAPWAPControlIPV4AdrArray(
 }
 
 void WritableCAPWAPControlIPV4AdrArray::Serialize(RawData *raw_data) const {
-    for (const auto &elem : items) {
+    for (const auto &item : items) {
         ASSERT(raw_data->current + sizeof(CAPWAPControlIPv4Address) <= raw_data->end);
-        CAPWAPControlIPv4Address *dst = (CAPWAPControlIPv4Address *)raw_data->current;
-        *dst = elem;
-        raw_data->current += sizeof(CAPWAPControlIPv4Address);
+        std::memcpy(raw_data->current, &item, sizeof(item));
+        raw_data->current += sizeof(item);
     }
-}
-uint16_t WritableCAPWAPControlIPV4AdrArray::GetTotalLength() const {
-    uint16_t size = 0;
-    for (const auto &elem : items) {
-        size += elem.GetLength() + sizeof(ElementHeader);
-    }
-    return size;
 }
 
 void WritableCAPWAPControlIPV4AdrArray::Log() const {
@@ -99,4 +92,12 @@ void ReadableCAPWAPControlIPV4AdrArray::Log() const {
               IpToString(items[i]->GetIPAddress()).c_str(),
               items[i]->GetWTPCount());
     }
+}
+
+ElementHeader::ElementType ReadableCAPWAPControlIPV4AdrArray::GetElementType() const {
+    return ElementHeader::CAPWAPControlIPv4Address;
+}
+
+bool ReadableCAPWAPControlIPV4AdrArray::IsPresent() const {
+    return count > 0;
 }

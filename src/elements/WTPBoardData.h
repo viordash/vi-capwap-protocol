@@ -1,6 +1,7 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -46,11 +47,9 @@ struct __attribute__((packed)) BoardDataSubElementHeader {
     Type GetType() const;
     uint16_t GetLength() const;
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static BoardDataSubElementHeader *Deserialize(RawData *raw_data);
 };
 
-struct WritableWTPBoardData {
+struct WritableWTPBoardData : IWritableElement {
   public:
     struct __attribute__((packed)) SubElement {
         const char *value;
@@ -71,18 +70,18 @@ struct WritableWTPBoardData {
     WritableWTPBoardData(const uint32_t vendor_identifier,
                          const nonstd::span<const SubElement> &items);
 
-    void Serialize(RawData *raw_data) const;
+    void Serialize(RawData *raw_data) const override final;
 
     uint16_t GetTotalLength() const;
-    void Log() const;
+    void Log() const override final;
 };
 
-struct ReadableWTPBoardData {
+struct ReadableWTPBoardData : IReadableElement {
   public:
     static const size_t max_count = 10; //BoardDataSubElementHeader::Type * 2
     WTPBoardDataHeader *header;
 
-  protected:
+  private:
     std::array<const BoardDataSubElementHeader *, max_count> items;
     size_t count;
 
@@ -90,7 +89,9 @@ struct ReadableWTPBoardData {
     ReadableWTPBoardData(const ReadableWTPBoardData &) = delete;
     ReadableWTPBoardData();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const BoardDataSubElementHeader *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

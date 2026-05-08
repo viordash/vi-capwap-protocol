@@ -4,22 +4,25 @@
 #include "Logging.h"
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
+#include <algorithm>
+
+WritableChangeStateEventRequest::WritableChangeStateEventRequest(
+    WritableRadioOperationalStateArray &radio_operational_states,
+    ResultCode &result_code)
+    : WritableChangeStateEventRequest(
+          radio_operational_states,
+          result_code,
+          nonstd::span<IWritableChangeStateEventRequestOptionalElement *const>{}) {
+}
 
 WritableChangeStateEventRequest::WritableChangeStateEventRequest(
     WritableRadioOperationalStateArray &radio_operational_states,
     ResultCode &result_code,
-    WritableReturnedMessageElementArray &returned_message_elements,
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads)
+    nonstd::span<IWritableChangeStateEventRequestOptionalElement *const> optional_elements)
     : radio_operational_states{ radio_operational_states }, result_code{ result_code },
-      returned_message_elements{ returned_message_elements },
-      vendor_specific_payloads{ vendor_specific_payloads } {
+      optional_elements{ optional_elements } {
 
-    if (!this->returned_message_elements.Validate()) {
-        this->returned_message_elements.Clear();
-        log_e("ChangeStateEventRequest: invalid one of Returned Message Element. Switch ResultCode "
-              "to Failure_UnrecognizedMessageElement");
-        this->result_code = { ResultCode::Type::Failure_UnrecognizedMessageElement };
-    }
+    ValidateReturnedMessageElement();
 }
 
 ControlHeader::MessageType WritableChangeStateEventRequest::GetMessageType() const {
@@ -32,33 +35,43 @@ ControlHeader::MessageType WritableChangeStateEventRequest::GetResponseMessageTy
 
 void WritableChangeStateEventRequest::Serialize(RawData *raw_data) const {
     radio_operational_states.Serialize(raw_data);
-    result_code.Serialize(raw_data);
-    returned_message_elements.Serialize(raw_data);
-    vendor_specific_payloads.Serialize(raw_data);
+    WritableResultCode{ result_code.type }.Serialize(raw_data);
+    for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
+        elem->Serialize(raw_data);
+    }
 }
 
 ResultCode::Type WritableChangeStateEventRequest::GetResultCode() {
     return result_code.type;
 }
 
-void WritableChangeStateEventRequest::Clear() {
-    radio_operational_states.Clear();
-    returned_message_elements.Clear();
-    vendor_specific_payloads.Clear();
+void WritableChangeStateEventRequest::ValidateReturnedMessageElement() {
+    for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
+        if (elem->GetElementType() == ElementHeader::ReturnedMessageElement) {
+            auto *returned_message_elements =
+                static_cast<WritableReturnedMessageElementArray *>(elem);
+            if (!returned_message_elements->Validate()) {
+                returned_message_elements->Clear();
+                log_e("ChangeStateEventRequest: invalid one of Returned Message Element. Switch "
+                      "ResultCode "
+                      "to Failure_UnrecognizedMessageElement");
+                this->result_code = { ResultCode::Type::Failure_UnrecognizedMessageElement };
+            }
+            break;
+        }
+    }
 }
 
-bool WritableChangeStateEventRequest::Validate() {
-    if (radio_operational_states.Empty()) {
-        return false;
-    }
-    if (!result_code.Validate()) {
-        return false;
-    }
-    return true;
+ReadableChangeStateEventRequest::ReadableChangeStateEventRequest()
+    : ReadableChangeStateEventRequest(
+          nonstd::span<IReadableChangeStateEventRequestOptionalElement *const>{}) {
 }
 
-ReadableChangeStateEventRequest::ReadableChangeStateEventRequest() : unknown_elements{} {
-    result_code = nullptr;
+ReadableChangeStateEventRequest::ReadableChangeStateEventRequest(
+    nonstd::span<IReadableChangeStateEventRequestOptionalElement *const> optional_elements)
+    : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
 ControlHeader::MessageType ReadableChangeStateEventRequest::GetMessageType() const {
@@ -76,25 +89,20 @@ bool ReadableChangeStateEventRequest::Deserialize(RawData *raw_data) {
                 }
                 break;
             case ElementHeader::ElementType::ResultCode:
-                result_code = ResultCode::Deserialize(raw_data);
-                if (result_code == nullptr) {
-                    return false;
-                }
-                break;
-
-            case ElementHeader::ElementType::ReturnedMessageElement:
-                if (!returned_message_elements.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-
-            case ElementHeader::ElementType::VendorSpecificPayload:
-                if (!vendor_specific_payloads.Deserialize(raw_data)) {
+                if (!result_code.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
 
             default: {
+                auto it = key_optional_elements.find(element->GetElementType());
+                if (it != key_optional_elements.end()) {
+                    if (!it->second->Deserialize(raw_data)) {
+                        return false;
+                    }
+                    break;
+                }
+
                 auto unknownElement = UnrecognizedElement::Deserialize(raw_data);
                 if (unknownElement == nullptr) {
                     return false;
@@ -107,7 +115,7 @@ bool ReadableChangeStateEventRequest::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return radio_operational_states.Get().size() > 0 && result_code != nullptr;
+    return radio_operational_states.Get().size() > 0 && result_code.IsPresent();
 }
 
 void ReadableChangeStateEventRequest::Log() const {
@@ -116,15 +124,34 @@ void ReadableChangeStateEventRequest::Log() const {
 
     radio_operational_states.Log();
 
-    ASSERT(result_code != nullptr);
-    result_code->Log();
+    result_code.Log();
 
-    returned_message_elements.Log();
-
-    vendor_specific_payloads.Log();
-
+    for (const auto &[type, value] : key_optional_elements) {
+        if (value->IsPresent()) {
+            value->Log();
+        } else {
+            log_i("  expected optional element is missing, type: 0x%04X", (unsigned)type);
+        }
+    }
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
+}
+
+std::unordered_map<ElementHeader::ElementType,
+                   IReadableChangeStateEventRequestOptionalElement *const>
+ReadableChangeStateEventRequest::MapOptionalsElements(
+    nonstd::span<IReadableChangeStateEventRequestOptionalElement *const> optional_elements) {
+
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableChangeStateEventRequestOptionalElement *const>
+        map;
+
+    for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
+        map.emplace(elem->GetElementType(), elem);
+    }
+
+    return map;
 }

@@ -5,15 +5,13 @@
 #include "elements/UnrecognizedElement.h"
 #include "lassert.h"
 
+WritableImageDataRequest::WritableImageDataRequest()
+    : WritableImageDataRequest(nonstd::span<IWritableImageDataRequestOptionalElement *const>{}) {
+}
+
 WritableImageDataRequest::WritableImageDataRequest(
-    const CapwapTransportProtocol *capwap_transport_protocol,
-    const WritableImageData *image_data,
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads,
-    const WritableImageIdentifier *image_identifier,
-    const InitiateDownload *initiate_download)
-    : capwap_transport_protocol{ capwap_transport_protocol }, image_data{ image_data },
-      vendor_specific_payloads{ vendor_specific_payloads }, image_identifier{ image_identifier },
-      initiate_download{ initiate_download } {
+    nonstd::span<IWritableImageDataRequestOptionalElement *const> optional_elements)
+    : optional_elements{ optional_elements } {
 }
 
 ControlHeader::MessageType WritableImageDataRequest::GetMessageType() const {
@@ -25,25 +23,19 @@ ControlHeader::MessageType WritableImageDataRequest::GetResponseMessageType() co
 }
 
 void WritableImageDataRequest::Serialize(RawData *raw_data) const {
-    if (capwap_transport_protocol != nullptr) {
-        capwap_transport_protocol->Serialize(raw_data);
-    }
-    if (image_data != nullptr) {
-        image_data->Serialize(raw_data);
-    }
-    vendor_specific_payloads.Serialize(raw_data);
-    if (image_identifier != nullptr) {
-        image_identifier->Serialize(raw_data);
-    }
-    if (initiate_download != nullptr) {
-        initiate_download->Serialize(raw_data);
+    for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
+        elem->Serialize(raw_data);
     }
 }
 
-ReadableImageDataRequest::ReadableImageDataRequest() : unknown_elements{} {
-    capwap_transport_protocol = nullptr;
-    image_data = nullptr;
-    initiate_download = nullptr;
+ReadableImageDataRequest::ReadableImageDataRequest()
+    : ReadableImageDataRequest(nonstd::span<IReadableImageDataRequestOptionalElement *const>{}) {
+}
+
+ReadableImageDataRequest::ReadableImageDataRequest(
+    nonstd::span<IReadableImageDataRequestOptionalElement *const> optional_elements)
+    : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
 ControlHeader::MessageType ReadableImageDataRequest::GetMessageType() const {
@@ -51,46 +43,19 @@ ControlHeader::MessageType ReadableImageDataRequest::GetMessageType() const {
 }
 
 bool ReadableImageDataRequest::Deserialize(RawData *raw_data) {
-
     while (raw_data->current + sizeof(ElementHeader) <= raw_data->end) {
         ElementHeader *element = (ElementHeader *)raw_data->current;
 
         switch (element->GetElementType()) {
-
-            case ElementHeader::ElementType::CAPWAPTransportProtocol:
-                capwap_transport_protocol = CapwapTransportProtocol::Deserialize(raw_data);
-                if (capwap_transport_protocol == nullptr) {
-                    return false;
-                }
-                break;
-
-            case ElementHeader::ElementType::ImageData:
-                image_data = ReadableImageData::Deserialize(raw_data);
-                if (image_data == nullptr) {
-                    return false;
-                }
-                break;
-
-            case ElementHeader::ElementType::VendorSpecificPayload:
-                if (!vendor_specific_payloads.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-
-            case ElementHeader::ElementType::ImageIdentifier:
-                if (!image_identifier.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-
-            case ElementHeader::ElementType::InitiateDownload:
-                initiate_download = InitiateDownload::Deserialize(raw_data);
-                if (initiate_download == nullptr) {
-                    return false;
-                }
-                break;
-
             default: {
+                auto it = key_optional_elements.find(element->GetElementType());
+                if (it != key_optional_elements.end()) {
+                    if (!it->second->Deserialize(raw_data)) {
+                        return false;
+                    }
+                    break;
+                }
+
                 auto unknownElement = UnrecognizedElement::Deserialize(raw_data);
                 if (unknownElement == nullptr) {
                     return false;
@@ -103,28 +68,38 @@ bool ReadableImageDataRequest::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return image_data != nullptr
-        || (image_identifier.GetData().size() > 0 && initiate_download != nullptr);
+    return true;
 }
 
 void ReadableImageDataRequest::Log() const {
     log_i("----------------------------------");
     log_i("ME ImageDataRequest:");
 
-    if (capwap_transport_protocol != nullptr) {
-        capwap_transport_protocol->Log();
-    }
-    if (image_data != nullptr) {
-        image_data->Log();
-    }
-    image_identifier.Log();
-    if (initiate_download != nullptr) {
-        initiate_download->Log();
+    for (const auto &[type, value] : key_optional_elements) {
+        if (value->IsPresent()) {
+            value->Log();
+        } else {
+            log_i("  expected optional element is missing, type: 0x%04X", (unsigned)type);
+        }
     }
 
-    vendor_specific_payloads.Log();
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
+}
+
+std::unordered_map<ElementHeader::ElementType, IReadableImageDataRequestOptionalElement *const>
+ReadableImageDataRequest::MapOptionalsElements(
+    nonstd::span<IReadableImageDataRequestOptionalElement *const> optional_elements) {
+
+    std::unordered_map<ElementHeader::ElementType, IReadableImageDataRequestOptionalElement *const>
+        map;
+
+    for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
+        map.emplace(elem->GetElementType(), elem);
+    }
+
+    return map;
 }

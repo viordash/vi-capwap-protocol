@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "lassert.h"
 #include "span.hpp"
@@ -16,10 +17,6 @@ struct __attribute__((packed)) SessionId : ElementHeader {
     SessionId(const AlignedSessionId &aligned_id);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static SessionId *Deserialize(RawData *raw_data);
-
-    uint16_t GetTotalLength() const;
     void Log() const;
 
     bool operator==(const nonstd::span<const uint8_t> &other) const {
@@ -39,6 +36,31 @@ struct __attribute__((packed)) SessionId : ElementHeader {
 
     static std::string ToString(const nonstd::span<const uint8_t> &session_id);
     std::string ToString() const;
+};
+
+struct WritableSessionId : IWritableElement {
+  protected:
+    const SessionId &element;
+
+  public:
+    WritableSessionId(const SessionId &session_id);
+
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
+    const SessionId &Get() const;
+};
+
+struct ReadableSessionId : IReadableElement {
+  protected:
+    SessionId *element = nullptr;
+    bool is_present = false;
+
+  public:
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
+    const SessionId *Get() const;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };
 
 struct AlignedSessionId {

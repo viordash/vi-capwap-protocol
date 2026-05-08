@@ -117,3 +117,11 @@ void ReadableAddMacAclEntry::Log() const {
         MacAddress::Log(i, entry->Length, entry->MACAddresses);
     }
 }
+
+ElementHeader::ElementType ReadableAddMacAclEntry::GetElementType() const {
+    return ElementHeader::AddMACACLEntry;
+}
+
+bool ReadableAddMacAclEntry::IsPresent() const {
+    return count > 0;
+}

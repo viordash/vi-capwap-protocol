@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "elements/WTPRadioInformation.h"
+#include "elements/IEEE80211/WTPRadioInformation.h"
 
 #include "CppUTest/TestHarness.h"
 
@@ -12,61 +12,6 @@ TEST_GROUP(WTPRadioInformationTestsGroup){ //
 
                                            TEST_TEARDOWN(){}
 };
-
-TEST(WTPRadioInformationTestsGroup, Deserialize) {
-    uint8_t data[] = {
-        // WTP Radio Information (802.11) - Пример 1 (2.4 GHz b/g/n)
-        0x04,
-        0x18, // Type = 1048 (в Big Endian)
-        0x00,
-        0x05, // Length = 5 (в Big Endian)
-
-        // --- Value (5 байт) ---
-        0x01, // Radio ID: 1
-        0x00,
-        0x00,
-        0x00, // Radio Type (первые 3 байта зарезервированы/не используются)
-        0x0D  // Radio Type (последний байт, битовая маска для b, g, n)
-    };
-    RawData raw_data{ data, data + sizeof(data) };
-    auto element = WTPRadioInformation::Deserialize(&raw_data);
-
-    CHECK(element != nullptr);
-    CHECK_EQUAL(raw_data.current, raw_data.end);
-    CHECK_EQUAL(ElementHeader::ElementType::WTPRadioInformation, element->GetElementType());
-    CHECK_EQUAL(1, element->RadioID);
-    CHECK_TRUE(element->B);
-    CHECK_FALSE(element->A);
-    CHECK_TRUE(element->G);
-    CHECK_TRUE(element->N);
-}
-
-TEST(WTPRadioInformationTestsGroup, Serialize) {
-    uint8_t buffer[256] = {};
-    WTPRadioInformation element_0{ 31, true, true, false, false, false, true, false };
-    RawData raw_data{ buffer, buffer + sizeof(buffer) };
-
-    element_0.Serialize(&raw_data);
-    CHECK_EQUAL(&buffer[0] + 9, raw_data.current);
-    const uint8_t reference[] = {
-        0x04, 0x18, 0x00, 0x05, 0x1F, 0x00, 0x00, 0x00, 0x23,
-    };
-    MEMCMP_EQUAL(buffer, reference, sizeof(reference));
-
-    raw_data = { buffer, buffer + sizeof(buffer) };
-    auto element = WTPRadioInformation::Deserialize(&raw_data);
-    CHECK(element != nullptr);
-    CHECK_EQUAL(&buffer[0] + 9, raw_data.current);
-    CHECK_EQUAL(ElementHeader::ElementType::WTPRadioInformation, element->GetElementType());
-    CHECK_EQUAL(31, element->RadioID);
-    CHECK_TRUE(element->B);
-    CHECK_TRUE(element->A);
-    CHECK_FALSE(element->G);
-    CHECK_FALSE(element->N);
-    CHECK_FALSE(element->AC);
-    CHECK_TRUE(element->AX);
-    CHECK_FALSE(element->BE);
-}
 
 TEST(WTPRadioInformationTestsGroup, ToString) {
     WTPRadioInformation element{ 7, true, true, false, true, false, true, false };
@@ -139,4 +84,99 @@ TEST(WTPRadioInformationTestsGroup, Serialize_few_elements) {
         0x00, 0x00, 0x0B
     };
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
+}
+
+TEST(WTPRadioInformationTestsGroup, Serialize_Deserialize_array) {
+    uint8_t buffer[2048] = {};
+
+    WritableWTPRadioInformationArray w_infos;
+    w_infos.Add({ 1, true, false, true, true, false, false, false }); // b/g/n
+    w_infos.Add({ 2, false, true, false, true, true, false, false }); // a/n/ac
+    w_infos.Add({ 3, false, true, false, true, true, true, false });  // a/n/ac/ax
+
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    w_infos.Serialize(&raw_data);
+    CHECK_EQUAL(&buffer[0] + 27, raw_data.current); // 3 × 9 = 27
+
+    ReadableWTPRadioInformationArray r_infos;
+    CHECK_FALSE(r_infos.IsPresent());
+    raw_data = { buffer, buffer + 27 };
+
+    CHECK_TRUE(r_infos.Deserialize(&raw_data));
+    CHECK_TRUE(r_infos.IsPresent());
+    CHECK_TRUE(r_infos.Deserialize(&raw_data));
+    CHECK_TRUE(r_infos.Deserialize(&raw_data));
+    CHECK_EQUAL(raw_data.current, raw_data.end);
+    CHECK_EQUAL(3, r_infos.Get().size());
+
+    // Check first element (b/g/n)
+    CHECK_EQUAL(1, r_infos.Get()[0]->RadioID);
+    CHECK_TRUE(r_infos.Get()[0]->B);
+    CHECK_FALSE(r_infos.Get()[0]->A);
+    CHECK_TRUE(r_infos.Get()[0]->G);
+    CHECK_TRUE(r_infos.Get()[0]->N);
+    CHECK_FALSE(r_infos.Get()[0]->AC);
+
+    // Check second element (a/n/ac)
+    CHECK_EQUAL(2, r_infos.Get()[1]->RadioID);
+    CHECK_FALSE(r_infos.Get()[1]->B);
+    CHECK_TRUE(r_infos.Get()[1]->A);
+    CHECK_FALSE(r_infos.Get()[1]->G);
+    CHECK_TRUE(r_infos.Get()[1]->N);
+    CHECK_TRUE(r_infos.Get()[1]->AC);
+
+    // Check third element (a/n/ac/ax)
+    CHECK_EQUAL(3, r_infos.Get()[2]->RadioID);
+    CHECK_FALSE(r_infos.Get()[2]->B);
+    CHECK_TRUE(r_infos.Get()[2]->A);
+    CHECK_TRUE(r_infos.Get()[2]->N);
+    CHECK_TRUE(r_infos.Get()[2]->AC);
+    CHECK_TRUE(r_infos.Get()[2]->AX);
+    CHECK_FALSE(r_infos.Get()[2]->BE);
+}
+
+TEST(WTPRadioInformationTestsGroup, Add_array_of_items_is_unique_by_RadioID) {
+    uint8_t buffer[2048] = {};
+
+    WritableWTPRadioInformationArray w_infos;
+
+    // Add same RadioID multiple times - should replace
+    w_infos.Add({ 1, true, false, true, false, false, false, false });  // First
+    w_infos.Add({ 1, false, true, false, true, true, false, false });   // Second - replaces first
+    w_infos.Add({ 2, true, true, true, true, false, false, false });    // Different RadioID
+    w_infos.Add({ 2, false, false, false, false, true, true, true });   // Replaces second
+
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    w_infos.Serialize(&raw_data);
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableWTPRadioInformationArray r_infos;
+    CHECK_FALSE(r_infos.IsPresent());
+
+    CHECK_TRUE(r_infos.Deserialize(&raw_data));
+    CHECK_TRUE(r_infos.IsPresent());
+    CHECK_TRUE(r_infos.Deserialize(&raw_data));
+    CHECK_FALSE(r_infos.Deserialize(&raw_data));
+
+    CHECK_EQUAL(raw_data.current, raw_data.end);
+    CHECK_EQUAL(2, r_infos.Get().size());
+
+    // Should have the last values for each RadioID
+    CHECK_EQUAL(1, r_infos.Get()[0]->RadioID);
+    CHECK_FALSE(r_infos.Get()[0]->B);
+    CHECK_TRUE(r_infos.Get()[0]->A);
+    CHECK_FALSE(r_infos.Get()[0]->G);
+    CHECK_TRUE(r_infos.Get()[0]->N);
+    CHECK_TRUE(r_infos.Get()[0]->AC);
+
+    CHECK_EQUAL(2, r_infos.Get()[1]->RadioID);
+    CHECK_FALSE(r_infos.Get()[1]->B);
+    CHECK_FALSE(r_infos.Get()[1]->A);
+    CHECK_FALSE(r_infos.Get()[1]->G);
+    CHECK_FALSE(r_infos.Get()[1]->N);
+    CHECK_TRUE(r_infos.Get()[1]->AC);
+    CHECK_TRUE(r_infos.Get()[1]->AX);
+    CHECK_TRUE(r_infos.Get()[1]->BE);
 }

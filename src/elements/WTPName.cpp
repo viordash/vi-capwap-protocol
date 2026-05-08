@@ -2,55 +2,81 @@
 #include "WTPName.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <cstring>
 #include <string.h>
 
-WritableWTPName::WritableWTPName(std::string_view str) : name{ str.begin(), str.end() } {
-    ASSERT(name.size() <= ReadableWTPName::max_data_size);
+WTPName::WTPName(uint16_t length)
+    : ElementHeader(ElementHeader::WTPName, (sizeof(WTPName) - sizeof(ElementHeader)) + length) {
+}
+
+uint16_t WTPName::GetDataLenght() const {
+    return GetLength();
+}
+
+bool WTPName::Validate() const {
+    static_assert(sizeof(WTPName) == 4);
+    if (ElementHeader::GetElementType() != ElementHeader::WTPName) {
+        return false;
+    }
+    if (GetDataLenght() > WTPName::max_data_size) {
+        return false;
+    }
+    return true;
+}
+
+WritableWTPName::WritableWTPName(const std::string_view location)
+    : element{ (uint16_t)location.size() }, name{ location } {
+    static_assert(sizeof(element) == 4);
+    ASSERT(name.size() <= WTPName::max_data_size);
 }
 
 void WritableWTPName::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(ElementHeader) + name.size() <= raw_data->end);
+    ASSERT(raw_data->current + sizeof(ElementHeader) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
 
-    RawData header_raw_data = *raw_data;
-    raw_data->current += sizeof(ElementHeader);
-
-    memcpy(raw_data->current, name.data(), name.size());
+    std::memcpy(raw_data->current, name.data(), name.size());
     raw_data->current += name.size();
-
-    ElementHeader header(ElementHeader::WTPName, (uint16_t)name.size());
-    memcpy(header_raw_data.current, &header, sizeof(header));
 }
 
 void WritableWTPName::Log() const {
     log_i("ME WTPName :%.*s", (int)name.size(), name.data());
 }
 
-ReadableWTPName::ReadableWTPName() : ElementHeader(ElementHeader::WTPName, 0) {
-}
-bool ReadableWTPName::Validate() const {
-    static_assert(sizeof(ReadableWTPName) == 4);
-    return ElementHeader::GetElementType() == ElementHeader::WTPName
-        && GetLength() <= ReadableWTPName::max_data_size
-                              + (sizeof(ReadableWTPName) - sizeof(ElementHeader));
-}
-
-ReadableWTPName *ReadableWTPName::Deserialize(RawData *raw_data) {
+bool ReadableWTPName::Deserialize(RawData *raw_data) {
     if (raw_data->current + sizeof(ElementHeader) > raw_data->end) {
-        return nullptr;
+        return false;
     }
 
-    auto res = (ReadableWTPName *)raw_data->current;
-    if (!res->Validate()) {
-        return nullptr;
-    }
-    if (raw_data->current + sizeof(ElementHeader) + res->GetLength() > raw_data->end) {
-        return nullptr;
+    auto item = (ReadableWTPName::Element *)raw_data->current;
+    if (!item->Validate()) {
+        return false;
     }
 
-    raw_data->current += sizeof(ElementHeader) + res->GetLength();
-    return res;
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
+    element = item;
+    is_present = true;
+    return true;
+}
+
+const ReadableWTPName::Element *ReadableWTPName::Get() const {
+    return element;
 }
 
 void ReadableWTPName::Log() const {
-    log_i("ME WTPName :%.*s", GetLength(), name);
+    ASSERT(element != nullptr);
+    log_i("ME WTPName :%.*s", (int)element->GetDataLenght(), element->name);
+}
+
+ElementHeader::ElementType ReadableWTPName::GetElementType() const {
+    return ElementHeader::WTPName;
+}
+
+bool ReadableWTPName::IsPresent() const {
+    return is_present;
 }

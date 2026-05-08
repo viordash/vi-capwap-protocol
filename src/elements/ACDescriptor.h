@@ -1,6 +1,7 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -94,7 +95,7 @@ struct __attribute__((packed)) ACInformationSubElementHeader {
     bool Validate() const;
 };
 
-struct WritableACDescriptor {
+struct WritableACDescriptor : IWritableElement {
   public:
     struct __attribute__((packed)) SubElement {
         const char *data;
@@ -125,12 +126,12 @@ struct WritableACDescriptor {
                          bool dtls_data_chn,
                          const nonstd::span<const SubElement> &elements);
 
-    void Serialize(RawData *raw_data) const;
+    void Serialize(RawData *raw_data) const override final;
     uint16_t GetTotalLength() const;
-    void Log() const;
+    void Log() const override final;
 };
 
-struct ReadableACDescriptor {
+struct ReadableACDescriptor : IReadableElement {
   public:
     static const size_t max_count = 8; //DescriptorSubElementHeader::Type * 2
     ACDescriptorHeader *header;
@@ -143,7 +144,9 @@ struct ReadableACDescriptor {
     ReadableACDescriptor(const ReadableACDescriptor &) = delete;
     ReadableACDescriptor();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const ACInformationSubElementHeader *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

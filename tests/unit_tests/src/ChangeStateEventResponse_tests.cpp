@@ -18,7 +18,7 @@ TEST(ChangeStateEventResponseTestsGroup, ChangeStateEventResponse_serialize) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
-    WritableChangeStateEventResponse write_data(VendorSpecificPayload::Dummy);
+    WritableChangeStateEventResponse write_data(nonstd::span<IWritableChangeStateEventResponseOptionalElement *const>{});
 
     write_data.Serialize(&raw_data);
     CHECK_EQUAL(&buffer[0] + 16 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
@@ -30,8 +30,12 @@ TEST(ChangeStateEventResponseTestsGroup, ChangeStateEventResponse_serialize) {
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 16 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableChangeStateEventResponse read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableChangeStateEventResponseOptionalElement *const elems_1[] = { &vendor_specific_payloads };
+    ReadableChangeStateEventResponse read_data(elems_1);
+
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -39,24 +43,27 @@ TEST(ChangeStateEventResponseTestsGroup,
      ChangeStateEventResponse_serialize_with_VendorSpecificPayload) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    {
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        IWritableChangeStateEventResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads };
+        WritableChangeStateEventResponse write_data(elems_2);
 
-    WritableChangeStateEventResponse write_data(vendor_specific_payloads);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     raw_data = { buffer, buffer + 47 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
 
-    ReadableChangeStateEventResponse read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableChangeStateEventResponseOptionalElement *const elems_3[] = { &vendor_specific_payloads };
+    ReadableChangeStateEventResponse read_data(elems_3);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -82,13 +89,15 @@ TEST(ChangeStateEventResponseTestsGroup, ChangeStateEventResponse_deserialize_im
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableChangeStateEventResponse read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableChangeStateEventResponseOptionalElement *const elems_4[] = { &vendor_specific_payloads };
+    ReadableChangeStateEventResponse read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    CHECK_EQUAL(0, read_data.vendor_specific_payloads.Get().size());
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -120,9 +129,28 @@ TEST(ChangeStateEventResponseTestsGroup,
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableChangeStateEventResponse read_data;
+    ReadableChangeStateEventResponse read_data(nonstd::span<IReadableChangeStateEventResponseOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, read_data.unknown_elements);
+}
+TEST(ChangeStateEventResponseTestsGroup, GetOptionalElement) {
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableChangeStateEventResponseOptionalElement *const elems_5[] = { &vendor_specific_payloads };
+    ReadableChangeStateEventResponse read_data(elems_5);
+
+    CHECK_EQUAL(&vendor_specific_payloads,
+                read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
+                    ElementHeader::VendorSpecificPayload));
+
+    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
+          nullptr);
+}
+
+TEST(ChangeStateEventResponseTestsGroup, MessageTypeIdentification) {
+    WritableChangeStateEventResponse write_data(nonstd::span<IWritableChangeStateEventResponseOptionalElement *const>{});
+
+    CHECK_EQUAL(ControlHeader::ChangeStateEventResponse, write_data.GetMessageType());
+    CHECK_EQUAL(ControlHeader::ChangeStateEventRequest, write_data.GetRequestMessageType());
 }

@@ -54,14 +54,15 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_deserialize_perf) {
         addresses,
     };
     WritableImageIdentifier image_identifier{ 1232344, "1232344" };
-    MaximumMessageLength maximum_message_length(4219);
+    WritableMaximumMessageLength maximum_message_length(4219);
 
-    CapwapTransportProtocol capwap_transport_protocol{ CapwapTransportProtocol::Type::UDP };
+    WritableCapwapTransportProtocol capwap_transport_protocol{ CapwapTransportProtocol::Type::UDP };
 
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
     vendor_specific_payloads.Add(1, 2, "01234567890A");
 
+    IWritableJoinResponseOptionalElement *const elems_1[] = { &ac_ipv4_list, &capwap_transport_protocol, &image_identifier, &maximum_message_length, &vendor_specific_payloads };
     WritableJoinResponse write_data(ResultCode::Type::Success,
                                     ac_descriptor,
                                     "Corporate-AC-1",
@@ -69,11 +70,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_deserialize_perf) {
                                     ECNSupport::Type::FullAndLimitedECN,
                                     control_ip_addresses,
                                     local_ip_addresses,
-                                    &ac_ipv4_list,
-                                    &capwap_transport_protocol,
-                                    &image_identifier,
-                                    &maximum_message_length,
-                                    vendor_specific_payloads);
+        elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -82,7 +79,15 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_deserialize_perf) {
 
         const auto size = raw_data.current - buffer;
         raw_data = { buffer, buffer + size };
-        ReadableJoinResponse read_data;
+
+        ReadableACIPv4List ac_ipv4_list;
+        ReadableCapwapTransportProtocol capwap_transport_protocol;
+        ReadableImageIdentifier image_identifier;
+        ReadableMaximumMessageLength maximum_message_length;
+        ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+        IReadableJoinResponseOptionalElement *const elems_2[] = { &ac_ipv4_list, &capwap_transport_protocol, &image_identifier, &maximum_message_length, &vendor_specific_payloads };
+        ReadableJoinResponse read_data(elems_2);
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

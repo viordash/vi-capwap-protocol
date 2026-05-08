@@ -45,11 +45,12 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize_deserialize_perf) 
     vendor_specific_payloads.Add(12300, 700, "0123");
     vendor_specific_payloads.Add(12301, 701, "01234567");
 
+    IWritableDiscoveryResponseOptionalElement *const elems_1[] = { &vendor_specific_payloads };
     WritableDiscoveryResponse write_data(ac_descriptor,
                                          "Corporate-AC-1",
                                          wtp_radio_informations,
                                          ip_addresses,
-                                         vendor_specific_payloads);
+        elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -57,7 +58,9 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize_deserialize_perf) 
         ankerl::nanobench::doNotOptimizeAway(raw_data);
 
         raw_data = { buffer, buffer + 212 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-        ReadableDiscoveryResponse read_data;
+        ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+        IReadableDiscoveryResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads };
+        ReadableDiscoveryResponse read_data(elems_2);
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

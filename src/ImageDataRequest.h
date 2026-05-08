@@ -8,24 +8,18 @@
 #include "elements/VendorSpecificPayload.h"
 #include "span.hpp"
 #include <limits>
-#include <vector>
+#include <unordered_map>
 
 struct WritableImageDataRequest : WritableCapwapRequest {
 
   private:
-    const CapwapTransportProtocol *capwap_transport_protocol;
-    const WritableImageData *image_data;
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads;
-    const WritableImageIdentifier *image_identifier;
-    const InitiateDownload *initiate_download;
+    nonstd::span<IWritableImageDataRequestOptionalElement *const> optional_elements;
 
   public:
     WritableImageDataRequest(const WritableImageDataRequest &) = delete;
-    WritableImageDataRequest(const CapwapTransportProtocol *capwap_transport_protocol,
-                             const WritableImageData *image_data,
-                             WritableVendorSpecificPayloadArray &vendor_specific_payloads,
-                             const WritableImageIdentifier *image_identifier,
-                             const InitiateDownload *initiate_download);
+    WritableImageDataRequest();
+    WritableImageDataRequest(
+        nonstd::span<IWritableImageDataRequestOptionalElement *const> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
@@ -33,18 +27,30 @@ struct WritableImageDataRequest : WritableCapwapRequest {
 };
 
 struct ReadableImageDataRequest : ReadableCapwapRequest {
-    CapwapTransportProtocol *capwap_transport_protocol;
-    ReadableImageData *image_data;
-    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableImageIdentifier image_identifier;
-    InitiateDownload *initiate_download;
+  protected:
+    std::unordered_map<ElementHeader::ElementType, IReadableImageDataRequestOptionalElement *const>
+        key_optional_elements;
 
+    std::unordered_map<ElementHeader::ElementType, IReadableImageDataRequestOptionalElement *const>
+    MapOptionalsElements(
+        nonstd::span<IReadableImageDataRequestOptionalElement *const> optional_elements);
+
+  public:
     size_t unknown_elements;
-
     ReadableImageDataRequest(const ReadableImageDataRequest &) = delete;
     ReadableImageDataRequest();
+    ReadableImageDataRequest(
+        nonstd::span<IReadableImageDataRequestOptionalElement *const> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;
     void Log() const;
+
+    template <typename T> T *GetOptionalElement(ElementHeader::ElementType element_type) {
+        auto it = key_optional_elements.find(element_type);
+        if (it != key_optional_elements.end()) {
+            return static_cast<T *>(it->second);
+        }
+        return nullptr;
+    }
 };

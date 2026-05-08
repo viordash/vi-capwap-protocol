@@ -24,7 +24,7 @@ TEST(ConfigurationStatusResponseTestsGroup,
 
     uint8_t buffer[4096] = {};
 
-    CAPWAPTimers capwap_timers{ 42, 19 };
+    WritableCAPWAPTimers capwap_timers{ 42, 19 };
 
     WritableDecryptionErrorReportPeriodArray decryption_error_report_periods;
     decryption_error_report_periods.Add({ 0, 10 });
@@ -41,21 +41,22 @@ TEST(ConfigurationStatusResponseTestsGroup,
         { inet_addr("192.168.1.112") },
     };
 
-    WTPStaticIPAddressInformation wtp_static_ipaddress{ inet_addr("192.168.100.10"),
-                                                        inet_addr("255.255.255.0"),
-                                                        inet_addr("192.168.1.1"),
-                                                        true };
+    WritableWTPStaticIPAddressInformation wtp_static_ipaddress{ inet_addr("192.168.100.10"),
+                                                                inet_addr("255.255.255.0"),
+                                                                inet_addr("192.168.1.1"),
+                                                                true };
 
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-    WritableConfigurationStatusResponse write_data(capwap_timers,
-                                                   decryption_error_report_periods,
-                                                   idle_timeout,
-                                                   wtp_fallback,
-                                                   ac_ipv4_list,
-                                                   &wtp_static_ipaddress,
-                                                   vendor_specific_payloads);
+    IWritableConfigurationStatusResponseOptionalElement *const elems_1[] = { &wtp_static_ipaddress, &vendor_specific_payloads };
+    WritableConfigurationStatusResponse write_data(
+        capwap_timers,
+        decryption_error_report_periods,
+        idle_timeout,
+        wtp_fallback,
+        ac_ipv4_list,
+        elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -63,7 +64,11 @@ TEST(ConfigurationStatusResponseTestsGroup,
         ankerl::nanobench::doNotOptimizeAway(raw_data);
 
         raw_data = { buffer, buffer + 120 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-        ReadableConfigurationStatusResponse read_data;
+
+        ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
+        ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+        IReadableConfigurationStatusResponseOptionalElement *const elems_2[] = { &wtp_static_ipaddress, &vendor_specific_payloads };
+        ReadableConfigurationStatusResponse read_data(elems_2);
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

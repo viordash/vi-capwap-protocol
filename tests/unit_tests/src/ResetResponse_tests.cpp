@@ -17,14 +17,16 @@ TEST_GROUP(ResetResponseTestsGroup){ //
 TEST(ResetResponseTestsGroup, ResetResponse_serialize) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    {
+        WritableResultCode result_code(ResultCode::MessageUnexpected_InvalidInCurrentState);
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        IWritableResetResponseOptionalElement *const elems_1[] = { &result_code, &vendor_specific_payloads };
+        WritableResetResponse write_data(elems_1);
 
-    WritableResetResponse write_data(ResultCode::MessageUnexpected_InvalidInCurrentState,
-                                     vendor_specific_payloads);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 39, raw_data.current);
     const uint8_t reference[] = { 0x00, 0x21, 0x00, 0x04, 0x00, 0x00, 0x00, 0x12, 0x00, 0x25,
                                   0x00, 0x1B, 0x00, 0x01, 0xE2, 0x40, 0x03, 0x15, 0x30, 0x31,
@@ -34,17 +36,20 @@ TEST(ResetResponseTestsGroup, ResetResponse_serialize) {
     MEMCMP_EQUAL(buffer, reference, sizeof(reference));
 
     raw_data = { buffer, buffer + 39 };
-    ReadableResetResponse read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableResultCode result_code;
+    IReadableResetResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads, &result_code };
+    ReadableResetResponse read_data(elems_2);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(ResultCode::MessageUnexpected_InvalidInCurrentState, read_data.result_code->type);
+    CHECK_TRUE(result_code.IsPresent());
+    CHECK_EQUAL(ResultCode::MessageUnexpected_InvalidInCurrentState, result_code.Get()->type);
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -93,19 +98,23 @@ TEST(ResetResponseTestsGroup, ResetResponse_deserialize_image_data) {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableResetResponse read_data;
-
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableResultCode result_code;
+    IReadableResetResponseOptionalElement *const elems_3[] = { &vendor_specific_payloads, &result_code };
+    ReadableResetResponse read_data(elems_3);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    CHECK_EQUAL(ResultCode::Success, read_data.result_code->type);
+    CHECK_TRUE(result_code.IsPresent());
+    CHECK_EQUAL(ResultCode::Success, result_code.Get()->type);
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(14823, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(0x0101, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    CHECK_EQUAL(7, read_data.vendor_specific_payloads.Get()[0]->GetLength());
-    CHECK_EQUAL(0x01, read_data.vendor_specific_payloads.Get()[0]->value[0]);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(14823, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(0x0101, vendor_specific_payloads.Get()[0]->GetElementId());
+    CHECK_EQUAL(7, vendor_specific_payloads.Get()[0]->GetLength());
+    CHECK_EQUAL(0x01, vendor_specific_payloads.Get()[0]->value[0]);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -151,9 +160,38 @@ TEST(ResetResponseTestsGroup, ResetResponse_deserialize_handle_unknown_element) 
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableResetResponse read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableResultCode result_code;
+    IReadableResetResponseOptionalElement *const elems_4[] = { &vendor_specific_payloads, &result_code };
+    ReadableResetResponse read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
+
+    CHECK_TRUE(result_code.IsPresent());
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
+
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, read_data.unknown_elements);
+}
+
+TEST(ResetResponseTestsGroup, GetOptionalElement) {
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableResultCode result_code;
+    IReadableResetResponseOptionalElement *const elems_5[] = { &vendor_specific_payloads, &result_code };
+    ReadableResetResponse read_data(elems_5);
+
+    CHECK_EQUAL(&vendor_specific_payloads,
+                read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
+                    ElementHeader::VendorSpecificPayload));
+
+    CHECK_EQUAL(&result_code,
+                read_data.GetOptionalElement<ReadableResultCode>(ElementHeader::ResultCode));
+    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)9) == nullptr);
+}
+
+TEST(ResetResponseTestsGroup, MessageTypeIdentification) {
+    WritableResetResponse write_data(nonstd::span<IWritableResetResponseOptionalElement *const>{});
+
+    CHECK_EQUAL(ControlHeader::ResetResponse, write_data.GetMessageType());
+    CHECK_EQUAL(ControlHeader::ResetRequest, write_data.GetRequestMessageType());
 }

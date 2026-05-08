@@ -18,34 +18,36 @@ TEST(ChangeStateEventRequestTestsGroup, ChangeStateEventRequest_serialize) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
-    WritableRadioOperationalStateArray radio_operational_states;
-    radio_operational_states.Add({ 0,
-                                   RadioOperationalState::States::Enabled,
-                                   RadioOperationalState::Causes::AdministrativelySet });
-    radio_operational_states.Add(
-        { 1, RadioOperationalState::States::Disabled, RadioOperationalState::Causes::Normal });
-    radio_operational_states.Add({ 2,
-                                   RadioOperationalState::States::Reserved,
-                                   RadioOperationalState::Causes::RadioFailure });
-
-    ResultCode result_code = ResultCode::Type::Success;
-
     const uint8_t UnknownMessageElement[25] = {};
     const uint8_t UnsupportedMessageElement[35] = {};
-    WritableReturnedMessageElementArray returned_elements;
-    returned_elements.Add(
-        ReturnedMessageElement::Reasons::UnknownMessageElement,
-        { UnknownMessageElement, UnknownMessageElement + sizeof(UnknownMessageElement) });
-    returned_elements.Add(ReturnedMessageElement::Reasons::UnsupportedMessageElement,
-                          { UnsupportedMessageElement,
-                            UnsupportedMessageElement + sizeof(UnsupportedMessageElement) });
+    {
+        WritableRadioOperationalStateArray radio_operational_states;
+        radio_operational_states.Add({ 0,
+                                       RadioOperationalState::States::Enabled,
+                                       RadioOperationalState::Causes::AdministrativelySet });
+        radio_operational_states.Add(
+            { 1, RadioOperationalState::States::Disabled, RadioOperationalState::Causes::Normal });
+        radio_operational_states.Add({ 2,
+                                       RadioOperationalState::States::Reserved,
+                                       RadioOperationalState::Causes::RadioFailure });
 
-    WritableChangeStateEventRequest write_data(radio_operational_states,
-                                               result_code,
-                                               returned_elements,
-                                               VendorSpecificPayload::Dummy);
+        ResultCode result_code = ResultCode::Type::Success;
 
-    write_data.Serialize(&raw_data);
+        WritableReturnedMessageElementArray returned_elements;
+        returned_elements.Add(
+            ReturnedMessageElement::Reasons::UnknownMessageElement,
+            { UnknownMessageElement, UnknownMessageElement + sizeof(UnknownMessageElement) });
+        returned_elements.Add(ReturnedMessageElement::Reasons::UnsupportedMessageElement,
+                              { UnsupportedMessageElement,
+                                UnsupportedMessageElement + sizeof(UnsupportedMessageElement) });
+
+        IWritableChangeStateEventRequestOptionalElement *const elems_1[] = { &returned_elements };
+        WritableChangeStateEventRequest write_data(radio_operational_states,
+                                                   result_code,
+            elems_1);
+
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 117 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = {
         0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0B, 0x2A, 0x00, 0x65,
@@ -63,7 +65,11 @@ TEST(ChangeStateEventRequestTestsGroup, ChangeStateEventRequest_serialize) {
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 117 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableChangeStateEventRequest read_data;
+    ReadableReturnedMessageElementArray returned_message_elements;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableChangeStateEventRequestOptionalElement *const elems_2[] = { &returned_message_elements, &vendor_specific_payloads };
+    ReadableChangeStateEventRequest read_data(
+        elems_2);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(3, read_data.radio_operational_states.Get().size());
@@ -83,22 +89,25 @@ TEST(ChangeStateEventRequestTestsGroup, ChangeStateEventRequest_serialize) {
     CHECK_EQUAL(RadioOperationalState::Causes::RadioFailure,
                 read_data.radio_operational_states.Get()[2]->Cause);
 
-    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code->type);
+    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code.Get()->type);
 
-    CHECK_EQUAL(2, read_data.returned_message_elements.Get().size());
+    CHECK_EQUAL(2, returned_message_elements.Get().size());
     CHECK_EQUAL(ReturnedMessageElement::Reasons::UnknownMessageElement,
-                read_data.returned_message_elements.Get()[0]->GetReason());
-    CHECK_EQUAL(25, read_data.returned_message_elements.Get()[0]->GetDataLength());
+                returned_message_elements.Get()[0]->GetReason());
+    CHECK_EQUAL(25, returned_message_elements.Get()[0]->GetDataLength());
     MEMCMP_EQUAL(UnknownMessageElement,
-                 read_data.returned_message_elements.Get()[0]->data,
+                 returned_message_elements.Get()[0]->data,
                  sizeof(UnknownMessageElement));
 
     CHECK_EQUAL(ReturnedMessageElement::Reasons::UnsupportedMessageElement,
-                read_data.returned_message_elements.Get()[1]->GetReason());
-    CHECK_EQUAL(35, read_data.returned_message_elements.Get()[1]->GetDataLength());
+                returned_message_elements.Get()[1]->GetReason());
+    CHECK_EQUAL(35, returned_message_elements.Get()[1]->GetDataLength());
     MEMCMP_EQUAL(UnsupportedMessageElement,
-                 read_data.returned_message_elements.Get()[1]->data,
+                 returned_message_elements.Get()[1]->data,
                  sizeof(UnsupportedMessageElement));
+
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
+
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -106,45 +115,49 @@ TEST(ChangeStateEventRequestTestsGroup,
      ChangeStateEventRequest_serialize_with_VendorSpecificPayload) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    {
+        WritableRadioOperationalStateArray radio_operational_states;
+        radio_operational_states.Add({ 0,
+                                       RadioOperationalState::States::Enabled,
+                                       RadioOperationalState::Causes::AdministrativelySet });
+        radio_operational_states.Add(
+            { 1, RadioOperationalState::States::Disabled, RadioOperationalState::Causes::Normal });
+        radio_operational_states.Add({ 2,
+                                       RadioOperationalState::States::Reserved,
+                                       RadioOperationalState::Causes::RadioFailure });
 
-    WritableRadioOperationalStateArray radio_operational_states;
-    radio_operational_states.Add({ 0,
-                                   RadioOperationalState::States::Enabled,
-                                   RadioOperationalState::Causes::AdministrativelySet });
-    radio_operational_states.Add(
-        { 1, RadioOperationalState::States::Disabled, RadioOperationalState::Causes::Normal });
-    radio_operational_states.Add({ 2,
-                                   RadioOperationalState::States::Reserved,
-                                   RadioOperationalState::Causes::RadioFailure });
+        ResultCode result_code = ResultCode::Type::Success;
 
-    ResultCode result_code = ResultCode::Type::Success;
-    WritableReturnedMessageElementArray returned_elements;
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        vendor_specific_payloads.Add(1, 2, "01234567890A");
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
-    vendor_specific_payloads.Add(1, 2, "01234567890A");
+        IWritableChangeStateEventRequestOptionalElement *const elems_3[] = { &vendor_specific_payloads };
+        WritableChangeStateEventRequest write_data(radio_operational_states,
+                                                   result_code,
+            elems_3);
 
-    WritableChangeStateEventRequest write_data(radio_operational_states,
-                                               result_code,
-                                               returned_elements,
-                                               vendor_specific_payloads);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 82, raw_data.current);
 
     raw_data = { buffer, buffer + 82 };
-    ReadableChangeStateEventRequest read_data;
+    ReadableReturnedMessageElementArray returned_elements;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableChangeStateEventRequestOptionalElement *const elems_4[] = { &returned_elements, &vendor_specific_payloads };
+    ReadableChangeStateEventRequest read_data(elems_4);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(2, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get()[1]->GetVendorIdentifier());
-    CHECK_EQUAL(2, read_data.vendor_specific_payloads.Get()[1]->GetElementId());
-    STRNCMP_EQUAL("01234567890A", (char *)read_data.vendor_specific_payloads.Get()[1]->value, 12);
+    CHECK_FALSE(returned_elements.IsPresent());
+
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(2, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
+    CHECK_EQUAL(1, vendor_specific_payloads.Get()[1]->GetVendorIdentifier());
+    CHECK_EQUAL(2, vendor_specific_payloads.Get()[1]->GetElementId());
+    STRNCMP_EQUAL("01234567890A", (char *)vendor_specific_payloads.Get()[1]->value, 12);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -152,35 +165,40 @@ TEST(ChangeStateEventRequestTestsGroup,
      if_returned_message_elements_is_not_valid_change_resultcode_to_error_and_clear_list) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    {
+        WritableRadioOperationalStateArray radio_operational_states;
+        radio_operational_states.Add({ 0,
+                                       RadioOperationalState::States::Enabled,
+                                       RadioOperationalState::Causes::AdministrativelySet });
 
-    WritableRadioOperationalStateArray radio_operational_states;
-    radio_operational_states.Add({ 0,
-                                   RadioOperationalState::States::Enabled,
-                                   RadioOperationalState::Causes::AdministrativelySet });
+        ResultCode result_code = ResultCode::Type::Success;
 
-    ResultCode result_code = ResultCode::Type::Success;
+        const uint8_t message_element[256] = {};
 
-    const uint8_t message_element[256] = {};
+        WritableReturnedMessageElementArray returned_elements;
+        returned_elements.Add(ReturnedMessageElement::Reasons::UnknownMessageElement,
+                              { message_element, message_element + sizeof(message_element) });
 
-    WritableReturnedMessageElementArray returned_elements;
-    returned_elements.Add(ReturnedMessageElement::Reasons::UnknownMessageElement,
-                          { message_element, message_element + sizeof(message_element) });
+        IWritableChangeStateEventRequestOptionalElement *const elems_5[] = { &returned_elements };
+        WritableChangeStateEventRequest write_data(radio_operational_states,
+                                                   result_code,
+            elems_5);
 
-    WritableChangeStateEventRequest write_data(radio_operational_states,
-                                               result_code,
-                                               returned_elements,
-                                               VendorSpecificPayload::Dummy);
+        CHECK_EQUAL(ResultCode::Type::Failure_UnrecognizedMessageElement,
+                    write_data.GetResultCode());
+        CHECK_EQUAL(ResultCode::Type::Failure_UnrecognizedMessageElement, result_code.type);
 
-    CHECK_EQUAL(ResultCode::Type::Failure_UnrecognizedMessageElement, write_data.GetResultCode());
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 31 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
 
     raw_data = { buffer, buffer + 31 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableChangeStateEventRequest read_data;
+    ReadableReturnedMessageElementArray returned_message_elements;
+    IReadableChangeStateEventRequestOptionalElement *const elems_6[] = { &returned_message_elements };
+    ReadableChangeStateEventRequest read_data(elems_6);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(0, read_data.returned_message_elements.Get().size());
+    CHECK_FALSE(returned_message_elements.IsPresent());
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -238,7 +256,11 @@ TEST(ChangeStateEventRequestTestsGroup, ChangeStateEventRequest_deserialize) {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableChangeStateEventRequest read_data;
+    ReadableReturnedMessageElementArray returned_message_elements;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableChangeStateEventRequestOptionalElement *const elems_7[] = { &returned_message_elements, &vendor_specific_payloads };
+    ReadableChangeStateEventRequest read_data(
+        elems_7);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -252,19 +274,20 @@ TEST(ChangeStateEventRequestTestsGroup, ChangeStateEventRequest_deserialize) {
                 read_data.radio_operational_states.Get()[0]->Cause);
 
     CHECK_EQUAL(ResultCode::Type::ConfigurationFailure_ServiceProvided,
-                read_data.result_code->type);
+                read_data.result_code.Get()->type);
 
-    CHECK_EQUAL(1, read_data.returned_message_elements.Get().size());
+    CHECK_TRUE(returned_message_elements.IsPresent());
+    CHECK_EQUAL(1, returned_message_elements.Get().size());
     CHECK_EQUAL(ReturnedMessageElement::Reasons::UnknownMessageElementValue,
-                read_data.returned_message_elements.Get()[0]->GetReason());
-    CHECK_EQUAL(7, read_data.returned_message_elements.Get()[0]->GetDataLength());
-    CHECK_EQUAL(0x0F, read_data.returned_message_elements.Get()[0]->data[0]);
-    CHECK_EQUAL(0xA0, read_data.returned_message_elements.Get()[0]->data[1]);
-    CHECK_EQUAL(0x00, read_data.returned_message_elements.Get()[0]->data[2]);
-    CHECK_EQUAL(0x03, read_data.returned_message_elements.Get()[0]->data[3]);
-    CHECK_EQUAL(0xFF, read_data.returned_message_elements.Get()[0]->data[4]);
-    CHECK_EQUAL(0x00, read_data.returned_message_elements.Get()[0]->data[5]);
-    CHECK_EQUAL(0x00, read_data.returned_message_elements.Get()[0]->data[6]);
+                returned_message_elements.Get()[0]->GetReason());
+    CHECK_EQUAL(7, returned_message_elements.Get()[0]->GetDataLength());
+    CHECK_EQUAL(0x0F, returned_message_elements.Get()[0]->data[0]);
+    CHECK_EQUAL(0xA0, returned_message_elements.Get()[0]->data[1]);
+    CHECK_EQUAL(0x00, returned_message_elements.Get()[0]->data[2]);
+    CHECK_EQUAL(0x03, returned_message_elements.Get()[0]->data[3]);
+    CHECK_EQUAL(0xFF, returned_message_elements.Get()[0]->data[4]);
+    CHECK_EQUAL(0x00, returned_message_elements.Get()[0]->data[5]);
+    CHECK_EQUAL(0x00, returned_message_elements.Get()[0]->data[6]);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -312,10 +335,80 @@ TEST(ChangeStateEventRequestTestsGroup,
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableChangeStateEventRequest read_data;
+    ReadableReturnedMessageElementArray returned_elements;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableChangeStateEventRequestOptionalElement *const elems_8[] = { &returned_elements, &vendor_specific_payloads };
+    ReadableChangeStateEventRequest read_data(elems_8);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
+    CHECK_FALSE(returned_elements.IsPresent());
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
+
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, read_data.unknown_elements);
+}
+
+TEST(ChangeStateEventRequestTestsGroup, IEEE80211_specific_message_elements) {
+    uint8_t buffer[4096] = {};
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+
+    {
+        WritableRadioOperationalStateArray radio_operational_states;
+        radio_operational_states.Add({ 0,
+                                       RadioOperationalState::States::Enabled,
+                                       RadioOperationalState::Causes::AdministrativelySet });
+        ResultCode result_code = ResultCode::Type::Success;
+
+        WritableWTPRadioFailAlarmIndicationArray w_alarms;
+        w_alarms.Add(
+            { 1, WTPRadioFailAlarmIndication::Receiver, WTPRadioFailAlarmIndication::Minor });
+
+        IWritableChangeStateEventRequestOptionalElement *const elems_9[] = { &w_alarms };
+        WritableChangeStateEventRequest write_data(radio_operational_states,
+                                                   result_code,
+            elems_9);
+
+        write_data.Serialize(&raw_data);
+    }
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableWTPRadioFailAlarmIndicationArray r_alarms;
+    IReadableChangeStateEventRequestOptionalElement *const elems_10[] = { &r_alarms };
+    ReadableChangeStateEventRequest read_data(elems_10);
+
+    CHECK_TRUE(read_data.Deserialize(&raw_data));
+
+    CHECK_TRUE(read_data.radio_operational_states.IsPresent());
+    CHECK_TRUE(read_data.result_code.IsPresent());
+
+    CHECK_TRUE(r_alarms.IsPresent());
+    CHECK_EQUAL(1, r_alarms.Get().size());
+    CHECK_EQUAL(1, r_alarms.Get()[0]->RadioID);
+    CHECK_EQUAL(WTPRadioFailAlarmIndication::Receiver, r_alarms.Get()[0]->Type);
+    CHECK_EQUAL(WTPRadioFailAlarmIndication::Minor, r_alarms.Get()[0]->Status);
+
+    CHECK_EQUAL(0, read_data.unknown_elements);
+}
+TEST(ChangeStateEventRequestTestsGroup, GetOptionalElement) {
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableChangeStateEventRequestOptionalElement *const elems_11[] = { &vendor_specific_payloads };
+    ReadableChangeStateEventRequest read_data(elems_11);
+
+    CHECK_EQUAL(&vendor_specific_payloads,
+                read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
+                    ElementHeader::VendorSpecificPayload));
+
+    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
+          nullptr);
+}
+
+TEST(ChangeStateEventRequestTestsGroup, MessageTypeIdentification) {
+    WritableRadioOperationalStateArray radio_operational_states;
+    ResultCode result_code = ResultCode::Type::Success;
+    WritableChangeStateEventRequest write_data(radio_operational_states, result_code, nonstd::span<IWritableChangeStateEventRequestOptionalElement *const>{});
+
+    CHECK_EQUAL(ControlHeader::ChangeStateEventRequest, write_data.GetMessageType());
 }

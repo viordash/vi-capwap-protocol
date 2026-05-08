@@ -22,24 +22,21 @@ TEST(ImageDataRequestTestsGroup, ImageDataRequest_serialize_deserialize_perf) {
 
     uint8_t buffer[4096] = {};
 
-    CapwapTransportProtocol capwap_transport_protocol{ CapwapTransportProtocol::Type::UDP };
+    WritableCapwapTransportProtocol capwap_transport_protocol{ CapwapTransportProtocol::Type::UDP };
 
     const uint8_t data[] = { 0xF8, 0x1D, 0x4F, 0xAE, 0x7D, 0xEC, 0x11, 0xD0,
                              0xA7, 0x65, 0x00, 0xA0, 0xC9, 0x1E, 0x6B, 0xF6 };
 
-    WritableImageData image_data{ ImageDataHeader::Type::ImageDataIsIncluded, data };
+    WritableImageData image_data{ ImageData::Type::ImageDataIsIncluded, data };
 
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
     WritableImageIdentifier image_identifier{ 123456, "1232344" };
-    InitiateDownload initiate_download;
+    WritableInitiateDownload initiate_download;
 
-    WritableImageDataRequest write_data(&capwap_transport_protocol,
-                                        &image_data,
-                                        vendor_specific_payloads,
-                                        &image_identifier,
-                                        &initiate_download);
+    IWritableImageDataRequestOptionalElement *const elems_1[] = { &capwap_transport_protocol, &image_data, &vendor_specific_payloads, &image_identifier, &initiate_download };
+    WritableImageDataRequest write_data(elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -47,7 +44,16 @@ TEST(ImageDataRequestTestsGroup, ImageDataRequest_serialize_deserialize_perf) {
         ankerl::nanobench::doNotOptimizeAway(raw_data);
 
         raw_data = { buffer, buffer + 92 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-        ReadableImageDataRequest read_data;
+
+        ReadableCapwapTransportProtocol capwap_transport_protocol;
+        ReadableImageData image_data;
+        ReadableImageIdentifier image_identifier;
+        ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+        ReadableInitiateDownload initiate_download;
+
+        IReadableImageDataRequestOptionalElement *const elems_2[] = { &capwap_transport_protocol, &image_data, &image_identifier, &vendor_specific_payloads, &initiate_download };
+        ReadableImageDataRequest read_data(elems_2);
+
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

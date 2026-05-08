@@ -1,5 +1,6 @@
 #pragma once
 
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -19,15 +20,42 @@ struct __attribute__((packed)) WTPStaticIPAddressInformation : ElementHeader {
     uint8_t Static;
 
     WTPStaticIPAddressInformation(const WTPStaticIPAddressInformation &) = default;
-    WTPStaticIPAddressInformation(WTPStaticIPAddressInformation &&) = default;
     WTPStaticIPAddressInformation(uint32_t ipaddress,
                                   uint32_t netmask,
                                   uint32_t gateway,
                                   bool use_static);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static WTPStaticIPAddressInformation *Deserialize(RawData *raw_data);
-    uint16_t GetTotalLength() const;
     void Log() const;
+};
+
+struct WritableWTPStaticIPAddressInformation : IWritableConfigurationStatusRequestOptionalElement,
+                                               IWritableConfigurationStatusResponseOptionalElement,
+                                               IWritableConfigurationUpdateRequestOptionalElement {
+  protected:
+    WTPStaticIPAddressInformation element;
+
+  public:
+    WritableWTPStaticIPAddressInformation(uint32_t ipaddress,
+                                          uint32_t netmask,
+                                          uint32_t gateway,
+                                          bool use_static);
+
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
+};
+
+struct ReadableWTPStaticIPAddressInformation : IReadableConfigurationStatusRequestOptionalElement,
+                                               IReadableConfigurationStatusResponseOptionalElement,
+                                               IReadableConfigurationUpdateRequestOptionalElement {
+  protected:
+    WTPStaticIPAddressInformation *element = nullptr;
+    bool is_present = false;
+
+  public:
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
+    const WTPStaticIPAddressInformation *Get() const;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };

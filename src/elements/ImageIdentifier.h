@@ -1,6 +1,7 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -23,33 +24,39 @@ struct __attribute__((packed)) ImageIdentifierHeader : ElementHeader {
     bool Validate() const;
 };
 
-struct WritableImageIdentifier {
-  private:
+struct WritableImageIdentifier : IWritableJoinResponseOptionalElement,
+                                 IWritableImageDataRequestOptionalElement,
+                                 IWritableConfigurationUpdateRequestOptionalElement {
+  protected:
+    ImageIdentifierHeader element;
     std::vector<char> data;
-    ImageIdentifierHeader header;
 
   public:
-    WritableImageIdentifier(const WritableImageIdentifier &) = default;
-    WritableImageIdentifier(WritableImageIdentifier &&) = default;
-    WritableImageIdentifier(uint32_t vendor_identifier, const std::string_view str);
+    WritableImageIdentifier(uint32_t vendor_identifier, const std::string_view image_id);
 
-    WritableImageIdentifier &operator=(const WritableImageIdentifier &) = default;
-
-    void Serialize(RawData *raw_data) const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableImageIdentifier {
+struct ReadableImageIdentifier : IReadableJoinResponseOptionalElement,
+                                 IReadableImageDataRequestOptionalElement,
+                                 IReadableConfigurationUpdateRequestOptionalElement {
+  public:
+    struct Element : ImageIdentifierHeader {
+        char data[];
+        Element(const Element &) = delete;
+    };
+
   protected:
-    ImageIdentifierHeader *header;
-    const char *data;
+    Element *element = nullptr;
+    bool is_present = false;
 
   public:
-    ReadableImageIdentifier(const ReadableImageIdentifier &) = delete;
-    ReadableImageIdentifier();
-
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
+    void Log() const override final;
+    const ReadableImageIdentifier::Element *Get() const;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
     uint32_t GetVendorIdentifier() const;
     const std::string_view GetData() const;
-    void Log() const;
 };

@@ -17,56 +17,56 @@ TEST_GROUP(JoinResponseTestsGroup){ //
 TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    {
+        WritableACDescriptor::SubElement info_elements[] = {
+            { 1234,
+              ACInformationSubElementHeader::Type::HardwareVersion,
+              "01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF" },
+            { 5678, ACInformationSubElementHeader::Type::SoftwareVersion, "efghijklm" },
+        };
 
-    WritableACDescriptor::SubElement info_elements[] = {
-        { 1234,
-          ACInformationSubElementHeader::Type::HardwareVersion,
-          "01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF" },
-        { 5678, ACInformationSubElementHeader::Type::SoftwareVersion, "efghijklm" },
-    };
+        WritableACDescriptor ac_descriptor{
+            100,  200,   1000,         1234, true, false, ACDescriptorHeader::RMACField::Supported,
+            true, false, info_elements
+        };
 
-    WritableACDescriptor ac_descriptor{
-        100,  200,   1000,         1234, true, false, ACDescriptorHeader::RMACField::Supported,
-        true, false, info_elements
-    };
+        WritableWTPRadioInformationArray wtp_radio_informations;
+        wtp_radio_informations.Add({ 10, false, false, false, false, false, false, false });
+        wtp_radio_informations.Add({ 1, true, true, false, false, false, false, false });
+        wtp_radio_informations.Add({ 2, false, false, false, false, false, false, false });
 
-    WritableWTPRadioInformationArray wtp_radio_informations;
-    wtp_radio_informations.Add({ 10, false, false, false, false, false, false, false });
-    wtp_radio_informations.Add({ 1, true, true, false, false, false, false, false });
-    wtp_radio_informations.Add({ 2, false, false, false, false, false, false, false });
+        CAPWAPControlIPv4Address control_ip_addresses[] = { { inet_addr("192.168.100.10"), 19 },
+                                                            { inet_addr("192.168.100.11"), 20 } };
 
-    CAPWAPControlIPv4Address control_ip_addresses[] = { { inet_addr("192.168.100.10"), 19 },
-                                                        { inet_addr("192.168.100.11"), 20 } };
+        CAPWAPLocalIPv4Address local_ip_addresses[] = { { inet_addr("192.168.100.10") } };
 
-    CAPWAPLocalIPv4Address local_ip_addresses[] = { { inet_addr("192.168.100.10") } };
+        uint32_t addresses[] = {
+            { inet_addr("192.168.1.110") },
+            { inet_addr("192.168.1.111") },
+        };
 
-    uint32_t addresses[] = {
-        { inet_addr("192.168.1.110") },
-        { inet_addr("192.168.1.111") },
-    };
+        WritableACIPv4List ac_ipv4_list{
+            addresses,
+        };
+        WritableImageIdentifier image_identifier{ 1232344, "1232344" };
+        WritableMaximumMessageLength maximum_message_length(4219);
 
-    WritableACIPv4List ac_ipv4_list{
-        addresses,
-    };
-    WritableImageIdentifier image_identifier{ 1232344, "1232344" };
-    MaximumMessageLength maximum_message_length(4219);
+        WritableCapwapTransportProtocol capwap_transport_protocol{
+            CapwapTransportProtocol::Type::UDP
+        };
 
-    CapwapTransportProtocol capwap_transport_protocol{ CapwapTransportProtocol::Type::UDP };
+        IWritableJoinResponseOptionalElement *const elems_1[] = { &ac_ipv4_list, &capwap_transport_protocol, &image_identifier, &maximum_message_length };
+        WritableJoinResponse write_data(ResultCode::Type::Success,
+                                        ac_descriptor,
+                                        "Corporate-AC-1",
+                                        wtp_radio_informations,
+                                        ECNSupport::Type::FullAndLimitedECN,
+                                        control_ip_addresses,
+                                        local_ip_addresses,
+            elems_1);
 
-    WritableJoinResponse write_data(ResultCode::Type::Success,
-                                    ac_descriptor,
-                                    "Corporate-AC-1",
-                                    wtp_radio_informations,
-                                    ECNSupport::Type::FullAndLimitedECN,
-                                    control_ip_addresses,
-                                    local_ip_addresses,
-                                    &ac_ipv4_list,
-                                    &capwap_transport_protocol,
-                                    &image_identifier,
-                                    &maximum_message_length,
-                                    VendorSpecificPayload::Dummy);
-
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 249 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = {
         0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x2A, 0x00, 0xE9,
@@ -93,10 +93,17 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 249 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableJoinResponse read_data;
+    ReadableACIPv4List ac_ipv4_list;
+    ReadableCapwapTransportProtocol capwap_transport_protocol;
+    ReadableImageIdentifier image_identifier;
+    ReadableMaximumMessageLength maximum_message_length;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+    IReadableJoinResponseOptionalElement *const elems_2[] = { &ac_ipv4_list, &capwap_transport_protocol, &image_identifier, &maximum_message_length, &vendor_specific_payloads };
+    ReadableJoinResponse read_data(elems_2);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code->type);
+    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code.Get()->type);
 
     CHECK_EQUAL(100, read_data.ac_descriptor.header->GetStations());
     CHECK_EQUAL(200, read_data.ac_descriptor.header->GetLimit());
@@ -126,7 +133,8 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
     CHECK_EQUAL(9, read_data.ac_descriptor.Get()[1]->GetLength());
     CHECK_EQUAL(5678, read_data.ac_descriptor.Get()[1]->GetVendorIdentifier());
 
-    STRNCMP_EQUAL("Corporate-AC-1", (char *)read_data.ac_name->name, 14);
+    CHECK_TRUE(read_data.ac_name.IsPresent());
+    STRNCMP_EQUAL("Corporate-AC-1", (char *)read_data.ac_name.Get()->name, 14);
 
     CHECK_EQUAL(3, read_data.wtp_radio_informations.Get().size());
     CHECK_EQUAL(10, read_data.wtp_radio_informations.Get()[0]->RadioID);
@@ -145,7 +153,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[2]->G);
     CHECK_FALSE(read_data.wtp_radio_informations.Get()[2]->N);
 
-    CHECK_EQUAL(ECNSupport::Type::FullAndLimitedECN, read_data.ecn_support->type);
+    CHECK_EQUAL(ECNSupport::Type::FullAndLimitedECN, read_data.ecn_support.Get()->type);
 
     CHECK_EQUAL(2, read_data.control_ip_addresses.Get().size());
     CHECK_EQUAL(inet_addr("192.168.100.10"),
@@ -158,20 +166,21 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
     CHECK_EQUAL(1, read_data.local_ip_addresses.Get().size());
     CHECK_EQUAL(inet_addr("192.168.100.10"), read_data.local_ip_addresses.Get()[0]->GetIPAddress());
 
-    CHECK(read_data.ac_ipv4_list != nullptr);
-    CHECK_EQUAL(2, read_data.ac_ipv4_list->GetCount());
-    CHECK_EQUAL(inet_addr("192.168.1.110"), read_data.ac_ipv4_list->addresses[0]);
-    CHECK_EQUAL(inet_addr("192.168.1.111"), read_data.ac_ipv4_list->addresses[1]);
+    CHECK_TRUE(ac_ipv4_list.IsPresent());
+    CHECK_EQUAL(2, ac_ipv4_list.Get()->GetCount());
+    CHECK_EQUAL(inet_addr("192.168.1.110"), ac_ipv4_list.Get()->addresses[0]);
+    CHECK_EQUAL(inet_addr("192.168.1.111"), ac_ipv4_list.Get()->addresses[1]);
 
-    CHECK(read_data.capwap_transport_protocol != nullptr);
-    CHECK_EQUAL(CapwapTransportProtocol::Type::UDP, read_data.capwap_transport_protocol->type);
+    CHECK_TRUE(capwap_transport_protocol.IsPresent());
+    CHECK_EQUAL(CapwapTransportProtocol::Type::UDP, capwap_transport_protocol.Get()->type);
 
-    CHECK_EQUAL(7, read_data.image_identifier.GetData().size());
-    CHECK_EQUAL(1232344, read_data.image_identifier.GetVendorIdentifier());
-    STRNCMP_EQUAL("1232344", (char *)read_data.image_identifier.GetData().data(), 7);
+    CHECK_TRUE(image_identifier.IsPresent());
+    CHECK_EQUAL(7, image_identifier.GetData().size());
+    CHECK_EQUAL(1232344, image_identifier.GetVendorIdentifier());
+    STRNCMP_EQUAL("1232344", (char *)image_identifier.GetData().data(), 7);
 
-    CHECK(read_data.maximum_message_length != nullptr);
-    CHECK_EQUAL(4219, read_data.maximum_message_length->GetValue());
+    CHECK_TRUE(maximum_message_length.IsPresent());
+    CHECK_EQUAL(4219, maximum_message_length.Get()->GetValue());
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -179,44 +188,43 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_with_VendorSpecificPayload) 
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
-    WritableACDescriptor::SubElement info_elements[] = {
-        { 1234,
-          ACInformationSubElementHeader::Type::HardwareVersion,
-          "01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF" },
-        { 5678, ACInformationSubElementHeader::Type::SoftwareVersion, "efghijklm" },
-    };
+    {
+        WritableACDescriptor::SubElement info_elements[] = {
+            { 1234,
+              ACInformationSubElementHeader::Type::HardwareVersion,
+              "01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF01234567890ABCDEF" },
+            { 5678, ACInformationSubElementHeader::Type::SoftwareVersion, "efghijklm" },
+        };
 
-    WritableACDescriptor ac_descriptor{
-        100,  200,   1000,         1234, true, false, ACDescriptorHeader::RMACField::Supported,
-        true, false, info_elements
-    };
+        WritableACDescriptor ac_descriptor{
+            100,  200,   1000,         1234, true, false, ACDescriptorHeader::RMACField::Supported,
+            true, false, info_elements
+        };
 
-    WritableWTPRadioInformationArray wtp_radio_informations;
-    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
+        WritableWTPRadioInformationArray wtp_radio_informations;
+        wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
 
-    CAPWAPControlIPv4Address control_ip_addresses[] = { { inet_addr("192.168.100.10"), 19 },
-                                                        { inet_addr("192.168.100.11"), 20 } };
+        CAPWAPControlIPv4Address control_ip_addresses[] = { { inet_addr("192.168.100.10"), 19 },
+                                                            { inet_addr("192.168.100.11"), 20 } };
 
-    CAPWAPLocalIPv4Address local_ip_addresses[] = { { inet_addr("192.168.100.10") } };
+        CAPWAPLocalIPv4Address local_ip_addresses[] = { { inet_addr("192.168.100.10") } };
 
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
-    vendor_specific_payloads.Add(1, 2, "01234567890A");
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
+        vendor_specific_payloads.Add(1, 2, "01234567890A");
 
-    WritableJoinResponse write_data(ResultCode::Type::Success,
-                                    ac_descriptor,
-                                    "Corporate-AC-1",
-                                    wtp_radio_informations,
-                                    ECNSupport::Type::FullAndLimitedECN,
-                                    control_ip_addresses,
-                                    local_ip_addresses,
-                                    nullptr,
-                                    nullptr,
-                                    nullptr,
-                                    nullptr,
-                                    vendor_specific_payloads);
+        IWritableJoinResponseOptionalElement *const elems_3[] = { &vendor_specific_payloads };
+        WritableJoinResponse write_data(ResultCode::Type::Success,
+                                        ac_descriptor,
+                                        "Corporate-AC-1",
+                                        wtp_radio_informations,
+                                        ECNSupport::Type::FullAndLimitedECN,
+                                        control_ip_addresses,
+                                        local_ip_addresses,
+            elems_3);
 
-    write_data.Serialize(&raw_data);
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 246 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = {
         0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x2A, 0x00, 0xE6,
@@ -243,18 +251,31 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_with_VendorSpecificPayload) 
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 246 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableJoinResponse read_data;
+
+    ReadableACIPv4List ac_ipv4_list;
+    ReadableCapwapTransportProtocol capwap_transport_protocol;
+    ReadableImageIdentifier image_identifier;
+    ReadableMaximumMessageLength maximum_message_length;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+    IReadableJoinResponseOptionalElement *const elems_4[] = { &ac_ipv4_list, &capwap_transport_protocol, &image_identifier, &maximum_message_length, &vendor_specific_payloads };
+    ReadableJoinResponse read_data(elems_4);
+
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(2, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get()[1]->GetVendorIdentifier());
-    CHECK_EQUAL(2, read_data.vendor_specific_payloads.Get()[1]->GetElementId());
-    STRNCMP_EQUAL("01234567890A", (char *)read_data.vendor_specific_payloads.Get()[1]->value, 12);
+    CHECK_FALSE(ac_ipv4_list.IsPresent());
+    CHECK_FALSE(capwap_transport_protocol.IsPresent());
+    CHECK_FALSE(image_identifier.IsPresent());
+    CHECK_FALSE(maximum_message_length.IsPresent());
+
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(2, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
+    CHECK_EQUAL(1, vendor_specific_payloads.Get()[1]->GetVendorIdentifier());
+    CHECK_EQUAL(2, vendor_specific_payloads.Get()[1]->GetElementId());
+    STRNCMP_EQUAL("01234567890A", (char *)vendor_specific_payloads.Get()[1]->value, 12);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -276,7 +297,7 @@ uint8_t data[] = {
     //-------------------------------------------------------------------------
     0x00, 0x00, 0x00, 0x04, // Message Type = 4 (Join Response)
     0x2A,                   // Sequence Number = 42
-    0x00, 0xAD+4,             // 
+    0x00, 0xAD+4,             //
     0x00,                   // Flags = 0
 
     //=========================================================================
@@ -298,7 +319,7 @@ uint8_t data[] = {
     0x02,                   // Security: 0b00000010 (X.509 Certificate)
     0x01,                   // R-MAC Field: Supported
     0x00,                   // Reserved
-    0x02,                   // DTLS Policy: 0b00000010 
+    0x02,                   // DTLS Policy: 0b00000010
     // Sub-element: Hardware Version (Type=4)
     0x00, 0x00, 0x24, 0x3F, 0x00, 0x04, 0x00, 0x04, 'v', '2', '.', '0',
     // Sub-element: Software Version (Type=5)
@@ -356,7 +377,14 @@ uint8_t data[] = {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableJoinResponse read_data;
+    ReadableACIPv4List ac_ipv4_list;
+    ReadableCapwapTransportProtocol capwap_transport_protocol;
+    ReadableImageIdentifier image_identifier;
+    ReadableMaximumMessageLength maximum_message_length;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+
+    IReadableJoinResponseOptionalElement *const elems_5[] = { &ac_ipv4_list, &capwap_transport_protocol, &image_identifier, &maximum_message_length, &vendor_specific_payloads };
+    ReadableJoinResponse read_data(elems_5);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -386,8 +414,8 @@ uint8_t data[] = {
     CHECK_EQUAL(10, read_data.ac_descriptor.Get()[1]->GetLength());
     CHECK_EQUAL(9279, read_data.ac_descriptor.Get()[1]->GetVendorIdentifier());
 
-    CHECK_EQUAL(15, read_data.ac_name->GetLength());
-    STRNCMP_EQUAL("ACME-Corp-AC-01", (char *)read_data.ac_name->name, 15);
+    CHECK_EQUAL(15, read_data.ac_name.Get()->GetLength());
+    STRNCMP_EQUAL("ACME-Corp-AC-01", (char *)read_data.ac_name.Get()->name, 15);
 
     CHECK_EQUAL(2, read_data.wtp_radio_informations.Get().size());
     CHECK_EQUAL(1, read_data.wtp_radio_informations.Get()[0]->RadioID);
@@ -408,22 +436,25 @@ uint8_t data[] = {
     CHECK_EQUAL(1, read_data.local_ip_addresses.Get().size());
     CHECK_EQUAL(inet_addr("192.0.2.1"), read_data.local_ip_addresses.Get()[0]->GetIPAddress());
 
-    CHECK_EQUAL(18, read_data.image_identifier.GetData().size());
-    CHECK_EQUAL(9279, read_data.image_identifier.GetVendorIdentifier());
-    STRNCMP_EQUAL("ACME-OS-v3.1.2-WAP", (char *)read_data.image_identifier.GetData().data(), 18);
+    CHECK_TRUE(image_identifier.IsPresent());
+    CHECK_EQUAL(18, image_identifier.GetData().size());
+    CHECK_EQUAL(9279, image_identifier.GetVendorIdentifier());
+    STRNCMP_EQUAL("ACME-OS-v3.1.2-WAP", (char *)image_identifier.GetData().data(), 18);
 
-    CHECK(read_data.ac_ipv4_list != nullptr);
-    CHECK_EQUAL(2, read_data.ac_ipv4_list->GetCount());
-    CHECK_EQUAL(inet_addr("192.0.2.2"), read_data.ac_ipv4_list->addresses[0]);
-    CHECK_EQUAL(inet_addr("192.0.2.3"), read_data.ac_ipv4_list->addresses[1]);
+    CHECK_TRUE(ac_ipv4_list.IsPresent());
+    CHECK_EQUAL(2, ac_ipv4_list.Get()->GetCount());
+    CHECK_EQUAL(inet_addr("192.0.2.2"), ac_ipv4_list.Get()->addresses[0]);
+    CHECK_EQUAL(inet_addr("192.0.2.3"), ac_ipv4_list.Get()->addresses[1]);
 
-    CHECK(read_data.maximum_message_length != nullptr);
-    CHECK_EQUAL(8192, read_data.maximum_message_length->GetValue());
+    CHECK_TRUE(maximum_message_length.IsPresent());
+    CHECK_EQUAL(8192, maximum_message_length.Get()->GetValue());
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(9, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(100, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("diag-data", (char *)read_data.vendor_specific_payloads.Get()[0]->value, 9);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(9, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(100, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("diag-data", (char *)vendor_specific_payloads.Get()[0]->value, 9);
+
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -445,7 +476,7 @@ uint8_t data[] = {
     //-------------------------------------------------------------------------
     0x00, 0x00, 0x00, 0x04, // Message Type = 4 (Join Response)
     0x2A,                   // Sequence Number = 42
-    0x00, 124,             // 
+    0x00, 124,             //
     0x00,                   // Flags = 0
 
     //=========================================================================
@@ -467,7 +498,7 @@ uint8_t data[] = {
     0x02,                   // Security: 0b00000010 (X.509 Certificate)
     0x01,                   // R-MAC Field: Supported
     0x00,                   // Reserved
-    0x02,                   // DTLS Policy: 0b00000010 
+    0x02,                   // DTLS Policy: 0b00000010
     // Sub-element: Hardware Version (Type=4)
     0x00, 0x00, 0x24, 0x3F, 0x00, 0x04, 0x00, 0x04, 'v', '2', '.', '0',
     // Sub-element: Software Version (Type=5)
@@ -506,9 +537,49 @@ uint8_t data[] = {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableJoinResponse read_data;
+    ReadableJoinResponse read_data(nonstd::span<IReadableJoinResponseOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
     CHECK_EQUAL(2, read_data.unknown_elements);
+}
+TEST(JoinResponseTestsGroup, GetOptionalElement) {
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableJoinResponseOptionalElement *const elems_6[] = { &vendor_specific_payloads };
+    ReadableJoinResponse read_data(elems_6);
+
+    CHECK_EQUAL(&vendor_specific_payloads,
+                read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
+                    ElementHeader::VendorSpecificPayload));
+
+    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
+          nullptr);
+}
+
+TEST(JoinResponseTestsGroup, MessageTypeIdentification) {
+    WritableACDescriptor::SubElement info_elements[] = {
+        { 1, ACInformationSubElementHeader::Type::SoftwareVersion, "v" },
+    };
+    WritableACDescriptor ac_descriptor{
+        1, 1, 1, 1, true, false, ACDescriptorHeader::RMACField::Supported,
+        true, false, info_elements
+    };
+
+    WritableWTPRadioInformationArray wtp_radio_informations;
+    wtp_radio_informations.Add({ 0, false, false, false, false, false, false, false });
+
+    CAPWAPControlIPv4Address control_ip[] = { { inet_addr("127.0.0.1"), 1 } };
+    CAPWAPLocalIPv4Address local_ip[] = { { inet_addr("127.0.0.1") } };
+
+    WritableJoinResponse write_data(ResultCode::Type::Success,
+                                    ac_descriptor,
+                                    "ac",
+                                    wtp_radio_informations,
+                                    ECNSupport::Type::FullAndLimitedECN,
+                                    control_ip,
+                                    local_ip,
+                                    {});
+
+    CHECK_EQUAL(ControlHeader::JoinResponse, write_data.GetMessageType());
+    CHECK_EQUAL(ControlHeader::JoinRequest, write_data.GetRequestMessageType());
 }

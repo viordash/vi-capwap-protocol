@@ -1,56 +1,61 @@
 #pragma once
 
 #include "CapwapMessage.h"
+#include "IElement.h"
 #include "elements/DecryptionErrorReport.h"
 #include "elements/DeleteStation.h"
 #include "elements/DuplicateIPv4Address.h"
+#include "elements/IEEE80211/MICCountermeasures.h"
+#include "elements/IEEE80211/RSNAErrorReportFromStation.h"
+#include "elements/IEEE80211/Statistics.h"
 #include "elements/VendorSpecificPayload.h"
 #include "elements/WTPRadioStatistics.h"
 #include "elements/WTPRebootStatistics.h"
 #include "span.hpp"
 #include <limits>
-#include <optional>
-#include <vector>
+#include <unordered_map>
 
 struct WritableWTPEventRequest : WritableCapwapRequest {
   private:
-    WritableDecryptionErrorReportArray &decryption_error_report;
-    WritableDuplicateIPv4AdrArray &duplicate_ipv4_address;
-    WritableWTPRadioStatisticsArray &wtp_radio_statistics;
-    std::optional<WTPRebootStatistics> &wtp_reboot_statistics;
-    WritableDeleteStationArray &delete_station;
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads;
+    nonstd::span<IWritableWTPEventRequestOptionalElement *const> optional_elements;
 
   public:
     WritableWTPEventRequest(const WritableWTPEventRequest &) = delete;
-    WritableWTPEventRequest(WritableDecryptionErrorReportArray &decryption_error_report,
-                            WritableDuplicateIPv4AdrArray &duplicate_ipv4_address,
-                            WritableWTPRadioStatisticsArray &wtp_radio_statistics,
-                            std::optional<WTPRebootStatistics> &wtp_reboot_statistics,
-                            WritableDeleteStationArray &delete_station,
-                            WritableVendorSpecificPayloadArray &vendor_specific_payloads);
+    WritableWTPEventRequest();
+    WritableWTPEventRequest(
+        nonstd::span<IWritableWTPEventRequestOptionalElement *const> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
     void Serialize(RawData *raw_data) const override final;
-    void Clear();
-    bool Validate();
 };
 
 struct ReadableWTPEventRequest : ReadableCapwapRequest {
-    ReadableDecryptionErrorReportArray decryption_error_report;
-    ReadableDuplicateIPv4AdrArray duplicate_ipv4_address;
-    ReadableWTPRadioStatisticsArray wtp_radio_statistics;
-    WTPRebootStatistics *wtp_reboot_statistics;
-    ReadableDeleteStationArray delete_station;
-    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+  protected:
+    std::unordered_map<ElementHeader::ElementType, IReadableWTPEventRequestOptionalElement *const>
+        key_optional_elements;
 
+    std::unordered_map<ElementHeader::ElementType, IReadableWTPEventRequestOptionalElement *const>
+    MapOptionalsElements(
+        nonstd::span<IReadableWTPEventRequestOptionalElement *const> optional_elements);
+
+  public:
     size_t unknown_elements;
 
     ReadableWTPEventRequest(const ReadableWTPEventRequest &) = delete;
     ReadableWTPEventRequest();
+    ReadableWTPEventRequest(
+        nonstd::span<IReadableWTPEventRequestOptionalElement *const> optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;
     void Log() const;
+
+    template <typename T> T *GetOptionalElement(ElementHeader::ElementType element_type) {
+        auto it = key_optional_elements.find(element_type);
+        if (it != key_optional_elements.end()) {
+            return static_cast<T *>(it->second);
+        }
+        return nullptr;
+    }
 };

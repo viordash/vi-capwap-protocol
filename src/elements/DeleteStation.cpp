@@ -2,6 +2,7 @@
 #include "ClearHeader.h"
 #include "Logging.h"
 #include "lassert.h"
+#include <cstring>
 #include <string.h>
 
 DeleteStation::DeleteStation(uint8_t radio_id, uint8_t mac_length)
@@ -38,6 +39,7 @@ bool DeleteStation::Validate() const {
 }
 
 WritableDeleteStationArray::WritableDeleteStationArray() {
+    static_assert(sizeof(Item::header) == 6);
     items.reserve(ReadableDeleteStationArray::max_count);
 }
 
@@ -68,24 +70,16 @@ void WritableDeleteStationArray::Clear() {
 void WritableDeleteStationArray::Serialize(RawData *raw_data) const {
     ASSERT(items.size() <= ReadableDeleteStationArray::max_count);
 
-    for (const auto &elem : items) {
-        ASSERT(raw_data->current + sizeof(DeleteStation) + elem.header.GetLength()
-               <= raw_data->end);
-        DeleteStation *dst = (DeleteStation *)raw_data->current;
-        *dst = elem.header;
-        raw_data->current += sizeof(DeleteStation);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) + item.header.GetLength() <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
 
-        memcpy(raw_data->current, elem.Mac.Address, elem.header.MACAddress.Length);
-        raw_data->current +=
-            elem.header.GetLength() - (sizeof(DeleteStation) - sizeof(ElementHeader));
+        uint16_t data_size =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.Mac.Address, data_size);
+        raw_data->current += data_size;
     }
-}
-uint16_t WritableDeleteStationArray::GetTotalLength() const {
-    uint16_t len = 0;
-    for (const auto &elem : items) {
-        len += elem.header.GetLength() + sizeof(ElementHeader);
-    }
-    return len;
 }
 
 void WritableDeleteStationArray::Log() const {
@@ -112,8 +106,13 @@ bool ReadableDeleteStationArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += item->GetLength() + sizeof(ElementHeader);
 
+    uint8_t *last = raw_data->current + sizeof(ElementHeader) + item->GetLength();
+    if (last > raw_data->end) {
+        return false;
+    }
+
+    raw_data->current = last;
     items[count] = item;
     count++;
     return true;
@@ -129,4 +128,12 @@ void ReadableDeleteStationArray::Log() const {
         log_i("ME DeleteStation #%zu Radio ID:%u", i, items[i]->RadioID);
         MacAddress::Log(i, items[i]->MACAddress.Length, items[i]->MACAddress.MACAddresses);
     }
+}
+
+ElementHeader::ElementType ReadableDeleteStationArray::GetElementType() const {
+    return ElementHeader::DeleteStation;
+}
+
+bool ReadableDeleteStationArray::IsPresent() const {
+    return count > 0;
 }

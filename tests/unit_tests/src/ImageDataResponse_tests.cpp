@@ -16,19 +16,20 @@ TEST_GROUP(ImageDataResponseTestsGroup){ //
 TEST(ImageDataResponseTestsGroup, ImageDataResponse_serialize) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
-
-    WritableVendorSpecificPayloadArray vendor_specific_payloads;
-    vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
-
     const uint8_t hash[] = { 0xF8, 0x1D, 0x4F, 0xAE, 0x7D, 0xEC, 0x11, 0xD0,
                              0xA7, 0x65, 0x00, 0xA0, 0xC9, 0x1E, 0x6B, 0xF6 };
-    ImageInformation image_information{ 12345, hash };
+    {
+        WritableVendorSpecificPayloadArray vendor_specific_payloads;
+        vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-    WritableImageDataResponse write_data(ResultCode::Type::Success,
-                                         vendor_specific_payloads,
-                                         &image_information);
+        WritableImageInformation image_information{ 12345, hash };
 
-    write_data.Serialize(&raw_data);
+        IWritableImageDataResponseOptionalElement *const elems_1[] = { &vendor_specific_payloads, &image_information };
+        WritableImageDataResponse write_data(ResultCode::Type::Success,
+            elems_1);
+
+        write_data.Serialize(&raw_data);
+    }
     CHECK_EQUAL(&buffer[0] + 79 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
     const uint8_t reference[] = { 0x00, 0x10, 0xC2, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                                   0x00, 0x10, 0x2A, 0x00, 0x3F, 0x00, 0x00, 0x21, 0x00, 0x04,
@@ -44,21 +45,25 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_serialize) {
                  sizeof(reference) - (sizeof(ClearHeader) + sizeof(ControlHeader)));
 
     raw_data = { buffer, buffer + 79 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
-    ReadableImageDataResponse read_data;
+
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableImageInformation image_information;
+    IReadableImageDataResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads, &image_information };
+    ReadableImageDataResponse read_data(elems_2);
+
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
-    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code->type);
+    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code.Get()->type);
 
-    CHECK_EQUAL(1, read_data.vendor_specific_payloads.Get().size());
-    CHECK_EQUAL(123456, read_data.vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
-    CHECK_EQUAL(789, read_data.vendor_specific_payloads.Get()[0]->GetElementId());
-    STRNCMP_EQUAL("01234567890ABCDEF0123",
-                  (char *)read_data.vendor_specific_payloads.Get()[0]->value,
-                  21);
+    CHECK_TRUE(vendor_specific_payloads.IsPresent());
+    CHECK_EQUAL(1, vendor_specific_payloads.Get().size());
+    CHECK_EQUAL(123456, vendor_specific_payloads.Get()[0]->GetVendorIdentifier());
+    CHECK_EQUAL(789, vendor_specific_payloads.Get()[0]->GetElementId());
+    STRNCMP_EQUAL("01234567890ABCDEF0123", (char *)vendor_specific_payloads.Get()[0]->value, 21);
 
-    CHECK(read_data.image_information != nullptr);
-    CHECK_EQUAL(12345, read_data.image_information->GetFileSize());
-    MEMCMP_EQUAL(hash, read_data.image_information->file_hash, 16);
+    CHECK_TRUE(image_information.IsPresent());
+    CHECK_EQUAL(12345, image_information.Get()->GetFileSize());
+    MEMCMP_EQUAL(hash, image_information.Get()->file_hash, 16);
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -98,18 +103,23 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_deserialize_after_initiate_d
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableImageDataResponse read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableImageInformation image_information;
+    IReadableImageDataResponseOptionalElement *const elems_3[] = { &vendor_specific_payloads, &image_information };
+    ReadableImageDataResponse read_data(elems_3);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
 
-    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code->type);
+    CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code.Get()->type);
 
-    CHECK(read_data.image_information != nullptr);
-    CHECK_EQUAL(1048576, read_data.image_information->GetFileSize());
-    CHECK_EQUAL(0xf1, read_data.image_information->file_hash[0]);
-    CHECK_EQUAL(0x60, read_data.image_information->file_hash[1]);
+    CHECK_TRUE(image_information.IsPresent());
+    CHECK_EQUAL(1048576, image_information.Get()->GetFileSize());
+    CHECK_EQUAL(0xf1, image_information.Get()->file_hash[0]);
+    CHECK_EQUAL(0x60, image_information.Get()->file_hash[1]);
+
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
     CHECK_EQUAL(0, read_data.unknown_elements);
 }
 
@@ -145,9 +155,33 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_deserialize_handle_unknown_e
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableImageDataResponse read_data;
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    ReadableImageInformation image_information;
+    IReadableImageDataResponseOptionalElement *const elems_4[] = { &vendor_specific_payloads, &image_information };
+    ReadableImageDataResponse read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
+    CHECK_FALSE(vendor_specific_payloads.IsPresent());
+    CHECK_FALSE(image_information.IsPresent());
     CHECK_EQUAL(2, read_data.unknown_elements);
+}
+TEST(ImageDataResponseTestsGroup, GetOptionalElement) {
+    ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableImageDataResponseOptionalElement *const elems_5[] = { &vendor_specific_payloads };
+    ReadableImageDataResponse read_data(elems_5);
+
+    CHECK_EQUAL(&vendor_specific_payloads,
+                read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
+                    ElementHeader::VendorSpecificPayload));
+
+    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
+          nullptr);
+}
+
+TEST(ImageDataResponseTestsGroup, MessageTypeIdentification) {
+    WritableImageDataResponse write_data(ResultCode::Type::Success, nonstd::span<IWritableImageDataResponseOptionalElement *const>{});
+
+    CHECK_EQUAL(ControlHeader::ImageDataResponse, write_data.GetMessageType());
+    CHECK_EQUAL(ControlHeader::ImageDataRequest, write_data.GetRequestMessageType());
 }

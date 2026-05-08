@@ -7,6 +7,7 @@ WTPFallback::WTPFallback(Mode mode)
     : ElementHeader(ElementHeader::WTPFallback, sizeof(WTPFallback) - sizeof(ElementHeader)),
       mode{ mode } {
 }
+
 bool WTPFallback::Validate() const {
     static_assert(sizeof(WTPFallback) == 5);
 #pragma GCC diagnostic push
@@ -16,32 +17,54 @@ bool WTPFallback::Validate() const {
         && mode >= Reserved && mode <= Disabled;
 #pragma GCC diagnostic pop
 }
-void WTPFallback::Serialize(RawData *raw_data) const {
-    ASSERT(raw_data->current + sizeof(WTPFallback) <= raw_data->end);
-#pragma GCC diagnostic push
-#if __GNUC__ >= 8
-#pragma GCC diagnostic ignored "-Wclass-memaccess"
-#endif
-    memcpy(raw_data->current, this, sizeof(WTPFallback));
-#pragma GCC diagnostic pop
-    raw_data->current += sizeof(WTPFallback);
+
+void WTPFallback::Log() const {
+    log_i("ME WTPFallback Mode:%u", (unsigned)mode);
 }
-WTPFallback *WTPFallback::Deserialize(RawData *raw_data) {
+
+WritableWTPFallback::WritableWTPFallback(WTPFallback::Mode mode) : element{ mode } {
+    static_assert(sizeof(element) == 5);
+}
+
+void WritableWTPFallback::Serialize(RawData *raw_data) const {
+    ASSERT(raw_data->current + sizeof(WTPFallback) <= raw_data->end);
+    std::memcpy(raw_data->current, &element, sizeof(element));
+    raw_data->current += sizeof(element);
+}
+
+void WritableWTPFallback::Log() const {
+    element.Log();
+}
+
+bool ReadableWTPFallback::Deserialize(RawData *raw_data) {
     if (raw_data->current + sizeof(WTPFallback) > raw_data->end) {
-        return nullptr;
+        return false;
     }
 
     auto res = (WTPFallback *)raw_data->current;
     if (!res->Validate()) {
-        return nullptr;
+        return false;
     }
     raw_data->current += sizeof(WTPFallback);
-    return res;
-}
-uint16_t WTPFallback::GetTotalLength() const {
-    return GetLength() + sizeof(ElementHeader);
+
+    element = res;
+    is_present = true;
+    return true;
 }
 
-void WTPFallback::Log() const {
-    log_i("ME WTPFallback Mode:%u", (unsigned)mode);
+const WTPFallback *ReadableWTPFallback::Get() const {
+    return element;
+}
+
+void ReadableWTPFallback::Log() const {
+    ASSERT(element != nullptr);
+    element->Log();
+}
+
+ElementHeader::ElementType ReadableWTPFallback::GetElementType() const {
+    return ElementHeader::WTPFallback;
+}
+
+bool ReadableWTPFallback::IsPresent() const {
+    return is_present;
 }

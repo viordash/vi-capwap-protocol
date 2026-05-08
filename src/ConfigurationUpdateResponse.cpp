@@ -6,11 +6,16 @@
 #include "lassert.h"
 
 WritableConfigurationUpdateResponse::WritableConfigurationUpdateResponse(
+    const ResultCode::Type result_code)
+    : WritableConfigurationUpdateResponse(
+          result_code,
+          nonstd::span<IWritableConfigurationUpdateResponseOptionalElement *const>{}) {
+}
+
+WritableConfigurationUpdateResponse::WritableConfigurationUpdateResponse(
     const ResultCode::Type result_code,
-    WritableRadioOperationalStateArray &radio_operational_states,
-    WritableVendorSpecificPayloadArray &vendor_specific_payloads)
-    : result_code{ result_code }, radio_operational_states{ radio_operational_states },
-      vendor_specific_payloads{ vendor_specific_payloads } {
+    nonstd::span<IWritableConfigurationUpdateResponseOptionalElement *const> optional_elements)
+    : result_code{ result_code }, optional_elements{ optional_elements } {
 }
 
 ControlHeader::MessageType WritableConfigurationUpdateResponse::GetMessageType() const {
@@ -23,12 +28,21 @@ ControlHeader::MessageType WritableConfigurationUpdateResponse::GetRequestMessag
 
 void WritableConfigurationUpdateResponse::Serialize(RawData *raw_data) const {
     result_code.Serialize(raw_data);
-    radio_operational_states.Serialize(raw_data);
-    vendor_specific_payloads.Serialize(raw_data);
+
+    for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
+        elem->Serialize(raw_data);
+    }
 }
 
-ReadableConfigurationUpdateResponse::ReadableConfigurationUpdateResponse() : unknown_elements{} {
-    result_code = nullptr;
+ReadableConfigurationUpdateResponse::ReadableConfigurationUpdateResponse()
+    : ReadableConfigurationUpdateResponse(
+          nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const>{}) {
+}
+
+ReadableConfigurationUpdateResponse::ReadableConfigurationUpdateResponse(
+    nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const> optional_elements)
+    : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
 ControlHeader::MessageType ReadableConfigurationUpdateResponse::GetMessageType() const {
@@ -41,23 +55,20 @@ bool ReadableConfigurationUpdateResponse::Deserialize(RawData *raw_data) {
 
         switch (element->GetElementType()) {
             case ElementHeader::ElementType::ResultCode:
-                result_code = ResultCode::Deserialize(raw_data);
-                if (result_code == nullptr) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::RadioOperationalState:
-                if (!radio_operational_states.Deserialize(raw_data)) {
-                    return false;
-                }
-                break;
-            case ElementHeader::ElementType::VendorSpecificPayload:
-                if (!vendor_specific_payloads.Deserialize(raw_data)) {
+                if (!result_code.Deserialize(raw_data)) {
                     return false;
                 }
                 break;
 
             default: {
+                auto it = key_optional_elements.find(element->GetElementType());
+                if (it != key_optional_elements.end()) {
+                    if (!it->second->Deserialize(raw_data)) {
+                        return false;
+                    }
+                    break;
+                }
+
                 auto unknownElement = UnrecognizedElement::Deserialize(raw_data);
                 if (unknownElement == nullptr) {
                     return false;
@@ -71,20 +82,42 @@ bool ReadableConfigurationUpdateResponse::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return result_code != nullptr;
+    return result_code.IsPresent();
 }
 
 void ReadableConfigurationUpdateResponse::Log() const {
     log_i("----------------------------------");
     log_i("ME ConfigurationUpdateResponse:");
 
-    ASSERT(result_code != nullptr);
-    result_code->Log();
+    result_code.Log();
 
-    radio_operational_states.Log();
-    vendor_specific_payloads.Log();
+    for (const auto &[type, value] : key_optional_elements) {
+        if (value->IsPresent()) {
+            value->Log();
+        } else {
+            log_i("  expected optional element is missing, type: 0x%04X", (unsigned)type);
+        }
+    }
+
     if (unknown_elements > 0) {
         log_i("  UnknownElements count: %zu", unknown_elements);
     }
     log_i("----------------------------------");
+}
+
+std::unordered_map<ElementHeader::ElementType,
+                   IReadableConfigurationUpdateResponseOptionalElement *const>
+ReadableConfigurationUpdateResponse::MapOptionalsElements(
+    nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const> optional_elements) {
+
+    std::unordered_map<ElementHeader::ElementType,
+                       IReadableConfigurationUpdateResponseOptionalElement *const>
+        map;
+
+    for (auto *elem : optional_elements) {
+        ASSERT(elem != nullptr);
+        map.emplace(elem->GetElementType(), elem);
+    }
+
+    return map;
 }

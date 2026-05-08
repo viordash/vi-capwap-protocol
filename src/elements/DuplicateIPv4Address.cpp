@@ -3,6 +3,7 @@
 #include "Logging.h"
 #include "NetworkUtils.h"
 #include "lassert.h"
+#include <cstring>
 #include <string.h>
 
 DuplicateIPv4Address::DuplicateIPv4Address(uint32_t ipaddress,
@@ -48,6 +49,7 @@ bool DuplicateIPv4Address::Validate() const {
 }
 
 WritableDuplicateIPv4AdrArray::WritableDuplicateIPv4AdrArray() {
+    static_assert(sizeof(Item::header) == 10);
     items.reserve(ReadableDuplicateIPv4AdrArray::max_count);
 }
 
@@ -86,24 +88,16 @@ void WritableDuplicateIPv4AdrArray::Clear() {
 void WritableDuplicateIPv4AdrArray::Serialize(RawData *raw_data) const {
     ASSERT(items.size() <= ReadableDuplicateIPv4AdrArray::max_count);
 
-    for (const auto &elem : items) {
-        ASSERT(raw_data->current + sizeof(DuplicateIPv4Address) + elem.header.GetLength()
-               <= raw_data->end);
-        DuplicateIPv4Address *dst = (DuplicateIPv4Address *)raw_data->current;
-        *dst = elem.header;
-        raw_data->current += sizeof(DuplicateIPv4Address);
+    for (const auto &item : items) {
+        ASSERT(raw_data->current + sizeof(item.header) + item.header.GetLength() <= raw_data->end);
+        std::memcpy(raw_data->current, &item.header, sizeof(item.header));
+        raw_data->current += sizeof(item.header);
 
-        memcpy(raw_data->current, elem.Mac.Address, elem.header.MACAddress.Length);
-        raw_data->current +=
-            elem.header.GetLength() - (sizeof(DuplicateIPv4Address) - sizeof(ElementHeader));
+        uint16_t data_size =
+            item.header.GetLength() - (sizeof(item.header) - sizeof(ElementHeader));
+        std::memcpy(raw_data->current, item.Mac.Address, data_size);
+        raw_data->current += data_size;
     }
-}
-uint16_t WritableDuplicateIPv4AdrArray::GetTotalLength() const {
-    uint16_t len = 0;
-    for (const auto &elem : items) {
-        len += elem.header.GetLength() + sizeof(ElementHeader);
-    }
-    return len;
 }
 
 void WritableDuplicateIPv4AdrArray::Log() const {
@@ -133,8 +127,11 @@ bool ReadableDuplicateIPv4AdrArray::Deserialize(RawData *raw_data) {
     if (!item->Validate()) {
         return false;
     }
-    raw_data->current += item->GetLength() + sizeof(ElementHeader);
+    if (raw_data->current + sizeof(ElementHeader) + item->GetLength() > raw_data->end) {
+        return false;
+    }
 
+    raw_data->current += sizeof(ElementHeader) + item->GetLength();
     items[count] = item;
     count++;
     return true;
@@ -153,4 +150,12 @@ void ReadableDuplicateIPv4AdrArray::Log() const {
               items[i]->Status);
         MacAddress::Log(i, items[i]->MACAddress.Length, items[i]->MACAddress.MACAddresses);
     }
+}
+
+ElementHeader::ElementType ReadableDuplicateIPv4AdrArray::GetElementType() const {
+    return ElementHeader::DuplicateIPv4Address;
+}
+
+bool ReadableDuplicateIPv4AdrArray::IsPresent() const {
+    return count > 0;
 }

@@ -1,6 +1,7 @@
 #pragma once
 #include "ClearHeader.h"
 #include "ControlHeader.h"
+#include "IElement.h"
 #include "elements/ElementHeader.h"
 #include "span.hpp"
 #include <array>
@@ -65,8 +66,6 @@ struct __attribute__((packed)) WTPRadioStatistics : ElementHeader {
                        int16_t current_noise_floor);
 
     bool Validate() const;
-    void Serialize(RawData *raw_data) const;
-    static WTPRadioStatistics *Deserialize(RawData *raw_data);
 
     uint8_t GetRadioID() const;
     LastFailureType GetLastFailureType() const;
@@ -80,12 +79,10 @@ struct __attribute__((packed)) WTPRadioStatistics : ElementHeader {
     uint16_t GetBandChangeCount() const;
     int16_t GetCurrentNoiseFloor() const;
 
-    uint16_t GetTotalLength() const;
-
     bool operator==(const WTPRadioStatistics &other) const;
 };
 
-struct WritableWTPRadioStatisticsArray {
+struct WritableWTPRadioStatisticsArray : IWritableWTPEventRequestOptionalElement {
   private:
     std::vector<WTPRadioStatistics> items;
 
@@ -97,12 +94,11 @@ struct WritableWTPRadioStatisticsArray {
     bool Empty() const;
     void Clear();
 
-    void Serialize(RawData *raw_data) const;
-    uint16_t GetTotalLength() const;
-    void Log() const;
+    void Serialize(RawData *raw_data) const override final;
+    void Log() const override final;
 };
 
-struct ReadableWTPRadioStatisticsArray {
+struct ReadableWTPRadioStatisticsArray : IReadableWTPEventRequestOptionalElement {
   public:
     static const size_t max_count = 32; //Radio ID
 
@@ -114,7 +110,9 @@ struct ReadableWTPRadioStatisticsArray {
     ReadableWTPRadioStatisticsArray(const ReadableWTPRadioStatisticsArray &) = delete;
     ReadableWTPRadioStatisticsArray();
 
-    bool Deserialize(RawData *raw_data);
+    bool Deserialize(RawData *raw_data) override final;
     nonstd::span<const WTPRadioStatistics *const> Get() const;
-    void Log() const;
+    void Log() const override final;
+    ElementHeader::ElementType GetElementType() const override final;
+    bool IsPresent() const override final;
 };
