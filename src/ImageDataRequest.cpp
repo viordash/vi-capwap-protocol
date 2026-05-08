@@ -75,9 +75,12 @@ void ReadableImageDataRequest::Log() const {
     log_i("----------------------------------");
     log_i("ME ImageDataRequest:");
 
-    for (const auto &[_, value] : key_optional_elements) {
-        (void)_;
-        value->Log();
+    for (const auto &[type, value] : key_optional_elements) {
+        if (value->IsPresent()) {
+            value->Log();
+        } else {
+            log_w("  expected optional element is missing, type: 0x%04X", (unsigned)type);
+        }
     }
 
     if (unknown_elements > 0) {
