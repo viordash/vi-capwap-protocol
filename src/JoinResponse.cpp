@@ -20,26 +20,6 @@ WritableJoinResponse::WritableJoinResponse(
       optional_elements{ optional_elements } {
 }
 
-WritableJoinResponse::WritableJoinResponse(
-    const ResultCode::Type result_code,
-    const WritableACDescriptor &ac_descriptor,
-    const std::string_view ac_name,
-    WritableWTPRadioInformationArray &wtp_radio_informations,
-    const ECNSupport::Type ecn_support,
-    const nonstd::span<const CAPWAPControlIPv4Address> &control_ip_addresses,
-    const nonstd::span<const CAPWAPLocalIPv4Address> &local_ip_addresses,
-    std::initializer_list<IWritableJoinResponseOptionalElement *const> optional_elements)
-    : WritableJoinResponse(
-          result_code,
-          ac_descriptor,
-          ac_name,
-          wtp_radio_informations,
-          ecn_support,
-          control_ip_addresses,
-          local_ip_addresses,
-          nonstd::span<IWritableJoinResponseOptionalElement *const>(optional_elements.begin(),
-                                                                    optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableJoinResponse::GetMessageType() const {
     return ControlHeader::JoinResponse;
@@ -69,12 +49,6 @@ ReadableJoinResponse::ReadableJoinResponse(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableJoinResponse::ReadableJoinResponse(
-    std::initializer_list<IReadableJoinResponseOptionalElement *> optional_elements)
-    : ReadableJoinResponse(
-          nonstd::span<IReadableJoinResponseOptionalElement *const>(optional_elements.begin(),
-                                                                    optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableJoinResponse::GetMessageType() const {
     return ControlHeader::JoinResponse;

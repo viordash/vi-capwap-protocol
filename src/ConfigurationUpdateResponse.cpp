@@ -10,16 +10,6 @@ WritableConfigurationUpdateResponse::WritableConfigurationUpdateResponse(
     nonstd::span<IWritableConfigurationUpdateResponseOptionalElement *const> optional_elements)
     : result_code{ result_code }, optional_elements{ optional_elements } {
 }
-WritableConfigurationUpdateResponse::WritableConfigurationUpdateResponse(
-    const ResultCode::Type result_code,
-    std::initializer_list<IWritableConfigurationUpdateResponseOptionalElement *const>
-        optional_elements)
-    : WritableConfigurationUpdateResponse(
-          result_code,
-          nonstd::span<IWritableConfigurationUpdateResponseOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableConfigurationUpdateResponse::GetMessageType() const {
     return ControlHeader::ConfigurationUpdateResponse;
@@ -43,13 +33,6 @@ ReadableConfigurationUpdateResponse::ReadableConfigurationUpdateResponse(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableConfigurationUpdateResponse::ReadableConfigurationUpdateResponse(
-    std::initializer_list<IReadableConfigurationUpdateResponseOptionalElement *> optional_elements)
-    : ReadableConfigurationUpdateResponse(
-          nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableConfigurationUpdateResponse::GetMessageType() const {
     return ControlHeader::ConfigurationUpdateResponse;

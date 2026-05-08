@@ -18,7 +18,7 @@ TEST(EchoResponseTestsGroup, EchoResponse_serialize) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
-    WritableEchoResponse write_data({});
+    WritableEchoResponse write_data(nonstd::span<IWritableEchoResponseOptionalElement *const>{});
 
     write_data.Serialize(&raw_data);
 
@@ -32,7 +32,8 @@ TEST(EchoResponseTestsGroup, EchoResponse_serialize) {
 
     raw_data = { buffer, buffer + 16 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableEchoResponse read_data({ &vendor_specific_payloads });
+    IReadableEchoResponseOptionalElement *const elems_1[] = { &vendor_specific_payloads };
+    ReadableEchoResponse read_data(elems_1);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_FALSE(vendor_specific_payloads.IsPresent());
     CHECK_EQUAL(0, read_data.unknown_elements);
@@ -45,7 +46,8 @@ TEST(EchoResponseTestsGroup, EchoResponse_serialize_with_VendorSpecificPayload) 
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-        WritableEchoResponse write_data({ &vendor_specific_payloads });
+        IWritableEchoResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads };
+        WritableEchoResponse write_data(elems_2);
 
         write_data.Serialize(&raw_data);
     }
@@ -53,7 +55,8 @@ TEST(EchoResponseTestsGroup, EchoResponse_serialize_with_VendorSpecificPayload) 
 
     raw_data = { buffer, buffer + 47 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableEchoResponse read_data({ &vendor_specific_payloads });
+    IReadableEchoResponseOptionalElement *const elems_3[] = { &vendor_specific_payloads };
+    ReadableEchoResponse read_data(elems_3);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_TRUE(vendor_specific_payloads.IsPresent());
@@ -86,7 +89,7 @@ TEST(EchoResponseTestsGroup, EchoResponse_deserialize_image_data) {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableEchoResponse read_data({});
+    ReadableEchoResponse read_data(nonstd::span<IReadableEchoResponseOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -121,7 +124,8 @@ TEST(EchoResponseTestsGroup, EchoResponse_deserialize_handle_unknown_element) {
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableEchoResponse read_data({ &vendor_specific_payloads });
+    IReadableEchoResponseOptionalElement *const elems_4[] = { &vendor_specific_payloads };
+    ReadableEchoResponse read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -130,7 +134,8 @@ TEST(EchoResponseTestsGroup, EchoResponse_deserialize_handle_unknown_element) {
 }
 TEST(EchoResponseTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableEchoResponse read_data({ &vendor_specific_payloads });
+    IReadableEchoResponseOptionalElement *const elems_5[] = { &vendor_specific_payloads };
+    ReadableEchoResponse read_data(elems_5);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
@@ -141,7 +146,7 @@ TEST(EchoResponseTestsGroup, GetOptionalElement) {
 }
 
 TEST(EchoResponseTestsGroup, MessageTypeIdentification) {
-    WritableEchoResponse write_data({});
+    WritableEchoResponse write_data(nonstd::span<IWritableEchoResponseOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::EchoResponse, write_data.GetMessageType());
     CHECK_EQUAL(ControlHeader::EchoRequest, write_data.GetRequestMessageType());

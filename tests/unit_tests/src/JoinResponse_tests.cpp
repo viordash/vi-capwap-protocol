@@ -55,6 +55,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
             CapwapTransportProtocol::Type::UDP
         };
 
+        IWritableJoinResponseOptionalElement *const elems_1[] = { &ac_ipv4_list, &capwap_transport_protocol, &image_identifier, &maximum_message_length };
         WritableJoinResponse write_data(ResultCode::Type::Success,
                                         ac_descriptor,
                                         "Corporate-AC-1",
@@ -62,10 +63,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
                                         ECNSupport::Type::FullAndLimitedECN,
                                         control_ip_addresses,
                                         local_ip_addresses,
-                                        { &ac_ipv4_list,
-                                          &capwap_transport_protocol,
-                                          &image_identifier,
-                                          &maximum_message_length });
+            elems_1);
 
         write_data.Serialize(&raw_data);
     }
@@ -101,11 +99,8 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize) {
     ReadableMaximumMessageLength maximum_message_length;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
-    ReadableJoinResponse read_data({ &ac_ipv4_list,
-                                     &capwap_transport_protocol,
-                                     &image_identifier,
-                                     &maximum_message_length,
-                                     &vendor_specific_payloads });
+    IReadableJoinResponseOptionalElement *const elems_2[] = { &ac_ipv4_list, &capwap_transport_protocol, &image_identifier, &maximum_message_length, &vendor_specific_payloads };
+    ReadableJoinResponse read_data(elems_2);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(ResultCode::Type::Success, read_data.result_code.Get()->type);
@@ -218,6 +213,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_with_VendorSpecificPayload) 
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
         vendor_specific_payloads.Add(1, 2, "01234567890A");
 
+        IWritableJoinResponseOptionalElement *const elems_3[] = { &vendor_specific_payloads };
         WritableJoinResponse write_data(ResultCode::Type::Success,
                                         ac_descriptor,
                                         "Corporate-AC-1",
@@ -225,7 +221,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_with_VendorSpecificPayload) 
                                         ECNSupport::Type::FullAndLimitedECN,
                                         control_ip_addresses,
                                         local_ip_addresses,
-                                        { &vendor_specific_payloads });
+            elems_3);
 
         write_data.Serialize(&raw_data);
     }
@@ -262,11 +258,8 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_with_VendorSpecificPayload) 
     ReadableMaximumMessageLength maximum_message_length;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
-    ReadableJoinResponse read_data({ &ac_ipv4_list,
-                                     &capwap_transport_protocol,
-                                     &image_identifier,
-                                     &maximum_message_length,
-                                     &vendor_specific_payloads });
+    IReadableJoinResponseOptionalElement *const elems_4[] = { &ac_ipv4_list, &capwap_transport_protocol, &image_identifier, &maximum_message_length, &vendor_specific_payloads };
+    ReadableJoinResponse read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -390,11 +383,8 @@ uint8_t data[] = {
     ReadableMaximumMessageLength maximum_message_length;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
-    ReadableJoinResponse read_data({ &ac_ipv4_list,
-                                     &capwap_transport_protocol,
-                                     &image_identifier,
-                                     &maximum_message_length,
-                                     &vendor_specific_payloads });
+    IReadableJoinResponseOptionalElement *const elems_5[] = { &ac_ipv4_list, &capwap_transport_protocol, &image_identifier, &maximum_message_length, &vendor_specific_payloads };
+    ReadableJoinResponse read_data(elems_5);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -547,7 +537,7 @@ uint8_t data[] = {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableJoinResponse read_data({});
+    ReadableJoinResponse read_data(nonstd::span<IReadableJoinResponseOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -555,7 +545,8 @@ uint8_t data[] = {
 }
 TEST(JoinResponseTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableJoinResponse read_data({ &vendor_specific_payloads });
+    IReadableJoinResponseOptionalElement *const elems_6[] = { &vendor_specific_payloads };
+    ReadableJoinResponse read_data(elems_6);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(

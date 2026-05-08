@@ -10,12 +10,6 @@ WritableImageDataRequest::WritableImageDataRequest(
     : optional_elements{ optional_elements } {
 }
 
-WritableImageDataRequest::WritableImageDataRequest(
-    std::initializer_list<IWritableImageDataRequestOptionalElement *const> optional_elements)
-    : WritableImageDataRequest(
-          nonstd::span<IWritableImageDataRequestOptionalElement *const>(optional_elements.begin(),
-                                                                        optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableImageDataRequest::GetMessageType() const {
     return ControlHeader::ImageDataRequest;
@@ -37,12 +31,6 @@ ReadableImageDataRequest::ReadableImageDataRequest(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableImageDataRequest::ReadableImageDataRequest(
-    std::initializer_list<IReadableImageDataRequestOptionalElement *> optional_elements)
-    : ReadableImageDataRequest(
-          nonstd::span<IReadableImageDataRequestOptionalElement *const>(optional_elements.begin(),
-                                                                        optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableImageDataRequest::GetMessageType() const {
     return ControlHeader::ImageDataRequest;

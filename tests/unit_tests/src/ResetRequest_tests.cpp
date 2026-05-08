@@ -23,7 +23,8 @@ TEST(ResetRequestTestsGroup, ResetRequest_serialize) {
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-        WritableResetRequest write_data(image_identifier, { &vendor_specific_payloads });
+        IWritableResetRequestOptionalElement *const elems_1[] = { &vendor_specific_payloads };
+        WritableResetRequest write_data(image_identifier, elems_1);
 
         write_data.Serialize(&raw_data);
     }
@@ -39,7 +40,8 @@ TEST(ResetRequestTestsGroup, ResetRequest_serialize) {
 
     raw_data = { buffer, buffer + 63 };
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableResetRequest read_data({ &vendor_specific_payloads });
+    IReadableResetRequestOptionalElement *const elems_2[] = { &vendor_specific_payloads };
+    ReadableResetRequest read_data(elems_2);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_TRUE(read_data.image_identifier.IsPresent());
@@ -94,7 +96,8 @@ TEST(ResetRequestTestsGroup, ResetRequest_deserialize_image_data) {
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableResetRequest read_data({ &vendor_specific_payloads });
+    IReadableResetRequestOptionalElement *const elems_3[] = { &vendor_specific_payloads };
+    ReadableResetRequest read_data(elems_3);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -149,7 +152,8 @@ TEST(ResetRequestTestsGroup, ResetRequest_deserialize_handle_unknown_element) {
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableResetRequest read_data({ &vendor_specific_payloads });
+    IReadableResetRequestOptionalElement *const elems_4[] = { &vendor_specific_payloads };
+    ReadableResetRequest read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -158,7 +162,8 @@ TEST(ResetRequestTestsGroup, ResetRequest_deserialize_handle_unknown_element) {
 }
 TEST(ResetRequestTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableResetRequest read_data({ &vendor_specific_payloads });
+    IReadableResetRequestOptionalElement *const elems_5[] = { &vendor_specific_payloads };
+    ReadableResetRequest read_data(elems_5);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
@@ -170,7 +175,7 @@ TEST(ResetRequestTestsGroup, GetOptionalElement) {
 
 TEST(ResetRequestTestsGroup, MessageTypeIdentification) {
     WritableImageIdentifier image_identifier{ 1, "img" };
-    WritableResetRequest write_data(image_identifier, {});
+    WritableResetRequest write_data(image_identifier, nonstd::span<IWritableResetRequestOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::ResetRequest, write_data.GetMessageType());
 }

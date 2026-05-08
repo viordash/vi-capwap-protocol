@@ -10,12 +10,6 @@ WritableEchoResponse::WritableEchoResponse(
     : optional_elements{ optional_elements } {
 }
 
-WritableEchoResponse::WritableEchoResponse(
-    std::initializer_list<IWritableEchoResponseOptionalElement *const> optional_elements)
-    : WritableEchoResponse(
-          nonstd::span<IWritableEchoResponseOptionalElement *const>(optional_elements.begin(),
-                                                                    optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableEchoResponse::GetMessageType() const {
     return ControlHeader::EchoResponse;
@@ -37,12 +31,6 @@ ReadableEchoResponse::ReadableEchoResponse(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableEchoResponse::ReadableEchoResponse(
-    std::initializer_list<IReadableEchoResponseOptionalElement *> optional_elements)
-    : ReadableEchoResponse(
-          nonstd::span<IReadableEchoResponseOptionalElement *const>(optional_elements.begin(),
-                                                                    optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableEchoResponse::GetMessageType() const {
     return ControlHeader::EchoResponse;

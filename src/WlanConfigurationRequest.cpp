@@ -12,15 +12,6 @@ WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
       optional_elements{ optional_elements } {
 }
 
-WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
-    WritableAddWlanArray *add_wlan,
-    std::initializer_list<IWritableWlanConfigurationRequestOptionalElement *> optional_elements)
-    : WritableWlanConfigurationRequest(
-          add_wlan,
-          nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
     WritableDeleteWlanArray *delete_wlan,
@@ -29,15 +20,6 @@ WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
       optional_elements{ optional_elements } {
 }
 
-WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
-    WritableDeleteWlanArray *delete_wlan,
-    std::initializer_list<IWritableWlanConfigurationRequestOptionalElement *> optional_elements)
-    : WritableWlanConfigurationRequest(
-          delete_wlan,
-          nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
     WritableUpdateWlanArray *update_wlan,
@@ -46,15 +28,6 @@ WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
       optional_elements{ optional_elements } {
 }
 
-WritableWlanConfigurationRequest::WritableWlanConfigurationRequest(
-    WritableUpdateWlanArray *update_wlan,
-    std::initializer_list<IWritableWlanConfigurationRequestOptionalElement *> optional_elements)
-    : WritableWlanConfigurationRequest(
-          update_wlan,
-          nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableWlanConfigurationRequest::GetMessageType() const {
     return ControlHeader::WlanConfigurationRequest;
@@ -86,13 +59,6 @@ ReadableWlanConfigurationRequest::ReadableWlanConfigurationRequest(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableWlanConfigurationRequest::ReadableWlanConfigurationRequest(
-    std::initializer_list<IReadableWlanConfigurationRequestOptionalElement *> optional_elements)
-    : ReadableWlanConfigurationRequest(
-          nonstd::span<IReadableWlanConfigurationRequestOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableWlanConfigurationRequest::GetMessageType() const {
     return ControlHeader::WlanConfigurationRequest;

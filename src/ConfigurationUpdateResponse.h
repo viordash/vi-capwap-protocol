@@ -21,10 +21,6 @@ struct WritableConfigurationUpdateResponse : WritableCapwapResponse {
     WritableConfigurationUpdateResponse(
         const ResultCode::Type result_code,
         nonstd::span<IWritableConfigurationUpdateResponseOptionalElement *const> optional_elements);
-    WritableConfigurationUpdateResponse(
-        const ResultCode::Type result_code,
-        std::initializer_list<IWritableConfigurationUpdateResponseOptionalElement *const>
-            optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -50,9 +46,6 @@ struct ReadableConfigurationUpdateResponse : ReadableCapwapResponse {
     ReadableConfigurationUpdateResponse(const ReadableConfigurationUpdateResponse &) = delete;
     ReadableConfigurationUpdateResponse(
         nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const> optional_elements);
-    ReadableConfigurationUpdateResponse(
-        std::initializer_list<IReadableConfigurationUpdateResponseOptionalElement *>
-            optional_elements);
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

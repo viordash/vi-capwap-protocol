@@ -11,15 +11,6 @@ WritableWlanConfigurationResponse::WritableWlanConfigurationResponse(
     : result_code{ result_code }, optional_elements{ optional_elements } {
 }
 
-WritableWlanConfigurationResponse::WritableWlanConfigurationResponse(
-    const ResultCode::Type result_code,
-    std::initializer_list<IWritableWlanConfigurationResponseOptionalElement *> optional_elements)
-    : WritableWlanConfigurationResponse(
-          result_code,
-          nonstd::span<IWritableWlanConfigurationResponseOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableWlanConfigurationResponse::GetMessageType() const {
     return ControlHeader::WlanConfigurationResponse;
@@ -43,13 +34,6 @@ ReadableWlanConfigurationResponse::ReadableWlanConfigurationResponse(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableWlanConfigurationResponse::ReadableWlanConfigurationResponse(
-    std::initializer_list<IReadableWlanConfigurationResponseOptionalElement *> optional_elements)
-    : ReadableWlanConfigurationResponse(
-          nonstd::span<IReadableWlanConfigurationResponseOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableWlanConfigurationResponse::GetMessageType() const {
     return ControlHeader::WlanConfigurationResponse;

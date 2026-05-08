@@ -18,7 +18,7 @@ TEST(ChangeStateEventResponseTestsGroup, ChangeStateEventResponse_serialize) {
     uint8_t buffer[4096] = {};
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
-    WritableChangeStateEventResponse write_data({});
+    WritableChangeStateEventResponse write_data(nonstd::span<IWritableChangeStateEventResponseOptionalElement *const>{});
 
     write_data.Serialize(&raw_data);
     CHECK_EQUAL(&buffer[0] + 16 - (sizeof(ClearHeader) + sizeof(ControlHeader)), raw_data.current);
@@ -31,7 +31,8 @@ TEST(ChangeStateEventResponseTestsGroup, ChangeStateEventResponse_serialize) {
 
     raw_data = { buffer, buffer + 16 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableChangeStateEventResponse read_data({ &vendor_specific_payloads });
+    IReadableChangeStateEventResponseOptionalElement *const elems_1[] = { &vendor_specific_payloads };
+    ReadableChangeStateEventResponse read_data(elems_1);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_FALSE(vendor_specific_payloads.IsPresent());
@@ -46,14 +47,16 @@ TEST(ChangeStateEventResponseTestsGroup,
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-        WritableChangeStateEventResponse write_data({ &vendor_specific_payloads });
+        IWritableChangeStateEventResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads };
+        WritableChangeStateEventResponse write_data(elems_2);
 
         write_data.Serialize(&raw_data);
     }
     raw_data = { buffer, buffer + 47 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableChangeStateEventResponse read_data({ &vendor_specific_payloads });
+    IReadableChangeStateEventResponseOptionalElement *const elems_3[] = { &vendor_specific_payloads };
+    ReadableChangeStateEventResponse read_data(elems_3);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_TRUE(vendor_specific_payloads.IsPresent());
@@ -87,7 +90,8 @@ TEST(ChangeStateEventResponseTestsGroup, ChangeStateEventResponse_deserialize_im
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableChangeStateEventResponse read_data({ &vendor_specific_payloads });
+    IReadableChangeStateEventResponseOptionalElement *const elems_4[] = { &vendor_specific_payloads };
+    ReadableChangeStateEventResponse read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -125,7 +129,7 @@ TEST(ChangeStateEventResponseTestsGroup,
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableChangeStateEventResponse read_data({});
+    ReadableChangeStateEventResponse read_data(nonstd::span<IReadableChangeStateEventResponseOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -133,7 +137,8 @@ TEST(ChangeStateEventResponseTestsGroup,
 }
 TEST(ChangeStateEventResponseTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableChangeStateEventResponse read_data({ &vendor_specific_payloads });
+    IReadableChangeStateEventResponseOptionalElement *const elems_5[] = { &vendor_specific_payloads };
+    ReadableChangeStateEventResponse read_data(elems_5);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
@@ -144,7 +149,7 @@ TEST(ChangeStateEventResponseTestsGroup, GetOptionalElement) {
 }
 
 TEST(ChangeStateEventResponseTestsGroup, MessageTypeIdentification) {
-    WritableChangeStateEventResponse write_data({});
+    WritableChangeStateEventResponse write_data(nonstd::span<IWritableChangeStateEventResponseOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::ChangeStateEventResponse, write_data.GetMessageType());
     CHECK_EQUAL(ControlHeader::ChangeStateEventRequest, write_data.GetRequestMessageType());

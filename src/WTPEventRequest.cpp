@@ -10,12 +10,6 @@ WritableWTPEventRequest::WritableWTPEventRequest(
     : optional_elements{ optional_elements } {
 }
 
-WritableWTPEventRequest::WritableWTPEventRequest(
-    std::initializer_list<IWritableWTPEventRequestOptionalElement *const> optional_elements)
-    : WritableWTPEventRequest(
-          nonstd::span<IWritableWTPEventRequestOptionalElement *const>(optional_elements.begin(),
-                                                                       optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableWTPEventRequest::GetMessageType() const {
     return ControlHeader::WTPEventRequest;
@@ -37,12 +31,6 @@ ReadableWTPEventRequest::ReadableWTPEventRequest(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableWTPEventRequest::ReadableWTPEventRequest(
-    std::initializer_list<IReadableWTPEventRequestOptionalElement *> optional_elements)
-    : ReadableWTPEventRequest(
-          nonstd::span<IReadableWTPEventRequestOptionalElement *const>(optional_elements.begin(),
-                                                                       optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableWTPEventRequest::GetMessageType() const {
     return ControlHeader::WTPEventRequest;

@@ -23,7 +23,7 @@ TEST(WlanConfigurationResponseTestsGroup, WlanConfigurationResponse_serialize_su
     ankerl::nanobench::Bench b;
     b.minEpochIterations(50000);
 
-    WritableWlanConfigurationResponse write_data(ResultCode::Type::Success, {});
+    WritableWlanConfigurationResponse write_data(ResultCode::Type::Success, nonstd::span<IWritableWlanConfigurationResponseOptionalElement *const>{});
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -32,7 +32,7 @@ TEST(WlanConfigurationResponseTestsGroup, WlanConfigurationResponse_serialize_su
 
         raw_data = { buffer, buffer + 24 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
 
-        ReadableWlanConfigurationResponse read_data({});
+        ReadableWlanConfigurationResponse read_data(nonstd::span<IReadableWlanConfigurationResponseOptionalElement *const>{});
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);
@@ -68,7 +68,8 @@ TEST(WlanConfigurationResponseTestsGroup,
     assigned_bssid.Add({ 1, 2, bssid1 });
     assigned_bssid.Add({ 3, 4, bssid2 });
 
-    WritableWlanConfigurationResponse write_data(ResultCode::Type::Success, { &assigned_bssid });
+    IWritableWlanConfigurationResponseOptionalElement *const elems_1[] = { &assigned_bssid };
+    WritableWlanConfigurationResponse write_data(ResultCode::Type::Success, elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -78,7 +79,8 @@ TEST(WlanConfigurationResponseTestsGroup,
         raw_data = { buffer, buffer + 48 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
 
         ReadableAssignedWtpBssidArray assigned_bssid;
-        ReadableWlanConfigurationResponse read_data({ &assigned_bssid });
+        IReadableWlanConfigurationResponseOptionalElement *const elems_2[] = { &assigned_bssid };
+        ReadableWlanConfigurationResponse read_data(elems_2);
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

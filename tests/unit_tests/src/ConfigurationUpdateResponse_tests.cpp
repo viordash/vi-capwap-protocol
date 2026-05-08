@@ -31,9 +31,10 @@ TEST(ConfigurationUpdateResponseTestsGroup, ConfigurationUpdateResponse_serializ
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
+        IWritableConfigurationUpdateResponseOptionalElement *const elems_1[] = { &radio_operational_states, &vendor_specific_payloads };
         WritableConfigurationUpdateResponse write_data(
             ResultCode::MessageUnexpected_InvalidInCurrentState,
-            { &radio_operational_states, &vendor_specific_payloads });
+            elems_1);
 
         write_data.Serialize(&raw_data);
     }
@@ -53,8 +54,9 @@ TEST(ConfigurationUpdateResponseTestsGroup, ConfigurationUpdateResponse_serializ
     raw_data = { buffer, buffer + 76 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
     ReadableRadioOperationalStateArray radio_operational_states;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableConfigurationUpdateResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads, &radio_operational_states };
     ReadableConfigurationUpdateResponse read_data(
-        { &vendor_specific_payloads, &radio_operational_states });
+        elems_2);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(ResultCode::MessageUnexpected_InvalidInCurrentState,
@@ -145,8 +147,9 @@ TEST(ConfigurationUpdateResponseTestsGroup, ConfigurationUpdateResponse_deserial
 
     ReadableRadioOperationalStateArray radio_operational_states;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
+    IReadableConfigurationUpdateResponseOptionalElement *const elems_3[] = { &vendor_specific_payloads, &radio_operational_states };
     ReadableConfigurationUpdateResponse read_data(
-        { &vendor_specific_payloads, &radio_operational_states });
+        elems_3);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -217,7 +220,7 @@ TEST(ConfigurationUpdateResponseTestsGroup,
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableConfigurationUpdateResponse read_data({});
+    ReadableConfigurationUpdateResponse read_data(nonstd::span<IReadableConfigurationUpdateResponseOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -225,7 +228,8 @@ TEST(ConfigurationUpdateResponseTestsGroup,
 }
 TEST(ConfigurationUpdateResponseTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableConfigurationUpdateResponse read_data({ &vendor_specific_payloads });
+    IReadableConfigurationUpdateResponseOptionalElement *const elems_4[] = { &vendor_specific_payloads };
+    ReadableConfigurationUpdateResponse read_data(elems_4);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
@@ -236,7 +240,7 @@ TEST(ConfigurationUpdateResponseTestsGroup, GetOptionalElement) {
 }
 
 TEST(ConfigurationUpdateResponseTestsGroup, MessageTypeIdentification) {
-    WritableConfigurationUpdateResponse write_data(ResultCode::Type::Success, {});
+    WritableConfigurationUpdateResponse write_data(ResultCode::Type::Success, nonstd::span<IWritableConfigurationUpdateResponseOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::ConfigurationUpdateResponse, write_data.GetMessageType());
     CHECK_EQUAL(ControlHeader::ConfigurationUpdateRequest, write_data.GetRequestMessageType());

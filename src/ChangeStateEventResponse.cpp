@@ -10,14 +10,6 @@ WritableChangeStateEventResponse::WritableChangeStateEventResponse(
     : optional_elements{ optional_elements } {
 }
 
-WritableChangeStateEventResponse::WritableChangeStateEventResponse(
-    std::initializer_list<IWritableChangeStateEventResponseOptionalElement *const>
-        optional_elements)
-    : WritableChangeStateEventResponse(
-          nonstd::span<IWritableChangeStateEventResponseOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableChangeStateEventResponse::GetMessageType() const {
     return ControlHeader::ChangeStateEventResponse;
@@ -39,13 +31,6 @@ ReadableChangeStateEventResponse::ReadableChangeStateEventResponse(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableChangeStateEventResponse::ReadableChangeStateEventResponse(
-    std::initializer_list<IReadableChangeStateEventResponseOptionalElement *> optional_elements)
-    : ReadableChangeStateEventResponse(
-          nonstd::span<IReadableChangeStateEventResponseOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableChangeStateEventResponse::GetMessageType() const {
     return ControlHeader::ChangeStateEventResponse;

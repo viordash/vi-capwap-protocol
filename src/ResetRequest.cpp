@@ -11,14 +11,6 @@ WritableResetRequest::WritableResetRequest(
     : image_identifier{ image_identifier }, optional_elements{ optional_elements } {
 }
 
-WritableResetRequest::WritableResetRequest(
-    WritableImageIdentifier &image_identifier,
-    std::initializer_list<IWritableResetRequestOptionalElement *const> optional_elements)
-    : WritableResetRequest(
-          image_identifier,
-          nonstd::span<IWritableResetRequestOptionalElement *const>(optional_elements.begin(),
-                                                                    optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableResetRequest::GetMessageType() const {
     return ControlHeader::ResetRequest;
@@ -42,12 +34,6 @@ ReadableResetRequest::ReadableResetRequest(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableResetRequest::ReadableResetRequest(
-    std::initializer_list<IReadableResetRequestOptionalElement *> optional_elements)
-    : ReadableResetRequest(
-          nonstd::span<IReadableResetRequestOptionalElement *const>(optional_elements.begin(),
-                                                                    optional_elements.size())) {
-}
 ControlHeader::MessageType ReadableResetRequest::GetMessageType() const {
     return ControlHeader::ResetRequest;
 }

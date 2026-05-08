@@ -63,6 +63,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize) {
 
         WritableWTPFrameTunnelMode wtp_frame_tunnel_mode(true, false, false);
 
+        IWritableJoinRequestOptionalElement *const elems_1[] = { &capwap_transport_protocol, &maximum_message_length, &wtp_reboot_statistics };
         WritableJoinRequest write_data(
             "location_data",
             wtpboarddata,
@@ -74,7 +75,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize) {
             wtp_radio_informations,
             ECNSupport::Type::FullAndLimitedECN,
             ip_addresses,
-            { &capwap_transport_protocol, &maximum_message_length, &wtp_reboot_statistics });
+            elems_1);
 
         write_data.Serialize(&raw_data);
     }
@@ -112,10 +113,8 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize) {
     ReadableWTPRebootStatistics wtp_reboot_statistics;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
-    ReadableJoinRequest read_data({ &capwap_transport_protocol,
-                                    &maximum_message_length,
-                                    &wtp_reboot_statistics,
-                                    &vendor_specific_payloads });
+    IReadableJoinRequestOptionalElement *const elems_2[] = { &capwap_transport_protocol, &maximum_message_length, &wtp_reboot_statistics, &vendor_specific_payloads };
+    ReadableJoinRequest read_data(elems_2);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(4, read_data.wtp_radio_informations.Get().size());
@@ -199,6 +198,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_with_VendorSpecificPayload) {
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
         vendor_specific_payloads.Add(1, 2, "01234567890A");
 
+        IWritableJoinRequestOptionalElement *const elems_3[] = { &vendor_specific_payloads };
         WritableJoinRequest write_data("location_data",
                                        wtpboarddata,
                                        wtpdescriptor,
@@ -209,7 +209,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_with_VendorSpecificPayload) {
                                        wtp_radio_informations,
                                        ECNSupport::Type::FullAndLimitedECN,
                                        ip_addresses,
-                                       { &vendor_specific_payloads });
+            elems_3);
 
         write_data.Serialize(&raw_data);
     }
@@ -239,7 +239,8 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_with_VendorSpecificPayload) {
     ReadableCapwapTransportProtocol capwap_transport_protocol;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
-    ReadableJoinRequest read_data({ &capwap_transport_protocol, &vendor_specific_payloads });
+    IReadableJoinRequestOptionalElement *const elems_4[] = { &capwap_transport_protocol, &vendor_specific_payloads };
+    ReadableJoinRequest read_data(elems_4);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_FALSE(capwap_transport_protocol.IsPresent());
@@ -381,10 +382,8 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
     ReadableWTPRebootStatistics wtp_reboot_statistics;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
-    ReadableJoinRequest read_data({ &capwap_transport_protocol,
-                                    &maximum_message_length,
-                                    &wtp_reboot_statistics,
-                                    &vendor_specific_payloads });
+    IReadableJoinRequestOptionalElement *const elems_5[] = { &capwap_transport_protocol, &maximum_message_length, &wtp_reboot_statistics, &vendor_specific_payloads };
+    ReadableJoinRequest read_data(elems_5);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -610,10 +609,8 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize_handle_unknown_element) {
     ReadableWTPRebootStatistics wtp_reboot_statistics;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
-    ReadableJoinRequest read_data({ &capwap_transport_protocol,
-                                    &maximum_message_length,
-                                    &wtp_reboot_statistics,
-                                    &vendor_specific_payloads });
+    IReadableJoinRequestOptionalElement *const elems_6[] = { &capwap_transport_protocol, &maximum_message_length, &wtp_reboot_statistics, &vendor_specific_payloads };
+    ReadableJoinRequest read_data(elems_6);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -622,7 +619,8 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize_handle_unknown_element) {
 }
 TEST(JoinRequestTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableJoinRequest read_data({ &vendor_specific_payloads });
+    IReadableJoinRequestOptionalElement *const elems_7[] = { &vendor_specific_payloads };
+    ReadableJoinRequest read_data(elems_7);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(

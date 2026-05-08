@@ -10,14 +10,6 @@ WritableConfigurationUpdateRequest::WritableConfigurationUpdateRequest(
     : optional_elements{ optional_elements } {
 }
 
-WritableConfigurationUpdateRequest::WritableConfigurationUpdateRequest(
-    std::initializer_list<IWritableConfigurationUpdateRequestOptionalElement *const>
-        optional_elements)
-    : WritableConfigurationUpdateRequest(
-          nonstd::span<IWritableConfigurationUpdateRequestOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableConfigurationUpdateRequest::GetMessageType() const {
     return ControlHeader::ConfigurationUpdateRequest;
@@ -39,13 +31,6 @@ ReadableConfigurationUpdateRequest::ReadableConfigurationUpdateRequest(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableConfigurationUpdateRequest::ReadableConfigurationUpdateRequest(
-    std::initializer_list<IReadableConfigurationUpdateRequestOptionalElement *> optional_elements)
-    : ReadableConfigurationUpdateRequest(
-          nonstd::span<IReadableConfigurationUpdateRequestOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableConfigurationUpdateRequest::GetMessageType() const {
     return ControlHeader::ConfigurationUpdateRequest;

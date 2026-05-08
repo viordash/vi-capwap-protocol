@@ -17,8 +17,7 @@ struct WritableResetResponse : WritableCapwapResponse {
     WritableResetResponse(const WritableResetResponse &) = delete;
     WritableResetResponse(
         nonstd::span<IWritableResetResponseOptionalElement *const> optional_elements);
-    WritableResetResponse(
-        std::initializer_list<IWritableResetResponseOptionalElement *const> optional_elements);
+
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -40,8 +39,7 @@ struct ReadableResetResponse : ReadableCapwapResponse {
     ReadableResetResponse(const ReadableResetResponse &) = delete;
     ReadableResetResponse(
         nonstd::span<IReadableResetResponseOptionalElement *const> optional_elements);
-    ReadableResetResponse(
-        std::initializer_list<IReadableResetResponseOptionalElement *> optional_elements);
+
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

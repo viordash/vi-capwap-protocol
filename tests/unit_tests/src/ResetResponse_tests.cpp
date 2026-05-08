@@ -22,7 +22,8 @@ TEST(ResetResponseTestsGroup, ResetResponse_serialize) {
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-        WritableResetResponse write_data({ &result_code, &vendor_specific_payloads });
+        IWritableResetResponseOptionalElement *const elems_1[] = { &result_code, &vendor_specific_payloads };
+        WritableResetResponse write_data(elems_1);
 
         write_data.Serialize(&raw_data);
     }
@@ -37,7 +38,8 @@ TEST(ResetResponseTestsGroup, ResetResponse_serialize) {
     raw_data = { buffer, buffer + 39 };
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
     ReadableResultCode result_code;
-    ReadableResetResponse read_data({ &vendor_specific_payloads, &result_code });
+    IReadableResetResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads, &result_code };
+    ReadableResetResponse read_data(elems_2);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_TRUE(result_code.IsPresent());
@@ -98,7 +100,8 @@ TEST(ResetResponseTestsGroup, ResetResponse_deserialize_image_data) {
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
     ReadableResultCode result_code;
-    ReadableResetResponse read_data({ &vendor_specific_payloads, &result_code });
+    IReadableResetResponseOptionalElement *const elems_3[] = { &vendor_specific_payloads, &result_code };
+    ReadableResetResponse read_data(elems_3);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -159,7 +162,8 @@ TEST(ResetResponseTestsGroup, ResetResponse_deserialize_handle_unknown_element) 
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
     ReadableResultCode result_code;
-    ReadableResetResponse read_data({ &vendor_specific_payloads, &result_code });
+    IReadableResetResponseOptionalElement *const elems_4[] = { &vendor_specific_payloads, &result_code };
+    ReadableResetResponse read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -173,7 +177,8 @@ TEST(ResetResponseTestsGroup, ResetResponse_deserialize_handle_unknown_element) 
 TEST(ResetResponseTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
     ReadableResultCode result_code;
-    ReadableResetResponse read_data({ &vendor_specific_payloads, &result_code });
+    IReadableResetResponseOptionalElement *const elems_5[] = { &vendor_specific_payloads, &result_code };
+    ReadableResetResponse read_data(elems_5);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
@@ -185,7 +190,7 @@ TEST(ResetResponseTestsGroup, GetOptionalElement) {
 }
 
 TEST(ResetResponseTestsGroup, MessageTypeIdentification) {
-    WritableResetResponse write_data({});
+    WritableResetResponse write_data(nonstd::span<IWritableResetResponseOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::ResetResponse, write_data.GetMessageType());
     CHECK_EQUAL(ControlHeader::ResetRequest, write_data.GetRequestMessageType());

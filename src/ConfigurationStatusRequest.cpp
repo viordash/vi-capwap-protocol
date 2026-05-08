@@ -16,21 +16,6 @@ WritableConfigurationStatusRequest::WritableConfigurationStatusRequest(
       wtp_reboot_statistics{ wtp_reboot_statistics }, optional_elements{ optional_elements } {
 }
 
-WritableConfigurationStatusRequest::WritableConfigurationStatusRequest(
-    const std::string_view ac_name,
-    WritableRadioAdministrativeStateArray &radio_states,
-    const uint16_t statistics_timer,
-    const WTPRebootStatistics &wtp_reboot_statistics,
-    std::initializer_list<IWritableConfigurationStatusRequestOptionalElement *> optional_elements)
-    : WritableConfigurationStatusRequest(
-          ac_name,
-          radio_states,
-          statistics_timer,
-          wtp_reboot_statistics,
-          nonstd::span<IWritableConfigurationStatusRequestOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableConfigurationStatusRequest::GetMessageType() const {
     return ControlHeader::ConfigurationStatusRequest;
@@ -65,13 +50,6 @@ ReadableConfigurationStatusRequest::ReadableConfigurationStatusRequest(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableConfigurationStatusRequest::ReadableConfigurationStatusRequest(
-    std::initializer_list<IReadableConfigurationStatusRequestOptionalElement *> optional_elements)
-    : ReadableConfigurationStatusRequest(
-          nonstd::span<IReadableConfigurationStatusRequestOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableConfigurationStatusRequest::GetMessageType() const {
     return ControlHeader::ConfigurationStatusRequest;

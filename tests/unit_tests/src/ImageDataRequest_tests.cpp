@@ -31,11 +31,8 @@ TEST(ImageDataRequestTestsGroup, ImageDataRequest_serialize) {
         WritableImageIdentifier image_identifier{ 123456, "1232344" };
         WritableInitiateDownload initiate_download;
 
-        WritableImageDataRequest write_data({ &capwap_transport_protocol,
-                                              &image_data,
-                                              &vendor_specific_payloads,
-                                              &image_identifier,
-                                              &initiate_download });
+        IWritableImageDataRequestOptionalElement *const elems_1[] = { &capwap_transport_protocol, &image_data, &vendor_specific_payloads, &image_identifier, &initiate_download };
+        WritableImageDataRequest write_data(elems_1);
 
         write_data.Serialize(&raw_data);
     }
@@ -61,11 +58,8 @@ TEST(ImageDataRequestTestsGroup, ImageDataRequest_serialize) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
     ReadableInitiateDownload initiate_download;
 
-    ReadableImageDataRequest read_data({ &capwap_transport_protocol,
-                                         &image_data,
-                                         &image_identifier,
-                                         &vendor_specific_payloads,
-                                         &initiate_download });
+    IReadableImageDataRequestOptionalElement *const elems_2[] = { &capwap_transport_protocol, &image_data, &image_identifier, &vendor_specific_payloads, &initiate_download };
+    ReadableImageDataRequest read_data(elems_2);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_TRUE(capwap_transport_protocol.IsPresent());
@@ -130,11 +124,8 @@ uint8_t data[] = {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
     ReadableInitiateDownload initiate_download;
 
-    ReadableImageDataRequest read_data({ &capwap_transport_protocol,
-                                         &image_data,
-                                         &image_identifier,
-                                         &vendor_specific_payloads,
-                                         &initiate_download });
+    IReadableImageDataRequestOptionalElement *const elems_3[] = { &capwap_transport_protocol, &image_data, &image_identifier, &vendor_specific_payloads, &initiate_download };
+    ReadableImageDataRequest read_data(elems_3);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -189,11 +180,8 @@ TEST(ImageDataRequestTestsGroup, ImageDataRequest_deserialize_image_data) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
     ReadableInitiateDownload initiate_download;
 
-    ReadableImageDataRequest read_data({ &capwap_transport_protocol,
-                                         &image_data,
-                                         &image_identifier,
-                                         &vendor_specific_payloads,
-                                         &initiate_download });
+    IReadableImageDataRequestOptionalElement *const elems_4[] = { &capwap_transport_protocol, &image_data, &image_identifier, &vendor_specific_payloads, &initiate_download };
+    ReadableImageDataRequest read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -256,7 +244,8 @@ TEST(ImageDataRequestTestsGroup, ImageDataRequest_deserialize_handle_unknown_ele
     ReadableImageIdentifier image_identifier;
     ReadableInitiateDownload initiate_download;
 
-    ReadableImageDataRequest read_data({ &image_identifier, &initiate_download });
+    IReadableImageDataRequestOptionalElement *const elems_5[] = { &image_identifier, &initiate_download };
+    ReadableImageDataRequest read_data(elems_5);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -264,7 +253,8 @@ TEST(ImageDataRequestTestsGroup, ImageDataRequest_deserialize_handle_unknown_ele
 }
 TEST(ImageDataRequestTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableImageDataRequest read_data({ &vendor_specific_payloads });
+    IReadableImageDataRequestOptionalElement *const elems_6[] = { &vendor_specific_payloads };
+    ReadableImageDataRequest read_data(elems_6);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
@@ -275,7 +265,7 @@ TEST(ImageDataRequestTestsGroup, GetOptionalElement) {
 }
 
 TEST(ImageDataRequestTestsGroup, MessageTypeIdentification) {
-    WritableImageDataRequest write_data({});
+    WritableImageDataRequest write_data(nonstd::span<IWritableImageDataRequestOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::ImageDataRequest, write_data.GetMessageType());
 }

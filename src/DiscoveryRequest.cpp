@@ -20,26 +20,6 @@ WritableDiscoveryRequest::WritableDiscoveryRequest(
       optional_elements{ optional_elements }, padding{ CalcMTUPadding(probe_mtu_size) } {
 }
 
-WritableDiscoveryRequest::WritableDiscoveryRequest(
-    const DiscoveryType::Type discovery_type,
-    const WritableWTPBoardData &wtp_board_data,
-    const WritableWTPDescriptor &wtp_descriptor,
-    const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
-    const WTPMACType::Type mac_type,
-    WritableWTPRadioInformationArray &wtp_radio_informations,
-    std::initializer_list<IWritableDiscoveryRequestOptionalElement *const> optional_elements,
-    const uint16_t probe_mtu_size)
-    : WritableDiscoveryRequest(
-          discovery_type,
-          wtp_board_data,
-          wtp_descriptor,
-          wtp_frame_tunnel_mode,
-          mac_type,
-          wtp_radio_informations,
-          nonstd::span<IWritableDiscoveryRequestOptionalElement *const>(optional_elements.begin(),
-                                                                        optional_elements.size()),
-          probe_mtu_size) {
-}
 
 ControlHeader::MessageType WritableDiscoveryRequest::GetMessageType() const {
     return ControlHeader::DiscoveryRequest;
@@ -112,12 +92,6 @@ ReadableDiscoveryRequest::ReadableDiscoveryRequest(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableDiscoveryRequest::ReadableDiscoveryRequest(
-    std::initializer_list<IReadableDiscoveryRequestOptionalElement *> optional_elements)
-    : ReadableDiscoveryRequest(
-          nonstd::span<IReadableDiscoveryRequestOptionalElement *const>(optional_elements.begin(),
-                                                                        optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableDiscoveryRequest::GetMessageType() const {
     return ControlHeader::DiscoveryRequest;

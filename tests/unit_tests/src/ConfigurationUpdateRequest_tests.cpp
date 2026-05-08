@@ -66,21 +66,8 @@ TEST(ConfigurationUpdateRequestTestsGroup, ConfigurationUpdateRequest_serialize)
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-        WritableConfigurationUpdateRequest write_data({ &ac_names_with_priority,
-                                                        &ac_timestamp,
-                                                        &add_mac_acl_entry,
-                                                        &capwap_timers,
-                                                        &decryption_error_report_periods,
-                                                        &delete_mac_acl_entry,
-                                                        &idle_timeout,
-                                                        &location_data,
-                                                        &radio_states,
-                                                        &statistics_timer,
-                                                        &wtp_fallback,
-                                                        &wtp_name,
-                                                        &wtp_static_ipaddress,
-                                                        &image_identifier,
-                                                        &vendor_specific_payloads });
+        IWritableConfigurationUpdateRequestOptionalElement *const elems_1[] = { &ac_names_with_priority, &ac_timestamp, &add_mac_acl_entry, &capwap_timers, &decryption_error_report_periods, &delete_mac_acl_entry, &idle_timeout, &location_data, &radio_states, &statistics_timer, &wtp_fallback, &wtp_name, &wtp_static_ipaddress, &image_identifier, &vendor_specific_payloads };
+        WritableConfigurationUpdateRequest write_data(elems_1);
 
         write_data.Serialize(&raw_data);
     }
@@ -128,21 +115,8 @@ TEST(ConfigurationUpdateRequestTestsGroup, ConfigurationUpdateRequest_serialize)
     ReadableImageIdentifier image_identifier;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
-    ReadableConfigurationUpdateRequest read_data({ &ac_names_with_priority,
-                                                   &ac_timestamp,
-                                                   &add_mac_acl_entry,
-                                                   &capwap_timers,
-                                                   &decryption_error_report_periods,
-                                                   &delete_mac_acl_entry,
-                                                   &idle_timeout,
-                                                   &location_data,
-                                                   &radio_states,
-                                                   &statistics_timer,
-                                                   &wtp_fallback,
-                                                   &wtp_name,
-                                                   &wtp_static_ipaddress,
-                                                   &image_identifier,
-                                                   &vendor_specific_payloads });
+    IReadableConfigurationUpdateRequestOptionalElement *const elems_2[] = { &ac_names_with_priority, &ac_timestamp, &add_mac_acl_entry, &capwap_timers, &decryption_error_report_periods, &delete_mac_acl_entry, &idle_timeout, &location_data, &radio_states, &statistics_timer, &wtp_fallback, &wtp_name, &wtp_static_ipaddress, &image_identifier, &vendor_specific_payloads };
+    ReadableConfigurationUpdateRequest read_data(elems_2);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_TRUE(ac_names_with_priority.IsPresent());
@@ -339,21 +313,8 @@ TEST(ConfigurationUpdateRequestTestsGroup, ConfigurationUpdateRequest_deserializ
     ReadableImageIdentifier image_identifier;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
-    ReadableConfigurationUpdateRequest read_data({ &ac_names_with_priority,
-                                                   &ac_timestamp,
-                                                   &add_mac_acl_entry,
-                                                   &capwap_timers,
-                                                   &decryption_error_report_periods,
-                                                   &delete_mac_acl_entry,
-                                                   &idle_timeout,
-                                                   &location_data,
-                                                   &radio_states,
-                                                   &statistics_timer,
-                                                   &wtp_fallback,
-                                                   &wtp_name,
-                                                   &wtp_static_ipaddress,
-                                                   &image_identifier,
-                                                   &vendor_specific_payloads });
+    IReadableConfigurationUpdateRequestOptionalElement *const elems_3[] = { &ac_names_with_priority, &ac_timestamp, &add_mac_acl_entry, &capwap_timers, &decryption_error_report_periods, &delete_mac_acl_entry, &idle_timeout, &location_data, &radio_states, &statistics_timer, &wtp_fallback, &wtp_name, &wtp_static_ipaddress, &image_identifier, &vendor_specific_payloads };
+    ReadableConfigurationUpdateRequest read_data(elems_3);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -463,7 +424,8 @@ TEST(ConfigurationUpdateRequestTestsGroup,
 
     ReadableWTPName wtp_name;
 
-    ReadableConfigurationUpdateRequest read_data({ &wtp_name });
+    IReadableConfigurationUpdateRequestOptionalElement *const elems_4[] = { &wtp_name };
+    ReadableConfigurationUpdateRequest read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -478,7 +440,8 @@ TEST(ConfigurationUpdateRequestTestsGroup, One_or_more_serialize) {
         WritableAddMacAclEntry add_mac_acl_entry;
         add_mac_acl_entry.Add({ mac_6_0 });
 
-        WritableConfigurationUpdateRequest write_data({ &add_mac_acl_entry });
+        IWritableConfigurationUpdateRequestOptionalElement *const elems_5[] = { &add_mac_acl_entry };
+        WritableConfigurationUpdateRequest write_data(elems_5);
 
         write_data.Serialize(&raw_data);
     }
@@ -495,8 +458,9 @@ TEST(ConfigurationUpdateRequestTestsGroup, One_or_more_serialize) {
     ReadableAddMacAclEntry add_mac_acl_entry;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
+    IReadableConfigurationUpdateRequestOptionalElement *const elems_6[] = { &ac_names_with_priority, &ac_timestamp, &add_mac_acl_entry, &vendor_specific_payloads };
     ReadableConfigurationUpdateRequest read_data(
-        { &ac_names_with_priority, &ac_timestamp, &add_mac_acl_entry, &vendor_specific_payloads });
+        elems_6);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_FALSE(ac_names_with_priority.IsPresent());
@@ -562,16 +526,8 @@ TEST(ConfigurationUpdateRequestTestsGroup, IEEE80211_specific_message_elements) 
         WritableWTPRadioConfigurationArray w_configs;
         w_configs.Add({ 1, 1, 4, 2, bssid1, 100, "US " });
 
-        WritableConfigurationUpdateRequest write_data({ &w_antennas,
-                                                        &w_ctrls,
-                                                        &w_ops,
-                                                        &w_capabilities,
-                                                        &w_controls,
-                                                        &w_rate_sets,
-                                                        &w_reports,
-                                                        &w_tps,
-                                                        &w_qos,
-                                                        &w_configs });
+        IWritableConfigurationUpdateRequestOptionalElement *const elems_7[] = { &w_antennas, &w_ctrls, &w_ops, &w_capabilities, &w_controls, &w_rate_sets, &w_reports, &w_tps, &w_qos, &w_configs };
+        WritableConfigurationUpdateRequest write_data(elems_7);
 
         write_data.Serialize(&raw_data);
     }
@@ -589,16 +545,8 @@ TEST(ConfigurationUpdateRequestTestsGroup, IEEE80211_specific_message_elements) 
     ReadableTxPowerArray r_tps;
     ReadableWTPQualityOfServiceArray r_qos;
     ReadableWTPRadioConfigurationArray r_configs;
-    ReadableConfigurationUpdateRequest read_data({ &r_antennas,
-                                                   &r_ctrls,
-                                                   &r_ops,
-                                                   &r_capabilities,
-                                                   &r_controls,
-                                                   &r_rate_sets,
-                                                   &r_reports,
-                                                   &r_tps,
-                                                   &r_qos,
-                                                   &r_configs });
+    IReadableConfigurationUpdateRequestOptionalElement *const elems_8[] = { &r_antennas, &r_ctrls, &r_ops, &r_capabilities, &r_controls, &r_rate_sets, &r_reports, &r_tps, &r_qos, &r_configs };
+    ReadableConfigurationUpdateRequest read_data(elems_8);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -682,7 +630,8 @@ TEST(ConfigurationUpdateRequestTestsGroup, IEEE80211_specific_message_elements) 
 }
 TEST(ConfigurationUpdateRequestTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableConfigurationUpdateRequest read_data({ &vendor_specific_payloads });
+    IReadableConfigurationUpdateRequestOptionalElement *const elems_9[] = { &vendor_specific_payloads };
+    ReadableConfigurationUpdateRequest read_data(elems_9);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
@@ -693,7 +642,7 @@ TEST(ConfigurationUpdateRequestTestsGroup, GetOptionalElement) {
 }
 
 TEST(ConfigurationUpdateRequestTestsGroup, MessageTypeIdentification) {
-    WritableConfigurationUpdateRequest write_data({});
+    WritableConfigurationUpdateRequest write_data(nonstd::span<IWritableConfigurationUpdateRequestOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::ConfigurationUpdateRequest, write_data.GetMessageType());
 }

@@ -9,12 +9,6 @@ WritableEchoRequest::WritableEchoRequest(
     nonstd::span<IWritableEchoRequestOptionalElement *const> optional_elements)
     : optional_elements{ optional_elements } {
 }
-WritableEchoRequest::WritableEchoRequest(
-    std::initializer_list<IWritableEchoRequestOptionalElement *const> optional_elements)
-    : WritableEchoRequest(
-          nonstd::span<IWritableEchoRequestOptionalElement *const>(optional_elements.begin(),
-                                                                   optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableEchoRequest::GetMessageType() const {
     return ControlHeader::EchoRequest;
@@ -36,12 +30,6 @@ ReadableEchoRequest::ReadableEchoRequest(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableEchoRequest::ReadableEchoRequest(
-    std::initializer_list<IReadableEchoRequestOptionalElement *> optional_elements)
-    : ReadableEchoRequest(
-          nonstd::span<IReadableEchoRequestOptionalElement *const>(optional_elements.begin(),
-                                                                   optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableEchoRequest::GetMessageType() const {
     return ControlHeader::EchoRequest;

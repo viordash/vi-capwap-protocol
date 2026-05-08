@@ -21,7 +21,8 @@ TEST(WTPEventResponseTestsGroup, WTPEventResponse_serialize) {
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-        WritableWTPEventResponse write_data({ &vendor_specific_payloads });
+        IWritableWTPEventResponseOptionalElement *const elems_1[] = { &vendor_specific_payloads };
+        WritableWTPEventResponse write_data(elems_1);
 
         write_data.Serialize(&raw_data);
     }
@@ -38,7 +39,8 @@ TEST(WTPEventResponseTestsGroup, WTPEventResponse_serialize) {
 
     raw_data = { buffer, buffer + 47 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableWTPEventResponse read_data({ &vendor_specific_payloads });
+    IReadableWTPEventResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads };
+    ReadableWTPEventResponse read_data(elems_2);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_TRUE(vendor_specific_payloads.IsPresent());
@@ -88,7 +90,8 @@ TEST(WTPEventResponseTestsGroup, WTPEventResponse_deserialize_image_data) {
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableWTPEventResponse read_data({ &vendor_specific_payloads });
+    IReadableWTPEventResponseOptionalElement *const elems_3[] = { &vendor_specific_payloads };
+    ReadableWTPEventResponse read_data(elems_3);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -134,7 +137,7 @@ TEST(WTPEventResponseTestsGroup, WTPEventResponse_deserialize_handle_unknown_ele
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableWTPEventResponse read_data({});
+    ReadableWTPEventResponse read_data(nonstd::span<IReadableWTPEventResponseOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -142,7 +145,8 @@ TEST(WTPEventResponseTestsGroup, WTPEventResponse_deserialize_handle_unknown_ele
 }
 TEST(WTPEventResponseTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableWTPEventResponse read_data({ &vendor_specific_payloads });
+    IReadableWTPEventResponseOptionalElement *const elems_4[] = { &vendor_specific_payloads };
+    ReadableWTPEventResponse read_data(elems_4);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
@@ -153,7 +157,7 @@ TEST(WTPEventResponseTestsGroup, GetOptionalElement) {
 }
 
 TEST(WTPEventResponseTestsGroup, MessageTypeIdentification) {
-    WritableWTPEventResponse write_data({});
+    WritableWTPEventResponse write_data(nonstd::span<IWritableWTPEventResponseOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::WTPEventResponse, write_data.GetMessageType());
     CHECK_EQUAL(ControlHeader::WTPEventRequest, write_data.GetRequestMessageType());

@@ -29,8 +29,9 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_serialize_deserialize_perf) 
                              0xA7, 0x65, 0x00, 0xA0, 0xC9, 0x1E, 0x6B, 0xF6 };
     WritableImageInformation image_information{ 12345, hash };
 
+    IWritableImageDataResponseOptionalElement *const elems_1[] = { &vendor_specific_payloads, &image_information };
     WritableImageDataResponse write_data(ResultCode::Type::Success,
-                                         { &vendor_specific_payloads, &image_information });
+        elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -40,7 +41,8 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_serialize_deserialize_perf) 
         raw_data = { buffer, buffer + 79 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
         ReadableVendorSpecificPayloadArray vendor_specific_payloads;
         ReadableImageInformation image_information;
-        ReadableImageDataResponse read_data({ &vendor_specific_payloads, &image_information });
+        IReadableImageDataResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads, &image_information };
+        ReadableImageDataResponse read_data(elems_2);
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

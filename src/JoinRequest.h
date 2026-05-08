@@ -48,18 +48,7 @@ struct WritableJoinRequest : WritableCapwapRequest {
                         const nonstd::span<const CAPWAPLocalIPv4Address> &ip_addresses,
                         nonstd::span<IWritableJoinRequestOptionalElement *const> optional_elements);
 
-    WritableJoinRequest(
-        const std::string_view location_data,
-        const WritableWTPBoardData &wtp_board_data,
-        const WritableWTPDescriptor &wtp_descriptor,
-        const std::string_view wtp_name,
-        const SessionId &session_id,
-        const WritableWTPFrameTunnelMode &wtp_frame_tunnel_mode,
-        const WTPMACType::Type mac_type,
-        WritableWTPRadioInformationArray &wtp_radio_informations,
-        const ECNSupport::Type ecn_support,
-        const nonstd::span<const CAPWAPLocalIPv4Address> &ip_addresses,
-        std::initializer_list<IWritableJoinRequestOptionalElement *> optional_elements);
+
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
@@ -92,8 +81,7 @@ struct ReadableJoinRequest : ReadableCapwapRequest {
     ReadableJoinRequest(const ReadableJoinRequest &) = delete;
     ReadableJoinRequest(nonstd::span<IReadableJoinRequestOptionalElement *const> optional_elements);
 
-    ReadableJoinRequest(
-        std::initializer_list<IReadableJoinRequestOptionalElement *> optional_elements);
+
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

@@ -24,8 +24,9 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_serialize) {
 
         WritableImageInformation image_information{ 12345, hash };
 
+        IWritableImageDataResponseOptionalElement *const elems_1[] = { &vendor_specific_payloads, &image_information };
         WritableImageDataResponse write_data(ResultCode::Type::Success,
-                                             { &vendor_specific_payloads, &image_information });
+            elems_1);
 
         write_data.Serialize(&raw_data);
     }
@@ -47,7 +48,8 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_serialize) {
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
     ReadableImageInformation image_information;
-    ReadableImageDataResponse read_data({ &vendor_specific_payloads, &image_information });
+    IReadableImageDataResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads, &image_information };
+    ReadableImageDataResponse read_data(elems_2);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -103,7 +105,8 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_deserialize_after_initiate_d
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
     ReadableImageInformation image_information;
-    ReadableImageDataResponse read_data({ &vendor_specific_payloads, &image_information });
+    IReadableImageDataResponseOptionalElement *const elems_3[] = { &vendor_specific_payloads, &image_information };
+    ReadableImageDataResponse read_data(elems_3);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -154,7 +157,8 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_deserialize_handle_unknown_e
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
     ReadableImageInformation image_information;
-    ReadableImageDataResponse read_data({ &vendor_specific_payloads, &image_information });
+    IReadableImageDataResponseOptionalElement *const elems_4[] = { &vendor_specific_payloads, &image_information };
+    ReadableImageDataResponse read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -164,7 +168,8 @@ TEST(ImageDataResponseTestsGroup, ImageDataResponse_deserialize_handle_unknown_e
 }
 TEST(ImageDataResponseTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableImageDataResponse read_data({ &vendor_specific_payloads });
+    IReadableImageDataResponseOptionalElement *const elems_5[] = { &vendor_specific_payloads };
+    ReadableImageDataResponse read_data(elems_5);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
@@ -175,7 +180,7 @@ TEST(ImageDataResponseTestsGroup, GetOptionalElement) {
 }
 
 TEST(ImageDataResponseTestsGroup, MessageTypeIdentification) {
-    WritableImageDataResponse write_data(ResultCode::Type::Success, {});
+    WritableImageDataResponse write_data(ResultCode::Type::Success, nonstd::span<IWritableImageDataResponseOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::ImageDataResponse, write_data.GetMessageType());
     CHECK_EQUAL(ControlHeader::ImageDataRequest, write_data.GetRequestMessageType());

@@ -26,7 +26,8 @@ TEST(WTPEventResponseTestsGroup, WTPEventResponse_serialize_deserialize_perf) {
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-    WritableWTPEventResponse write_data({ &vendor_specific_payloads });
+    IWritableWTPEventResponseOptionalElement *const elems_1[] = { &vendor_specific_payloads };
+    WritableWTPEventResponse write_data(elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -35,7 +36,8 @@ TEST(WTPEventResponseTestsGroup, WTPEventResponse_serialize_deserialize_perf) {
 
         raw_data = { buffer, buffer + 47 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
         ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-        ReadableWTPEventResponse read_data({ &vendor_specific_payloads });
+        IReadableWTPEventResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads };
+        ReadableWTPEventResponse read_data(elems_2);
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

@@ -42,13 +42,7 @@ struct WritableConfigurationStatusRequest : WritableCapwapRequest {
         const WTPRebootStatistics &wtp_reboot_statistics,
         nonstd::span<IWritableConfigurationStatusRequestOptionalElement *const> optional_elements);
 
-    WritableConfigurationStatusRequest(
-        const std::string_view ac_name,
-        WritableRadioAdministrativeStateArray &radio_states,
-        const uint16_t statistics_timer,
-        const WTPRebootStatistics &wtp_reboot_statistics,
-        std::initializer_list<IWritableConfigurationStatusRequestOptionalElement *>
-            optional_elements);
+
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
@@ -78,9 +72,7 @@ struct ReadableConfigurationStatusRequest : ReadableCapwapRequest {
     ReadableConfigurationStatusRequest(
         nonstd::span<IReadableConfigurationStatusRequestOptionalElement *const> optional_elements);
 
-    ReadableConfigurationStatusRequest(
-        std::initializer_list<IReadableConfigurationStatusRequestOptionalElement *>
-            optional_elements);
+
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

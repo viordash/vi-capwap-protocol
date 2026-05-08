@@ -52,13 +52,14 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_deserialize_perf) {
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
+    IWritableDiscoveryRequestOptionalElement *const elems_1[] = { &vendor_specific_payloads };
     WritableDiscoveryRequest write_data(DiscoveryType::Type::DHCP,
                                         wtpboarddata,
                                         wtpdescriptor,
                                         wtp_frame_tunnel_mode,
                                         WTPMACType::Local_MAC,
                                         wtp_radio_informations,
-                                        { &vendor_specific_payloads },
+        elems_1,
                                         1500);
 
     b.run("serialization", [&] {
@@ -69,7 +70,8 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_serialize_deserialize_perf) {
         raw_data = { buffer, buffer + 1500 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
         
         ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-        ReadableDiscoveryRequest read_data({ &vendor_specific_payloads });
+        IReadableDiscoveryRequestOptionalElement *const elems_2[] = { &vendor_specific_payloads };
+        ReadableDiscoveryRequest read_data(elems_2);
 
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);

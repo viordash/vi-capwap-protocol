@@ -10,12 +10,6 @@ WritableResetResponse::WritableResetResponse(
     : optional_elements{ optional_elements } {
 }
 
-WritableResetResponse::WritableResetResponse(
-    std::initializer_list<IWritableResetResponseOptionalElement *const> optional_elements)
-    : WritableResetResponse(
-          nonstd::span<IWritableResetResponseOptionalElement *const>(optional_elements.begin(),
-                                                                     optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableResetResponse::GetMessageType() const {
     return ControlHeader::ResetResponse;
@@ -37,12 +31,6 @@ ReadableResetResponse::ReadableResetResponse(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableResetResponse::ReadableResetResponse(
-    std::initializer_list<IReadableResetResponseOptionalElement *> optional_elements)
-    : ReadableResetResponse(
-          nonstd::span<IReadableResetResponseOptionalElement *const>(optional_elements.begin(),
-                                                                     optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableResetResponse::GetMessageType() const {
     return ControlHeader::ResetResponse;

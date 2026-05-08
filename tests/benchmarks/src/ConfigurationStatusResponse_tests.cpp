@@ -49,13 +49,14 @@ TEST(ConfigurationStatusResponseTestsGroup,
     WritableVendorSpecificPayloadArray vendor_specific_payloads;
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
+    IWritableConfigurationStatusResponseOptionalElement *const elems_1[] = { &wtp_static_ipaddress, &vendor_specific_payloads };
     WritableConfigurationStatusResponse write_data(
         capwap_timers,
         decryption_error_report_periods,
         idle_timeout,
         wtp_fallback,
         ac_ipv4_list,
-        { &wtp_static_ipaddress, &vendor_specific_payloads });
+        elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -66,8 +67,8 @@ TEST(ConfigurationStatusResponseTestsGroup,
 
         ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
         ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-        ReadableConfigurationStatusResponse read_data{ &wtp_static_ipaddress,
-                                                       &vendor_specific_payloads };
+        IReadableConfigurationStatusResponseOptionalElement *const elems_2[] = { &wtp_static_ipaddress, &vendor_specific_payloads };
+        ReadableConfigurationStatusResponse read_data(elems_2);
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

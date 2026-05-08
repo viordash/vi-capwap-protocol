@@ -44,8 +44,9 @@ TEST(WlanConfigurationRequestTestsGroup, WlanConfigurationRequest_serialize_add_
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
+        IWritableWlanConfigurationRequestOptionalElement *const elems_1[] = { &info_elements, &vendor_specific_payloads };
         WritableWlanConfigurationRequest write_data(&add_wlan,
-                                                    { &info_elements, &vendor_specific_payloads });
+            elems_1);
 
         write_data.Serialize(&raw_data);
     }
@@ -68,7 +69,8 @@ TEST(WlanConfigurationRequestTestsGroup, WlanConfigurationRequest_serialize_add_
 
     ReadableInformationElementArray info_elements;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableWlanConfigurationRequest read_data({ &info_elements, &vendor_specific_payloads });
+    IReadableWlanConfigurationRequestOptionalElement *const elems_2[] = { &info_elements, &vendor_specific_payloads };
+    ReadableWlanConfigurationRequest read_data(elems_2);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -119,7 +121,7 @@ TEST(WlanConfigurationRequestTestsGroup, WlanConfigurationRequest_serialize_dele
         delete_wlan.Add({ 1, 2 });
         delete_wlan.Add({ 3, 4 });
 
-        WritableWlanConfigurationRequest write_data(&delete_wlan, {});
+        WritableWlanConfigurationRequest write_data(&delete_wlan, nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const>{});
 
         write_data.Serialize(&raw_data);
     }
@@ -134,7 +136,7 @@ TEST(WlanConfigurationRequestTestsGroup, WlanConfigurationRequest_serialize_dele
 
     raw_data = { buffer, buffer + 28 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
 
-    ReadableWlanConfigurationRequest read_data({});
+    ReadableWlanConfigurationRequest read_data(nonstd::span<IReadableWlanConfigurationRequestOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -165,7 +167,7 @@ TEST(WlanConfigurationRequestTestsGroup, WlanConfigurationRequest_serialize_upda
                           UpdateWlan::KeyStatus::BeginRekeying,
                           nonstd::span<const uint8_t>(key, sizeof(key)) });
 
-        WritableWlanConfigurationRequest write_data(&update_wlan, {});
+        WritableWlanConfigurationRequest write_data(&update_wlan, nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const>{});
 
         write_data.Serialize(&raw_data);
     }
@@ -181,7 +183,7 @@ TEST(WlanConfigurationRequestTestsGroup, WlanConfigurationRequest_serialize_upda
 
     raw_data = { buffer, buffer + 34 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
 
-    ReadableWlanConfigurationRequest read_data({});
+    ReadableWlanConfigurationRequest read_data(nonstd::span<IReadableWlanConfigurationRequestOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -233,7 +235,7 @@ TEST(WlanConfigurationRequestTestsGroup,
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableWlanConfigurationRequest read_data({});
+    ReadableWlanConfigurationRequest read_data(nonstd::span<IReadableWlanConfigurationRequestOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -241,7 +243,8 @@ TEST(WlanConfigurationRequestTestsGroup,
 }
 TEST(WlanConfigurationRequestTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableWlanConfigurationRequest read_data({ &vendor_specific_payloads });
+    IReadableWlanConfigurationRequestOptionalElement *const elems_3[] = { &vendor_specific_payloads };
+    ReadableWlanConfigurationRequest read_data(elems_3);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
@@ -253,7 +256,7 @@ TEST(WlanConfigurationRequestTestsGroup, GetOptionalElement) {
 
 TEST(WlanConfigurationRequestTestsGroup, MessageTypeIdentification) {
     WritableAddWlanArray add_wlan;
-    WritableWlanConfigurationRequest write_data(&add_wlan, {});
+    WritableWlanConfigurationRequest write_data(&add_wlan, nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::WlanConfigurationRequest, write_data.GetMessageType());
 }

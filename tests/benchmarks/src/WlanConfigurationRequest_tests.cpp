@@ -49,7 +49,8 @@ TEST(WlanConfigurationRequestTestsGroup,
     uint8_t ie_data[] = { 0xDD, 0x08, 0x00, 0x50, 0xF2, 0x01, 0x01, 0x00, 0x00, 0x50 };
     info_elements.Add({ 1, 2, InformationElement::FLAG_BEACON, { ie_data, sizeof(ie_data) } });
 
-    WritableWlanConfigurationRequest write_data(&add_wlan, { &info_elements });
+    IWritableWlanConfigurationRequestOptionalElement *const elems_1[] = { &info_elements };
+    WritableWlanConfigurationRequest write_data(&add_wlan, elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -59,7 +60,8 @@ TEST(WlanConfigurationRequestTestsGroup,
         raw_data = { buffer, buffer + 68 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
 
         ReadableInformationElementArray info_elements;
-        ReadableWlanConfigurationRequest read_data({ &info_elements });
+        IReadableWlanConfigurationRequestOptionalElement *const elems_2[] = { &info_elements };
+        ReadableWlanConfigurationRequest read_data(elems_2);
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);
@@ -102,7 +104,7 @@ TEST(WlanConfigurationRequestTestsGroup,
     delete_wlan.Add({ 1, 2 });
     delete_wlan.Add({ 3, 4 });
 
-    WritableWlanConfigurationRequest write_data(&delete_wlan, {});
+    WritableWlanConfigurationRequest write_data(&delete_wlan, nonstd::span<IWritableWlanConfigurationRequestOptionalElement *const>{});
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -111,7 +113,7 @@ TEST(WlanConfigurationRequestTestsGroup,
 
         raw_data = { buffer, buffer + 28 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
 
-        ReadableWlanConfigurationRequest read_data({});
+        ReadableWlanConfigurationRequest read_data(nonstd::span<IReadableWlanConfigurationRequestOptionalElement *const>{});
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

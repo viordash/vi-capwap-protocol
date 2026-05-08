@@ -16,20 +16,6 @@ WritableDiscoveryResponse::WritableDiscoveryResponse(
       optional_elements{ optional_elements } {
 }
 
-WritableDiscoveryResponse::WritableDiscoveryResponse(
-    const WritableACDescriptor &ac_descriptor,
-    const std::string_view ac_name,
-    WritableWTPRadioInformationArray &wtp_radio_informations,
-    const nonstd::span<const CAPWAPControlIPv4Address> &ip_addresses,
-    std::initializer_list<IWritableDiscoveryResponseOptionalElement *const> optional_elements)
-    : WritableDiscoveryResponse(ac_descriptor,
-                                ac_name,
-                                wtp_radio_informations,
-                                ip_addresses,
-                                nonstd::span<IWritableDiscoveryResponseOptionalElement *const>(
-                                    optional_elements.begin(),
-                                    optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableDiscoveryResponse::GetMessageType() const {
     return ControlHeader::DiscoveryResponse;
@@ -56,12 +42,6 @@ ReadableDiscoveryResponse::ReadableDiscoveryResponse(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableDiscoveryResponse::ReadableDiscoveryResponse(
-    std::initializer_list<IReadableDiscoveryResponseOptionalElement *> optional_elements)
-    : ReadableDiscoveryResponse(nonstd::span<IReadableDiscoveryResponseOptionalElement *const>(
-          optional_elements.begin(),
-          optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableDiscoveryResponse::GetMessageType() const {
     return ControlHeader::DiscoveryResponse;

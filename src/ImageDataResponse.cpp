@@ -11,14 +11,6 @@ WritableImageDataResponse::WritableImageDataResponse(
     : result_code{ result_code }, optional_elements{ optional_elements } {
 }
 
-WritableImageDataResponse::WritableImageDataResponse(
-    const ResultCode::Type result_code,
-    std::initializer_list<IWritableImageDataResponseOptionalElement *const> optional_elements)
-    : WritableImageDataResponse(result_code,
-                                nonstd::span<IWritableImageDataResponseOptionalElement *const>(
-                                    optional_elements.begin(),
-                                    optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableImageDataResponse::GetMessageType() const {
     return ControlHeader::ImageDataResponse;
@@ -42,12 +34,6 @@ ReadableImageDataResponse::ReadableImageDataResponse(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableImageDataResponse::ReadableImageDataResponse(
-    std::initializer_list<IReadableImageDataResponseOptionalElement *> optional_elements)
-    : ReadableImageDataResponse(nonstd::span<IReadableImageDataResponseOptionalElement *const>(
-          optional_elements.begin(),
-          optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableImageDataResponse::GetMessageType() const {
     return ControlHeader::ImageDataResponse;

@@ -24,8 +24,9 @@ TEST(WlanConfigurationResponseTestsGroup, WlanConfigurationResponse_serialize_su
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
+        IWritableWlanConfigurationResponseOptionalElement *const elems_1[] = { &vendor_specific_payloads };
         WritableWlanConfigurationResponse write_data(ResultCode::Type::Success,
-                                                     { &vendor_specific_payloads });
+            elems_1);
 
         write_data.Serialize(&raw_data);
     }
@@ -44,7 +45,8 @@ TEST(WlanConfigurationResponseTestsGroup, WlanConfigurationResponse_serialize_su
     raw_data = { buffer, buffer + 55 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableWlanConfigurationResponse read_data({ &vendor_specific_payloads });
+    IReadableWlanConfigurationResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads };
+    ReadableWlanConfigurationResponse read_data(elems_2);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -72,8 +74,9 @@ TEST(WlanConfigurationResponseTestsGroup, WlanConfigurationResponse_serialize_wi
         assigned_bssid.Add({ 1, 2, bssid1 });
         assigned_bssid.Add({ 3, 4, bssid2 });
 
+        IWritableWlanConfigurationResponseOptionalElement *const elems_3[] = { &assigned_bssid };
         WritableWlanConfigurationResponse write_data(ResultCode::Type::Success,
-                                                     { &assigned_bssid });
+            elems_3);
 
         write_data.Serialize(&raw_data);
     }
@@ -91,7 +94,8 @@ TEST(WlanConfigurationResponseTestsGroup, WlanConfigurationResponse_serialize_wi
     raw_data = { buffer, buffer + 48 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
 
     ReadableAssignedWtpBssidArray assigned_bssid;
-    ReadableWlanConfigurationResponse read_data({ &assigned_bssid });
+    IReadableWlanConfigurationResponseOptionalElement *const elems_4[] = { &assigned_bssid };
+    ReadableWlanConfigurationResponse read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -137,7 +141,7 @@ TEST(WlanConfigurationResponseTestsGroup, WlanConfigurationResponse_deserialize_
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableWlanConfigurationResponse read_data({});
+    ReadableWlanConfigurationResponse read_data(nonstd::span<IReadableWlanConfigurationResponseOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -176,7 +180,7 @@ TEST(WlanConfigurationResponseTestsGroup,
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableWlanConfigurationResponse read_data({});
+    ReadableWlanConfigurationResponse read_data(nonstd::span<IReadableWlanConfigurationResponseOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -184,7 +188,8 @@ TEST(WlanConfigurationResponseTestsGroup,
 }
 TEST(WlanConfigurationResponseTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableWlanConfigurationResponse read_data({ &vendor_specific_payloads });
+    IReadableWlanConfigurationResponseOptionalElement *const elems_5[] = { &vendor_specific_payloads };
+    ReadableWlanConfigurationResponse read_data(elems_5);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
@@ -195,7 +200,7 @@ TEST(WlanConfigurationResponseTestsGroup, GetOptionalElement) {
 }
 
 TEST(WlanConfigurationResponseTestsGroup, MessageTypeIdentification) {
-    WritableWlanConfigurationResponse write_data(ResultCode::Type::Success, {});
+    WritableWlanConfigurationResponse write_data(ResultCode::Type::Success, nonstd::span<IWritableWlanConfigurationResponseOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::WlanConfigurationResponse, write_data.GetMessageType());
     CHECK_EQUAL(ControlHeader::WlanConfigurationRequest, write_data.GetRequestMessageType());

@@ -19,10 +19,7 @@ struct WritableWlanConfigurationResponse : WritableCapwapResponse {
         const ResultCode::Type result_code,
         nonstd::span<IWritableWlanConfigurationResponseOptionalElement *const> optional_elements);
 
-    WritableWlanConfigurationResponse(
-        const ResultCode::Type result_code,
-        std::initializer_list<IWritableWlanConfigurationResponseOptionalElement *>
-            optional_elements);
+
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -48,9 +45,7 @@ struct ReadableWlanConfigurationResponse : ReadableCapwapResponse {
     ReadableWlanConfigurationResponse(
         nonstd::span<IReadableWlanConfigurationResponseOptionalElement *const> optional_elements);
 
-    ReadableWlanConfigurationResponse(
-        std::initializer_list<IReadableWlanConfigurationResponseOptionalElement *>
-            optional_elements);
+
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

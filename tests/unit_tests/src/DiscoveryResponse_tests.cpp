@@ -67,7 +67,8 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize) {
 
     raw_data = { buffer, buffer + 190 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableDiscoveryResponse read_data{ &vendor_specific_payloads };
+    IReadableDiscoveryResponseOptionalElement *const elems_1[] = { &vendor_specific_payloads };
+    ReadableDiscoveryResponse read_data(elems_1);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_EQUAL(3, read_data.wtp_radio_informations.Get().size());
@@ -125,11 +126,12 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize_with_VendorSpecifi
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
         vendor_specific_payloads.Add(1, 2, "01234567890A");
 
+        IWritableDiscoveryResponseOptionalElement *const elems_2[] = { &vendor_specific_payloads };
         WritableDiscoveryResponse write_data(ac_descriptor,
                                              ac_name,
                                              wtp_radio_informations,
                                              ip_addresses,
-                                             { &vendor_specific_payloads });
+            elems_2);
 
         write_data.Serialize(&raw_data);
     }
@@ -158,7 +160,8 @@ TEST(DiscoveryResponseTestsGroup, DiscoveryResponse_serialize_with_VendorSpecifi
 
     raw_data = { buffer, buffer + 215 - (sizeof(ClearHeader) + sizeof(ControlHeader)) };
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableDiscoveryResponse read_data{ &vendor_specific_payloads };
+    IReadableDiscoveryResponseOptionalElement *const elems_3[] = { &vendor_specific_payloads };
+    ReadableDiscoveryResponse read_data(elems_3);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_TRUE(vendor_specific_payloads.IsPresent());
@@ -232,7 +235,7 @@ uint8_t data[] = {
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableDiscoveryResponse read_data({});
+    ReadableDiscoveryResponse read_data(nonstd::span<IReadableDiscoveryResponseOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -349,7 +352,8 @@ uint8_t data[] = {
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableDiscoveryResponse read_data{ &vendor_specific_payloads };
+    IReadableDiscoveryResponseOptionalElement *const elems_4[] = { &vendor_specific_payloads };
+    ReadableDiscoveryResponse read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -358,7 +362,8 @@ uint8_t data[] = {
 }
 TEST(DiscoveryResponseTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableDiscoveryResponse read_data({ &vendor_specific_payloads });
+    IReadableDiscoveryResponseOptionalElement *const elems_5[] = { &vendor_specific_payloads };
+    ReadableDiscoveryResponse read_data(elems_5);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
@@ -383,7 +388,7 @@ TEST(DiscoveryResponseTestsGroup, MessageTypeIdentification) {
     CAPWAPControlIPv4Address ip_addresses[] = { { inet_addr("127.0.0.1"), 1 } };
 
     WritableDiscoveryResponse write_data(
-        ac_descriptor, "ac", wtp_radio_informations, ip_addresses, {});
+        ac_descriptor, "ac", wtp_radio_informations, ip_addresses, nonstd::span<IWritableDiscoveryResponseOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::DiscoveryResponse, write_data.GetMessageType());
     CHECK_EQUAL(ControlHeader::DiscoveryRequest, write_data.GetRequestMessageType());

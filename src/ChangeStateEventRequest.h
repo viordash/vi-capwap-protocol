@@ -27,11 +27,7 @@ struct WritableChangeStateEventRequest : WritableCapwapRequest {
         WritableRadioOperationalStateArray &radio_operational_states,
         ResultCode &result_code,
         nonstd::span<IWritableChangeStateEventRequestOptionalElement *const> optional_elements);
-    WritableChangeStateEventRequest(
-        WritableRadioOperationalStateArray &radio_operational_states,
-        ResultCode &result_code,
-        std::initializer_list<IWritableChangeStateEventRequestOptionalElement *const>
-            optional_elements);
+
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetResponseMessageType() const override final;
@@ -60,8 +56,7 @@ struct ReadableChangeStateEventRequest : ReadableCapwapRequest {
     ReadableChangeStateEventRequest(const ReadableChangeStateEventRequest &) = delete;
     ReadableChangeStateEventRequest(
         nonstd::span<IReadableChangeStateEventRequestOptionalElement *const> optional_elements);
-    ReadableChangeStateEventRequest(
-        std::initializer_list<IReadableChangeStateEventRequestOptionalElement *> optional_elements);
+
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

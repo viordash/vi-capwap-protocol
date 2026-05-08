@@ -60,12 +60,8 @@ TEST(WTPEventRequestTestsGroup, WTPEventRequest_serialize) {
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-        WritableWTPEventRequest write_data({ &decryption_error_report,
-                                             &duplicate_ipv4_address,
-                                             &wtp_radio_statistics,
-                                             &wtp_reboot_statistics,
-                                             &delete_station,
-                                             &vendor_specific_payloads });
+        IWritableWTPEventRequestOptionalElement *const elems_1[] = { &decryption_error_report, &duplicate_ipv4_address, &wtp_radio_statistics, &wtp_reboot_statistics, &delete_station, &vendor_specific_payloads };
+        WritableWTPEventRequest write_data(elems_1);
 
         write_data.Serialize(&raw_data);
     }
@@ -97,12 +93,8 @@ TEST(WTPEventRequestTestsGroup, WTPEventRequest_serialize) {
     ReadableWTPRebootStatistics wtp_reboot_statistics;
     ReadableDeleteStationArray delete_station;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableWTPEventRequest read_data({ &decryption_error_report,
-                                        &duplicate_ipv4_address,
-                                        &wtp_radio_statistics,
-                                        &wtp_reboot_statistics,
-                                        &delete_station,
-                                        &vendor_specific_payloads });
+    IReadableWTPEventRequestOptionalElement *const elems_2[] = { &decryption_error_report, &duplicate_ipv4_address, &wtp_radio_statistics, &wtp_reboot_statistics, &delete_station, &vendor_specific_payloads };
+    ReadableWTPEventRequest read_data(elems_2);
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
     CHECK_TRUE(decryption_error_report.IsPresent());
@@ -258,12 +250,8 @@ TEST(WTPEventRequestTestsGroup, WTPEventRequest_deserialize_image_data) {
     ReadableWTPRebootStatistics wtp_reboot_statistics;
     ReadableDeleteStationArray delete_station;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableWTPEventRequest read_data({ &decryption_error_report,
-                                        &duplicate_ipv4_address,
-                                        &wtp_radio_statistics,
-                                        &wtp_reboot_statistics,
-                                        &delete_station,
-                                        &vendor_specific_payloads });
+    IReadableWTPEventRequestOptionalElement *const elems_3[] = { &decryption_error_report, &duplicate_ipv4_address, &wtp_radio_statistics, &wtp_reboot_statistics, &delete_station, &vendor_specific_payloads };
+    ReadableWTPEventRequest read_data(elems_3);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -358,7 +346,8 @@ TEST(WTPEventRequestTestsGroup, WTPEventRequest_deserialize_handle_unknown_eleme
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
     ReadableDecryptionErrorReportArray decryption_error_report;
-    ReadableWTPEventRequest read_data({ &decryption_error_report });
+    IReadableWTPEventRequestOptionalElement *const elems_4[] = { &decryption_error_report };
+    ReadableWTPEventRequest read_data(elems_4);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_TRUE(decryption_error_report.IsPresent());
@@ -380,7 +369,8 @@ TEST(WTPEventRequestTestsGroup, One_or_more_serialize) {
         WritableDeleteStationArray delete_station;
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
 
-        WritableWTPEventRequest write_data({ &decryption_error_report });
+        IWritableWTPEventRequestOptionalElement *const elems_5[] = { &decryption_error_report };
+        WritableWTPEventRequest write_data(elems_5);
 
         write_data.Serialize(&raw_data);
     }
@@ -398,12 +388,8 @@ TEST(WTPEventRequestTestsGroup, One_or_more_serialize) {
     ReadableWTPRebootStatistics wtp_reboot_statistics;
     ReadableDeleteStationArray delete_station;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableWTPEventRequest read_data({ &decryption_error_report,
-                                        &duplicate_ipv4_address,
-                                        &wtp_radio_statistics,
-                                        &wtp_reboot_statistics,
-                                        &delete_station,
-                                        &vendor_specific_payloads });
+    IReadableWTPEventRequestOptionalElement *const elems_6[] = { &decryption_error_report, &duplicate_ipv4_address, &wtp_radio_statistics, &wtp_reboot_statistics, &delete_station, &vendor_specific_payloads };
+    ReadableWTPEventRequest read_data(elems_6);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_TRUE(decryption_error_report.IsPresent());
@@ -443,7 +429,8 @@ TEST(WTPEventRequestTestsGroup, IEEE80211_specific_message_elements) {
         w_stats.Add(
             { 1, 100, 200, 10, 20, 5, 3, 500, 2, 7, 150, 300, 4, 1000, 1, 2, 25, 50, 6, 8 });
 
-        WritableWTPEventRequest write_data({ &w_cms, &w_reports, &w_stats });
+        IWritableWTPEventRequestOptionalElement *const elems_7[] = { &w_cms, &w_reports, &w_stats };
+        WritableWTPEventRequest write_data(elems_7);
 
         write_data.Serialize(&raw_data);
     }
@@ -454,7 +441,8 @@ TEST(WTPEventRequestTestsGroup, IEEE80211_specific_message_elements) {
     ReadableMICCountermeasuresArray r_cms;
     ReadableRSNAErrorReportFromStationArray r_reports;
     ReadableStatisticsArray r_stats;
-    ReadableWTPEventRequest read_data({ &r_cms, &r_reports, &r_stats });
+    IReadableWTPEventRequestOptionalElement *const elems_8[] = { &r_cms, &r_reports, &r_stats };
+    ReadableWTPEventRequest read_data(elems_8);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
 
@@ -498,7 +486,8 @@ TEST(WTPEventRequestTestsGroup, IEEE80211_specific_message_elements) {
 }
 TEST(WTPEventRequestTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    ReadableWTPEventRequest read_data({ &vendor_specific_payloads });
+    IReadableWTPEventRequestOptionalElement *const elems_9[] = { &vendor_specific_payloads };
+    ReadableWTPEventRequest read_data(elems_9);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
@@ -509,7 +498,7 @@ TEST(WTPEventRequestTestsGroup, GetOptionalElement) {
 }
 
 TEST(WTPEventRequestTestsGroup, MessageTypeIdentification) {
-    WritableWTPEventRequest write_data({});
+    WritableWTPEventRequest write_data(nonstd::span<IWritableWTPEventRequestOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::WTPEventRequest, write_data.GetMessageType());
 }

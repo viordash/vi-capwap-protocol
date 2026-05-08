@@ -31,12 +31,7 @@ struct WritableDiscoveryResponse : WritableCapwapResponse {
         const nonstd::span<const CAPWAPControlIPv4Address> &ip_addresses,
         nonstd::span<IWritableDiscoveryResponseOptionalElement *const> optional_elements);
 
-    WritableDiscoveryResponse(
-        const WritableACDescriptor &ac_descriptor,
-        const std::string_view ac_name,
-        WritableWTPRadioInformationArray &wtp_radio_informations,
-        const nonstd::span<const CAPWAPControlIPv4Address> &ip_addresses,
-        std::initializer_list<IWritableDiscoveryResponseOptionalElement *const> optional_elements);
+
 
     ControlHeader::MessageType GetMessageType() const override final;
     ControlHeader::MessageType GetRequestMessageType() const override final;
@@ -63,8 +58,7 @@ struct ReadableDiscoveryResponse : ReadableCapwapResponse {
     ReadableDiscoveryResponse(const ReadableDiscoveryResponse &) = delete;
     ReadableDiscoveryResponse(
         nonstd::span<IReadableDiscoveryResponseOptionalElement *const> optional_elements);
-    ReadableDiscoveryResponse(
-        std::initializer_list<IReadableDiscoveryResponseOptionalElement *> optional_elements);
+
 
     ControlHeader::MessageType GetMessageType() const override final;
     bool Deserialize(RawData *raw_data) override final;

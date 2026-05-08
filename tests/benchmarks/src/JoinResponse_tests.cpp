@@ -62,6 +62,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_deserialize_perf) {
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
     vendor_specific_payloads.Add(1, 2, "01234567890A");
 
+    IWritableJoinResponseOptionalElement *const elems_1[] = { &ac_ipv4_list, &capwap_transport_protocol, &image_identifier, &maximum_message_length, &vendor_specific_payloads };
     WritableJoinResponse write_data(ResultCode::Type::Success,
                                     ac_descriptor,
                                     "Corporate-AC-1",
@@ -69,11 +70,7 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_deserialize_perf) {
                                     ECNSupport::Type::FullAndLimitedECN,
                                     control_ip_addresses,
                                     local_ip_addresses,
-                                    { &ac_ipv4_list,
-                                      &capwap_transport_protocol,
-                                      &image_identifier,
-                                      &maximum_message_length,
-                                      &vendor_specific_payloads });
+        elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -89,11 +86,8 @@ TEST(JoinResponseTestsGroup, JoinResponse_serialize_deserialize_perf) {
         ReadableMaximumMessageLength maximum_message_length;
         ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
-        ReadableJoinResponse read_data({ &ac_ipv4_list,
-                                         &capwap_transport_protocol,
-                                         &image_identifier,
-                                         &maximum_message_length,
-                                         &vendor_specific_payloads });
+        IReadableJoinResponseOptionalElement *const elems_2[] = { &ac_ipv4_list, &capwap_transport_protocol, &image_identifier, &maximum_message_length, &vendor_specific_payloads };
+        ReadableJoinResponse read_data(elems_2);
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

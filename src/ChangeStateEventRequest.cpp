@@ -16,17 +16,6 @@ WritableChangeStateEventRequest::WritableChangeStateEventRequest(
     ValidateReturnedMessageElement();
 }
 
-WritableChangeStateEventRequest::WritableChangeStateEventRequest(
-    WritableRadioOperationalStateArray &radio_operational_states,
-    ResultCode &result_code,
-    std::initializer_list<IWritableChangeStateEventRequestOptionalElement *const> optional_elements)
-    : WritableChangeStateEventRequest(
-          radio_operational_states,
-          result_code,
-          nonstd::span<IWritableChangeStateEventRequestOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableChangeStateEventRequest::GetMessageType() const {
     return ControlHeader::ChangeStateEventRequest;
@@ -72,13 +61,6 @@ ReadableChangeStateEventRequest::ReadableChangeStateEventRequest(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableChangeStateEventRequest::ReadableChangeStateEventRequest(
-    std::initializer_list<IReadableChangeStateEventRequestOptionalElement *> optional_elements)
-    : ReadableChangeStateEventRequest(
-          nonstd::span<IReadableChangeStateEventRequestOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableChangeStateEventRequest::GetMessageType() const {
     return ControlHeader::ChangeStateEventRequest;

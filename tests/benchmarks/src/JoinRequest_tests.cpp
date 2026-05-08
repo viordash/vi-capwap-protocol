@@ -71,6 +71,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_deserialize_perf) {
     vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
     vendor_specific_payloads.Add(1, 2, "01234567890A");
 
+    IWritableJoinRequestOptionalElement *const elems_1[] = { &capwap_transport_protocol, &maximum_message_length, &wtp_reboot_statistics, &vendor_specific_payloads };
     WritableJoinRequest write_data("location_data",
                                    wtpboarddata,
                                    wtpdescriptor,
@@ -81,10 +82,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_deserialize_perf) {
                                    wtp_radio_informations,
                                    ECNSupport::Type::FullAndLimitedECN,
                                    ip_addresses,
-                                   { &capwap_transport_protocol,
-                                     &maximum_message_length,
-                                     &wtp_reboot_statistics,
-                                     &vendor_specific_payloads });
+        elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -98,10 +96,8 @@ TEST(JoinRequestTestsGroup, JoinRequest_serialize_deserialize_perf) {
         ReadableWTPRebootStatistics wtp_reboot_statistics;
         ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
-        ReadableJoinRequest read_data({ &capwap_transport_protocol,
-                                        &maximum_message_length,
-                                        &wtp_reboot_statistics,
-                                        &vendor_specific_payloads });
+        IReadableJoinRequestOptionalElement *const elems_2[] = { &capwap_transport_protocol, &maximum_message_length, &wtp_reboot_statistics, &vendor_specific_payloads };
+        ReadableJoinRequest read_data(elems_2);
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
         CHECK_EQUAL(0, read_data.unknown_elements);

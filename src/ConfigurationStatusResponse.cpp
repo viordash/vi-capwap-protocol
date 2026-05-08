@@ -18,23 +18,6 @@ WritableConfigurationStatusResponse::WritableConfigurationStatusResponse(
       optional_elements{ optional_elements } {
 }
 
-WritableConfigurationStatusResponse::WritableConfigurationStatusResponse(
-    const WritableCAPWAPTimers &capwap_timers,
-    WritableDecryptionErrorReportPeriodArray &decryption_error_report_periods,
-    const uint32_t idle_timeout,
-    const WTPFallback::Mode wtp_fallback,
-    const nonstd::span<const uint32_t> &ac_ipv4_list,
-    std::initializer_list<IWritableConfigurationStatusResponseOptionalElement *> optional_elements)
-    : WritableConfigurationStatusResponse(
-          capwap_timers,
-          decryption_error_report_periods,
-          idle_timeout,
-          wtp_fallback,
-          ac_ipv4_list,
-          nonstd::span<IWritableConfigurationStatusResponseOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType WritableConfigurationStatusResponse::GetMessageType() const {
     return ControlHeader::ConfigurationStatusResponse;
@@ -62,13 +45,6 @@ ReadableConfigurationStatusResponse::ReadableConfigurationStatusResponse(
     : key_optional_elements{ MapOptionalsElements(optional_elements) }, unknown_elements{} {
 }
 
-ReadableConfigurationStatusResponse::ReadableConfigurationStatusResponse(
-    std::initializer_list<IReadableConfigurationStatusResponseOptionalElement *> optional_elements)
-    : ReadableConfigurationStatusResponse(
-          nonstd::span<IReadableConfigurationStatusResponseOptionalElement *const>(
-              optional_elements.begin(),
-              optional_elements.size())) {
-}
 
 ControlHeader::MessageType ReadableConfigurationStatusResponse::GetMessageType() const {
     return ControlHeader::ConfigurationStatusResponse;

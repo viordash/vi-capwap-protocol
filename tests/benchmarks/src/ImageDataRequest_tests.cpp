@@ -35,11 +35,8 @@ TEST(ImageDataRequestTestsGroup, ImageDataRequest_serialize_deserialize_perf) {
     WritableImageIdentifier image_identifier{ 123456, "1232344" };
     WritableInitiateDownload initiate_download;
 
-    WritableImageDataRequest write_data({ &capwap_transport_protocol,
-                                          &image_data,
-                                          &vendor_specific_payloads,
-                                          &image_identifier,
-                                          &initiate_download });
+    IWritableImageDataRequestOptionalElement *const elems_1[] = { &capwap_transport_protocol, &image_data, &vendor_specific_payloads, &image_identifier, &initiate_download };
+    WritableImageDataRequest write_data(elems_1);
 
     b.run("serialization", [&] {
         RawData raw_data{ buffer, buffer + sizeof(buffer) };
@@ -54,11 +51,8 @@ TEST(ImageDataRequestTestsGroup, ImageDataRequest_serialize_deserialize_perf) {
         ReadableVendorSpecificPayloadArray vendor_specific_payloads;
         ReadableInitiateDownload initiate_download;
 
-        ReadableImageDataRequest read_data({ &capwap_transport_protocol,
-                                             &image_data,
-                                             &image_identifier,
-                                             &vendor_specific_payloads,
-                                             &initiate_download });
+        IReadableImageDataRequestOptionalElement *const elems_2[] = { &capwap_transport_protocol, &image_data, &image_identifier, &vendor_specific_payloads, &initiate_download };
+        ReadableImageDataRequest read_data(elems_2);
 
         CHECK_TRUE(read_data.Deserialize(&raw_data));
         ankerl::nanobench::doNotOptimizeAway(raw_data);
