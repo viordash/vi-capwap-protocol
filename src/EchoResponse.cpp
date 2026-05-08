@@ -80,7 +80,7 @@ void ReadableEchoResponse::Log() const {
         if (value->IsPresent()) {
             value->Log();
         } else {
-            log_w("  expected optional element is missing, type: 0x%04X", (unsigned)type);
+            log_i("  expected optional element is missing, type: 0x%04X", (unsigned)type);
         }
     }
     if (unknown_elements > 0) {
