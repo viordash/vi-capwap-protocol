@@ -29,7 +29,7 @@ struct __attribute__((packed)) TxPower : ElementHeader {
     uint8_t Reserved;
 
     // Current Tx Power: A 16-bit unsigned value containing the current transmit
-    // power level in units of dBm currently being used by the radio.
+    // output power in mW currently being used by the radio.
     NetworkU16 CurrentTxPower;
 
     TxPower(const TxPower &) = default;
