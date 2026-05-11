@@ -48,11 +48,11 @@ struct __attribute__((packed)) TxPowerLevel : ElementHeader {
 struct WritableTxPowerLevelArray : IWritableConfigurationStatusRequestOptionalElement {
   public:
     struct Item {
-        nonstd::span<const NetworkU16> data;
+        nonstd::span<const uint16_t> data;
         TxPowerLevel header;
 
         Item(const Item &) = default;
-        Item(uint8_t radio_id, nonstd::span<const NetworkU16> levels)
+        Item(uint8_t radio_id, nonstd::span<const uint16_t> levels)
             : data(levels), header(radio_id, data.size()) {
         }
     };
@@ -77,7 +77,7 @@ struct ReadableTxPowerLevelArray : IReadableConfigurationStatusRequestOptionalEl
     static const size_t max_count = 32;
 
     struct Item : TxPowerLevel {
-        NetworkU16 data[];
+        uint16_t data[];
         Item(const Item &) = delete;
     };
 

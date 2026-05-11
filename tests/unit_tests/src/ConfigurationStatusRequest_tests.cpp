@@ -43,12 +43,17 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize)
         WritableVendorSpecificPayloadArray vendor_specific_payloads;
         vendor_specific_payloads.Add(123456, 789, "01234567890ABCDEF0123");
 
-        IWritableConfigurationStatusRequestOptionalElement *const elems_1[] = { &ac_names_with_priority, &capwap_transport_protocol, &wtp_static_ipaddress, &vendor_specific_payloads };
+        IWritableConfigurationStatusRequestOptionalElement *const elems_1[] = {
+            &ac_names_with_priority,
+            &capwap_transport_protocol,
+            &wtp_static_ipaddress,
+            &vendor_specific_payloads
+        };
         WritableConfigurationStatusRequest write_data("abcdefабвгд",
                                                       radio_states,
                                                       12345,
                                                       wtp_reboot_statistics,
-            elems_1);
+                                                      elems_1);
 
         write_data.Serialize(&raw_data);
     }
@@ -79,7 +84,12 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_serialize)
     ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
-    IReadableConfigurationStatusRequestOptionalElement *const elems_2[] = { &ac_names_with_priority, &capwap_transport_protocol, &wtp_static_ipaddress, &vendor_specific_payloads };
+    IReadableConfigurationStatusRequestOptionalElement *const elems_2[] = {
+        &ac_names_with_priority,
+        &capwap_transport_protocol,
+        &wtp_static_ipaddress,
+        &vendor_specific_payloads
+    };
     ReadableConfigurationStatusRequest read_data(elems_2);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
@@ -238,7 +248,12 @@ TEST(ConfigurationStatusRequestTestsGroup, ConfigurationStatusRequest_deserializ
     ReadableWTPStaticIPAddressInformation wtp_static_ipaddress;
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
 
-    IReadableConfigurationStatusRequestOptionalElement *const elems_3[] = { &ac_names_with_priority, &capwap_transport_protocol, &wtp_static_ipaddress, &vendor_specific_payloads };
+    IReadableConfigurationStatusRequestOptionalElement *const elems_3[] = {
+        &ac_names_with_priority,
+        &capwap_transport_protocol,
+        &wtp_static_ipaddress,
+        &vendor_specific_payloads
+    };
     ReadableConfigurationStatusRequest read_data(elems_3);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
@@ -365,7 +380,8 @@ TEST(ConfigurationStatusRequestTestsGroup,
     // clang-format on
     RawData raw_data{ data + (sizeof(ClearHeader) + sizeof(ControlHeader)), data + sizeof(data) };
 
-    ReadableConfigurationStatusRequest read_data(nonstd::span<IReadableConfigurationStatusRequestOptionalElement *const>{});
+    ReadableConfigurationStatusRequest read_data(
+        nonstd::span<IReadableConfigurationStatusRequestOptionalElement *const>{});
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
     CHECK_EQUAL(raw_data.current, raw_data.end);
@@ -377,7 +393,7 @@ TEST(ConfigurationStatusRequestTestsGroup, IEEE80211_specific_message_elements) 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     std::vector<uint8_t> rates_0 = { 0x82, 0x84 };
-    std::vector<NetworkU16> levels_0 = { 20 };
+    std::vector<uint16_t> levels_0 = { 20 };
     const uint8_t bssid1[] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0x01 };
 
     {
@@ -424,12 +440,15 @@ TEST(ConfigurationStatusRequestTestsGroup, IEEE80211_specific_message_elements) 
         WritableWTPRadioInformationArray w_infos;
         w_infos.Add({ 1, true, false, true, true, false, false, false }); // b/g/n
 
-        IWritableConfigurationStatusRequestOptionalElement *const elems_4[] = { &w_antennas, &w_ctrls, &w_ops, &w_capabilities, &w_controls, &w_rates, &w_tps, &w_levels, &w_configs, &w_infos };
+        IWritableConfigurationStatusRequestOptionalElement *const elems_4[] = {
+            &w_antennas, &w_ctrls, &w_ops,    &w_capabilities, &w_controls,
+            &w_rates,    &w_tps,   &w_levels, &w_configs,      &w_infos
+        };
         WritableConfigurationStatusRequest write_data("abcdefабвгд",
                                                       radio_states,
                                                       12345,
                                                       wtp_reboot_statistics,
-            elems_4);
+                                                      elems_4);
 
         write_data.Serialize(&raw_data);
     }
@@ -447,7 +466,10 @@ TEST(ConfigurationStatusRequestTestsGroup, IEEE80211_specific_message_elements) 
     ReadableTxPowerLevelArray r_levels;
     ReadableWTPRadioConfigurationArray r_configs;
     ReadableWTPRadioInformationArray r_infos;
-    IReadableConfigurationStatusRequestOptionalElement *const elems_5[] = { &r_antennas, &r_ctrls, &r_ops, &r_capabilities, &r_controls, &r_rates, &r_tps, &r_levels, &r_configs, &r_infos };
+    IReadableConfigurationStatusRequestOptionalElement *const elems_5[] = {
+        &r_antennas, &r_ctrls, &r_ops,    &r_capabilities, &r_controls,
+        &r_rates,    &r_tps,   &r_levels, &r_configs,      &r_infos
+    };
     ReadableConfigurationStatusRequest read_data(elems_5);
 
     CHECK_TRUE(read_data.Deserialize(&raw_data));
@@ -537,15 +559,17 @@ TEST(ConfigurationStatusRequestTestsGroup, IEEE80211_specific_message_elements) 
 }
 TEST(ConfigurationStatusRequestTestsGroup, GetOptionalElement) {
     ReadableVendorSpecificPayloadArray vendor_specific_payloads;
-    IReadableConfigurationStatusRequestOptionalElement *const elems_6[] = { &vendor_specific_payloads };
+    IReadableConfigurationStatusRequestOptionalElement *const elems_6[] = {
+        &vendor_specific_payloads
+    };
     ReadableConfigurationStatusRequest read_data(elems_6);
 
     CHECK_EQUAL(&vendor_specific_payloads,
                 read_data.GetOptionalElement<ReadableVendorSpecificPayloadArray>(
                     ElementHeader::VendorSpecificPayload));
 
-    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF) ==
-          nullptr);
+    CHECK(read_data.GetOptionalElement<IReadableElement>((ElementHeader::ElementType)0xFFFF)
+          == nullptr);
 }
 
 TEST(ConfigurationStatusRequestTestsGroup, MessageTypeIdentification) {
@@ -554,7 +578,11 @@ TEST(ConfigurationStatusRequestTestsGroup, MessageTypeIdentification) {
         0, 0, 0, 0, 0, 0, 0, WTPRebootStatistics::LastFailureType::Unknown
     };
     WritableConfigurationStatusRequest write_data(
-        "ac", radio_states, 0, wtp_reboot_statistics, nonstd::span<IWritableConfigurationStatusRequestOptionalElement *const>{});
+        "ac",
+        radio_states,
+        0,
+        wtp_reboot_statistics,
+        nonstd::span<IWritableConfigurationStatusRequestOptionalElement *const>{});
 
     CHECK_EQUAL(ControlHeader::ConfigurationStatusRequest, write_data.GetMessageType());
 }
