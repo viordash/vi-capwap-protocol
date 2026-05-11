@@ -18,9 +18,9 @@ TEST(TxPowerLevelTestsGroup, Serialize_Deserialize_few_elements) {
 
     WritableTxPowerLevelArray w_levels;
 
-    std::vector<uint16_t> levels_0 = { 20 };
-    std::vector<uint16_t> levels_1 = { 17, 14, 11 };
-    std::vector<uint16_t> levels_2 = { 23, 20, 17, 14, 11 };
+    std::vector<NetworkU16> levels_0 = { 20 };
+    std::vector<NetworkU16> levels_1 = { 17, 14, 11 };
+    std::vector<NetworkU16> levels_2 = { 23456, 20, 17890, 14, 11 };
 
     w_levels.Add({ 1, levels_0 });
     w_levels.Add({ 3, levels_1 });
@@ -50,17 +50,26 @@ TEST(TxPowerLevelTestsGroup, Serialize_Deserialize_few_elements) {
     CHECK_EQUAL(1, r_levels.Get()[0]->GetRadioID());
     CHECK_EQUAL(1, r_levels.Get()[0]->GetNumLevels());
     CHECK_EQUAL(2 + 2, r_levels.Get()[0]->GetLength());
-    MEMCMP_EQUAL(levels_0.data(), r_levels.Get()[0]->data, 2);
+    CHECK_EQUAL(1, r_levels.Get()[0]->GetNumLevels());
+    CHECK_EQUAL(20, r_levels.Get()[0]->data[0].Get());
 
     CHECK_EQUAL(3, r_levels.Get()[1]->GetRadioID());
     CHECK_EQUAL(3, r_levels.Get()[1]->GetNumLevels());
     CHECK_EQUAL(6 + 2, r_levels.Get()[1]->GetLength());
-    MEMCMP_EQUAL(levels_1.data(), r_levels.Get()[1]->data, 6);
+    CHECK_EQUAL(3, r_levels.Get()[1]->GetNumLevels());
+    CHECK_EQUAL(17, r_levels.Get()[1]->data[0].Get());
+    CHECK_EQUAL(14, r_levels.Get()[1]->data[1].Get());
+    CHECK_EQUAL(11, r_levels.Get()[1]->data[2].Get());
 
     CHECK_EQUAL(2, r_levels.Get()[2]->GetRadioID());
     CHECK_EQUAL(5, r_levels.Get()[2]->GetNumLevels());
     CHECK_EQUAL(10 + 2, r_levels.Get()[2]->GetLength());
-    MEMCMP_EQUAL(levels_2.data(), r_levels.Get()[2]->data, 10);
+    CHECK_EQUAL(5, r_levels.Get()[2]->GetNumLevels());
+    CHECK_EQUAL(23456, r_levels.Get()[2]->data[0].Get());
+    CHECK_EQUAL(20, r_levels.Get()[2]->data[1].Get());
+    CHECK_EQUAL(17890, r_levels.Get()[2]->data[2].Get());
+    CHECK_EQUAL(14, r_levels.Get()[2]->data[3].Get());
+    CHECK_EQUAL(11, r_levels.Get()[2]->data[4].Get());
 }
 
 TEST(TxPowerLevelTestsGroup, Add_array_of_items_is_unique_by_RadioID) {
@@ -68,10 +77,10 @@ TEST(TxPowerLevelTestsGroup, Add_array_of_items_is_unique_by_RadioID) {
 
     WritableTxPowerLevelArray w_levels;
 
-    std::vector<uint16_t> levels_0 = { 20 };
-    std::vector<uint16_t> levels_1 = { 17, 14, 11 };
-    std::vector<uint16_t> levels_2 = { 23, 20, 17, 14, 11 };
-    std::vector<uint16_t> levels_3 = { 25, 22 };
+    std::vector<NetworkU16> levels_0 = { 20 };
+    std::vector<NetworkU16> levels_1 = { 17, 14, 11 };
+    std::vector<NetworkU16> levels_2 = { 23, 20, 17, 14, 11 };
+    std::vector<NetworkU16> levels_3 = { 25, 22 };
 
     // Add same RadioID multiple times - should replace
     w_levels.Add({ 1, levels_0 });

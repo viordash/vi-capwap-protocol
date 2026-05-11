@@ -377,7 +377,7 @@ TEST(ConfigurationStatusRequestTestsGroup, IEEE80211_specific_message_elements) 
     RawData raw_data{ buffer, buffer + sizeof(buffer) };
 
     std::vector<uint8_t> rates_0 = { 0x82, 0x84 };
-    std::vector<uint16_t> levels_0 = { 20 };
+    std::vector<NetworkU16> levels_0 = { 20 };
     const uint8_t bssid1[] = { 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0x01 };
 
     {

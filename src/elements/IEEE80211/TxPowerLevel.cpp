@@ -5,7 +5,7 @@
 #include <cstring>
 
 TxPowerLevel::TxPowerLevel(uint8_t radio_id, uint8_t num_levels)
-    : ElementHeader(ElementHeader::TxPowerLevel, 2 + num_levels * sizeof(NetworkS16)),
+    : ElementHeader(ElementHeader::TxPowerLevel, 2 + num_levels * sizeof(NetworkU16)),
       radio_id{ radio_id }, num_levels{ num_levels } {
 }
 
