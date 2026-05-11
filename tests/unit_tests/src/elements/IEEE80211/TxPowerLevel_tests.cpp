@@ -18,9 +18,9 @@ TEST(TxPowerLevelTestsGroup, Serialize_Deserialize_few_elements) {
 
     WritableTxPowerLevelArray w_levels;
 
-    std::vector<int16_t> levels_0 = { 20 };
-    std::vector<int16_t> levels_1 = { 17, 14, 11 };
-    std::vector<int16_t> levels_2 = { 23, 20, 17, 14, 11 };
+    std::vector<uint16_t> levels_0 = { 20 };
+    std::vector<uint16_t> levels_1 = { 17, 14, 11 };
+    std::vector<uint16_t> levels_2 = { 23, 20, 17, 14, 11 };
 
     w_levels.Add({ 1, levels_0 });
     w_levels.Add({ 3, levels_1 });
@@ -68,10 +68,10 @@ TEST(TxPowerLevelTestsGroup, Add_array_of_items_is_unique_by_RadioID) {
 
     WritableTxPowerLevelArray w_levels;
 
-    std::vector<int16_t> levels_0 = { 20 };
-    std::vector<int16_t> levels_1 = { 17, 14, 11 };
-    std::vector<int16_t> levels_2 = { 23, 20, 17, 14, 11 };
-    std::vector<int16_t> levels_3 = { 25, 22 };
+    std::vector<uint16_t> levels_0 = { 20 };
+    std::vector<uint16_t> levels_1 = { 17, 14, 11 };
+    std::vector<uint16_t> levels_2 = { 23, 20, 17, 14, 11 };
+    std::vector<uint16_t> levels_3 = { 25, 22 };
 
     // Add same RadioID multiple times - should replace
     w_levels.Add({ 1, levels_0 });

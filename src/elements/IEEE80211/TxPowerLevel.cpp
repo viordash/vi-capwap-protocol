@@ -44,6 +44,7 @@ WritableTxPowerLevelArray::WritableTxPowerLevelArray() {
 
 void WritableTxPowerLevelArray::Add(Item element) {
     ASSERT(items.size() + 1 <= ReadableTxPowerLevelArray::max_count);
+    ASSERT(element.data.size() <= TxPowerLevel::max_levels);
 
     auto it_exists = std::find_if(items.begin(), items.end(), [&element](const Item &item) {
         return item.header.GetRadioID() == element.header.GetRadioID();

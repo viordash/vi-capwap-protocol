@@ -34,7 +34,7 @@ struct __attribute__((packed)) TxPowerLevel : ElementHeader {
     uint8_t num_levels;
 
   public:
-    // Power Level: A 16-bit signed value, in dBm, for each of the supported power levels.
+    // Power Level: A 16-bit unsigned value, in mW, for each of the supported power levels.
 
     TxPowerLevel(const TxPowerLevel &) = default;
     TxPowerLevel(uint8_t radio_id, uint8_t num_levels);
@@ -48,11 +48,11 @@ struct __attribute__((packed)) TxPowerLevel : ElementHeader {
 struct WritableTxPowerLevelArray : IWritableConfigurationStatusRequestOptionalElement {
   public:
     struct Item {
-        nonstd::span<const int16_t> data;
+        nonstd::span<const uint16_t> data;
         TxPowerLevel header;
 
         Item(const Item &) = default;
-        Item(uint8_t radio_id, nonstd::span<const int16_t> levels)
+        Item(uint8_t radio_id, nonstd::span<const uint16_t> levels)
             : data(levels), header(radio_id, data.size()) {
         }
     };
