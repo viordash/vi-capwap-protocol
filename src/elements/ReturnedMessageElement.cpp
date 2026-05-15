@@ -70,7 +70,7 @@ void WritableReturnedMessageElementArray::Add(ReturnedMessageElement::Reasons re
     if (it_exists != items.end()) {
         *it_exists = WritableReturnedMessageElementArray::Item{ reason, std::move(val) };
         log_i("ReturnedMessageElement: replace Reason: %u, Data size: %zu",
-              reason,
+              (unsigned)reason,
               (*it_exists).data.size());
     } else {
         items.emplace_back(reason, std::move(val));
@@ -111,7 +111,7 @@ void WritableReturnedMessageElementArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
         log_i("     #%zu: Reason: %u, Length: %u",
               i,
-              items[i].header.GetReason(),
+              (unsigned)items[i].header.GetReason(),
               items[i].header.GetDataLength());
     }
 }
@@ -159,7 +159,7 @@ void ReadableReturnedMessageElementArray::Log() const {
     for (size_t i = 0; i < count; i++) {
         log_i("     #%zu: Reason: %u, Length: %u",
               i,
-              items[i]->GetReason(),
+              (unsigned)items[i]->GetReason(),
               items[i]->GetDataLength());
     }
 }

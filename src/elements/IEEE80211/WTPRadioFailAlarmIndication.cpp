@@ -88,8 +88,8 @@ void WritableWTPRadioFailAlarmIndicationArray::Log() const {
         log_i("ME WTPRadioFailAlarmIndication #%zu RadioID:%u, Type:%u, Status:%u",
               i,
               items[i].RadioID,
-              items[i].Type,
-              items[i].Status);
+              (unsigned)items[i].Type,
+              (unsigned)items[i].Status);
     }
 }
 
@@ -140,7 +140,7 @@ void ReadableWTPRadioFailAlarmIndicationArray::Log() const {
         log_i("ME WTPRadioFailAlarmIndication #%zu RadioID:%u, Type:%u, Status:%u",
               i,
               items[i]->RadioID,
-              items[i]->Type,
-              items[i]->Status);
+              (unsigned)items[i]->Type,
+              (unsigned)items[i]->Status);
     }
 }

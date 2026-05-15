@@ -153,7 +153,7 @@ void WritableWTPDescriptor::Log() const {
         log_i("    S-E #%zu: VendorId:%u, Type:0x%04X, Value:%.*s",
               i,
               desc_items[i].header.GetVendorIdentifier(),
-              desc_items[i].header.GetType(),
+              (unsigned)desc_items[i].header.GetType(),
               desc_items[i].header.GetLength(),
               desc_items[i].utf8_value);
     }
@@ -271,7 +271,7 @@ void ReadableWTPDescriptor::Log() const {
         log_i("    S-E #%zu: VendorId:%u, Type:0x%04X, Value:%.*s",
               i,
               desc_items[i]->GetVendorIdentifier(),
-              desc_items[i]->GetType(),
+              (unsigned)desc_items[i]->GetType(),
               desc_items[i]->GetLength(),
               desc_items[i]->utf8_value);
     }

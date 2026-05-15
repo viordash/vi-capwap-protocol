@@ -103,7 +103,7 @@ void WritableWTPBoardData::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
         log_i("    S-E #%zu: Type:0x%04X, Value:%.*s",
               i,
-              items[i].header.GetType(),
+              (unsigned)items[i].header.GetType(),
               items[i].header.GetLength(),
               (char *)items[i].value);
     }
@@ -172,7 +172,7 @@ void ReadableWTPBoardData::Log() const {
     for (size_t i = 0; i < count; i++) {
         log_i("    S-E #%zu: Type:0x%04X, Value:%.*s",
               i,
-              items[i]->GetType(),
+              (unsigned)items[i]->GetType(),
               items[i]->GetLength(),
               (char *)items[i]->value);
     }

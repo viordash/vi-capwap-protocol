@@ -114,8 +114,8 @@ void WritableAntennaArray::Log() const {
         log_i("ME Antenna #%zu RadioID:%u, Diversity:%u, Combiner:%u, AntennaCount:%u",
               i,
               items[i].header.GetRadioID(),
-              items[i].header.GetDiversity(),
-              items[i].header.GetCombiner(),
+              (unsigned)items[i].header.GetDiversity(),
+              (unsigned)items[i].header.GetCombiner(),
               items[i].header.GetAntennaCount());
     }
 }
@@ -159,8 +159,8 @@ void ReadableAntennaArray::Log() const {
         log_i("ME Antenna #%zu RadioID:%u, Diversity:%u, Combiner:%u, AntennaCount:%u",
               i,
               items[i]->GetRadioID(),
-              items[i]->GetDiversity(),
-              items[i]->GetCombiner(),
+              (unsigned)items[i]->GetDiversity(),
+              (unsigned)items[i]->GetCombiner(),
               items[i]->GetAntennaCount());
     }
 }

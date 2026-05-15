@@ -87,8 +87,8 @@ void WritableRadioOperationalStateArray::Log() const {
         log_i("ME RadioOperationalState #%zu RadioID:%u, State:%u, Cause:%u",
               i,
               items[i].RadioID,
-              items[i].State,
-              items[i].Cause);
+              (unsigned)items[i].State,
+              (unsigned)items[i].Cause);
     }
 }
 
@@ -126,8 +126,8 @@ void ReadableRadioOperationalStateArray::Log() const {
         log_i("ME RadioOperationalState #%zu RadioID:%u, State:%u, Cause:%u",
               i,
               items[i]->RadioID,
-              items[i]->State,
-              items[i]->Cause);
+              (unsigned)items[i]->State,
+              (unsigned)items[i]->Cause);
     }
 }
 

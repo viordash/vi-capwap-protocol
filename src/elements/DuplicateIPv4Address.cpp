@@ -147,7 +147,7 @@ void ReadableDuplicateIPv4AdrArray::Log() const {
         log_i("ME DuplicateIPv4Address #%zu IP Address:%s, Status:%u",
               i,
               IpToString(items[i]->IPAddress).c_str(),
-              items[i]->Status);
+              (unsigned)items[i]->Status);
         MacAddress::Log(i, items[i]->MACAddress.Length, items[i]->MACAddress.MACAddresses);
     }
 }

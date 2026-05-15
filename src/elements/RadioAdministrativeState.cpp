@@ -74,7 +74,7 @@ void WritableRadioAdministrativeStateArray::Log() const {
         log_i("ME RadioAdministrativeState #%zu RadioID:%u, AdminState:%u",
               i,
               items[i].RadioID,
-              items[i].AdminState);
+              (unsigned)items[i].AdminState);
     }
 }
 
@@ -113,7 +113,7 @@ void ReadableRadioAdministrativeStateArray::Log() const {
         log_i("ME RadioAdministrativeState #%zu RadioID:%u, AdminState:%u",
               i,
               items[i]->RadioID,
-              items[i]->AdminState);
+              (unsigned)items[i]->AdminState);
     }
 }
 

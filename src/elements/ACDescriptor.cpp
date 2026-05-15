@@ -175,7 +175,7 @@ void WritableACDescriptor::Log() const {
           header.GetMaxWTPs(),
           header.X509Cert(),
           header.PresharedSecret(),
-          header.GetRMAC(),
+          (unsigned)header.GetRMAC(),
           header.ClearDataChannel(),
           header.DTLSDataChannel(),
           sub_elements.size());
@@ -184,7 +184,7 @@ void WritableACDescriptor::Log() const {
         log_i("    S-E #%zu: VendorId:%u, Type:0x%04X, Data:%.*s",
               i,
               sub_elements[i].header.GetVendorIdentifier(),
-              sub_elements[i].header.GetType(),
+              (unsigned)sub_elements[i].header.GetType(),
               sub_elements[i].header.GetLength(),
               sub_elements[i].data);
     }
@@ -243,7 +243,7 @@ void ReadableACDescriptor::Log() const {
           header->GetMaxWTPs(),
           header->X509Cert(),
           header->PresharedSecret(),
-          header->GetRMAC(),
+          (unsigned)header->GetRMAC(),
           header->ClearDataChannel(),
           header->DTLSDataChannel(),
           count);
@@ -252,9 +252,9 @@ void ReadableACDescriptor::Log() const {
         log_i("    S-E #%zu: VendorId:%u, Type:0x%04X, Data:%.*s",
               i,
               items[i]->GetVendorIdentifier(),
-              items[i]->GetType(),
+              (unsigned)items[i]->GetType(),
               items[i]->GetLength(),
-              items[i]->data);
+              (const char *)items[i]->data);
     }
 }
 

@@ -126,7 +126,7 @@ void WritableUpdateWlanArray::Log() const {
               items[i].header.GetWlanID(),
               items[i].header.GetCapability(),
               items[i].header.GetKeyIndex(),
-              items[i].header.GetKeyStatus(),
+              (unsigned)items[i].header.GetKeyStatus(),
               items[i].data.size());
     }
 }
@@ -174,7 +174,7 @@ void ReadableUpdateWlanArray::Log() const {
               items[i]->GetWlanID(),
               items[i]->GetCapability(),
               items[i]->GetKeyIndex(),
-              items[i]->GetKeyStatus(),
+              (unsigned)items[i]->GetKeyStatus(),
               items[i]->GetKeyLength());
     }
 }

@@ -113,7 +113,7 @@ bool ReadableConfigurationStatusRequest::Deserialize(RawData *raw_data) {
                 unknown_elements++;
                 log_w("ReadableConfigurationStatusRequest::Deserialize unhandled element type: "
                       "0x%04X",
-                      unknownElement->GetElementType());
+                      (unsigned)unknownElement->GetElementType());
 
                 break;
             }

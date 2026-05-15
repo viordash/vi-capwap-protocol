@@ -130,7 +130,7 @@ bool ReadableJoinResponse::Deserialize(RawData *raw_data) {
                 }
                 unknown_elements++;
                 log_e("ReadableJoinResponse::Deserialize unhandled element type: 0x%04X",
-                      unknownElement->GetElementType());
+                      (unsigned)unknownElement->GetElementType());
 
                 break;
             }

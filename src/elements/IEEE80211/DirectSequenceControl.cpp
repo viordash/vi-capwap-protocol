@@ -97,7 +97,7 @@ void WritableDirectSequenceControlArray::Log() const {
               i,
               items[i].GetRadioID(),
               items[i].GetCurrentChannel(),
-              items[i].GetCurrentCCA(),
+              (unsigned)items[i].GetCurrentCCA(),
               items[i].GetEnergyDetectThreshold());
     }
 }
@@ -146,7 +146,7 @@ void ReadableDirectSequenceControlArray::Log() const {
               i,
               items[i]->GetRadioID(),
               items[i]->GetCurrentChannel(),
-              items[i]->GetCurrentCCA(),
+              (unsigned)items[i]->GetCurrentCCA(),
               items[i]->GetEnergyDetectThreshold());
     }
 }
