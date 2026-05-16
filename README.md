@@ -60,6 +60,20 @@ WritableRateSetArray rate_sets;
 rate_sets.Serialize(&raw_data);  // Undefined behavior
 ```
 
+## Dependencies
+
+Required for standalone builds (unit tests and benchmarks).
+When used as a git submodule, the parent project provides its own logging backend.
+
+### spdlog
+
+- Debian/Ubuntu: `sudo apt install libspdlog-dev`
+
+### fmt (transitive dependency of system spdlog)
+
+- Debian/Ubuntu: `sudo apt install libfmt-dev`
+
+
 ## Building Tests
 
 ```bash
