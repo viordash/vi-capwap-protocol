@@ -35,7 +35,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get -y install ccache
+        sudo apt-get -y install ccache libspdlog-dev libfmt-dev
 
     - name: Build tests
       run: make build_tests
@@ -54,7 +54,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get -y install ccache
+        sudo apt-get -y install ccache libspdlog-dev libfmt-dev
 
     - name: Build benchmarks
       run: make build_benchmarks
