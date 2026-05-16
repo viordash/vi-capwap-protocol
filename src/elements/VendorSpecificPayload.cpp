@@ -143,14 +143,13 @@ ReadableVendorSpecificPayloadArray::Get() const {
 
 void ReadableVendorSpecificPayloadArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i(
-            "ME VendorSpecificPayload  #{} VendorId:{}, ElementId:{}, Value:{}",
-            i,
-            items[i]->GetVendorIdentifier(),
-            items[i]->GetElementId(),
-            std::string_view((char *)items[i]->value,
-                             items[i]->GetLength()
-                                 - (sizeof(VendorSpecificPayload) - sizeof(ElementHeader))));
+        log_i("ME VendorSpecificPayload  #{} VendorId:{}, ElementId:{}, Value:{}",
+              i,
+              items[i]->GetVendorIdentifier(),
+              items[i]->GetElementId(),
+              std::string_view((char *)items[i]->value,
+                               items[i]->GetLength()
+                                   - (sizeof(VendorSpecificPayload) - sizeof(ElementHeader))));
     }
 }
 

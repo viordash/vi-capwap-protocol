@@ -115,7 +115,8 @@ void WritableStationSessionKeyArray::Serialize(RawData *raw_data) const {
 
 void WritableStationSessionKeyArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME StationSessionKey #{} MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, Flags:0x{:04X} "
+        log_i("ME StationSessionKey #{} MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, "
+              "Flags:0x{:04X} "
               "(A:{}, C:{}), KeyLen:{}",
               i,
               items[i].header.GetMACAddress()[0],
@@ -168,7 +169,8 @@ ReadableStationSessionKeyArray::Get() const {
 
 void ReadableStationSessionKeyArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME StationSessionKey #{} MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, Flags:0x{:04X} "
+        log_i("ME StationSessionKey #{} MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, "
+              "Flags:0x{:04X} "
               "(A:{}, C:{}), KeyLen:{}",
               i,
               items[i]->GetMACAddress()[0],

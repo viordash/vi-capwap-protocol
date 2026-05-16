@@ -132,7 +132,8 @@ void WritableRSNAErrorReportFromStationArray::Serialize(RawData *raw_data) const
 void WritableRSNAErrorReportFromStationArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
         log_i("ME RSNAErrorReportFromStation #{} RadioID:{}, WlanID:{}, "
-              "MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, BSSID:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
+              "MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, "
+              "BSSID:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
               i,
               items[i].GetRadioID(),
               items[i].GetWlanID(),
@@ -192,7 +193,8 @@ ReadableRSNAErrorReportFromStationArray::Get() const {
 void ReadableRSNAErrorReportFromStationArray::Log() const {
     for (size_t i = 0; i < count; i++) {
         log_i("ME RSNAErrorReportFromStation #{} RadioID:{}, WlanID:{}, "
-              "MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, BSSID:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
+              "MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, "
+              "BSSID:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
               i,
               items[i]->GetRadioID(),
               items[i]->GetWlanID(),

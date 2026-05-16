@@ -108,8 +108,9 @@ bool ReadableChangeStateEventRequest::Deserialize(RawData *raw_data) {
                     return false;
                 }
                 unknown_elements++;
-                log_w("ReadableChangeStateEventRequest::Deserialize unhandled element type: 0x{:04X}",
-                      (unsigned)unknownElement->GetElementType());
+                log_w(
+                    "ReadableChangeStateEventRequest::Deserialize unhandled element type: 0x{:04X}",
+                    (unsigned)unknownElement->GetElementType());
 
                 break;
             }

@@ -30,7 +30,8 @@ bool ImageInformation::Validate() const {
 
 void ImageInformation::Log() const {
     log_i("ME ImageInformation FileSize: {}, hash: "
-          "{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}",
+          "{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:02X}{:"
+          "02X}{:02X}",
           GetFileSize(),
           file_hash[0],
           file_hash[1],

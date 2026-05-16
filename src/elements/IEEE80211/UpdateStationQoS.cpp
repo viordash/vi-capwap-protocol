@@ -101,7 +101,8 @@ void WritableUpdateStationQoSArray::Serialize(RawData *raw_data) const {
 
 void WritableUpdateStationQoSArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME UpdateStationQoS #{} RadioID:{}, MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, 8021p:{}, "
+        log_i("ME UpdateStationQoS #{} RadioID:{}, MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, "
+              "8021p:{}, "
               "DSCP:{}",
               i,
               items[i].RadioID,
@@ -155,7 +156,8 @@ nonstd::span<const UpdateStationQoS *const> ReadableUpdateStationQoSArray::Get()
 
 void ReadableUpdateStationQoSArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME UpdateStationQoS #{} RadioID:{}, MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, 8021p:{}, "
+        log_i("ME UpdateStationQoS #{} RadioID:{}, MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, "
+              "8021p:{}, "
               "DSCP:{}",
               i,
               items[i]->RadioID,

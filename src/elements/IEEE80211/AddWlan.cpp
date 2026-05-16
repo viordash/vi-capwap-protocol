@@ -303,22 +303,21 @@ bool ReadableAddWlanArray::IsPresent() const {
 
 void ReadableAddWlanArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i(
-            "ME AddWlan #{} RadioID:{}, WlanID:{}, Capability:{:04X}, KeyIndex:{}, KeyStatus:{}, "
-            "KeyLen:{}, QoS:{}, AuthType:{}, MACMode:{}, TunnelMode:{}, SuppressSSID:{}, "
-            "SSID:{}",
-            i,
-            items[i].header->GetRadioID(),
-            items[i].header->GetWlanID(),
-            items[i].header->GetCapability(),
-            items[i].header->GetKeyIndex(),
-            (unsigned)items[i].header->GetKeyStatus(),
-            items[i].header->GetKeyLength(),
-            (unsigned)items[i].tail->qos,
-            (unsigned)items[i].tail->auth_type,
-            (unsigned)items[i].tail->mac_mode,
-            (unsigned)items[i].tail->tunnel_mode,
-            items[i].tail->suppress_ssid,
-            std::string_view(items[i].ssid, items[i].ssid_length));
+        log_i("ME AddWlan #{} RadioID:{}, WlanID:{}, Capability:{:04X}, KeyIndex:{}, KeyStatus:{}, "
+              "KeyLen:{}, QoS:{}, AuthType:{}, MACMode:{}, TunnelMode:{}, SuppressSSID:{}, "
+              "SSID:{}",
+              i,
+              items[i].header->GetRadioID(),
+              items[i].header->GetWlanID(),
+              items[i].header->GetCapability(),
+              items[i].header->GetKeyIndex(),
+              (unsigned)items[i].header->GetKeyStatus(),
+              items[i].header->GetKeyLength(),
+              (unsigned)items[i].tail->qos,
+              (unsigned)items[i].tail->auth_type,
+              (unsigned)items[i].tail->mac_mode,
+              (unsigned)items[i].tail->tunnel_mode,
+              items[i].tail->suppress_ssid,
+              std::string_view(items[i].ssid, items[i].ssid_length));
     }
 }

@@ -39,7 +39,8 @@ void WritableImageIdentifier::Serialize(RawData *raw_data) const {
 void WritableImageIdentifier::Log() const {
     log_i("ME ImageIdentifierHeader VendorId:{}, Value:{}",
           element.vendor_id.Get(),
-          std::string_view(data.data(), element.GetLength() - (sizeof(element) - sizeof(ElementHeader))));
+          std::string_view(data.data(),
+                           element.GetLength() - (sizeof(element) - sizeof(ElementHeader))));
 }
 
 bool ReadableImageIdentifier::Deserialize(RawData *raw_data) {
@@ -76,7 +77,9 @@ void ReadableImageIdentifier::Log() const {
 
     log_i("ME ImageIdentifierHeader VendorId:{}, Value:{}",
           element->vendor_id.Get(),
-          std::string_view((char *)element->data, element->GetLength() - (sizeof(ImageIdentifierHeader) - sizeof(ElementHeader))));
+          std::string_view((char *)element->data,
+                           element->GetLength()
+                               - (sizeof(ImageIdentifierHeader) - sizeof(ElementHeader))));
 }
 
 ElementHeader::ElementType ReadableImageIdentifier::GetElementType() const {
