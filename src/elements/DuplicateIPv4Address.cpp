@@ -104,7 +104,7 @@ void WritableDuplicateIPv4AdrArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
         log_i("ME DuplicateIPv4Address #{} IP Address:{}, Status:{}",
               i,
-              IpToString(items[i].header.IPAddress).c_str(),
+              IpToString(items[i].header.IPAddress),
               (unsigned)items[i].header.Status);
         MacAddress::Log(i, items[i].Mac.Length, items[i].Mac.Address);
     }
@@ -146,7 +146,7 @@ void ReadableDuplicateIPv4AdrArray::Log() const {
     for (size_t i = 0; i < count; i++) {
         log_i("ME DuplicateIPv4Address #{} IP Address:{}, Status:{}",
               i,
-              IpToString(items[i]->IPAddress).c_str(),
+              IpToString(items[i]->IPAddress),
               (unsigned)items[i]->Status);
         MacAddress::Log(i, items[i]->MACAddress.Length, items[i]->MACAddress.MACAddresses);
     }

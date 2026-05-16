@@ -108,7 +108,7 @@ void WritableWTPRadioInformationArray::Log() const {
         log_i("ME WTPRadioInfo #{} RadioID:{}, 802.11 ({} )",
               i,
               items[i].RadioID,
-              items[i].ToString().c_str());
+              items[i].ToString());
     }
 }
 
@@ -154,6 +154,6 @@ void ReadableWTPRadioInformationArray::Log() const {
         log_i("ME WTPRadioInfo #{} RadioID:{}, 802.11 ({} )",
               i,
               items[i]->RadioID,
-              items[i]->ToString().c_str());
+              items[i]->ToString());
     }
 }

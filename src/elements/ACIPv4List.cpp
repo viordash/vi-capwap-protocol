@@ -33,7 +33,7 @@ void WritableACIPv4List::Serialize(RawData *raw_data) const {
 void WritableACIPv4List::Log() const {
     log_i("ME ACIPv4List size:{}, adrs:", addresses.size());
     for (size_t i = 0; i < addresses.size(); i++) {
-        log_i("     #{}, {}", i, IpToString(addresses[i]).c_str());
+        log_i("     #{}, {}", i, IpToString(addresses[i]));
     }
 }
 
@@ -83,7 +83,7 @@ void ReadableACIPv4List::Log() const {
 
     log_i("ME ACIPv4List size:{}, adrs:", element->GetCount());
     for (size_t i = 0; i < element->GetCount(); i++) {
-        log_i("     #{}, {}", i, IpToString(element->addresses[i]).c_str());
+        log_i("     #{}, {}", i, IpToString(element->addresses[i]));
     }
 }
 

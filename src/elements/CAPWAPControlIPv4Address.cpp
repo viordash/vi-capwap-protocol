@@ -29,7 +29,7 @@ uint16_t CAPWAPControlIPv4Address::GetWTPCount() const {
 
 void CAPWAPControlIPv4Address::Log() const {
     log_i("ME CAPWAPControlIPv4Address IP Address:{}, WTP Count:{}",
-          IpToString(GetIPAddress()).c_str(),
+          IpToString(GetIPAddress()),
           GetWTPCount());
 }
 
@@ -51,7 +51,7 @@ void WritableCAPWAPControlIPV4AdrArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
         log_i("ME CAPWAPControlIPv4Address #{} IP Address::{}, WTP Count:{}",
               i,
-              IpToString(items[i].GetIPAddress()).c_str(),
+              IpToString(items[i].GetIPAddress()),
               items[i].GetWTPCount());
     }
 }
@@ -89,7 +89,7 @@ void ReadableCAPWAPControlIPV4AdrArray::Log() const {
     for (size_t i = 0; i < count; i++) {
         log_i("ME CAPWAPControlIPv4Address #{} IP Address::{}, WTP Count:{}",
               i,
-              IpToString(items[i]->GetIPAddress()).c_str(),
+              IpToString(items[i]->GetIPAddress()),
               items[i]->GetWTPCount());
     }
 }

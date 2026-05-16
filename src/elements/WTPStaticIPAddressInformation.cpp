@@ -22,9 +22,9 @@ bool WTPStaticIPAddressInformation::Validate() const {
 
 void WTPStaticIPAddressInformation::Log() const {
     log_i("ME WTPStaticIPAddressInformation IP Address:{}, Netmask:{}, Gateway:{}, use static:{}",
-          IpToString(IpAddress).c_str(),
-          IpToString(Netmask).c_str(),
-          IpToString(Gateway).c_str(),
+          IpToString(IpAddress),
+          IpToString(Netmask),
+          IpToString(Gateway),
           Static);
 }
 

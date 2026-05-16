@@ -21,7 +21,7 @@ bool SessionId::Validate() const {
 }
 
 void SessionId::Log() const {
-    log_i("ME SessionId: {}", ToString().c_str());
+    log_i("ME SessionId: {}", ToString());
 }
 
 WritableSessionId::WritableSessionId(const SessionId &session_id) : element{ session_id } {
