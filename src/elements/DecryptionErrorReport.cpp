@@ -60,7 +60,7 @@ void WritableDecryptionErrorReportArray::Add(uint8_t radio_id,
         });
     if (it_exists != items.end()) {
         *it_exists = WritableDecryptionErrorReportArray::Item{ radio_id, std::move(mac_addresses) };
-        log_i("DecryptionErrorReport: replace RadioID: %u, size:%zu",
+        log_i("DecryptionErrorReport: replace RadioID: {}, size:{}",
               radio_id,
               (*it_exists).MacAddresses.size());
     } else {
@@ -96,7 +96,7 @@ void WritableDecryptionErrorReportArray::Serialize(RawData *raw_data) const {
 
 void WritableDecryptionErrorReportArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME DecryptionErrorReport #%zu RadioID: %u, size:%zu, entries:",
+        log_i("ME DecryptionErrorReport #{} RadioID: {}, size:{}, entries:",
               i,
               items[i].header.RadioID,
               items[i].MacAddresses.size());
@@ -176,7 +176,7 @@ ReadableDecryptionErrorReportArray::Get() {
 
 void ReadableDecryptionErrorReportArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME DecryptionErrorReport #%zu RadioID: %u, size:%u, entries:",
+        log_i("ME DecryptionErrorReport #{} RadioID: {}, size:{}, entries:",
               i,
               items[i].header->RadioID,
               (unsigned)items[i].num_of_entries);

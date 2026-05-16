@@ -19,7 +19,7 @@ bool DiscoveryType::Validate() const {
 }
 
 void DiscoveryType::Log() const {
-    log_i("ME DiscoveryType Type:%u", (unsigned)type);
+    log_i("ME DiscoveryType Type:{}", (unsigned)type);
 }
 
 WritableDiscoveryType::WritableDiscoveryType(DiscoveryType::Type type) : element{ type } {

@@ -73,7 +73,7 @@ void WritableMACOperationArray::Add(MACOperation op) {
     });
     if (it_exists != items.end()) {
         *it_exists = std::move(op);
-        log_i("MACOperation: replace RadioID: %u", (*it_exists).GetRadioID());
+        log_i("MACOperation: replace RadioID: {}", (*it_exists).GetRadioID());
     } else {
         items.emplace_back(std::move(op));
     }
@@ -97,8 +97,8 @@ void WritableMACOperationArray::Serialize(RawData *raw_data) const {
 
 void WritableMACOperationArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME MACOperation #%zu RadioID:%u, RTSThreshold:%u, ShortRetry:%u, LongRetry:%u, "
-              "FragThreshold:%u, TxMSDULifetime:%u, RxMSDULifetime:%u",
+        log_i("ME MACOperation #{} RadioID:{}, RTSThreshold:{}, ShortRetry:{}, LongRetry:{}, "
+              "FragThreshold:{}, TxMSDULifetime:{}, RxMSDULifetime:{}",
               i,
               items[i].GetRadioID(),
               items[i].GetRTSThreshold(),
@@ -148,8 +148,8 @@ nonstd::span<const MACOperation *const> ReadableMACOperationArray::Get() const {
 
 void ReadableMACOperationArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME MACOperation #%zu RadioID:%u, RTSThreshold:%u, ShortRetry:%u, LongRetry:%u, "
-              "FragThreshold:%u, TxMSDULifetime:%u, RxMSDULifetime:%u",
+        log_i("ME MACOperation #{} RadioID:{}, RTSThreshold:{}, ShortRetry:{}, LongRetry:{}, "
+              "FragThreshold:{}, TxMSDULifetime:{}, RxMSDULifetime:{}",
               i,
               items[i]->GetRadioID(),
               items[i]->GetRTSThreshold(),

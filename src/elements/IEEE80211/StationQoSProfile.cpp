@@ -51,7 +51,7 @@ void WritableStationQoSProfileArray::Add(StationQoSProfile element) {
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("StationQoSProfile: replace MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+        log_i("StationQoSProfile: replace MAC: {:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
               (*it_exists).GetMACAddress()[0],
               (*it_exists).GetMACAddress()[1],
               (*it_exists).GetMACAddress()[2],
@@ -81,7 +81,7 @@ void WritableStationQoSProfileArray::Serialize(RawData *raw_data) const {
 
 void WritableStationQoSProfileArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME StationQoSProfile #%zu MAC:%02X:%02X:%02X:%02X:%02X:%02X, 8021p:%u",
+        log_i("ME StationQoSProfile #{} MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, 8021p:{}",
               i,
               items[i].GetMACAddress()[0],
               items[i].GetMACAddress()[1],
@@ -132,7 +132,7 @@ nonstd::span<const StationQoSProfile *const> ReadableStationQoSProfileArray::Get
 
 void ReadableStationQoSProfileArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME StationQoSProfile #%zu MAC:%02X:%02X:%02X:%02X:%02X:%02X, 8021p:%u",
+        log_i("ME StationQoSProfile #{} MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, 8021p:{}",
               i,
               items[i]->GetMACAddress()[0],
               items[i]->GetMACAddress()[1],

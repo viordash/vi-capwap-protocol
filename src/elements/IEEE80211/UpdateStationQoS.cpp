@@ -71,7 +71,7 @@ void WritableUpdateStationQoSArray::Add(UpdateStationQoS element) {
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("UpdateStationQoS: replace MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+        log_i("UpdateStationQoS: replace MAC: {:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
               (*it_exists).MACAddress[0],
               (*it_exists).MACAddress[1],
               (*it_exists).MACAddress[2],
@@ -101,8 +101,8 @@ void WritableUpdateStationQoSArray::Serialize(RawData *raw_data) const {
 
 void WritableUpdateStationQoSArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME UpdateStationQoS #%zu RadioID:%u, MAC:%02X:%02X:%02X:%02X:%02X:%02X, 8021p:%u, "
-              "DSCP:%u",
+        log_i("ME UpdateStationQoS #{} RadioID:{}, MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, 8021p:{}, "
+              "DSCP:{}",
               i,
               items[i].RadioID,
               items[i].MACAddress[0],
@@ -155,8 +155,8 @@ nonstd::span<const UpdateStationQoS *const> ReadableUpdateStationQoSArray::Get()
 
 void ReadableUpdateStationQoSArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME UpdateStationQoS #%zu RadioID:%u, MAC:%02X:%02X:%02X:%02X:%02X:%02X, 8021p:%u, "
-              "DSCP:%u",
+        log_i("ME UpdateStationQoS #{} RadioID:{}, MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, 8021p:{}, "
+              "DSCP:{}",
               i,
               items[i]->RadioID,
               items[i]->MACAddress[0],

@@ -47,7 +47,7 @@ void WritableRadioAdministrativeStateArray::Add(RadioAdministrativeState radio_s
                                   });
     if (it_exists != items.end()) {
         *it_exists = std::move(radio_state);
-        log_i("RadioAdministrativeState: replace RadioID: %u", (*it_exists).RadioID);
+        log_i("RadioAdministrativeState: replace RadioID: {}", (*it_exists).RadioID);
     } else {
         items.emplace_back(std::move(radio_state));
     }
@@ -71,7 +71,7 @@ void WritableRadioAdministrativeStateArray::Serialize(RawData *raw_data) const {
 
 void WritableRadioAdministrativeStateArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME RadioAdministrativeState #%zu RadioID:%u, AdminState:%u",
+        log_i("ME RadioAdministrativeState #{} RadioID:{}, AdminState:{}",
               i,
               items[i].RadioID,
               (unsigned)items[i].AdminState);
@@ -110,7 +110,7 @@ ReadableRadioAdministrativeStateArray::Get() const {
 
 void ReadableRadioAdministrativeStateArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME RadioAdministrativeState #%zu RadioID:%u, AdminState:%u",
+        log_i("ME RadioAdministrativeState #{} RadioID:{}, AdminState:{}",
               i,
               items[i]->RadioID,
               (unsigned)items[i]->AdminState);

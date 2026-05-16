@@ -46,10 +46,9 @@ void WritableACNameWithPriorityArray::Add(uint8_t priority, const std::string_vi
                      });
     if (it_exists != items.end()) {
         *it_exists = WritableACNameWithPriorityArray::Item{ priority, str };
-        log_i("ACNameWithPriority: replace Priority: %u, Name: '%.*s'",
+        log_i("ACNameWithPriority: replace Priority: {}, Name: '{}'",
               priority,
-              (*it_exists).header.GetNameLenght(),
-              (*it_exists).name.data());
+              std::string_view((*it_exists).name.data(), (*it_exists).header.GetNameLenght()));
     } else {
         items.emplace_back(priority, str);
     }
@@ -78,13 +77,12 @@ void WritableACNameWithPriorityArray::Serialize(RawData *raw_data) const {
 }
 
 void WritableACNameWithPriorityArray::Log() const {
-    log_i("ME ACNameWithPriority count:%zu", items.size());
+    log_i("ME ACNameWithPriority count:{}", items.size());
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("     #%zu: priority: %u, :%.*s",
+        log_i("     #{}: priority: {}, :{}",
               i,
               items[i].header.GetPriority(),
-              items[i].header.GetNameLenght(),
-              (char *)items[i].name.data());
+              std::string_view((char *)items[i].name.data(), items[i].header.GetNameLenght()));
     }
 }
 
@@ -124,13 +122,12 @@ ReadableACNameWithPriorityArray::Get() const {
 }
 
 void ReadableACNameWithPriorityArray::Log() const {
-    log_i("ME ACNameWithPriority count:%zu", count);
+    log_i("ME ACNameWithPriority count:{}", count);
     for (size_t i = 0; i < count; i++) {
-        log_i("     #%zu: priority: %u, :%.*s",
+        log_i("     #{}: priority: {}, :{}",
               i,
               items[i]->GetPriority(),
-              items[i]->GetNameLenght(),
-              (char *)items[i]->name);
+              std::string_view((char *)items[i]->name, items[i]->GetNameLenght()));
     }
 }
 

@@ -127,7 +127,7 @@ void WritableWTPQualityOfServiceArray::Add(WTPQualityOfService element) {
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("WTPQualityOfService: replace RadioID: %u", (*it_exists).RadioID);
+        log_i("WTPQualityOfService: replace RadioID: {}", (*it_exists).RadioID);
     } else {
         items.emplace_back(std::move(element));
     }
@@ -151,7 +151,7 @@ void WritableWTPQualityOfServiceArray::Serialize(RawData *raw_data) const {
 
 void WritableWTPQualityOfServiceArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME WTPQualityOfService #%zu RadioID:%u, TaggingPolicy:0x%02X",
+        log_i("ME WTPQualityOfService #{} RadioID:{}, TaggingPolicy:0x{:02X}",
               i,
               items[i].RadioID,
               items[i].TaggingPolicy);
@@ -197,7 +197,7 @@ nonstd::span<const WTPQualityOfService *const> ReadableWTPQualityOfServiceArray:
 
 void ReadableWTPQualityOfServiceArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME WTPQualityOfService #%zu RadioID:%u, TaggingPolicy:0x%02X",
+        log_i("ME WTPQualityOfService #{} RadioID:{}, TaggingPolicy:0x{:02X}",
               i,
               items[i]->RadioID,
               items[i]->TaggingPolicy);

@@ -68,7 +68,7 @@ void WritableDuplicateIPv4AdrArray::Add(uint32_t ipaddress,
     if (it_exists != items.end()) {
         *it_exists =
             WritableDuplicateIPv4AdrArray::Item{ ipaddress, status, std::move(mac_address) };
-        log_i("DuplicateIPv4Adr: replace IPAddress: %u, Status: %u, MacAddress:",
+        log_i("DuplicateIPv4Adr: replace IPAddress: {}, Status: {}, MacAddress:",
               ipaddress,
               (unsigned)status);
         MacAddress::Log(0, (*it_exists).Mac.Length, (*it_exists).Mac.Address);
@@ -102,7 +102,7 @@ void WritableDuplicateIPv4AdrArray::Serialize(RawData *raw_data) const {
 
 void WritableDuplicateIPv4AdrArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME DuplicateIPv4Address #%zu IP Address:%s, Status:%u",
+        log_i("ME DuplicateIPv4Address #{} IP Address:{}, Status:{}",
               i,
               IpToString(items[i].header.IPAddress).c_str(),
               (unsigned)items[i].header.Status);
@@ -144,7 +144,7 @@ nonstd::span<const DuplicateIPv4Address *const> ReadableDuplicateIPv4AdrArray::G
 
 void ReadableDuplicateIPv4AdrArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME DuplicateIPv4Address #%zu IP Address:%s, Status:%u",
+        log_i("ME DuplicateIPv4Address #{} IP Address:{}, Status:{}",
               i,
               IpToString(items[i]->IPAddress).c_str(),
               (unsigned)items[i]->Status);

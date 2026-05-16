@@ -138,24 +138,23 @@ const WTPDescriptorHeader &WritableWTPDescriptor::GetHeader() const {
 }
 
 void WritableWTPDescriptor::Log() const {
-    log_i("ME WTPDescriptor MaxRadios:%u, RadiosInUse:%u, NumEncrypt:%zu, Sub-Elements count:%zu",
+    log_i("ME WTPDescriptor MaxRadios:{}, RadiosInUse:{}, NumEncrypt:{}, Sub-Elements count:{}",
           header.MaxRadios,
           header.RadiosInUse,
           encr_items.size(),
           desc_items.size());
     for (size_t i = 0; i < encr_items.size(); i++) {
-        log_i("    Encr S-E #%zu: WBID:%u, Encr-Caps:%u",
+        log_i("    Encr S-E #{}: WBID:{}, Encr-Caps:{}",
               i,
               encr_items[i].WBID,
               encr_items[i].EncryptionCapabilities);
     }
     for (size_t i = 0; i < desc_items.size(); i++) {
-        log_i("    S-E #%zu: VendorId:%u, Type:0x%04X, Value:%.*s",
+        log_i("    S-E #{}: VendorId:{}, Type:{:04X}, Value:{}",
               i,
               desc_items[i].header.GetVendorIdentifier(),
               (unsigned)desc_items[i].header.GetType(),
-              desc_items[i].header.GetLength(),
-              desc_items[i].utf8_value);
+              std::string_view(desc_items[i].utf8_value, desc_items[i].header.GetLength()));
     }
 }
 
@@ -256,24 +255,23 @@ const nonstd::span<const DescriptorSubElementHeader *> ReadableWTPDescriptor::Ge
 }
 
 void ReadableWTPDescriptor::Log() const {
-    log_i("ME WTPDescriptor MaxRadios:%u, RadiosInUse:%u, NumEncrypt:%u, Sub-Elements count:%zu",
+    log_i("ME WTPDescriptor MaxRadios:{}, RadiosInUse:{}, NumEncrypt:{}, Sub-Elements count:{}",
           header->MaxRadios,
           header->RadiosInUse,
           header->NumEncrypt,
           desc_count);
     for (size_t i = 0; i < header->NumEncrypt; i++) {
-        log_i("    Encr S-E #%zu: WBID:%u, Encr-Caps:%u",
+        log_i("    Encr S-E #{}: WBID:{}, Encr-Caps:{}",
               i,
               encr_items[i]->WBID,
               encr_items[i]->EncryptionCapabilities);
     }
     for (size_t i = 0; i < desc_count; i++) {
-        log_i("    S-E #%zu: VendorId:%u, Type:0x%04X, Value:%.*s",
+        log_i("    S-E #{}: VendorId:{}, Type:{:04X}, Value:{}",
               i,
               desc_items[i]->GetVendorIdentifier(),
               (unsigned)desc_items[i]->GetType(),
-              desc_items[i]->GetLength(),
-              desc_items[i]->utf8_value);
+              std::string_view(desc_items[i]->utf8_value, desc_items[i]->GetLength()));
     }
 }
 

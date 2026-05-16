@@ -21,7 +21,7 @@ bool ACTimestamp::Validate() const {
 }
 
 void ACTimestamp::Log() const {
-    log_i("ME ACTimestamp timestamp: %u", GetTimestamp());
+    log_i("ME ACTimestamp timestamp: {}", GetTimestamp());
 }
 
 WritableACTimestamp::WritableACTimestamp(uint32_t timestamp) : element{ timestamp } {

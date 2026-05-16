@@ -52,7 +52,7 @@ bool AddWlanHeader::Validate() const {
         return false;
     }
     if (GetKeyLength() > max_key_length) {
-        log_e("AddWlan: key length exceeds limit: %u", (unsigned)max_key_length);
+        log_e("AddWlan: key length exceeds limit: {}", (unsigned)max_key_length);
         return false;
     }
     switch (key_status) {
@@ -170,8 +170,8 @@ void WritableAddWlanArray::Item::Serialize(RawData *raw_data) const {
 }
 
 void WritableAddWlanArray::Item::Log() const {
-    log_i("ME AddWlan RadioID:%u, WlanID:%u, Capability:0x%04X, KeyIndex:%u, KeyStatus:%u, "
-          "KeyLen:%zu, QoS:%u, AuthType:%u, MACMode:%u, TunnelMode:%u, SuppressSSID:%u, SSID:%.*s",
+    log_i("ME AddWlan RadioID:{}, WlanID:{}, Capability:{:04X}, KeyIndex:{}, KeyStatus:{}, "
+          "KeyLen:{}, QoS:{}, AuthType:{}, MACMode:{}, TunnelMode:{}, SuppressSSID:{}, SSID:{}",
           header.GetRadioID(),
           header.GetWlanID(),
           header.GetCapability(),
@@ -183,8 +183,7 @@ void WritableAddWlanArray::Item::Log() const {
           (unsigned)tail.mac_mode,
           (unsigned)tail.tunnel_mode,
           tail.suppress_ssid,
-          (int)ssid.size(),
-          ssid.data());
+          std::string_view(ssid.data(), ssid.size()));
 }
 
 WritableAddWlanArray::WritableAddWlanArray() {
@@ -202,7 +201,7 @@ void WritableAddWlanArray::Add(WritableAddWlanArray::Item wlan) {
 
     if (it_exists != items.end()) {
         *it_exists = std::move(wlan);
-        log_i("AddWlan: replace RadioID: %u, WlanID: %u",
+        log_i("AddWlan: replace RadioID: {}, WlanID: {}",
               (*it_exists).header.GetRadioID(),
               (*it_exists).header.GetWlanID());
     } else {
@@ -226,7 +225,7 @@ void WritableAddWlanArray::Serialize(RawData *raw_data) const {
 
 void WritableAddWlanArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME AddWlan #%zu", i);
+        log_i("ME AddWlan #{}", i);
         items[i].Log();
     }
 }
@@ -265,7 +264,7 @@ bool ReadableAddWlanArray::Deserialize(RawData *raw_data) {
 
     size_t ssid_len = element_length - min_size;
     if (ssid_len > AddWlanHeader::max_ssid_length) {
-        log_e("AddWlan: SSID length exceeds limit: %u", (unsigned)AddWlanHeader::max_ssid_length);
+        log_e("AddWlan: SSID length exceeds limit: {}", (unsigned)AddWlanHeader::max_ssid_length);
         return false;
     }
 
@@ -305,9 +304,9 @@ bool ReadableAddWlanArray::IsPresent() const {
 void ReadableAddWlanArray::Log() const {
     for (size_t i = 0; i < count; i++) {
         log_i(
-            "ME AddWlan #%zu RadioID:%u, WlanID:%u, Capability:0x%04X, KeyIndex:%u, KeyStatus:%u, "
-            "KeyLen:%u, QoS:%u, AuthType:%u, MACMode:%u, TunnelMode:%u, SuppressSSID:%u, "
-            "SSID:%.*s",
+            "ME AddWlan #{} RadioID:{}, WlanID:{}, Capability:{:04X}, KeyIndex:{}, KeyStatus:{}, "
+            "KeyLen:{}, QoS:{}, AuthType:{}, MACMode:{}, TunnelMode:{}, SuppressSSID:{}, "
+            "SSID:{}",
             i,
             items[i].header->GetRadioID(),
             items[i].header->GetWlanID(),
@@ -320,7 +319,6 @@ void ReadableAddWlanArray::Log() const {
             (unsigned)items[i].tail->mac_mode,
             (unsigned)items[i].tail->tunnel_mode,
             items[i].tail->suppress_ssid,
-            (int)items[i].ssid_length,
-            items[i].ssid);
+            std::string_view(items[i].ssid, items[i].ssid_length));
     }
 }

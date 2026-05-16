@@ -92,13 +92,13 @@ uint16_t WritableVendorSpecificPayloadArray::GetTotalLength() const {
 
 void WritableVendorSpecificPayloadArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME VendorSpecificPayload  #%zu VendorId:%u, ElementId:%u, Value:%.*s",
+        log_i("ME VendorSpecificPayload  #{} VendorId:{}, ElementId:{}, Value:{}",
               i,
               items[i].header.GetVendorIdentifier(),
               items[i].header.GetElementId(),
-              (int)(items[i].header.GetLength()
-                    - (sizeof(VendorSpecificPayload) - sizeof(ElementHeader))),
-              items[i].value.data());
+              std::string_view((const char *)items[i].value.data(),
+                               items[i].header.GetLength()
+                                   - (sizeof(VendorSpecificPayload) - sizeof(ElementHeader))));
     }
 }
 
@@ -144,12 +144,13 @@ ReadableVendorSpecificPayloadArray::Get() const {
 void ReadableVendorSpecificPayloadArray::Log() const {
     for (size_t i = 0; i < count; i++) {
         log_i(
-            "ME VendorSpecificPayload  #%zu VendorId:%u, ElementId:%u, Value:%.*s",
+            "ME VendorSpecificPayload  #{} VendorId:{}, ElementId:{}, Value:{}",
             i,
             items[i]->GetVendorIdentifier(),
             items[i]->GetElementId(),
-            (int)(items[i]->GetLength() - (sizeof(VendorSpecificPayload) - sizeof(ElementHeader))),
-            (char *)items[i]->value);
+            std::string_view((char *)items[i]->value,
+                             items[i]->GetLength()
+                                 - (sizeof(VendorSpecificPayload) - sizeof(ElementHeader))));
     }
 }
 

@@ -28,7 +28,7 @@ uint16_t CAPWAPControlIPv4Address::GetWTPCount() const {
 }
 
 void CAPWAPControlIPv4Address::Log() const {
-    log_i("ME CAPWAPControlIPv4Address IP Address:%s, WTP Count:%u",
+    log_i("ME CAPWAPControlIPv4Address IP Address:{}, WTP Count:{}",
           IpToString(GetIPAddress()).c_str(),
           GetWTPCount());
 }
@@ -49,7 +49,7 @@ void WritableCAPWAPControlIPV4AdrArray::Serialize(RawData *raw_data) const {
 
 void WritableCAPWAPControlIPV4AdrArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME CAPWAPControlIPv4Address #%zu IP Address::%s, WTP Count:%u",
+        log_i("ME CAPWAPControlIPv4Address #{} IP Address::{}, WTP Count:{}",
               i,
               IpToString(items[i].GetIPAddress()).c_str(),
               items[i].GetWTPCount());
@@ -87,7 +87,7 @@ nonstd::span<const CAPWAPControlIPv4Address *const> ReadableCAPWAPControlIPV4Adr
 
 void ReadableCAPWAPControlIPV4AdrArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME CAPWAPControlIPv4Address #%zu IP Address::%s, WTP Count:%u",
+        log_i("ME CAPWAPControlIPv4Address #{} IP Address::{}, WTP Count:{}",
               i,
               IpToString(items[i]->GetIPAddress()).c_str(),
               items[i]->GetWTPCount());

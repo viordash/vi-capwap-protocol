@@ -59,7 +59,7 @@ void WritableMultiDomainCapabilityArray::Add(MultiDomainCapability element) {
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("MultiDomainCapability: replace RadioID: %u", (*it_exists).GetRadioID());
+        log_i("MultiDomainCapability: replace RadioID: {}", (*it_exists).GetRadioID());
     } else {
         items.emplace_back(std::move(element));
     }
@@ -83,8 +83,8 @@ void WritableMultiDomainCapabilityArray::Serialize(RawData *raw_data) const {
 
 void WritableMultiDomainCapabilityArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME MultiDomainCapability #%zu RadioID:%u, FirstChannel:%u, "
-              "NumberOfChannels:%u, MaxTxPowerLevel:%u",
+        log_i("ME MultiDomainCapability #{} RadioID:{}, FirstChannel:{}, "
+              "NumberOfChannels:{}, MaxTxPowerLevel:{}",
               i,
               items[i].GetRadioID(),
               items[i].GetFirstChannel(),
@@ -131,8 +131,8 @@ nonstd::span<const MultiDomainCapability *const> ReadableMultiDomainCapabilityAr
 
 void ReadableMultiDomainCapabilityArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME MultiDomainCapability #%zu RadioID:%u, FirstChannel:%u, "
-              "NumberOfChannels:%u, MaxTxPowerLevel:%u",
+        log_i("ME MultiDomainCapability #{} RadioID:{}, FirstChannel:{}, "
+              "NumberOfChannels:{}, MaxTxPowerLevel:{}",
               i,
               items[i]->GetRadioID(),
               items[i]->GetFirstChannel(),

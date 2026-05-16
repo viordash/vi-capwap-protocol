@@ -39,7 +39,7 @@ void WritableDeleteWlanArray::Add(DeleteWlan wlan) {
     });
     if (it_exists != items.end()) {
         *it_exists = std::move(wlan);
-        log_i("DeleteWlan: replace RadioID: %u, WlanID: %u",
+        log_i("DeleteWlan: replace RadioID: {}, WlanID: {}",
               (*it_exists).RadioID,
               (*it_exists).WlanID);
     } else {
@@ -65,7 +65,7 @@ void WritableDeleteWlanArray::Serialize(RawData *raw_data) const {
 
 void WritableDeleteWlanArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME DeleteWlan #%zu RadioID:%u, WlanID:%u", i, items[i].RadioID, items[i].WlanID);
+        log_i("ME DeleteWlan #{} RadioID:{}, WlanID:{}", i, items[i].RadioID, items[i].WlanID);
     }
 }
 
@@ -108,6 +108,6 @@ nonstd::span<const DeleteWlan *const> ReadableDeleteWlanArray::Get() const {
 
 void ReadableDeleteWlanArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME DeleteWlan #%zu RadioID:%u, WlanID:%u", i, items[i]->RadioID, items[i]->WlanID);
+        log_i("ME DeleteWlan #{} RadioID:{}, WlanID:{}", i, items[i]->RadioID, items[i]->WlanID);
     }
 }

@@ -115,7 +115,7 @@ ClearHeader *ClearHeader::Deserialize(RawData *raw_data) {
 
 void ClearHeader::Log() const {
     log_i(
-        "Header HLEN:%u, RID:%u, WBID:%u, F:%u, L:%u, W:%u, M:%u, K:%u, Frag_ID:%u, Frag_Offset:%u",
+        "Header HLEN:{}, RID:{}, WBID:{}, F:{}, L:{}, W:{}, M:{}, K:{}, Frag_ID:{}, Frag_Offset:{}",
         HLEN(),
         RID(),
         (unsigned)WBID(),

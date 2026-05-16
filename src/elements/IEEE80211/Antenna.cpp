@@ -35,7 +35,7 @@ bool Antenna::Validate() const {
     }
     auto selection_count = GetLength() - (sizeof(Antenna) - sizeof(ElementHeader));
     if (selection_count > max_antenna_count) {
-        log_e("Antenna: antenna selection count exceeds limit: %u", (unsigned)max_antenna_count);
+        log_e("Antenna: antenna selection count exceeds limit: {}", (unsigned)max_antenna_count);
         return false;
     }
     if (selection_count != antenna_count) {
@@ -82,7 +82,7 @@ void WritableAntennaArray::Add(uint8_t radio_id,
 
     if (it_exists != items.end()) {
         *it_exists = WritableAntennaArray::Item{ radio_id, diversity, combiner, selections };
-        log_i("Antenna: replace RadioID: %u", radio_id);
+        log_i("Antenna: replace RadioID: {}", radio_id);
     } else {
         items.emplace_back(radio_id, diversity, combiner, selections);
     }
@@ -111,7 +111,7 @@ void WritableAntennaArray::Serialize(RawData *raw_data) const {
 
 void WritableAntennaArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME Antenna #%zu RadioID:%u, Diversity:%u, Combiner:%u, AntennaCount:%u",
+        log_i("ME Antenna #{} RadioID:{}, Diversity:{}, Combiner:{}, AntennaCount:{}",
               i,
               items[i].header.GetRadioID(),
               (unsigned)items[i].header.GetDiversity(),
@@ -156,7 +156,7 @@ nonstd::span<const ReadableAntennaArray::Item *const> ReadableAntennaArray::Get(
 
 void ReadableAntennaArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME Antenna #%zu RadioID:%u, Diversity:%u, Combiner:%u, AntennaCount:%u",
+        log_i("ME Antenna #{} RadioID:{}, Diversity:{}, Combiner:{}, AntennaCount:{}",
               i,
               items[i]->GetRadioID(),
               (unsigned)items[i]->GetDiversity(),

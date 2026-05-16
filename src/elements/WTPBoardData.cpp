@@ -97,15 +97,14 @@ uint16_t WritableWTPBoardData::GetTotalLength() const {
 }
 
 void WritableWTPBoardData::Log() const {
-    log_i("ME WTPBoardData VendorId:%u, Sub-Elements count:%zu",
+    log_i("ME WTPBoardData VendorId:{}, Sub-Elements count:{}",
           header.GetVendorIdentifier(),
           items.size());
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("    S-E #%zu: Type:0x%04X, Value:%.*s",
+        log_i("    S-E #{}: Type:{:04X}, Value:{}",
               i,
               (unsigned)items[i].header.GetType(),
-              items[i].header.GetLength(),
-              (char *)items[i].value);
+              std::string_view((char *)items[i].value, items[i].header.GetLength()));
     }
 }
 
@@ -166,15 +165,14 @@ nonstd::span<const BoardDataSubElementHeader *const> ReadableWTPBoardData::Get()
 }
 
 void ReadableWTPBoardData::Log() const {
-    log_i("ME WTPBoardData VendorId:%u, Sub-Elements count:%zu",
+    log_i("ME WTPBoardData VendorId:{}, Sub-Elements count:{}",
           header->GetVendorIdentifier(),
           count);
     for (size_t i = 0; i < count; i++) {
-        log_i("    S-E #%zu: Type:0x%04X, Value:%.*s",
+        log_i("    S-E #{}: Type:{:04X}, Value:{}",
               i,
               (unsigned)items[i]->GetType(),
-              items[i]->GetLength(),
-              (char *)items[i]->value);
+              std::string_view((char *)items[i]->value, items[i]->GetLength()));
     }
 }
 

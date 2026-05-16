@@ -43,7 +43,7 @@ ControlHeader *ControlHeader::Deserialize(RawData *raw_data) {
 }
 
 void ControlHeader::Log() const {
-    log_i("Control header Type:%u, SeqNum:%u, MsgElementLength:%u",
+    log_i("Control header Type:{}, SeqNum:{}, MsgElementLength:{}",
           (unsigned)GetType(),
           GetSeqNum(),
           GetMsgElementLength());

@@ -54,7 +54,7 @@ bool StationSessionKey::Validate() const {
         return false;
     }
     if (GetKeyLength() > max_key_length) {
-        log_e("StationSessionKey: key length exceeds limit: %u", (unsigned)max_key_length);
+        log_e("StationSessionKey: key length exceeds limit: {}", (unsigned)max_key_length);
         return false;
     }
     // Check reserved bits in flags (bits 13-0 must be zero)
@@ -81,7 +81,7 @@ void WritableStationSessionKeyArray::Add(WritableStationSessionKeyArray::Item el
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("StationSessionKey: replace MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+        log_i("StationSessionKey: replace MAC: {:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
               (*it_exists).header.GetMACAddress()[0],
               (*it_exists).header.GetMACAddress()[1],
               (*it_exists).header.GetMACAddress()[2],
@@ -115,8 +115,8 @@ void WritableStationSessionKeyArray::Serialize(RawData *raw_data) const {
 
 void WritableStationSessionKeyArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME StationSessionKey #%zu MAC:%02X:%02X:%02X:%02X:%02X:%02X, Flags:0x%04X "
-              "(A:%u, C:%u), KeyLen:%zu",
+        log_i("ME StationSessionKey #{} MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, Flags:0x{:04X} "
+              "(A:{}, C:{}), KeyLen:{}",
               i,
               items[i].header.GetMACAddress()[0],
               items[i].header.GetMACAddress()[1],
@@ -168,8 +168,8 @@ ReadableStationSessionKeyArray::Get() const {
 
 void ReadableStationSessionKeyArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME StationSessionKey #%zu MAC:%02X:%02X:%02X:%02X:%02X:%02X, Flags:0x%04X "
-              "(A:%u, C:%u), KeyLen:%u",
+        log_i("ME StationSessionKey #{} MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, Flags:0x{:04X} "
+              "(A:{}, C:{}), KeyLen:{}",
               i,
               items[i]->GetMACAddress()[0],
               items[i]->GetMACAddress()[1],

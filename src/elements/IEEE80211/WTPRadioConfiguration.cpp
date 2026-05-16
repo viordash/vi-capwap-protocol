@@ -61,7 +61,7 @@ void WritableWTPRadioConfigurationArray::Add(WTPRadioConfiguration element) {
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("WTPRadioConfiguration: replace RadioID: %u", (*it_exists).RadioID);
+        log_i("WTPRadioConfiguration: replace RadioID: {}", (*it_exists).RadioID);
     } else {
         items.emplace_back(std::move(element));
     }
@@ -85,8 +85,8 @@ void WritableWTPRadioConfigurationArray::Serialize(RawData *raw_data) const {
 
 void WritableWTPRadioConfigurationArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME WTPRadioConfiguration #%zu RadioID:%u, ShortPreamble:%u, NumBSSIDs:%u, "
-              "BeaconPeriod:%u",
+        log_i("ME WTPRadioConfiguration #{} RadioID:{}, ShortPreamble:{}, NumBSSIDs:{}, "
+              "BeaconPeriod:{}",
               i,
               items[i].RadioID,
               items[i].ShortPreamble,
@@ -134,8 +134,8 @@ nonstd::span<const WTPRadioConfiguration *const> ReadableWTPRadioConfigurationAr
 
 void ReadableWTPRadioConfigurationArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME WTPRadioConfiguration #%zu RadioID:%u, ShortPreamble:%u, NumBSSIDs:%u, "
-              "BeaconPeriod:%u",
+        log_i("ME WTPRadioConfiguration #{} RadioID:{}, ShortPreamble:{}, NumBSSIDs:{}, "
+              "BeaconPeriod:{}",
               i,
               items[i]->RadioID,
               items[i]->ShortPreamble,

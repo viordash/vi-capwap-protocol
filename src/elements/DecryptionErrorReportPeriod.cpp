@@ -40,7 +40,7 @@ void WritableDecryptionErrorReportPeriodArray::Add(DecryptionErrorReportPeriod p
                                   });
     if (it_exists != items.end()) {
         *it_exists = std::move(period);
-        log_i("DecryptionErrorReportPeriod: replace RadioID: %u", (*it_exists).RadioID());
+        log_i("DecryptionErrorReportPeriod: replace RadioID: {}", (*it_exists).RadioID());
     } else {
         items.emplace_back(std::move(period));
     }
@@ -64,7 +64,7 @@ void WritableDecryptionErrorReportPeriodArray::Serialize(RawData *raw_data) cons
 
 void WritableDecryptionErrorReportPeriodArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME DecryptionErrorReportPeriod #%zu RadioID:%u, Report interval:%u",
+        log_i("ME DecryptionErrorReportPeriod #{} RadioID:{}, Report interval:{}",
               i,
               items[i].RadioID(),
               items[i].ReportInterval());
@@ -103,7 +103,7 @@ ReadableDecryptionErrorReportPeriodArray::Get() const {
 
 void ReadableDecryptionErrorReportPeriodArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME DecryptionErrorReportPeriod #%zu RadioID:%u, Report interval:%u",
+        log_i("ME DecryptionErrorReportPeriod #{} RadioID:{}, Report interval:{}",
               i,
               items[i]->RadioID(),
               items[i]->ReportInterval());

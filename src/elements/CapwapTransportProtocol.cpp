@@ -17,7 +17,7 @@ bool CapwapTransportProtocol::Validate() const {
 }
 
 void CapwapTransportProtocol::Log() const {
-    log_i("ME CapwapTransportProtocol Type:%u", (unsigned)type);
+    log_i("ME CapwapTransportProtocol Type:{}", (unsigned)type);
 }
 
 WritableCapwapTransportProtocol::WritableCapwapTransportProtocol(CapwapTransportProtocol::Type type)

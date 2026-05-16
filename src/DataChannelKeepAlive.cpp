@@ -37,6 +37,6 @@ DataChannelKeepAlive *DataChannelKeepAlive::Deserialize(RawData *raw_data) {
 }
 
 void DataChannelKeepAlive::Log() const {
-    log_i("Control MsgElementLength:%u", msgElementLength.Get());
+    log_i("Control MsgElementLength:{}", msgElementLength.Get());
     session_id.Log();
 }

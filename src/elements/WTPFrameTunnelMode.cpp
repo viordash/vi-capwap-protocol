@@ -21,7 +21,7 @@ uint16_t WTPFrameTunnelMode::GetTotalLength() const {
 }
 
 void WTPFrameTunnelMode::Log() const {
-    log_i("ME WTPFrameTunnelMode L:%u, E:%u, N:%u", L, E, N);
+    log_i("ME WTPFrameTunnelMode L:{}, E:{}, N:{}", L, E, N);
 }
 
 WritableWTPFrameTunnelMode::WritableWTPFrameTunnelMode(bool l, bool e, bool n)

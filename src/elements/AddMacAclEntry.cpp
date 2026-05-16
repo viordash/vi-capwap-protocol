@@ -59,7 +59,7 @@ void WritableAddMacAclEntry::Serialize(RawData *raw_data) const {
 }
 
 void WritableAddMacAclEntry::Log() const {
-    log_i("ME AddMacAclEntry size:%u, entries:", (unsigned)items.size());
+    log_i("ME AddMacAclEntry size:{}, entries:", (unsigned)items.size());
     for (size_t i = 0; i < items.size(); i++) {
         auto &item = items[i];
         MacAddress::Log(i, item.Length, item.Address);
@@ -111,7 +111,7 @@ nonstd::span<const ReadableMacAddress *const> ReadableAddMacAclEntry::Get() cons
 }
 
 void ReadableAddMacAclEntry::Log() const {
-    log_i("ME AddMacAclEntry size:%zu, entries:", count);
+    log_i("ME AddMacAclEntry size:{}, entries:", count);
     for (size_t i = 0; i < count; i++) {
         auto &entry = entries[i];
         MacAddress::Log(i, entry->Length, entry->MACAddresses);

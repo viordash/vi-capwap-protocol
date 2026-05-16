@@ -68,7 +68,7 @@ void WritableDirectSequenceControlArray::Add(DirectSequenceControl ctrl) {
         });
     if (it_exists != items.end()) {
         *it_exists = std::move(ctrl);
-        log_i("DirectSequenceControl: replace RadioID: %u", (*it_exists).GetRadioID());
+        log_i("DirectSequenceControl: replace RadioID: {}", (*it_exists).GetRadioID());
     } else {
         items.emplace_back(std::move(ctrl));
     }
@@ -92,8 +92,8 @@ void WritableDirectSequenceControlArray::Serialize(RawData *raw_data) const {
 
 void WritableDirectSequenceControlArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME DirectSequenceControl #%zu RadioID:%u, CurrentChannel:%u, CurrentCCA:%u, "
-              "EnergyDetectThreshold:%u",
+        log_i("ME DirectSequenceControl #{} RadioID:{}, CurrentChannel:{}, CurrentCCA:{}, "
+              "EnergyDetectThreshold:{}",
               i,
               items[i].GetRadioID(),
               items[i].GetCurrentChannel(),
@@ -141,8 +141,8 @@ nonstd::span<const DirectSequenceControl *const> ReadableDirectSequenceControlAr
 
 void ReadableDirectSequenceControlArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME DirectSequenceControl #%zu RadioID:%u, CurrentChannel:%u, CurrentCCA:%u, "
-              "EnergyDetectThreshold:%u",
+        log_i("ME DirectSequenceControl #{} RadioID:{}, CurrentChannel:{}, CurrentCCA:{}, "
+              "EnergyDetectThreshold:{}",
               i,
               items[i]->GetRadioID(),
               items[i]->GetCurrentChannel(),

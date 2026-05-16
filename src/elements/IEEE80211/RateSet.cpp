@@ -48,7 +48,7 @@ void WritableRateSetArray::Add(uint8_t radio_id, nonstd::span<const uint8_t> rat
 
     if (it_exists != items.end()) {
         *it_exists = Item{ radio_id, rate_set_data };
-        log_i("RateSet: replace RadioID: %u", radio_id);
+        log_i("RateSet: replace RadioID: {}", radio_id);
     } else {
         items.push_back({ radio_id, rate_set_data });
     }
@@ -76,7 +76,7 @@ void WritableRateSetArray::Serialize(RawData *raw_data) const {
 
 void WritableRateSetArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME RateSet #%zu RadioID:%u, RateSet size:%zu",
+        log_i("ME RateSet #{} RadioID:{}, RateSet size:{}",
               i,
               items[i].header.GetRadioID(),
               items[i].data.size());
@@ -119,7 +119,7 @@ nonstd::span<const ReadableRateSetArray::Item *const> ReadableRateSetArray::Get(
 
 void ReadableRateSetArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME RateSet #%zu RadioID:%u, RateSet size:%zu",
+        log_i("ME RateSet #{} RadioID:{}, RateSet size:{}",
               i,
               items[i]->GetRadioID(),
               (items[i]->GetLength() - (sizeof(RateSet) - sizeof(ElementHeader))));

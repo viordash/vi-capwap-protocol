@@ -27,7 +27,7 @@ bool ReturnedMessageElement::Validate() const {
     }
     if (GetLength() - (sizeof(ReturnedMessageElement) - sizeof(ElementHeader))
         > ReturnedMessageElement::max_data_size) {
-        log_e("ReturnedMessageElement: element length exceeds limit in : %u",
+        log_e("ReturnedMessageElement: element length exceeds limit in : {}",
               (unsigned)ReturnedMessageElement::max_data_size);
         return false;
     }
@@ -69,7 +69,7 @@ void WritableReturnedMessageElementArray::Add(ReturnedMessageElement::Reasons re
 
     if (it_exists != items.end()) {
         *it_exists = WritableReturnedMessageElementArray::Item{ reason, std::move(val) };
-        log_i("ReturnedMessageElement: replace Reason: %u, Data size: %zu",
+        log_i("ReturnedMessageElement: replace Reason: {}, Data size: {}",
               (unsigned)reason,
               (*it_exists).data.size());
     } else {
@@ -107,9 +107,9 @@ bool WritableReturnedMessageElementArray::Validate() const {
 }
 
 void WritableReturnedMessageElementArray::Log() const {
-    log_i("ME ReturnedMessageElement count:%zu", items.size());
+    log_i("ME ReturnedMessageElement count:{}", items.size());
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("     #%zu: Reason: %u, Length: %u",
+        log_i("     #{}: Reason: {}, Length: {}",
               i,
               (unsigned)items[i].header.GetReason(),
               items[i].header.GetDataLength());
@@ -155,9 +155,9 @@ nonstd::span<const ReturnedMessageElement *const> ReadableReturnedMessageElement
 }
 
 void ReadableReturnedMessageElementArray::Log() const {
-    log_i("ME ReturnedMessageElement count:%zu", count);
+    log_i("ME ReturnedMessageElement count:{}", count);
     for (size_t i = 0; i < count; i++) {
-        log_i("     #%zu: Reason: %u, Length: %u",
+        log_i("     #{}: Reason: {}, Length: {}",
               i,
               (unsigned)items[i]->GetReason(),
               items[i]->GetDataLength());

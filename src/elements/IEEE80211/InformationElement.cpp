@@ -46,7 +46,7 @@ bool InformationElement::Validate() const {
         return false;
     }
     if (GetIELength() > max_ie_length) {
-        log_e("InformationElement: IE length exceeds limit: %u", (unsigned)max_ie_length);
+        log_e("InformationElement: IE length exceeds limit: {}", (unsigned)max_ie_length);
         return false;
     }
     if (radio_id > 31) {
@@ -76,7 +76,7 @@ void WritableInformationElementArray::Add(WritableInformationElementArray::Item 
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("InformationElement: replace RadioID: %u, WlanID: %u",
+        log_i("InformationElement: replace RadioID: {}, WlanID: {}",
               (*it_exists).header.GetRadioID(),
               (*it_exists).header.GetWlanID());
     } else {
@@ -106,8 +106,8 @@ void WritableInformationElementArray::Serialize(RawData *raw_data) const {
 
 void WritableInformationElementArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME InformationElement #%zu RadioID:%u, WlanID:%u, Flags:0x%02X (B:%u, P:%u), "
-              "IELen:%zu",
+        log_i("ME InformationElement #{} RadioID:{}, WlanID:{}, Flags:0x{:02X} (B:{}, P:{}), "
+              "IELen:{}",
               i,
               items[i].header.GetRadioID(),
               items[i].header.GetWlanID(),
@@ -155,8 +155,8 @@ ReadableInformationElementArray::Get() const {
 
 void ReadableInformationElementArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME InformationElement #%zu RadioID:%u, WlanID:%u, Flags:0x%02X (B:%u, P:%u), "
-              "IELen:%u",
+        log_i("ME InformationElement #{} RadioID:{}, WlanID:{}, Flags:0x{:02X} (B:{}, P:{}), "
+              "IELen:{}",
               i,
               items[i]->GetRadioID(),
               items[i]->GetWlanID(),
