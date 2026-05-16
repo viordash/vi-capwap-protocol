@@ -61,7 +61,7 @@ void WritableWTPRadioFailAlarmIndicationArray::Add(WTPRadioFailAlarmIndication e
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("WTPRadioFailAlarmIndication: replace RadioID: %u", (*it_exists).RadioID);
+        log_i("WTPRadioFailAlarmIndication: replace RadioID: {}", (*it_exists).RadioID);
     } else {
         items.emplace_back(std::move(element));
     }
@@ -85,7 +85,7 @@ void WritableWTPRadioFailAlarmIndicationArray::Serialize(RawData *raw_data) cons
 
 void WritableWTPRadioFailAlarmIndicationArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME WTPRadioFailAlarmIndication #%zu RadioID:%u, Type:%u, Status:%u",
+        log_i("ME WTPRadioFailAlarmIndication #{} RadioID:{}, Type:{}, Status:{}",
               i,
               items[i].RadioID,
               (unsigned)items[i].Type,
@@ -137,7 +137,7 @@ ReadableWTPRadioFailAlarmIndicationArray::Get() const {
 
 void ReadableWTPRadioFailAlarmIndicationArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME WTPRadioFailAlarmIndication #%zu RadioID:%u, Type:%u, Status:%u",
+        log_i("ME WTPRadioFailAlarmIndication #{} RadioID:{}, Type:{}, Status:{}",
               i,
               items[i]->RadioID,
               (unsigned)items[i]->Type,

@@ -45,7 +45,7 @@ void WritableMICCountermeasuresArray::Add(MICCountermeasures cm) {
 
     if (it_exists != items.end()) {
         *it_exists = std::move(cm);
-        log_i("MICCountermeasures: replace RadioID: %u, WlanID: %u",
+        log_i("MICCountermeasures: replace RadioID: {}, WlanID: {}",
               (*it_exists).RadioID,
               (*it_exists).WlanID);
     } else {
@@ -71,8 +71,8 @@ void WritableMICCountermeasuresArray::Serialize(RawData *raw_data) const {
 
 void WritableMICCountermeasuresArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME MICCountermeasures #%zu RadioID:%u, WlanID:%u, "
-              "MAC:%02X:%02X:%02X:%02X:%02X:%02X",
+        log_i("ME MICCountermeasures #{} RadioID:{}, WlanID:{}, "
+              "MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
               i,
               items[i].RadioID,
               items[i].WlanID,
@@ -123,8 +123,8 @@ nonstd::span<const MICCountermeasures *const> ReadableMICCountermeasuresArray::G
 
 void ReadableMICCountermeasuresArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME MICCountermeasures #%zu RadioID:%u, WlanID:%u, "
-              "MAC:%02X:%02X:%02X:%02X:%02X:%02X",
+        log_i("ME MICCountermeasures #{} RadioID:{}, WlanID:{}, "
+              "MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
               i,
               items[i]->RadioID,
               items[i]->WlanID,

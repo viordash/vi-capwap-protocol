@@ -43,7 +43,7 @@ void WritableAssignedWtpBssidArray::Add(AssignedWtpBssid bssid) {
         });
     if (it_exists != items.end()) {
         *it_exists = std::move(bssid);
-        log_i("AssignedWtpBssid: replace RadioID: %u, WlanID: %u",
+        log_i("AssignedWtpBssid: replace RadioID: {}, WlanID: {}",
               (*it_exists).RadioID,
               (*it_exists).WlanID);
     } else {
@@ -69,8 +69,8 @@ void WritableAssignedWtpBssidArray::Serialize(RawData *raw_data) const {
 
 void WritableAssignedWtpBssidArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME AssignedWtpBssid #%zu RadioID:%u, WlanID:%u, "
-              "BSSID:%02X:%02X:%02X:%02X:%02X:%02X",
+        log_i("ME AssignedWtpBssid #{} RadioID:{}, WlanID:{}, "
+              "BSSID:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
               i,
               items[i].RadioID,
               items[i].WlanID,
@@ -122,8 +122,8 @@ nonstd::span<const AssignedWtpBssid *const> ReadableAssignedWtpBssidArray::Get()
 
 void ReadableAssignedWtpBssidArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME AssignedWtpBssid #%zu RadioID:%u, WlanID:%u, "
-              "BSSID:%02X:%02X:%02X:%02X:%02X:%02X",
+        log_i("ME AssignedWtpBssid #{} RadioID:{}, WlanID:{}, "
+              "BSSID:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
               i,
               items[i]->RadioID,
               items[i]->WlanID,

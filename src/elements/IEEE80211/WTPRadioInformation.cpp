@@ -70,7 +70,7 @@ void WritableWTPRadioInformationArray::Add(WTPRadioInformation radio_info) {
         });
     if (it_exists != items.end()) {
         *it_exists = std::move(radio_info);
-        log_i("WTPRadioInformation: replace RadioID: %u", (*it_exists).RadioID);
+        log_i("WTPRadioInformation: replace RadioID: {}", (*it_exists).RadioID);
     } else {
         items.emplace_back(std::move(radio_info));
     }
@@ -105,10 +105,10 @@ uint16_t WritableWTPRadioInformationArray::GetTotalLength() const {
 
 void WritableWTPRadioInformationArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME WTPRadioInfo #%zu RadioID:%u, 802.11 (%s )",
+        log_i("ME WTPRadioInfo #{} RadioID:{}, 802.11 ({} )",
               i,
               items[i].RadioID,
-              items[i].ToString().c_str());
+              items[i].ToString());
     }
 }
 
@@ -151,9 +151,9 @@ nonstd::span<const WTPRadioInformation *const> ReadableWTPRadioInformationArray:
 
 void ReadableWTPRadioInformationArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME WTPRadioInfo #%zu RadioID:%u, 802.11 (%s )",
+        log_i("ME WTPRadioInfo #{} RadioID:{}, 802.11 ({} )",
               i,
               items[i]->RadioID,
-              items[i]->ToString().c_str());
+              items[i]->ToString());
     }
 }

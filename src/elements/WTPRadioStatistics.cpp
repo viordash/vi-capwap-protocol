@@ -106,12 +106,12 @@ void WritableWTPRadioStatisticsArray::Add(WTPRadioStatistics statistics) {
         });
     if (it_exists != items.end()) {
         *it_exists = std::move(statistics);
-        log_i("WTPRadioStatistics: replace Radio ID:%u, Last Failure Type:%u, Reset Count:%u, SW "
+        log_i("WTPRadioStatistics: replace Radio ID:{}, Last Failure Type:{}, Reset Count:{}, SW "
               "Failure "
-              "Count:%u, HW Failure Count:%u, "
-              "Other Failure Count:%u, Unknown Failure "
-              "Count:%u, Config Update Count:%u, Channel Change Count:%u, Band Change Count:%u, "
-              "Current Noise Floor:%d",
+              "Count:{}, HW Failure Count:{}, "
+              "Other Failure Count:{}, Unknown Failure "
+              "Count:{}, Config Update Count:{}, Channel Change Count:{}, Band Change Count:{}, "
+              "Current Noise Floor:{}",
               (*it_exists).GetRadioID(),
               (unsigned)(*it_exists).GetLastFailureType(),
               (*it_exists).GetResetCount(),
@@ -147,12 +147,12 @@ void WritableWTPRadioStatisticsArray::Serialize(RawData *raw_data) const {
 
 void WritableWTPRadioStatisticsArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME WTPRadioStatistics #%zu Radio ID:%u, Last Failure Type:%u, Reset Count:%u, SW "
+        log_i("ME WTPRadioStatistics #{} Radio ID:{}, Last Failure Type:{}, Reset Count:{}, SW "
               "Failure "
-              "Count:%u, HW Failure Count:%u, "
-              "Other Failure Count:%u, Unknown Failure "
-              "Count:%u, Config Update Count:%u, Channel Change Count:%u, Band Change Count:%u, "
-              "Current Noise Floor:%d",
+              "Count:{}, HW Failure Count:{}, "
+              "Other Failure Count:{}, Unknown Failure "
+              "Count:{}, Config Update Count:{}, Channel Change Count:{}, Band Change Count:{}, "
+              "Current Noise Floor:{}",
               i,
               items[i].GetRadioID(),
               (unsigned)items[i].GetLastFailureType(),
@@ -199,12 +199,12 @@ nonstd::span<const WTPRadioStatistics *const> ReadableWTPRadioStatisticsArray::G
 
 void ReadableWTPRadioStatisticsArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME WTPRadioStatistics #%zu Radio ID:%u, Last Failure Type:%u, Reset Count:%u, SW "
+        log_i("ME WTPRadioStatistics #{} Radio ID:{}, Last Failure Type:{}, Reset Count:{}, SW "
               "Failure "
-              "Count:%u, HW Failure Count:%u, "
-              "Other Failure Count:%u, Unknown Failure "
-              "Count:%u, Config Update Count:%u, Channel Change Count:%u, Band Change Count:%u, "
-              "Current Noise Floor:%d",
+              "Count:{}, HW Failure Count:{}, "
+              "Other Failure Count:{}, Unknown Failure "
+              "Count:{}, Config Update Count:{}, Channel Change Count:{}, Band Change Count:{}, "
+              "Current Noise Floor:{}",
               i,
               items[i]->GetRadioID(),
               (unsigned)items[i]->GetLastFailureType(),

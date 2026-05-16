@@ -15,7 +15,7 @@ bool CAPWAPTimers::Validate() const {
 }
 
 void CAPWAPTimers::Log() const {
-    log_i("ME CAPWAPTimers Discovery:%u, Echo interval:%u", Discovery, EchoInterval);
+    log_i("ME CAPWAPTimers Discovery:{}, Echo interval:{}", Discovery, EchoInterval);
 }
 
 WritableCAPWAPTimers::WritableCAPWAPTimers(uint8_t discovery, uint8_t echo_interval)

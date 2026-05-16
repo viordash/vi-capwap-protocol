@@ -50,7 +50,7 @@ void WritableSupportedRatesArray::Add(Item element) {
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("SupportedRates: replace RadioID: %u", (*it_exists).header.GetRadioID());
+        log_i("SupportedRates: replace RadioID: {}", (*it_exists).header.GetRadioID());
     } else {
         items.emplace_back(std::move(element));
     }
@@ -78,7 +78,7 @@ void WritableSupportedRatesArray::Serialize(RawData *raw_data) const {
 
 void WritableSupportedRatesArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME SupportedRates #%zu RadioID:%u, Rates count:%zu",
+        log_i("ME SupportedRates #{} RadioID:{}, Rates count:{}",
               i,
               items[i].header.GetRadioID(),
               items[i].data.size());
@@ -122,7 +122,7 @@ ReadableSupportedRatesArray::Get() const {
 
 void ReadableSupportedRatesArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME SupportedRates #%zu RadioID:%u, Rates count:%u",
+        log_i("ME SupportedRates #{} RadioID:{}, Rates count:{}",
               i,
               items[i]->GetRadioID(),
               items[i]->GetRatesCount());

@@ -43,7 +43,7 @@ uint16_t MaximumMessageLength::GetValue() const {
 }
 
 void MaximumMessageLength::Log() const {
-    log_i("ME MaximumMessageLength :%u", GetValue());
+    log_i("ME MaximumMessageLength :{}", GetValue());
 }
 
 WritableMaximumMessageLength::WritableMaximumMessageLength(uint16_t length) : element{ length } {

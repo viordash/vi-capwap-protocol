@@ -147,7 +147,7 @@ void WritableStatisticsArray::Add(Statistics element) {
     });
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("Statistics: replace RadioID: %u", (*it_exists).GetRadioID());
+        log_i("Statistics: replace RadioID: {}", (*it_exists).GetRadioID());
     } else {
         items.emplace_back(std::move(element));
     }
@@ -171,8 +171,8 @@ void WritableStatisticsArray::Serialize(RawData *raw_data) const {
 
 void WritableStatisticsArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME Statistics #%zu RadioID:%u, TxFragmentCount:%u, MulticastTxCount:%u, "
-              "FailedCount:%u, RetryCount:%u, AssociatedStationCount:%u",
+        log_i("ME Statistics #{} RadioID:{}, TxFragmentCount:{}, MulticastTxCount:{}, "
+              "FailedCount:{}, RetryCount:{}, AssociatedStationCount:{}",
               i,
               items[i].GetRadioID(),
               items[i].GetTxFragmentCount(),
@@ -222,8 +222,8 @@ nonstd::span<const Statistics *const> ReadableStatisticsArray::Get() const {
 
 void ReadableStatisticsArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME Statistics #%zu RadioID:%u, TxFragmentCount:%u, MulticastTxCount:%u, "
-              "FailedCount:%u, RetryCount:%u, AssociatedStationCount:%u",
+        log_i("ME Statistics #{} RadioID:{}, TxFragmentCount:{}, MulticastTxCount:{}, "
+              "FailedCount:{}, RetryCount:{}, AssociatedStationCount:{}",
               i,
               items[i]->GetRadioID(),
               items[i]->GetTxFragmentCount(),

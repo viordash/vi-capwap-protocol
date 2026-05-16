@@ -62,7 +62,7 @@ bool ReadableWTPEventResponse::Deserialize(RawData *raw_data) {
                 }
                 unknown_elements++;
                 log_w("ReadableWTPEventResponse::Deserialize unhandled element type: "
-                      "0x%04X",
+                      "0x{:04X}",
                       (unsigned)unknownElement->GetElementType());
 
                 break;
@@ -80,12 +80,12 @@ void ReadableWTPEventResponse::Log() const {
         if (value->IsPresent()) {
             value->Log();
         } else {
-            log_i("  expected optional element is missing, type: 0x%04X", (unsigned)type);
+            log_i("  expected optional element is missing, type: 0x{:04X}", (unsigned)type);
         }
     }
 
     if (unknown_elements > 0) {
-        log_i("  UnknownElements count: %zu", unknown_elements);
+        log_i("  UnknownElements count: {}", unknown_elements);
     }
     log_i("----------------------------------");
 }

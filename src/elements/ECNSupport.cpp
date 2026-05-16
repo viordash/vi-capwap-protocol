@@ -19,7 +19,7 @@ bool ECNSupport::Validate() const {
 }
 
 void ECNSupport::Log() const {
-    log_i("ME ECNSupport Type:%u", (unsigned)type);
+    log_i("ME ECNSupport Type:{}", (unsigned)type);
 }
 
 WritableECNSupport::WritableECNSupport(ECNSupport::Type type) : element{ type } {

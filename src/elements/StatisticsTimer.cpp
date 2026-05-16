@@ -19,7 +19,7 @@ uint16_t StatisticsTimer::GetValue() const {
 }
 
 void StatisticsTimer::Log() const {
-    log_i("ME StatisticsTimer :%u secs", GetValue());
+    log_i("ME StatisticsTimer :{} secs", GetValue());
 }
 
 WritableStatisticsTimer::WritableStatisticsTimer(uint16_t time) : element{ time } {

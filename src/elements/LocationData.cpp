@@ -41,7 +41,7 @@ void WritableLocationData::Serialize(RawData *raw_data) const {
 }
 
 void WritableLocationData::Log() const {
-    log_i("ME LocationData :%.*s", (int)data.size(), data.data());
+    log_i("ME LocationData :{}", std::string_view(data.data(), data.size()));
 }
 
 bool ReadableLocationData::Deserialize(RawData *raw_data) {
@@ -75,7 +75,7 @@ const ReadableLocationData::Element *ReadableLocationData::Get() const {
 
 void ReadableLocationData::Log() const {
     ASSERT(element != nullptr);
-    log_i("ME LocationData :%.*s", (int)element->GetDataLenght(), element->data);
+    log_i("ME LocationData :{}", std::string_view(element->data, element->GetDataLenght()));
 }
 
 ElementHeader::ElementType ReadableLocationData::GetElementType() const {

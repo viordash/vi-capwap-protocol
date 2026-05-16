@@ -40,7 +40,7 @@ void WritableACName::Serialize(RawData *raw_data) const {
 }
 
 void WritableACName::Log() const {
-    log_i("ME ACName :%.*s", (int)name.size(), name.data());
+    log_i("ME ACName :{}", std::string_view(name.data(), name.size()));
 }
 
 bool ReadableACName::Deserialize(RawData *raw_data) {
@@ -70,7 +70,7 @@ const ReadableACName::Element *ReadableACName::Get() const {
 
 void ReadableACName::Log() const {
     ASSERT(element != nullptr);
-    log_i("ME ACName :%.*s", (int)element->GetDataLenght(), element->name);
+    log_i("ME ACName :{}", std::string_view(element->name, element->GetDataLenght()));
 }
 
 ElementHeader::ElementType ReadableACName::GetElementType() const {

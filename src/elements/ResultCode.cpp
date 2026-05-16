@@ -16,7 +16,7 @@ bool ResultCode::Validate() const {
 }
 
 void ResultCode::Log() const {
-    log_i("ME ResultCode Type: 0x%08X", (unsigned)type);
+    log_i("ME ResultCode Type: 0x{:08X}", (unsigned)type);
 }
 
 WritableResultCode::WritableResultCode(ResultCode::Type type) : element{ type } {

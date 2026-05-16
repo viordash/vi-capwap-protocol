@@ -74,9 +74,9 @@ WTPRebootStatistics::LastFailureType WTPRebootStatistics::GetLastFailureType() c
 }
 
 void WTPRebootStatistics::Log() const {
-    log_i("ME WTPRebootStatistics Reboot Count:%u, AC Initiated Count:%u, Link Failure Count:%u, "
-          "SW Failure Count:%u, HW Failure Count:%u, Other Failure Count:%u, Unknown Failure "
-          "Count:%u, Last Failure Type:%u",
+    log_i("ME WTPRebootStatistics Reboot Count:{}, AC Initiated Count:{}, Link Failure Count:{}, "
+          "SW Failure Count:{}, HW Failure Count:{}, Other Failure Count:{}, Unknown Failure "
+          "Count:{}, Last Failure Type:{}",
           GetRebootCount(),
           GetACInitiatedCount(),
           GetLinkFailureCount(),

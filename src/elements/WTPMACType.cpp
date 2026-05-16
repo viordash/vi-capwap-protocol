@@ -19,7 +19,7 @@ bool WTPMACType::Validate() const {
 }
 
 void WTPMACType::Log() const {
-    log_i("ME WTPMACType Type:%u", (unsigned)type);
+    log_i("ME WTPMACType Type:{}", (unsigned)type);
 }
 
 WritableWTPMACType::WritableWTPMACType(WTPMACType::Type type) : element{ type } {

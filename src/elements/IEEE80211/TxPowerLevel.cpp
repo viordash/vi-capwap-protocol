@@ -52,7 +52,7 @@ void WritableTxPowerLevelArray::Add(Item element) {
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("TxPowerLevel: replace RadioID: %u", (*it_exists).header.GetRadioID());
+        log_i("TxPowerLevel: replace RadioID: {}", (*it_exists).header.GetRadioID());
     } else {
         items.emplace_back(std::move(element));
     }
@@ -80,7 +80,7 @@ void WritableTxPowerLevelArray::Serialize(RawData *raw_data) const {
 
 void WritableTxPowerLevelArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME TxPowerLevel #%zu RadioID:%u, NumLevels:%zu",
+        log_i("ME TxPowerLevel #{} RadioID:{}, NumLevels:{}",
               i,
               items[i].header.GetRadioID(),
               items[i].data.size());
@@ -123,7 +123,7 @@ nonstd::span<const ReadableTxPowerLevelArray::Item *const> ReadableTxPowerLevelA
 
 void ReadableTxPowerLevelArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME TxPowerLevel #%zu RadioID:%u, NumLevels:%u",
+        log_i("ME TxPowerLevel #{} RadioID:{}, NumLevels:{}",
               i,
               items[i]->GetRadioID(),
               items[i]->GetNumLevels());

@@ -60,7 +60,7 @@ void WritableRadioOperationalStateArray::Add(RadioOperationalState radio_state) 
         });
     if (it_exists != items.end()) {
         *it_exists = std::move(radio_state);
-        log_i("RadioOperationalState: replace RadioID: %u", (*it_exists).RadioID);
+        log_i("RadioOperationalState: replace RadioID: {}", (*it_exists).RadioID);
     } else {
         items.emplace_back(std::move(radio_state));
     }
@@ -84,7 +84,7 @@ void WritableRadioOperationalStateArray::Serialize(RawData *raw_data) const {
 
 void WritableRadioOperationalStateArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME RadioOperationalState #%zu RadioID:%u, State:%u, Cause:%u",
+        log_i("ME RadioOperationalState #{} RadioID:{}, State:{}, Cause:{}",
               i,
               items[i].RadioID,
               (unsigned)items[i].State,
@@ -123,7 +123,7 @@ nonstd::span<const RadioOperationalState *const> ReadableRadioOperationalStateAr
 
 void ReadableRadioOperationalStateArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME RadioOperationalState #%zu RadioID:%u, State:%u, Cause:%u",
+        log_i("ME RadioOperationalState #{} RadioID:{}, State:{}, Cause:{}",
               i,
               items[i]->RadioID,
               (unsigned)items[i]->State,

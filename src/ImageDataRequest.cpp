@@ -61,7 +61,7 @@ bool ReadableImageDataRequest::Deserialize(RawData *raw_data) {
                     return false;
                 }
                 unknown_elements++;
-                log_w("ReadableImageDataRequest::Deserialize unhandled element type: 0x%04X",
+                log_w("ReadableImageDataRequest::Deserialize unhandled element type: 0x{:04X}",
                       (unsigned)unknownElement->GetElementType());
 
                 break;
@@ -79,12 +79,12 @@ void ReadableImageDataRequest::Log() const {
         if (value->IsPresent()) {
             value->Log();
         } else {
-            log_i("  expected optional element is missing, type: 0x%04X", (unsigned)type);
+            log_i("  expected optional element is missing, type: 0x{:04X}", (unsigned)type);
         }
     }
 
     if (unknown_elements > 0) {
-        log_i("  UnknownElements count: %zu", unknown_elements);
+        log_i("  UnknownElements count: {}", unknown_elements);
     }
     log_i("----------------------------------");
 }

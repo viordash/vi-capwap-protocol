@@ -57,7 +57,7 @@ void WritableOFDMControlArray::Add(OFDMControl element) {
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("OFDMControl: replace RadioID: %u", (*it_exists).GetRadioID());
+        log_i("OFDMControl: replace RadioID: {}", (*it_exists).GetRadioID());
     } else {
         items.emplace_back(std::move(element));
     }
@@ -81,7 +81,7 @@ void WritableOFDMControlArray::Serialize(RawData *raw_data) const {
 
 void WritableOFDMControlArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME OFDMControl #%zu RadioID:%u, Channel:%u, BandSupport:0x%02X, TIThreshold:%u",
+        log_i("ME OFDMControl #{} RadioID:{}, Channel:{}, BandSupport:0x{:02X}, TIThreshold:{}",
               i,
               items[i].GetRadioID(),
               items[i].GetCurrentChannel(),
@@ -129,7 +129,7 @@ nonstd::span<const OFDMControl *const> ReadableOFDMControlArray::Get() const {
 
 void ReadableOFDMControlArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME OFDMControl #%zu RadioID:%u, Channel:%u, BandSupport:0x%02X, TIThreshold:%u",
+        log_i("ME OFDMControl #{} RadioID:{}, Channel:{}, BandSupport:0x{:02X}, TIThreshold:{}",
               i,
               items[i]->GetRadioID(),
               items[i]->GetCurrentChannel(),

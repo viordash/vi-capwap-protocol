@@ -21,7 +21,7 @@ bool IdleTimeout::Validate() const {
 }
 
 void IdleTimeout::Log() const {
-    log_i("ME IdleTimeout timeout: %u", GetTimeout());
+    log_i("ME IdleTimeout timeout: {}", GetTimeout());
 }
 
 WritableIdleTimeout::WritableIdleTimeout(uint32_t timeout) : element{ timeout } {

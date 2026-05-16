@@ -89,7 +89,7 @@ void WritableUpdateWlanArray::Add(Item element) {
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("UpdateWlan: replace RadioID: %u, WlanID: %u",
+        log_i("UpdateWlan: replace RadioID: {}, WlanID: {}",
               (*it_exists).header.GetRadioID(),
               (*it_exists).header.GetWlanID());
     } else {
@@ -119,8 +119,8 @@ void WritableUpdateWlanArray::Serialize(RawData *raw_data) const {
 
 void WritableUpdateWlanArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME UpdateWlan #%zu RadioID:%u, WlanID:%u, Capability:0x%04X, KeyIndex:%u, "
-              "KeyStatus:%u, KeyLen:%zu",
+        log_i("ME UpdateWlan #{} RadioID:{}, WlanID:{}, Capability:0x{:04X}, KeyIndex:{}, "
+              "KeyStatus:{}, KeyLen:{}",
               i,
               items[i].header.GetRadioID(),
               items[i].header.GetWlanID(),
@@ -167,8 +167,8 @@ nonstd::span<const ReadableUpdateWlanArray::Item *const> ReadableUpdateWlanArray
 
 void ReadableUpdateWlanArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME UpdateWlan #%zu RadioID:%u, WlanID:%u, Capability:0x%04X, KeyIndex:%u, "
-              "KeyStatus:%u, KeyLen:%u",
+        log_i("ME UpdateWlan #{} RadioID:{}, WlanID:{}, Capability:0x{:04X}, KeyIndex:{}, "
+              "KeyStatus:{}, KeyLen:{}",
               i,
               items[i]->GetRadioID(),
               items[i]->GetWlanID(),

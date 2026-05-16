@@ -55,7 +55,7 @@ bool Station::Validate() const {
         return false;
     }
     if (GetSupportedRatesLength() > max_supported_rates_length) {
-        log_e("Station: supported rates length exceeds limit: %u",
+        log_e("Station: supported rates length exceeds limit: {}",
               (unsigned)max_supported_rates_length);
         return false;
     }
@@ -86,7 +86,7 @@ void WritableStationArray::Add(WritableStationArray::Item element) {
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("Station: replace RadioID: %u, MAC: %02X:%02X:%02X:%02X:%02X:%02X",
+        log_i("Station: replace RadioID: {}, MAC: {:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}",
               (*it_exists).header.GetRadioID(),
               (*it_exists).header.GetMACAddress()[0],
               (*it_exists).header.GetMACAddress()[1],
@@ -121,19 +121,20 @@ void WritableStationArray::Serialize(RawData *raw_data) const {
 
 void WritableStationArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME Station #%zu RadioID:%u, AssocID:%u, MAC:%02X:%02X:%02X:%02X:%02X:%02X, "
-              "WlanID:%u, RatesLen:%zu",
-              i,
-              items[i].header.GetRadioID(),
-              items[i].header.GetAssociationID(),
-              items[i].header.GetMACAddress()[0],
-              items[i].header.GetMACAddress()[1],
-              items[i].header.GetMACAddress()[2],
-              items[i].header.GetMACAddress()[3],
-              items[i].header.GetMACAddress()[4],
-              items[i].header.GetMACAddress()[5],
-              items[i].header.GetWlanID(),
-              items[i].data.size());
+        log_i(
+            "ME Station #{} RadioID:{}, AssocID:{}, MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, "
+            "WlanID:{}, RatesLen:{}",
+            i,
+            items[i].header.GetRadioID(),
+            items[i].header.GetAssociationID(),
+            items[i].header.GetMACAddress()[0],
+            items[i].header.GetMACAddress()[1],
+            items[i].header.GetMACAddress()[2],
+            items[i].header.GetMACAddress()[3],
+            items[i].header.GetMACAddress()[4],
+            items[i].header.GetMACAddress()[5],
+            items[i].header.GetWlanID(),
+            items[i].data.size());
     }
 }
 
@@ -173,19 +174,20 @@ nonstd::span<const ReadableStationArray::Item *const> ReadableStationArray::Get(
 
 void ReadableStationArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME Station #%zu RadioID:%u, AssocID:%u, MAC:%02X:%02X:%02X:%02X:%02X:%02X, "
-              "WlanID:%u, RatesLen:%u",
-              i,
-              items[i]->GetRadioID(),
-              items[i]->GetAssociationID(),
-              items[i]->GetMACAddress()[0],
-              items[i]->GetMACAddress()[1],
-              items[i]->GetMACAddress()[2],
-              items[i]->GetMACAddress()[3],
-              items[i]->GetMACAddress()[4],
-              items[i]->GetMACAddress()[5],
-              items[i]->GetWlanID(),
-              items[i]->GetSupportedRatesLength());
+        log_i(
+            "ME Station #{} RadioID:{}, AssocID:{}, MAC:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}:{:02X}, "
+            "WlanID:{}, RatesLen:{}",
+            i,
+            items[i]->GetRadioID(),
+            items[i]->GetAssociationID(),
+            items[i]->GetMACAddress()[0],
+            items[i]->GetMACAddress()[1],
+            items[i]->GetMACAddress()[2],
+            items[i]->GetMACAddress()[3],
+            items[i]->GetMACAddress()[4],
+            items[i]->GetMACAddress()[5],
+            items[i]->GetWlanID(),
+            items[i]->GetSupportedRatesLength());
     }
 }
 

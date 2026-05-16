@@ -52,7 +52,7 @@ void WritableImageData::Serialize(RawData *raw_data) const {
 }
 
 void WritableImageData::Log() const {
-    log_i("ME ImageData data lenght: %u, type: %u",
+    log_i("ME ImageData data lenght: {}, type: {}",
           element.GetDataLenght(),
           (unsigned)element.type);
 }
@@ -88,7 +88,7 @@ const ReadableImageData::Element *ReadableImageData::Get() const {
 
 void ReadableImageData::Log() const {
     ASSERT(element != nullptr);
-    log_i("ME ImageData data lenght: %u, type: %u",
+    log_i("ME ImageData data lenght: {}, type: {}",
           element->GetDataLenght(),
           (unsigned)element->type);
 }

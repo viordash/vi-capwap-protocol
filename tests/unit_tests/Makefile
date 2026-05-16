@@ -15,7 +15,7 @@ CCACHE 			?= ccache
 CC 				:= g++
 
 CFLAGS := -std=c++17 -Wall -g -O0 -Wno-unused-parameter
-LDFLAGS := -lCppUTest
+LDFLAGS := -lCppUTest -lspdlog -lfmt
 CFLAGS += -DLOG_LEVEL=LOG_LEVEL_INFO
 
 MAIN						:= $(PROJECT_NAME)

@@ -15,7 +15,7 @@ CCACHE 			?= ccache
 CC 				:= g++
 
 CFLAGS := -std=c++17 -Wall -g -O2 -Wno-unused-parameter
-LDFLAGS := -lCppUTest
+LDFLAGS := -lCppUTest -lspdlog -lfmt
 CFLAGS += -DLOG_LEVEL=LOG_LEVEL_ERROR
 
 MAIN						:= $(PROJECT_NAME)
@@ -30,6 +30,7 @@ INCLUDES += -I$(ROOT_DIR)
 INCLUDES += -I$(ROOT_DIR)/tests/lib/CppUTest/include
 INCLUDES += -I$(ROOT_DIR)/tests/lib/nanobench/src/include
 LIBS		:= -L$(call FIXPATH,$(ROOT_DIR)/tests/lib)
+
 
 SOURCES_EXCLUDE 		:= 
 SOURCES					:= $(filter-out $(addprefix %/,$(SOURCES_EXCLUDE)), \

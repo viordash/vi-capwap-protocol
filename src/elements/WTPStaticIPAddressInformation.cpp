@@ -21,10 +21,10 @@ bool WTPStaticIPAddressInformation::Validate() const {
 }
 
 void WTPStaticIPAddressInformation::Log() const {
-    log_i("ME WTPStaticIPAddressInformation IP Address:%s, Netmask:%s, Gateway:%s, use static:%u",
-          IpToString(IpAddress).c_str(),
-          IpToString(Netmask).c_str(),
-          IpToString(Gateway).c_str(),
+    log_i("ME WTPStaticIPAddressInformation IP Address:{}, Netmask:{}, Gateway:{}, use static:{}",
+          IpToString(IpAddress),
+          IpToString(Netmask),
+          IpToString(Gateway),
           Static);
 }
 

@@ -35,7 +35,7 @@ uint16_t WritableMTUDiscoveryPadding::GetTotalLength() const {
 }
 
 void WritableMTUDiscoveryPadding::Log() const {
-    log_i("ME MTUDiscoveryPadding Padding:%u", element.GetLength());
+    log_i("ME MTUDiscoveryPadding Padding:{}", element.GetLength());
 }
 
 bool ReadableMTUDiscoveryPadding::Deserialize(RawData *raw_data) {
@@ -77,7 +77,7 @@ const ReadableMTUDiscoveryPadding::Element *ReadableMTUDiscoveryPadding::Get() c
 
 void ReadableMTUDiscoveryPadding::Log() const {
     ASSERT(element != nullptr);
-    log_i("ME MTUDiscoveryPadding Padding:%u", element->GetLength());
+    log_i("ME MTUDiscoveryPadding Padding:{}", element->GetLength());
 }
 
 ElementHeader::ElementType ReadableMTUDiscoveryPadding::GetElementType() const {

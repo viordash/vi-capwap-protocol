@@ -37,7 +37,7 @@ void WritableTxPowerArray::Add(TxPower element) {
 
     if (it_exists != items.end()) {
         *it_exists = std::move(element);
-        log_i("TxPower: replace RadioID: %u", (*it_exists).RadioID);
+        log_i("TxPower: replace RadioID: {}", (*it_exists).RadioID);
     } else {
         items.emplace_back(std::move(element));
     }
@@ -61,7 +61,7 @@ void WritableTxPowerArray::Serialize(RawData *raw_data) const {
 
 void WritableTxPowerArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME TxPower #%zu RadioID:%u, CurrentTxPower:%u",
+        log_i("ME TxPower #{} RadioID:{}, CurrentTxPower:{}",
               i,
               items[i].RadioID,
               items[i].CurrentTxPower.Get());
@@ -107,7 +107,7 @@ nonstd::span<const TxPower *const> ReadableTxPowerArray::Get() const {
 
 void ReadableTxPowerArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME TxPower #%zu RadioID:%u, CurrentTxPower:%u",
+        log_i("ME TxPower #{} RadioID:{}, CurrentTxPower:{}",
               i,
               items[i]->RadioID,
               items[i]->CurrentTxPower.Get());

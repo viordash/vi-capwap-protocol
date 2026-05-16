@@ -19,7 +19,7 @@ bool WTPFallback::Validate() const {
 }
 
 void WTPFallback::Log() const {
-    log_i("ME WTPFallback Mode:%u", (unsigned)mode);
+    log_i("ME WTPFallback Mode:{}", (unsigned)mode);
 }
 
 WritableWTPFallback::WritableWTPFallback(WTPFallback::Mode mode) : element{ mode } {

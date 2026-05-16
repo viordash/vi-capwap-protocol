@@ -40,7 +40,7 @@ void WritableWTPName::Serialize(RawData *raw_data) const {
 }
 
 void WritableWTPName::Log() const {
-    log_i("ME WTPName :%.*s", (int)name.size(), name.data());
+    log_i("ME WTPName :{}", std::string_view(name.data(), name.size()));
 }
 
 bool ReadableWTPName::Deserialize(RawData *raw_data) {
@@ -70,7 +70,7 @@ const ReadableWTPName::Element *ReadableWTPName::Get() const {
 
 void ReadableWTPName::Log() const {
     ASSERT(element != nullptr);
-    log_i("ME WTPName :%.*s", (int)element->GetDataLenght(), element->name);
+    log_i("ME WTPName :{}", std::string_view(element->name, element->GetDataLenght()));
 }
 
 ElementHeader::ElementType ReadableWTPName::GetElementType() const {
