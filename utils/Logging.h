@@ -74,38 +74,8 @@ static inline void log_level_set(log_level_t level) {
 #define log_d(fmt_, ...) (void)0
 #endif
 
-#elif __has_include(<fmt/format.h>)
-
-#include <fmt/format.h>
-
-const char *log_time();
-
-#if (LOG_LEVEL <= LOG_LEVEL_ERROR)
-#define log_e(fmt_, ...) fmt::print(stderr, "E ({}) " fmt_ "\n", log_time(), ##__VA_ARGS__)
 #else
-#define log_e(fmt_, ...) (void)0
-#endif
-
-#if (LOG_LEVEL <= LOG_LEVEL_WARN)
-#define log_w(fmt_, ...) fmt::print(stderr, "W ({}) " fmt_ "\n", log_time(), ##__VA_ARGS__)
-#else
-#define log_w(fmt_, ...) (void)0
-#endif
-
-#if (LOG_LEVEL <= LOG_LEVEL_INFO)
-#define log_i(fmt_, ...) fmt::print(stdout, "I ({}) " fmt_ "\n", log_time(), ##__VA_ARGS__)
-#else
-#define log_i(fmt_, ...) (void)0
-#endif
-
-#if (LOG_LEVEL <= LOG_LEVEL_DEBUG)
-#define log_d(fmt_, ...) fmt::print(stdout, "D ({}) " fmt_ "\n", log_time(), ##__VA_ARGS__)
-#else
-#define log_d(fmt_, ...) (void)0
-#endif
-
-#else
-#error "capwap-protocol logging requires either spdlog or libfmt (apt install libfmt-dev)"
+#error "capwap-protocol logging requires spdlog (apt install libspdlog-dev)"
 #endif
 
 #endif // !log_i
