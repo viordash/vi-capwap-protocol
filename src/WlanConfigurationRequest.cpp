@@ -55,6 +55,10 @@ ControlHeader::MessageType WritableWlanConfigurationRequest::GetResponseMessageT
 }
 
 void WritableWlanConfigurationRequest::Serialize(RawData *raw_data) const {
+    ASSERT((add_wlan != nullptr && delete_wlan == nullptr && update_wlan == nullptr)
+           || (add_wlan == nullptr && delete_wlan != nullptr && update_wlan == nullptr)
+           || (add_wlan == nullptr && delete_wlan == nullptr && update_wlan != nullptr));
+
     if (add_wlan != nullptr) {
         add_wlan->Serialize(raw_data);
     }
@@ -128,7 +132,16 @@ bool ReadableWlanConfigurationRequest::Deserialize(RawData *raw_data) {
             }
         }
     }
-    return add_wlan.IsPresent() || delete_wlan.IsPresent() || update_wlan.IsPresent();
+    if (add_wlan.IsPresent() && !delete_wlan.IsPresent() && !update_wlan.IsPresent()) {
+        return true;
+    }
+    if (!add_wlan.IsPresent() && delete_wlan.IsPresent() && !update_wlan.IsPresent()) {
+        return true;
+    }
+    if (!add_wlan.IsPresent() && !delete_wlan.IsPresent() && update_wlan.IsPresent()) {
+        return true;
+    }
+    return false;
 }
 
 void ReadableWlanConfigurationRequest::Log() const {
