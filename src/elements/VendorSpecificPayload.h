@@ -45,6 +45,8 @@ struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestO
                                             IWritableChangeStateEventResponseOptionalElement,
                                             IWritableWlanConfigurationRequestOptionalElement,
                                             IWritableWlanConfigurationResponseOptionalElement,
+                                            IWritableStationConfigurationRequestOptionalElement,
+                                            IWritableStationConfigurationResponseOptionalElement,
                                             IWritableResetResponseOptionalElement {
   public:
     struct Item {
@@ -94,6 +96,8 @@ struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestO
                                             IReadableChangeStateEventResponseOptionalElement,
                                             IReadableWlanConfigurationRequestOptionalElement,
                                             IReadableWlanConfigurationResponseOptionalElement,
+                                            IReadableStationConfigurationRequestOptionalElement,
+                                            IReadableStationConfigurationResponseOptionalElement,
                                             IReadableResetResponseOptionalElement {
   public:
     static const size_t max_data_size = 2048;
