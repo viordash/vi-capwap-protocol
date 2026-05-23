@@ -643,6 +643,86 @@ TEST(AddWlanTestsGroup, Deserialize_truncated_data) {
     CHECK_FALSE(r_wlans.Deserialize(&raw_data));
 }
 
+TEST(AddWlanTestsGroup, All_auth_type_values) {
+    uint8_t buffer[4096] = {};
+    const uint8_t group_tsc[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+    WritableAddWlanArray w_wlans;
+
+    const AddWlanHeader::AuthType auth_types[] = {
+        AddWlanHeader::AuthType::OpenSystem, AddWlanHeader::AuthType::WepSharedKey,
+        AddWlanHeader::AuthType::Wpa2Psk,    AddWlanHeader::AuthType::WpaPsk,
+        AddWlanHeader::AuthType::Wpa3Sae,    AddWlanHeader::AuthType::WpaEap,
+        AddWlanHeader::AuthType::Wpa2Eap,    AddWlanHeader::AuthType::Wpa3Enterprise,
+    };
+
+    for (uint8_t i = 0; i < 8; i++) {
+        w_wlans.Add({ 1,
+                      (uint8_t)(i + 1),
+                      0x0001,
+                      0,
+                      AddWlanHeader::KeyStatus::PerStationKeys,
+                      {},
+                      group_tsc,
+                      AddWlanHeader::QoS::BestEffort,
+                      auth_types[i],
+                      AddWlanHeader::MACMode::LocalMAC,
+                      AddWlanHeader::TunnelMode::LocalBridging,
+                      0,
+                      "SSID" });
+    }
+
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    w_wlans.Serialize(&raw_data);
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableAddWlanArray r_wlans;
+    for (int i = 0; i < 8; i++) {
+        CHECK_TRUE(r_wlans.Deserialize(&raw_data));
+    }
+    CHECK_EQUAL(8, r_wlans.Get().size());
+
+    for (int i = 0; i < 8; i++) {
+        CHECK_EQUAL(auth_types[i], r_wlans.Get()[i].tail->auth_type);
+    }
+}
+
+TEST(AddWlanTestsGroup, Deserialize_invalid_auth_type) {
+    uint8_t buffer[256] = {};
+    const uint8_t group_tsc[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+
+    WritableAddWlanArray w_wlans;
+    w_wlans.Add({ 1,
+                  1,
+                  0x0001,
+                  0,
+                  AddWlanHeader::KeyStatus::PerStationKeys,
+                  {},
+                  group_tsc,
+                  AddWlanHeader::QoS::BestEffort,
+                  AddWlanHeader::AuthType::OpenSystem,
+                  AddWlanHeader::MACMode::LocalMAC,
+                  AddWlanHeader::TunnelMode::LocalBridging,
+                  0,
+                  "Test" });
+
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    w_wlans.Serialize(&raw_data);
+
+    // Corrupt auth_type to an invalid value (8, beyond Wpa3Enterprise=7)
+    // auth_type is at offset: sizeof(AddWlanHeader) + key_len + offsetof(AddWlanTail, auth_type)
+    // sizeof(AddWlanHeader)=12, key_len=0, group_tsc=6, qos=1 => auth_type at buffer[12+6+1]=buffer[19]
+    buffer[19] = 8;
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableAddWlanArray r_wlans;
+    CHECK_FALSE(r_wlans.Deserialize(&raw_data));
+}
+
 TEST(AddWlanTestsGroup, Max_array_count) {
     uint8_t buffer[8192] = {};
     const uint8_t group_tsc[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };

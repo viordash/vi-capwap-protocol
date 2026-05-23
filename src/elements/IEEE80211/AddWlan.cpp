@@ -92,6 +92,12 @@ bool AddWlanTail::Validate() const {
     switch (auth_type) {
         case AddWlanHeader::AuthType::OpenSystem:
         case AddWlanHeader::AuthType::WepSharedKey:
+        case AddWlanHeader::AuthType::Wpa2Psk:
+        case AddWlanHeader::AuthType::WpaPsk:
+        case AddWlanHeader::AuthType::Wpa3Sae:
+        case AddWlanHeader::AuthType::WpaEap:
+        case AddWlanHeader::AuthType::Wpa2Eap:
+        case AddWlanHeader::AuthType::Wpa3Enterprise:
             break;
         default:
             return false;

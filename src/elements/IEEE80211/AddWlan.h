@@ -24,7 +24,16 @@ struct __attribute__((packed)) AddWlanHeader : ElementHeader {
 
     enum QoS : uint8_t { BestEffort = 0, Video = 1, Voice = 2, Background = 3 };
 
-    enum AuthType : uint8_t { OpenSystem = 0, WepSharedKey = 1 };
+    enum AuthType : uint8_t {
+        OpenSystem = 0,
+        WepSharedKey = 1,
+        Wpa2Psk = 2,
+        WpaPsk = 3,
+        Wpa3Sae = 4,
+        WpaEap = 5,
+        Wpa2Eap = 6,
+        Wpa3Enterprise = 7,
+    };
 
     enum MACMode : uint8_t { LocalMAC = 0, SplitMAC = 1 };
 
