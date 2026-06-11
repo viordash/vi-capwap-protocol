@@ -97,7 +97,7 @@ struct ReadableVendorSpecificPayloadArray : IReadableConfigurationStatusRequestO
                                             IReadableResetResponseOptionalElement {
   public:
     static const size_t max_data_size = 2048;
-    static const size_t max_count = 16;
+    static const size_t max_count = 1024;
 
     struct Item : VendorSpecificPayload {
         char value[];
