@@ -6,7 +6,7 @@
 #include "span.hpp"
 
 struct __attribute__((packed)) ImageData : ElementHeader {
-    static const size_t max_data_size = 1024;
+    static const size_t max_data_size = 16384;
     enum Type : uint8_t { ImageDataIsIncluded = 1, LastImageDataIsIncluded = 2, ErrorOccured = 5 };
 
     Type type;
