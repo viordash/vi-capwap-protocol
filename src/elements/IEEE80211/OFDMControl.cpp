@@ -6,10 +6,11 @@
 
 OFDMControl::OFDMControl(uint8_t radio_id,
                          uint8_t current_channel,
+                         uint8_t channel_width,
                          uint8_t band_support,
                          uint32_t ti_threshold)
     : ElementHeader(ElementHeader::OFDMControl, sizeof(OFDMControl) - sizeof(ElementHeader)),
-      radio_id{ radio_id }, reserved{ 0 }, current_channel{ current_channel },
+      radio_id{ radio_id }, channel_width{ channel_width }, current_channel{ current_channel },
       band_support{ band_support }, ti_threshold{ ti_threshold } {
 }
 
@@ -19,6 +20,10 @@ uint8_t OFDMControl::GetRadioID() const {
 
 uint8_t OFDMControl::GetCurrentChannel() const {
     return current_channel;
+}
+
+uint8_t OFDMControl::GetChannelWidth() const {
+    return channel_width;
 }
 
 uint8_t OFDMControl::GetBandSupport() const {
@@ -81,10 +86,12 @@ void WritableOFDMControlArray::Serialize(RawData *raw_data) const {
 
 void WritableOFDMControlArray::Log() const {
     for (size_t i = 0; i < items.size(); i++) {
-        log_i("ME OFDMControl #{} RadioID:{}, Channel:{}, BandSupport:0x{:02X}, TIThreshold:{}",
+        log_i("ME OFDMControl #{} RadioID:{}, Channel:{}, ChanWidth:{}, BandSupport:0x{:02X}, "
+              "TIThreshold:{}",
               i,
               items[i].GetRadioID(),
               items[i].GetCurrentChannel(),
+              items[i].GetChannelWidth(),
               items[i].GetBandSupport(),
               items[i].GetTIThreshold());
     }
@@ -129,10 +136,12 @@ nonstd::span<const OFDMControl *const> ReadableOFDMControlArray::Get() const {
 
 void ReadableOFDMControlArray::Log() const {
     for (size_t i = 0; i < count; i++) {
-        log_i("ME OFDMControl #{} RadioID:{}, Channel:{}, BandSupport:0x{:02X}, TIThreshold:{}",
+        log_i("ME OFDMControl #{} RadioID:{}, Channel:{}, ChanWidth:{}, BandSupport:0x{:02X}, "
+              "TIThreshold:{}",
               i,
               items[i]->GetRadioID(),
               items[i]->GetCurrentChannel(),
+              items[i]->GetChannelWidth(),
               items[i]->GetBandSupport(),
               items[i]->GetTIThreshold());
     }

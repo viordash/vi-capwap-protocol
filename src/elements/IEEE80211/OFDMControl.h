@@ -13,13 +13,17 @@
 //  0                   1                   2                   3
 //  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-// |    Radio ID   |    Reserved   | Current Chan  |  Band Support |
+// |    Radio ID   |  Chan Width   | Current Chan  |  Band Support |
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 // |                         TI Threshold                          |
 // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 //
 // Type:   1033 for IEEE 802.11 OFDM Control
 // Length: 8
+//
+// NOTE: The octet at the RFC 5416 "Reserved" position is repurposed here to
+// carry the operating Channel Width (vendor extension). The standard mandates
+// this octet be set to zero, so this deviates from RFC 5416.
 
 struct __attribute__((packed)) OFDMControl : ElementHeader {
   public:
@@ -36,8 +40,9 @@ struct __attribute__((packed)) OFDMControl : ElementHeader {
     // Radio ID: An 8-bit value representing the radio, whose value is between 0 and 31.
     uint8_t radio_id;
 
-    // Reserved: Set to zero
-    uint8_t reserved;
+    // Channel Width: operating channel width. Occupies the RFC 5416 "Reserved"
+    // octet, repurposed as a vendor extension (standard mandates zero here).
+    uint8_t channel_width;
 
     // Current Channel: Current operating frequency channel of the OFDM PHY
     uint8_t current_channel;
@@ -52,11 +57,13 @@ struct __attribute__((packed)) OFDMControl : ElementHeader {
     OFDMControl(const OFDMControl &) = default;
     OFDMControl(uint8_t radio_id,
                 uint8_t current_channel,
+                uint8_t channel_width,
                 uint8_t band_support,
                 uint32_t ti_threshold);
 
     uint8_t GetRadioID() const;
     uint8_t GetCurrentChannel() const;
+    uint8_t GetChannelWidth() const;
     uint8_t GetBandSupport() const;
     uint32_t GetTIThreshold() const;
 

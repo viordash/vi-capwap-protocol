@@ -250,7 +250,7 @@ Strictly fixed-size elements that can appear multiple times in a message (typica
 - 6.7. IEEE 802.11 MAC Operation ([src/elements/IEEE80211/MACOperation.h](src/elements/IEEE80211/MACOperation.h))
 - 6.8. IEEE 802.11 MIC Countermeasures ([src/elements/IEEE80211/MICCountermeasures.h](src/elements/IEEE80211/MICCountermeasures.h))
 - 6.9. IEEE 802.11 Multi-Domain Capability ([src/elements/IEEE80211/MultiDomainCapability.h](src/elements/IEEE80211/MultiDomainCapability.h))
-- 6.10. IEEE 802.11 OFDM Control ([src/elements/IEEE80211/OFDMControl.h](src/elements/IEEE80211/OFDMControl.h))
+- 6.10. IEEE 802.11 OFDM Control ([src/elements/IEEE80211/OFDMControl.h](src/elements/IEEE80211/OFDMControl.h)) — non-standard extension: the RFC 5416 "Reserved" octet is repurposed to carry the operating channel width
 - 6.12. IEEE 802.11 RSNA Error Report From Station ([src/elements/IEEE80211/RSNAErrorReportFromStation.h](src/elements/IEEE80211/RSNAErrorReportFromStation.h))
 - 6.14. IEEE 802.11 Station QoS Profile ([src/elements/IEEE80211/StationQoSProfile.h](src/elements/IEEE80211/StationQoSProfile.h))
 - 6.16. IEEE 802.11 Statistics ([src/elements/IEEE80211/Statistics.h](src/elements/IEEE80211/Statistics.h))
