@@ -327,7 +327,7 @@ TEST(ConfigurationStatusResponseTestsGroup, IEEE80211_specific_message_elements)
         w_capabilities.Add({ 1, 1, 13, 20 });
 
         WritableOFDMControlArray w_controls;
-        w_controls.Add({ 1, 36, 0x01, 100 });
+        w_controls.Add({ 1, 36, 2, 0x01, 100 });
 
         WritableRateSetArray w_rate_sets;
         w_rate_sets.Add(1, rate_set1);
@@ -419,6 +419,7 @@ TEST(ConfigurationStatusResponseTestsGroup, IEEE80211_specific_message_elements)
     CHECK_EQUAL(1, r_controls.Get().size());
     CHECK_EQUAL(1, r_controls.Get()[0]->GetRadioID());
     CHECK_EQUAL(36, r_controls.Get()[0]->GetCurrentChannel());
+    CHECK_EQUAL(2, r_controls.Get()[0]->GetChannelWidth());
     CHECK_EQUAL(0x01, r_controls.Get()[0]->GetBandSupport());
     CHECK_EQUAL(100, r_controls.Get()[0]->GetTIThreshold());
 
