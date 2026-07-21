@@ -32,10 +32,10 @@ constexpr uint32_t ToNetworkOrder32(uint32_t value) {
 #if VI_CAPWAP_BIG_ENDIAN
     return value;
 #else
-    return ((value >> 24) & 0x000000FF)   //
-        | ((value >> 8) & 0x0000FF00)     //
-        | ((value << 8) & 0x00FF0000)     //
-        | ((value << 24) & 0xFF000000);
+    return ((value >> 24) & 0x000000FF) //
+         | ((value >> 8) & 0x0000FF00)  //
+         | ((value << 8) & 0x00FF0000)  //
+         | ((value << 24) & 0xFF000000);
 #endif
 }
 
