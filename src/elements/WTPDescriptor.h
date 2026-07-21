@@ -24,8 +24,13 @@ struct __attribute__((packed)) WTPDescriptorHeader : ElementHeader {
 };
 
 struct __attribute__((packed)) EncryptionSubElement {
-    uint8_t WBID : 5;                // type of wireless packet associated with the radio
-    uint8_t Resvd : 3;               // reserved for future use
+#if VI_CAPWAP_BIG_ENDIAN
+    uint8_t Resvd : 3; // reserved for future use
+    uint8_t WBID : 5;  // type of wireless packet associated with the radio
+#else
+    uint8_t WBID : 5;  // type of wireless packet associated with the radio
+    uint8_t Resvd : 3; // reserved for future use
+#endif
     uint16_t EncryptionCapabilities; // WTP to communicate its capabilities to the AC
 
   public:

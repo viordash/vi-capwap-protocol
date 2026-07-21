@@ -16,10 +16,16 @@ ACDescriptorHeader::ACDescriptorHeader(uint16_t stations,
                                        uint16_t sub_elements_size)
     : ElementHeader(ElementHeader::ACDescriptor,
                     (sizeof(ACDescriptorHeader) - sizeof(ElementHeader)) + sub_elements_size),
-      stations{ stations }, limit{ limit }, active_wtp{ active_wtp }, max_wtp{ max_wtp }, r0{ 0 },
-      x509_cert{ x509_cert }, preshared_secret{ preshared_secret }, reserved{ 0 }, rmac{ rmac },
-      reserved1{ 0 }, r1{ 0 }, clear_data_chn{ clear_data_chn }, dtls_data_chn{ dtls_data_chn },
-      reserved2{ 0 } {
+      stations{ stations }, limit{ limit }, active_wtp{ active_wtp }, max_wtp{ max_wtp },
+#if VI_CAPWAP_BIG_ENDIAN
+      reserved{ 0 }, preshared_secret{ preshared_secret }, x509_cert{ x509_cert }, r0{ 0 },
+      rmac{ rmac }, reserved1{ 0 }, reserved2{ 0 }, dtls_data_chn{ dtls_data_chn },
+      clear_data_chn{ clear_data_chn }, r1{ 0 } {
+#else
+      r0{ 0 }, x509_cert{ x509_cert }, preshared_secret{ preshared_secret }, reserved{ 0 },
+      rmac{ rmac }, reserved1{ 0 }, r1{ 0 }, clear_data_chn{ clear_data_chn },
+      dtls_data_chn{ dtls_data_chn }, reserved2{ 0 } {
+#endif
 }
 
 bool ACDescriptorHeader::Validate() const {

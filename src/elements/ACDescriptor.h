@@ -25,10 +25,17 @@ struct __attribute__((packed)) ACDescriptorHeader : ElementHeader {
     NetworkU16 max_wtp;
 
     // Security:   An 8-bit mask specifying the authentication credential type supported by the AC
+#if VI_CAPWAP_BIG_ENDIAN
+    uint8_t reserved : 5;         // reserved bits for future flags
+    uint8_t preshared_secret : 1; // The AC supports the pre-shared secret authentication
+    uint8_t x509_cert : 1;        // The AC supports X.509 Certificate authentication
+    uint8_t r0 : 1;               // A reserved bit for future use
+#else
     uint8_t r0 : 1;               // A reserved bit for future use
     uint8_t x509_cert : 1;        // The AC supports X.509 Certificate authentication
     uint8_t preshared_secret : 1; // The AC supports the pre-shared secret authentication
     uint8_t reserved : 5;         // reserved bits for future flags
+#endif
 
     // The AC supports the optional Radio MAC Address field in the CAPWAP transport header
     RMACField rmac;
@@ -36,10 +43,17 @@ struct __attribute__((packed)) ACDescriptorHeader : ElementHeader {
     uint8_t reserved1;
 
     // DTLS Policy:   The AC communicates its policy on the use of DTLS for the CAPWAP data channel
+#if VI_CAPWAP_BIG_ENDIAN
+    uint8_t reserved2 : 5;      // reserved bits for future flags
+    uint8_t dtls_data_chn : 1;  // DTLS-Enabled Data Channel Supported
+    uint8_t clear_data_chn : 1; // Clear Text Data Channel Supported
+    uint8_t r1 : 1;             // A reserved bit for future use
+#else
     uint8_t r1 : 1;             // A reserved bit for future use
     uint8_t clear_data_chn : 1; // Clear Text Data Channel Supported
     uint8_t dtls_data_chn : 1;  // DTLS-Enabled Data Channel Supported
     uint8_t reserved2 : 5;      // reserved bits for future flags
+#endif
 
   public:
     ACDescriptorHeader(const ACDescriptorHeader &) = delete;

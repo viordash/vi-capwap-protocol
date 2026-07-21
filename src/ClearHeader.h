@@ -10,8 +10,16 @@ struct __attribute__((packed)) Preamble {
     enum Version : uint8_t { RFC_5415 = 0 };
     enum PayloadType : uint8_t { ClearText = 0, DTLSCrypted = 1 };
 
+#if VI_CAPWAP_BIG_ENDIAN
+    uint8_t version : 4;
+    uint8_t type : 4;
+#else
     uint8_t type : 4;
     uint8_t version : 4;
+#endif
+
+    Preamble() = default;
+    Preamble(PayloadType type, Version version);
 
     bool Validate() const;
     static Preamble *Deserialize(const RawData *raw_data);
@@ -23,6 +31,21 @@ struct __attribute__((packed)) ClearHeader {
   private:
     Preamble preamble;
 
+#if VI_CAPWAP_BIG_ENDIAN
+    uint8_t hlen : 5;
+    uint8_t rid_0 : 3;
+
+    uint8_t rid_1 : 2;
+    uint8_t wbid : 5;
+    uint8_t t : 1;
+
+    uint8_t f : 1;
+    uint8_t l : 1;
+    uint8_t w : 1;
+    uint8_t m : 1;
+    uint8_t k : 1;
+    uint8_t flags : 3; // reserved bits for future flags
+#else
     uint8_t rid_0 : 3;
     uint8_t hlen : 5;
 
@@ -36,13 +59,19 @@ struct __attribute__((packed)) ClearHeader {
     uint8_t w : 1;
     uint8_t l : 1;
     uint8_t f : 1;
+#endif
 
     NetworkU16 fragment_ID;
 
     uint8_t fragment_offset_0;
 
+#if VI_CAPWAP_BIG_ENDIAN
+    uint8_t fragment_offset_1 : 5;
+    uint8_t reserved : 3; //reserved for future use
+#else
     uint8_t reserved : 3; //reserved for future use
     uint8_t fragment_offset_1 : 5;
+#endif
 
   public:
     // length of the CAPWAP transport header in 4-byte words

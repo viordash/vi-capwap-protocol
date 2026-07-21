@@ -45,7 +45,11 @@ WTPDescriptorHeader *WTPDescriptorHeader::Deserialize(RawData *raw_data) {
 }
 
 EncryptionSubElement::EncryptionSubElement(uint16_t encryption_capabilities)
+#if VI_CAPWAP_BIG_ENDIAN
+    : Resvd{ 0 }, WBID{ WBIDType::IEEE_80211 }, EncryptionCapabilities{ encryption_capabilities } {
+#else
     : WBID{ WBIDType::IEEE_80211 }, Resvd{ 0 }, EncryptionCapabilities{ encryption_capabilities } {
+#endif
 }
 
 bool EncryptionSubElement::Validate() const {
