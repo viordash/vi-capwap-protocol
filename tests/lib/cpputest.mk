@@ -52,8 +52,11 @@ _DIR = $(ROOT_DIR)/tests/lib/CppUTest
 # define the Cpp compiler to use
 
 CCACHE 			?= ccache
-LIB_CXX         := g++
-LIB_AR          := ar
+# Overridable for cross builds, see tests/unit_tests/Makefile
+LIB_CXX         ?= g++
+LIB_AR          ?= ar
+# Keeps artifacts of different targets apart, empty for the native build
+TARGET_SUFFIX   ?=
 
 # define any compile-time flags
 LIB_CXXFLAGS	:= -std=c++17 -Wall -Wextra -g -O2 -fPIC -shared -DCPPUTEST_HAVE_GETTIMEOFDAY -DCPPUTEST_HAVE_PTHREAD_MUTEX_LOCK
@@ -78,7 +81,7 @@ LIB_INCLUDES	:= -I$(_DIR)/include
 LIB_SOURCES		:= $(patsubst %, $(LIB_SRC)/%, $(_SRC) $(_EXT_SRC))
 
 # define the C object files
-LIB_OBJECTS		:= $(LIB_SOURCES:.cpp=.o)
+LIB_OBJECTS		:= $(LIB_SOURCES:.cpp=$(TARGET_SUFFIX).o)
 
 # define the dependency output files
 LIB_DEPS		:= $(LIB_OBJECTS:.o=.d)
@@ -89,7 +92,7 @@ LIB_DEPS		:= $(LIB_OBJECTS:.o=.d)
 # deleting dependencies appended to the file from 'make depend'
 #
 
-LIB_OUTPUTMAIN	:= $(call LIB_FIXPATH,$(LIB_OUTPUT)/libCppUTest.a)
+LIB_OUTPUTMAIN	:= $(call LIB_FIXPATH,$(LIB_OUTPUT)/libCppUTest$(TARGET_SUFFIX).a)
 
 $(LIB_OUTPUT):
 	@$(LIB_MD) $(LIB_OUTPUT)
@@ -107,7 +110,7 @@ libCppUTest.a: $(LIB_OUTPUT) $(LIB_OBJECTS)
 # -MMD generates dependency output files same name as the .o file
 # (see the gnu make manual section about automatic variables)
 $(LIB_OBJECTS):
-	@$(CCACHE) $(LIB_CXX) $(LIB_CXXFLAGS) $(LIB_INCLUDES) -c -MMD $(@:.o=.cpp) -o $@
+	@$(CCACHE) $(LIB_CXX) $(LIB_CXXFLAGS) $(LIB_INCLUDES) -c -MMD $(@:$(TARGET_SUFFIX).o=.cpp) -o $@
 
 
 cleanlib:

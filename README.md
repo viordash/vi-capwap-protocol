@@ -86,6 +86,52 @@ make build_benchmarks
 ./output/tests/benchmarks/vi-capwap-benchmarks
 ```
 
+## Byte Order
+
+The library builds for both little-endian (x86, ARM) and big-endian (MIPS) targets.
+The byte order is detected from the compiler via `__BYTE_ORDER__`. If a toolchain
+does not define it, the build fails with an explicit error rather than guessing —
+override it manually in that case:
+
+```bash
+-DVI_CAPWAP_BIG_ENDIAN=1   # or 0
+```
+
+### Writing byte order safe code
+
+- **Multi-byte protocol fields** must use `NetworkU16`, `NetworkU32` or `NetworkS16`
+  ([src/Helpers.h](src/Helpers.h)). They are built and read byte by byte, so they carry no
+  byte order assumption. Never put a raw `uint16_t`/`uint32_t` in a packed structure.
+- **Protocol constants** stored raw in packed structures (message and element types,
+  result codes) must be wrapped in `ToNetworkOrder16()` / `ToNetworkOrder32()`, which
+  spell them in the target's byte order at compile time.
+- **Comparing** such a constant needs no conversion: equality does not depend on the
+  representation. Only ordering comparisons (`<`, `>`, ranges) require `ToHostOrder*`,
+  because byte swapping does not preserve order.
+- **Bit fields** in packed structures are allocated from the most significant bit on
+  big-endian targets. Every such structure declares both orders behind
+  `#if VI_CAPWAP_BIG_ENDIAN`, mirrored within each octet, and constructor member init
+  lists follow the same split. A bit field must never cross an octet boundary.
+- **IPv4 address fields** are raw `uint32_t` holding values in network byte order, as
+  returned by `inet_addr()` / `inet_pton()`. They are stored as-is and need no
+  conversion on either target.
+
+### Verifying on a big-endian target
+
+The unit tests compare serialized output against literal wire bytes, so running the
+suite on a big-endian target verifies the byte order handling end to end.
+
+```bash
+sudo apt install g++-mips-linux-gnu qemu-user-static
+
+make run_tests_be     # cross build for MIPS and run under qemu
+make clean_tests_be
+```
+
+Cross targets have no system spdlog, so `run_tests_be` compiles logging out
+(`LOG_LEVEL=LOG_LEVEL_NONE`). The compiler, sysroot and emulator can be overridden
+through `BE_CXX`, `BE_SYSROOT` and `BE_QEMU`.
+
 ## Code Quality
 
 ```bash
