@@ -157,6 +157,6 @@ TEST(ACDescriptorTestsGroup, ACDescriptor_deserialize) {
     CHECK_EQUAL(15, read_data.Get()[1]->GetLength());
 
     STRNCMP_EQUAL("AC-SN-987654321", (char *)read_data.Get()[2]->data, 15);
-    CHECK_EQUAL(0x0100, read_data.Get()[2]->GetType());
+    CHECK_EQUAL(ToNetworkOrder16(1), read_data.Get()[2]->GetType());
     CHECK_EQUAL(16, read_data.Get()[2]->GetLength());
 }
