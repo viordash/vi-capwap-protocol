@@ -10,9 +10,11 @@ ResultCode::ResultCode(Type type)
 
 bool ResultCode::Validate() const {
     static_assert(sizeof(ResultCode) == 8);
+    const uint32_t host_type = ToHostOrder32(type);
     return ElementHeader::GetElementType() == ElementHeader::ResultCode
         && ElementHeader::GetLength() == (sizeof(ResultCode) - sizeof(ElementHeader)) //
-        && type >= Type::Success && type <= Type::DataTransferError;
+        && host_type >= ToHostOrder32(Type::Success)
+        && host_type <= ToHostOrder32(Type::DataTransferError);
 }
 
 void ResultCode::Log() const {

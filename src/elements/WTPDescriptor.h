@@ -38,10 +38,10 @@ struct __attribute__((packed)) EncryptionSubElement {
 struct __attribute__((packed)) DescriptorSubElementHeader {
   public:
     enum Type : uint16_t {
-        HardwareVersion = 0x0000,       // MUST be present
-        ActiveSoftwareVersion = 0x0100, // MUST be present
-        BootVersion = 0x0200,           // MUST be present
-        OtherSoftwareVersion = 0x0300,  // MAY be present
+        HardwareVersion = ToNetworkOrder16(0),       // MUST be present
+        ActiveSoftwareVersion = ToNetworkOrder16(1), // MUST be present
+        BootVersion = ToNetworkOrder16(2),           // MUST be present
+        OtherSoftwareVersion = ToNetworkOrder16(3),  // MAY be present
     };
 
   private:

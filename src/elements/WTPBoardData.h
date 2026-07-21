@@ -26,11 +26,11 @@ struct __attribute__((packed)) WTPBoardDataHeader : ElementHeader {
 struct __attribute__((packed)) BoardDataSubElementHeader {
   public:
     enum Type : uint16_t {
-        WTPModelNumber = 0x0000,  // MUST be included
-        WTPSerialNumber = 0x0100, // MUST be included
-        BoardID = 0x0200,         // MAY be included
-        BoardRevision = 0x0300,   // MAY be included
-        BaseMACAddress = 0x0400   // MAY be included
+        WTPModelNumber = ToNetworkOrder16(0),  // MUST be included
+        WTPSerialNumber = ToNetworkOrder16(1), // MUST be included
+        BoardID = ToNetworkOrder16(2),         // MAY be included
+        BoardRevision = ToNetworkOrder16(3),   // MAY be included
+        BaseMACAddress = ToNetworkOrder16(4)   // MAY be included
     };
 
   private:

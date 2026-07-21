@@ -71,8 +71,8 @@ struct __attribute__((packed)) ACDescriptorHeader : ElementHeader {
 struct __attribute__((packed)) ACInformationSubElementHeader {
   public:
     enum Type : uint16_t {
-        HardwareVersion = 0x0400,
-        SoftwareVersion = 0x0500,
+        HardwareVersion = ToNetworkOrder16(4),
+        SoftwareVersion = ToNetworkOrder16(5),
     };
 
   private:
