@@ -43,6 +43,25 @@ jobs:
     - name: Run tests
       run: ./output/tests/unit_tests/vi-capwap-protocol-tests
 
+  Unit-Tests-Big-Endian:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get -y install ccache g++-mips-linux-gnu qemu-user-static
+
+    # The suite compares serialized output against literal wire bytes, so running
+    # it on a big-endian target verifies the byte order handling for real.
+    # Logging is compiled out, so no spdlog is needed for the cross target.
+    - name: Build and run tests on a big-endian target
+      run: make run_tests_be
+
   Benchmarks:
     runs-on: ubuntu-22.04
 
