@@ -151,7 +151,7 @@ void WritableWTPDescriptor::Log() const {
         log_i("    Encr S-E #{}: WBID:{}, Encr-Caps:{}",
               i,
               encr_items[i].WBID,
-              encr_items[i].EncryptionCapabilities);
+              encr_items[i].EncryptionCapabilities.Get());
     }
     for (size_t i = 0; i < desc_items.size(); i++) {
         log_i("    S-E #{}: VendorId:{}, Type:{:04X}, Value:{}",
@@ -268,7 +268,7 @@ void ReadableWTPDescriptor::Log() const {
         log_i("    Encr S-E #{}: WBID:{}, Encr-Caps:{}",
               i,
               encr_items[i]->WBID,
-              encr_items[i]->EncryptionCapabilities);
+              encr_items[i]->EncryptionCapabilities.Get());
     }
     for (size_t i = 0; i < desc_count; i++) {
         log_i("    S-E #{}: VendorId:{}, Type:{:04X}, Value:{}",

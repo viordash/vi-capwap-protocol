@@ -31,7 +31,7 @@ struct __attribute__((packed)) EncryptionSubElement {
     uint8_t WBID : 5;  // type of wireless packet associated with the radio
     uint8_t Resvd : 3; // reserved for future use
 #endif
-    uint16_t EncryptionCapabilities; // WTP to communicate its capabilities to the AC
+    NetworkU16 EncryptionCapabilities; // WTP to communicate its capabilities to the AC
 
   public:
     EncryptionSubElement(const EncryptionSubElement &) = delete;
