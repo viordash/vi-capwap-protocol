@@ -28,7 +28,19 @@ struct __attribute__((packed)) ResultCode : ElementHeader {
         MessageUnexpected_UnrecognizedRequest = ToNetworkOrder32(19),
         Failure_MissingMandatoryMessageElement = ToNetworkOrder32(20),
         Failure_UnrecognizedMessageElement = ToNetworkOrder32(21),
-        DataTransferError = ToNetworkOrder32(22)
+        DataTransferError = ToNetworkOrder32(22),
+
+        // Vendor-specific result codes, outside the range assigned by RFC 5415
+        VendorSpecific_1 = ToNetworkOrder32(0xF000),
+        VendorSpecific_2 = ToNetworkOrder32(0xF001),
+        VendorSpecific_3 = ToNetworkOrder32(0xF002),
+        VendorSpecific_4 = ToNetworkOrder32(0xF003),
+        VendorSpecific_5 = ToNetworkOrder32(0xF004),
+        VendorSpecific_6 = ToNetworkOrder32(0xF005),
+        VendorSpecific_7 = ToNetworkOrder32(0xF006),
+        VendorSpecific_8 = ToNetworkOrder32(0xF007),
+        VendorSpecific_9 = ToNetworkOrder32(0xF008),
+        VendorSpecific_10 = ToNetworkOrder32(0xF009)
     };
 
     Type type;

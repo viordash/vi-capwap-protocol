@@ -171,6 +171,26 @@ RFC 5415/5416 specify that Radio ID must be in the range 1-31. This implementati
 
 This extension is intentional and does not affect interoperability with RFC-compliant implementations, as Radio ID 0 is simply an additional option that can be used or avoided as needed.
 
+### Vendor-Specific Result Codes
+
+RFC 5415 assigns Result Codes 0-22. This implementation adds ten codes for vendor-defined
+conditions, placed well above the standard block so they cannot collide with future
+assignments by the RFC.
+
+**Standard Range (RFC)**: 0-22
+**Vendor-Specific Range**: 0xF000-0xF009 (`ResultCode::VendorSpecific_1` … `VendorSpecific_10`)
+
+```cpp
+WritableResultCode result{ ResultCode::Type::VendorSpecific_1 };
+```
+
+`ResultCode::Validate()` accepts both ranges and rejects everything else, so a peer that does
+not know these codes simply fails to parse the element rather than misinterpreting it.
+
+These codes are meaningful only between endpoints that agree on them. An RFC-compliant AC or
+WTP will reject them, so they must not be used where interoperability with third-party
+implementations is required.
+
 ### RFC 5416 Implementation Status
 
 This library implements IEEE 802.11 binding for CAPWAP (RFC 5416) with the following coverage:
