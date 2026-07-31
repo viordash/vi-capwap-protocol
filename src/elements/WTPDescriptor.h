@@ -24,9 +24,14 @@ struct __attribute__((packed)) WTPDescriptorHeader : ElementHeader {
 };
 
 struct __attribute__((packed)) EncryptionSubElement {
-    uint8_t WBID : 5;                // type of wireless packet associated with the radio
-    uint8_t Resvd : 3;               // reserved for future use
-    uint16_t EncryptionCapabilities; // WTP to communicate its capabilities to the AC
+#if VI_CAPWAP_BIG_ENDIAN
+    uint8_t Resvd : 3; // reserved for future use
+    uint8_t WBID : 5;  // type of wireless packet associated with the radio
+#else
+    uint8_t WBID : 5;  // type of wireless packet associated with the radio
+    uint8_t Resvd : 3; // reserved for future use
+#endif
+    NetworkU16 EncryptionCapabilities; // WTP to communicate its capabilities to the AC
 
   public:
     EncryptionSubElement(const EncryptionSubElement &) = delete;
@@ -38,10 +43,10 @@ struct __attribute__((packed)) EncryptionSubElement {
 struct __attribute__((packed)) DescriptorSubElementHeader {
   public:
     enum Type : uint16_t {
-        HardwareVersion = 0x0000,       // MUST be present
-        ActiveSoftwareVersion = 0x0100, // MUST be present
-        BootVersion = 0x0200,           // MUST be present
-        OtherSoftwareVersion = 0x0300,  // MAY be present
+        HardwareVersion = ToNetworkOrder16(0),       // MUST be present
+        ActiveSoftwareVersion = ToNetworkOrder16(1), // MUST be present
+        BootVersion = ToNetworkOrder16(2),           // MUST be present
+        OtherSoftwareVersion = ToNetworkOrder16(3),  // MAY be present
     };
 
   private:

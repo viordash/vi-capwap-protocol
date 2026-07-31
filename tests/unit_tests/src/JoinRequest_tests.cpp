@@ -409,7 +409,7 @@ TEST(JoinRequestTestsGroup, JoinRequest_deserialize) {
     CHECK_EQUAL(1, read_data.wtp_descriptor.header->NumEncrypt);
     CHECK_EQUAL(1, read_data.wtp_descriptor.GetEncryptions().size());
     CHECK_EQUAL(WBIDType::IEEE_80211, read_data.wtp_descriptor.GetEncryptions()[0]->WBID);
-    CHECK_EQUAL(0x0100, read_data.wtp_descriptor.GetEncryptions()[0]->EncryptionCapabilities);
+    CHECK_EQUAL(1, read_data.wtp_descriptor.GetEncryptions()[0]->EncryptionCapabilities.Get());
 
     CHECK_EQUAL(3, read_data.wtp_descriptor.GetDescriptors().size());
     STRNCMP_EQUAL("1", (char *)read_data.wtp_descriptor.GetDescriptors()[0]->utf8_value, 1);

@@ -45,7 +45,11 @@ WTPDescriptorHeader *WTPDescriptorHeader::Deserialize(RawData *raw_data) {
 }
 
 EncryptionSubElement::EncryptionSubElement(uint16_t encryption_capabilities)
+#if VI_CAPWAP_BIG_ENDIAN
+    : Resvd{ 0 }, WBID{ WBIDType::IEEE_80211 }, EncryptionCapabilities{ encryption_capabilities } {
+#else
     : WBID{ WBIDType::IEEE_80211 }, Resvd{ 0 }, EncryptionCapabilities{ encryption_capabilities } {
+#endif
 }
 
 bool EncryptionSubElement::Validate() const {
@@ -147,7 +151,7 @@ void WritableWTPDescriptor::Log() const {
         log_i("    Encr S-E #{}: WBID:{}, Encr-Caps:{}",
               i,
               encr_items[i].WBID,
-              encr_items[i].EncryptionCapabilities);
+              encr_items[i].EncryptionCapabilities.Get());
     }
     for (size_t i = 0; i < desc_items.size(); i++) {
         log_i("    S-E #{}: VendorId:{}, Type:{:04X}, Value:{}",
@@ -264,7 +268,7 @@ void ReadableWTPDescriptor::Log() const {
         log_i("    Encr S-E #{}: WBID:{}, Encr-Caps:{}",
               i,
               encr_items[i]->WBID,
-              encr_items[i]->EncryptionCapabilities);
+              encr_items[i]->EncryptionCapabilities.Get());
     }
     for (size_t i = 0; i < desc_count; i++) {
         log_i("    S-E #{}: VendorId:{}, Type:{:04X}, Value:{}",

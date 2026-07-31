@@ -10,13 +10,20 @@ ResultCode::ResultCode(Type type)
 
 bool ResultCode::Validate() const {
     static_assert(sizeof(ResultCode) == 8);
+    // 'type' is stored in network order, the range checks must be done on the host value
+    const uint32_t host_type = ToHostOrder32(type);
+    const bool rfc5415 = host_type >= ToHostOrder32(Type::Success)
+                      && host_type <= ToHostOrder32(Type::DataTransferError);
+    const bool vendor_specific = host_type >= ToHostOrder32(Type::VendorSpecific_1)
+                              && host_type <= ToHostOrder32(Type::VendorSpecific_10);
+
     return ElementHeader::GetElementType() == ElementHeader::ResultCode
         && ElementHeader::GetLength() == (sizeof(ResultCode) - sizeof(ElementHeader)) //
-        && type >= Type::Success && type <= Type::DataTransferError;
+        && (rfc5415 || vendor_specific);
 }
 
 void ResultCode::Log() const {
-    log_i("ME ResultCode Type: 0x{:08X}", (unsigned)type);
+    log_i("ME ResultCode Type: 0x{:08X}", (unsigned)ToHostOrder32(type));
 }
 
 WritableResultCode::WritableResultCode(ResultCode::Type type) : element{ type } {

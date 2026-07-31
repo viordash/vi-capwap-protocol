@@ -15,6 +15,16 @@ struct __attribute__((packed)) WTPRadioInformation : ElementHeader {
     uint8_t Reservd_1;
     uint8_t Reservd_2;
 
+#if VI_CAPWAP_BIG_ENDIAN
+    uint8_t Reservd_3 : 1;
+    uint8_t BE : 1; // Bit 6: 802.11be (Wi-Fi 7) - 2.4 / 5 / 6 GHz
+    uint8_t AX : 1; // Bit 5: 802.11ax (Wi-Fi 6/6E) - 2.4 / 5 / 6 GHz
+    uint8_t AC : 1; // Bit 4: 802.11ac (Wi-Fi 5) - 5 GHz
+    uint8_t N : 1;  // Bit 3: 802.11n (Wi-Fi 4) - 2.4 / 5 GHz
+    uint8_t G : 1;  // Bit 2: 802.11g (Wi-Fi 3) - 2.4 GHz
+    uint8_t A : 1;  // Bit 1: 802.11a (Wi-Fi 2) - 5 GHz
+    uint8_t B : 1;  // Bit 0: 802.11b (Wi-Fi 1) - 2.4 GHz
+#else
     uint8_t B : 1;  // Bit 0: 802.11b (Wi-Fi 1) - 2.4 GHz
     uint8_t A : 1;  // Bit 1: 802.11a (Wi-Fi 2) - 5 GHz
     uint8_t G : 1;  // Bit 2: 802.11g (Wi-Fi 3) - 2.4 GHz
@@ -23,6 +33,7 @@ struct __attribute__((packed)) WTPRadioInformation : ElementHeader {
     uint8_t AX : 1; // Bit 5: 802.11ax (Wi-Fi 6/6E) - 2.4 / 5 / 6 GHz
     uint8_t BE : 1; // Bit 6: 802.11be (Wi-Fi 7) - 2.4 / 5 / 6 GHz
     uint8_t Reservd_3 : 1;
+#endif
 
     WTPRadioInformation(const WTPRadioInformation &) = default;
     WTPRadioInformation(uint8_t radio_id,

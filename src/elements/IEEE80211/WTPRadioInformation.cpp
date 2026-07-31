@@ -15,8 +15,12 @@ WTPRadioInformation::WTPRadioInformation(uint8_t radio_id,
                                          bool be)
     : ElementHeader(ElementHeader::WTPRadioInformation,
                     sizeof(WTPRadioInformation) - sizeof(ElementHeader)),
-      RadioID{ radio_id }, Reservd_0{ 0 }, Reservd_1{ 0 }, Reservd_2{ 0 }, B{ b }, A{ a }, G{ g },
-      N{ n }, AC{ ac }, AX{ ax }, BE{ be }, Reservd_3{ 0 } {
+      RadioID{ radio_id }, Reservd_0{ 0 }, Reservd_1{ 0 }, Reservd_2{ 0 },
+#if VI_CAPWAP_BIG_ENDIAN
+      Reservd_3{ 0 }, BE{ be }, AX{ ax }, AC{ ac }, N{ n }, G{ g }, A{ a }, B{ b } {
+#else
+      B{ b }, A{ a }, G{ g }, N{ n }, AC{ ac }, AX{ ax }, BE{ be }, Reservd_3{ 0 } {
+#endif
 }
 bool WTPRadioInformation::Validate() const {
     static_assert(sizeof(WTPRadioInformation) == 9);

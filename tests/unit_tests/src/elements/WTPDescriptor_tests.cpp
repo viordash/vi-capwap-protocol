@@ -33,7 +33,7 @@ TEST(WTPDescriptorTestsGroup, WTPDescriptor_serialize) {
     write_data.Serialize(&raw_data);
     CHECK_EQUAL(&buffer[0] + 124, raw_data.current);
     const uint8_t reference[] = {
-        0x00, 0x27, 0x00, 0x78, 0x03, 0x02, 0x01, 0x01, 0x55, 0xAA, 0x00, 0x00, 0x04, 0xD2,
+        0x00, 0x27, 0x00, 0x78, 0x03, 0x02, 0x01, 0x01, 0xAA, 0x55, 0x00, 0x00, 0x04, 0xD2,
         0x00, 0x01, 0x00, 0x04, 0x61, 0x62, 0x63, 0x64, 0x00, 0x00, 0x16, 0x2E, 0x00, 0x02,
         0x00, 0x09, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x00, 0x00, 0x23,
         0x34, 0x00, 0x03, 0x00, 0x44, 0x30, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
@@ -56,7 +56,7 @@ TEST(WTPDescriptorTestsGroup, WTPDescriptor_serialize) {
     CHECK_EQUAL(1, read_data.header->NumEncrypt);
     CHECK_EQUAL(1, read_data.GetEncryptions().size());
     CHECK_EQUAL(WBIDType::IEEE_80211, read_data.GetEncryptions()[0]->WBID);
-    CHECK_EQUAL(0xAA55, read_data.GetEncryptions()[0]->EncryptionCapabilities);
+    CHECK_EQUAL(0xAA55, read_data.GetEncryptions()[0]->EncryptionCapabilities.Get());
 
     CHECK_EQUAL(4, read_data.GetDescriptors().size());
     STRNCMP_EQUAL("abcd", (char *)read_data.GetDescriptors()[0]->utf8_value, 4);
@@ -179,7 +179,7 @@ TEST(WTPDescriptorTestsGroup, WTPDescriptor_deserialize) {
     CHECK_EQUAL(1, read_data.header->NumEncrypt);
     CHECK_EQUAL(1, read_data.GetEncryptions().size());
     CHECK_EQUAL(WBIDType::IEEE_80211, read_data.GetEncryptions()[0]->WBID);
-    CHECK_EQUAL(0, read_data.GetEncryptions()[0]->EncryptionCapabilities);
+    CHECK_EQUAL(0, read_data.GetEncryptions()[0]->EncryptionCapabilities.Get());
 
     CHECK_EQUAL(3, read_data.GetDescriptors().size());
     STRNCMP_EQUAL("PROD2", (char *)read_data.GetDescriptors()[0]->utf8_value, 5);

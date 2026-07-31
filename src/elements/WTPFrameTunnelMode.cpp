@@ -6,7 +6,11 @@
 WTPFrameTunnelMode::WTPFrameTunnelMode(bool l, bool e, bool n)
     : ElementHeader(ElementHeader::WTPFrameTunnelMode,
                     sizeof(WTPFrameTunnelMode) - sizeof(ElementHeader)),
+#if VI_CAPWAP_BIG_ENDIAN
+      Reservd{ 0 }, N{ n }, E{ e }, L{ l }, U{ 0 } {
+#else
       U{ 0 }, L{ l }, E{ e }, N{ n }, Reservd{ 0 } {
+#endif
 }
 
 bool WTPFrameTunnelMode::Validate() const {

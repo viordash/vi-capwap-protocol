@@ -4,19 +4,34 @@ SHELL := /bin/bash
 
 ROOT_DIR ?= $(shell git rev-parse --show-toplevel)
 
-OUTPUT	:= $(ROOT_DIR)/output/tests/unit_tests
-BUILD	:= $(ROOT_DIR)/build/tests/unit_tests
+# Cross build: override CC and set TARGET_SUFFIX to keep artifacts of different
+# targets apart. Cross targets have no system spdlog, so logging is compiled out:
+#   make build_tests CC=mips-linux-gnu-g++ TARGET_SUFFIX=-mips LOG_BACKEND=none
+TARGET_SUFFIX	?=
+LOG_BACKEND		?= spdlog
+
+OUTPUT	:= $(ROOT_DIR)/output/tests/unit_tests$(TARGET_SUFFIX)
+BUILD	:= $(ROOT_DIR)/build/tests/unit_tests$(TARGET_SUFFIX)
 SRC		:= $(ROOT_DIR)/tests/unit_tests/src
 
 LIB_SRC				:= $(ROOT_DIR)/src
 UTILS_SRC			:= $(ROOT_DIR)/utils
 
 CCACHE 			?= ccache
+# CC has a built-in default, so ?= would not take effect here
+ifeq ($(origin CC), default)
 CC 				:= g++
+endif
+LIB_CXX			:= $(CC)
 
 CFLAGS := -std=c++17 -Wall -g -O0 -Wno-unused-parameter
-LDFLAGS := -lCppUTest -lspdlog -lfmt
+LDFLAGS := -lCppUTest$(TARGET_SUFFIX)
+ifeq ($(LOG_BACKEND),none)
+CFLAGS += -DLOG_LEVEL=LOG_LEVEL_NONE
+else
 CFLAGS += -DLOG_LEVEL=LOG_LEVEL_INFO
+LDFLAGS += -lspdlog -lfmt
+endif
 
 MAIN						:= $(PROJECT_NAME)
 SOURCEDIRS					:= $(shell find -L $(SRC) -type d)

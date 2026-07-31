@@ -3,6 +3,14 @@
 #include "lassert.h"
 #include <cstring>
 
+Preamble::Preamble(PayloadType type, Version version)
+#if VI_CAPWAP_BIG_ENDIAN
+    : version{ version }, type{ type } {
+#else
+    : type{ type }, version{ version } {
+#endif
+}
+
 bool Preamble::Validate() const {
     static_assert(sizeof(Preamble) == 1);
     return version == RFC_5415;
@@ -62,11 +70,19 @@ ClearHeader::ClearHeader(uint8_t HLEN,
                          bool K,
                          uint16_t Fragment_ID,
                          uint16_t Fragment_Offset)
+#if VI_CAPWAP_BIG_ENDIAN
+    : preamble{ Preamble::ClearText, Preamble::RFC_5415 }, hlen{ HLEN },
+      rid_0{ (uint8_t)(RID >> 2) }, rid_1{ (uint8_t)(RID & 0x03) }, wbid{ WBIDType::IEEE_80211 },
+      t{ T }, f{ F }, l{ L }, w{ W }, m{ M }, k{ K }, flags{ 0 }, fragment_ID{ Fragment_ID },
+      fragment_offset_0{ (uint8_t)(Fragment_Offset >> 5) },
+      fragment_offset_1{ (uint8_t)(Fragment_Offset & 0x1F) }, reserved{ 0 } {};
+#else
     : preamble{ Preamble::ClearText, Preamble::RFC_5415 }, rid_0{ (uint8_t)(RID >> 2) },
       hlen{ HLEN }, t{ T }, wbid{ WBIDType::IEEE_80211 }, rid_1{ (uint8_t)(RID & 0x03) },
       flags{ 0 }, k{ K }, m{ M }, w{ W }, l{ L }, f{ F }, fragment_ID{ Fragment_ID },
       fragment_offset_0{ (uint8_t)(Fragment_Offset >> 5) }, reserved{ 0 },
       fragment_offset_1{ (uint8_t)(Fragment_Offset & 0x1F) } {};
+#endif
 
 bool ClearHeader::Validate() const {
     static_assert(sizeof(ClearHeader) == 8);

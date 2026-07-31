@@ -86,6 +86,52 @@ make build_benchmarks
 ./output/tests/benchmarks/vi-capwap-benchmarks
 ```
 
+## Byte Order
+
+The library builds for both little-endian (x86, ARM) and big-endian (MIPS) targets.
+The byte order is detected from the compiler via `__BYTE_ORDER__`. If a toolchain
+does not define it, the build fails with an explicit error rather than guessing —
+override it manually in that case:
+
+```bash
+-DVI_CAPWAP_BIG_ENDIAN=1   # or 0
+```
+
+### Writing byte order safe code
+
+- **Multi-byte protocol fields** must use `NetworkU16`, `NetworkU32` or `NetworkS16`
+  ([src/Helpers.h](src/Helpers.h)). They are built and read byte by byte, so they carry no
+  byte order assumption. Never put a raw `uint16_t`/`uint32_t` in a packed structure.
+- **Protocol constants** stored raw in packed structures (message and element types,
+  result codes) must be wrapped in `ToNetworkOrder16()` / `ToNetworkOrder32()`, which
+  spell them in the target's byte order at compile time.
+- **Comparing** such a constant needs no conversion: equality does not depend on the
+  representation. Only ordering comparisons (`<`, `>`, ranges) require `ToHostOrder*`,
+  because byte swapping does not preserve order.
+- **Bit fields** in packed structures are allocated from the most significant bit on
+  big-endian targets. Every such structure declares both orders behind
+  `#if VI_CAPWAP_BIG_ENDIAN`, mirrored within each octet, and constructor member init
+  lists follow the same split. A bit field must never cross an octet boundary.
+- **IPv4 address fields** are raw `uint32_t` holding values in network byte order, as
+  returned by `inet_addr()` / `inet_pton()`. They are stored as-is and need no
+  conversion on either target.
+
+### Verifying on a big-endian target
+
+The unit tests compare serialized output against literal wire bytes, so running the
+suite on a big-endian target verifies the byte order handling end to end.
+
+```bash
+sudo apt install g++-mips-linux-gnu qemu-user-static
+
+make run_tests_be     # cross build for MIPS and run under qemu
+make clean_tests_be
+```
+
+Cross targets have no system spdlog, so `run_tests_be` compiles logging out
+(`LOG_LEVEL=LOG_LEVEL_NONE`). The compiler, sysroot and emulator can be overridden
+through `BE_CXX`, `BE_SYSROOT` and `BE_QEMU`.
+
 ## Code Quality
 
 ```bash
@@ -124,6 +170,26 @@ RFC 5415/5416 specify that Radio ID must be in the range 1-31. This implementati
 **Implementation Range**: 0-31
 
 This extension is intentional and does not affect interoperability with RFC-compliant implementations, as Radio ID 0 is simply an additional option that can be used or avoided as needed.
+
+### Vendor-Specific Result Codes
+
+RFC 5415 assigns Result Codes 0-22. This implementation adds ten codes for vendor-defined
+conditions, placed well above the standard block so they cannot collide with future
+assignments by the RFC.
+
+**Standard Range (RFC)**: 0-22
+**Vendor-Specific Range**: 0xF000-0xF009 (`ResultCode::VendorSpecific_1` … `VendorSpecific_10`)
+
+```cpp
+WritableResultCode result{ ResultCode::Type::VendorSpecific_1 };
+```
+
+`ResultCode::Validate()` accepts both ranges and rejects everything else, so a peer that does
+not know these codes simply fails to parse the element rather than misinterpreting it.
+
+These codes are meaningful only between endpoints that agree on them. An RFC-compliant AC or
+WTP will reject them, so they must not be used where interoperability with third-party
+implementations is required.
 
 ### RFC 5416 Implementation Status
 

@@ -24,13 +24,19 @@ static inline void log_level_set(log_level_t level) {
 
 #ifndef log_i
 
-#if __has_include(<spdlog/spdlog.h>)
-
 #if (LOG_LEVEL == LOG_LEVEL_NONE)
-#ifndef SPDLOG_ACTIVE_LEVEL
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_OFF
-#endif
-#elif (LOG_LEVEL == LOG_LEVEL_ERROR)
+
+// Logging is compiled out, so no backend is pulled in at all. This keeps cross
+// builds (for example a big-endian target used to verify the wire format) free
+// of the spdlog and fmt dependencies.
+#define log_e(fmt_, ...) (void)0
+#define log_w(fmt_, ...) (void)0
+#define log_i(fmt_, ...) (void)0
+#define log_d(fmt_, ...) (void)0
+
+#elif __has_include(<spdlog/spdlog.h>)
+
+#if (LOG_LEVEL == LOG_LEVEL_ERROR)
 #ifndef SPDLOG_ACTIVE_LEVEL
 #define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_ERROR
 #endif
@@ -49,6 +55,7 @@ static inline void log_level_set(log_level_t level) {
 #endif
 
 #include <spdlog/spdlog.h>
+#define VI_CAPWAP_LOGGING_SPDLOG 1
 
 #if (LOG_LEVEL <= LOG_LEVEL_ERROR)
 #define log_e(fmt_, ...) SPDLOG_ERROR(fmt_, ##__VA_ARGS__)

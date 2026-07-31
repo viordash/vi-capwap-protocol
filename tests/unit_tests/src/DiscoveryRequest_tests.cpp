@@ -351,7 +351,7 @@ TEST(DiscoveryRequestTestsGroup, DiscoveryRequest_deserialize) {
     CHECK_EQUAL(1, read_data.wtp_descriptor.header->NumEncrypt);
     CHECK_EQUAL(1, read_data.wtp_descriptor.GetEncryptions().size());
     CHECK_EQUAL(WBIDType::IEEE_80211, read_data.wtp_descriptor.GetEncryptions()[0]->WBID);
-    CHECK_EQUAL(0, read_data.wtp_descriptor.GetEncryptions()[0]->EncryptionCapabilities);
+    CHECK_EQUAL(0, read_data.wtp_descriptor.GetEncryptions()[0]->EncryptionCapabilities.Get());
 
     CHECK_EQUAL(4, read_data.wtp_descriptor.GetDescriptors().size());
     STRNCMP_EQUAL("abcd", (char *)read_data.wtp_descriptor.GetDescriptors()[0]->utf8_value, 4);
