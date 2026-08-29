@@ -76,5 +76,11 @@ struct IReadableWlanConfigurationRequestOptionalElement : IReadableElement {};
 struct IWritableWlanConfigurationResponseOptionalElement : IWritableElement {};
 struct IReadableWlanConfigurationResponseOptionalElement : IReadableElement {};
 
+struct IWritableStationConfigurationRequestOptionalElement : IWritableElement {};
+struct IReadableStationConfigurationRequestOptionalElement : IReadableElement {};
+
+struct IWritableStationConfigurationResponseOptionalElement : IWritableElement {};
+struct IReadableStationConfigurationResponseOptionalElement : IReadableElement {};
+
 struct IWritableResetResponseOptionalElement : IWritableElement {};
 struct IReadableResetResponseOptionalElement : IReadableElement {};
