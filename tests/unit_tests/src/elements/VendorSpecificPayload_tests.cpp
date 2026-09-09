@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <type_traits>
+#include <utility>
 
 #include "elements/VendorSpecificPayload.h"
 
@@ -131,4 +133,30 @@ TEST(VendorSpecificPayloadTestsGroup, Payload_take_ownership) {
     CHECK_EQUAL(1, read_data.Get()[0]->GetVendorIdentifier());
     CHECK_EQUAL(2, read_data.Get()[0]->GetElementId());
     STRNCMP_EQUAL("abcdef Привет 1234", read_data.Get()[0]->value, 24);
+}
+TEST(VendorSpecificPayloadTestsGroup, Item_is_movable) {
+    WritableVendorSpecificPayloadArray::Item src{ 0x00000BEE,
+                                                  0x0102,
+                                                  std::vector<char>{ 'p', 'a', 'y', 'l', 'o', 'a', 'd' } };
+
+    WritableVendorSpecificPayloadArray::Item moved{ std::move(src) };
+    CHECK_TRUE(src.value.empty());
+    CHECK_EQUAL(7, moved.value.size());
+    STRNCMP_EQUAL("payload", moved.value.data(), moved.value.size());
+    CHECK_EQUAL(0x00000BEE, moved.header.GetVendorIdentifier());
+
+    WritableVendorSpecificPayloadArray::Item dst{ 1, 2, std::vector<char>{ 'x' } };
+    dst = std::move(moved);
+    CHECK_TRUE(moved.value.empty());
+    STRNCMP_EQUAL("payload", dst.value.data(), dst.value.size());
+    CHECK_EQUAL(0x00000BEE, dst.header.GetVendorIdentifier());
+
+    // copying must stay available
+    WritableVendorSpecificPayloadArray::Item copied{ dst };
+    copied = dst;
+    CHECK_EQUAL(7, dst.value.size());
+    STRNCMP_EQUAL("payload", copied.value.data(), copied.value.size());
+
+    CHECK_TRUE(std::is_nothrow_move_constructible<WritableVendorSpecificPayloadArray::Item>::value);
+    CHECK_TRUE(std::is_nothrow_move_assignable<WritableVendorSpecificPayloadArray::Item>::value);
 }

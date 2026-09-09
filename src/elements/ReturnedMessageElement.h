@@ -45,6 +45,9 @@ struct WritableReturnedMessageElementArray : IWritableChangeStateEventRequestOpt
         std::vector<uint8_t> data;
         ReturnedMessageElement header;
         Item(const Item &) = default;
+        Item(Item &&) = default;
+        Item &operator=(const Item &) = default;
+        Item &operator=(Item &&) = default;
         Item(ReturnedMessageElement::Reasons reason, std::vector<uint8_t> &&val)
             : data{ std::move(val) }, header{ reason, (uint16_t)data.size() } {};
     };

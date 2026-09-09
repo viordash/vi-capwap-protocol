@@ -26,6 +26,9 @@ struct WritableDecryptionErrorReportArray : IWritableWTPEventRequestOptionalElem
         DecryptionErrorHeader header;
 
         Item(const Item &) = default;
+        Item(Item &&) = default;
+        Item &operator=(const Item &) = default;
+        Item &operator=(Item &&) = default;
         Item(uint8_t radio_id, std::vector<MacAddress> &&entries)
             : MacAddresses{ std::move(entries) },
               header{ CalcEntriesSize(MacAddresses), radio_id, (uint8_t)MacAddresses.size() } {};

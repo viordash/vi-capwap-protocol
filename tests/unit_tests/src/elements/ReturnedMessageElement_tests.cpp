@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <type_traits>
+#include <utility>
 
 #include "elements/ReturnedMessageElement.h"
 
@@ -181,4 +183,34 @@ TEST(ReturnedMessageElementTestsGroup, Add_array_of_items_is_unique) {
                 read_data.Get()[1]->GetReason());
     CHECK_EQUAL(8, read_data.Get()[1]->GetDataLength());
     MEMCMP_EQUAL(message_element_1, read_data.Get()[1]->data, sizeof(message_element_1));
+}
+TEST(ReturnedMessageElementTestsGroup, Item_is_movable) {
+    const uint8_t message_element[] = { 10, 11, 12, 13 };
+
+    WritableReturnedMessageElementArray::Item src{
+        ReturnedMessageElement::Reasons::UnknownMessageElement,
+        { message_element, message_element + sizeof(message_element) }
+    };
+
+    WritableReturnedMessageElementArray::Item moved{ std::move(src) };
+    CHECK_TRUE(src.data.empty());
+    CHECK_EQUAL(sizeof(message_element), moved.data.size());
+    MEMCMP_EQUAL(message_element, moved.data.data(), sizeof(message_element));
+    CHECK_EQUAL(ReturnedMessageElement::Reasons::UnknownMessageElement, moved.header.GetReason());
+
+    WritableReturnedMessageElementArray::Item dst{ ReturnedMessageElement::Reasons::Reserved,
+                                                   { 0x01 } };
+    dst = std::move(moved);
+    CHECK_TRUE(moved.data.empty());
+    MEMCMP_EQUAL(message_element, dst.data.data(), sizeof(message_element));
+    CHECK_EQUAL(ReturnedMessageElement::Reasons::UnknownMessageElement, dst.header.GetReason());
+
+    // copying must stay available
+    WritableReturnedMessageElementArray::Item copied{ dst };
+    copied = dst;
+    CHECK_EQUAL(sizeof(message_element), dst.data.size());
+    MEMCMP_EQUAL(message_element, copied.data.data(), sizeof(message_element));
+
+    CHECK_TRUE(std::is_nothrow_move_constructible<WritableReturnedMessageElementArray::Item>::value);
+    CHECK_TRUE(std::is_nothrow_move_assignable<WritableReturnedMessageElementArray::Item>::value);
 }
