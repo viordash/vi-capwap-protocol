@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <type_traits>
+#include <utility>
 
 #include "elements/IEEE80211/AddWlan.h"
 
@@ -760,4 +762,156 @@ TEST(AddWlanTestsGroup, Max_array_count) {
 
     // 17th should fail - array is full
     CHECK_FALSE(r_wlans.Deserialize(&raw_data));
+}
+
+TEST(AddWlanTestsGroup, Item_move_construction_steals_buffers) {
+    const uint8_t group_tsc[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
+    const uint8_t key[] = { 0xAA, 0xBB, 0xCC, 0xDD };
+
+    WritableAddWlanArray::Item src{ 1,
+                                    1,
+                                    0x0001,
+                                    0,
+                                    AddWlanHeader::KeyStatus::StaticWep,
+                                    key,
+                                    group_tsc,
+                                    AddWlanHeader::QoS::Voice,
+                                    AddWlanHeader::AuthType::Wpa2Psk,
+                                    AddWlanHeader::MACMode::SplitMAC,
+                                    AddWlanHeader::TunnelMode::Tunnel8023,
+                                    1,
+                                    "MovedSSID" };
+
+    WritableAddWlanArray::Item moved{ std::move(src) };
+
+    // the buffers must be stolen, not copied
+    CHECK_TRUE(src.key.empty());
+    CHECK_TRUE(src.ssid.empty());
+
+    CHECK_EQUAL(sizeof(key), moved.key.size());
+    MEMCMP_EQUAL(key, moved.key.data(), sizeof(key));
+    STRNCMP_EQUAL("MovedSSID", moved.ssid.data(), moved.ssid.size());
+    CHECK_EQUAL(1, moved.GetRadioID());
+    CHECK_EQUAL(1, moved.GetWlanID());
+    CHECK_EQUAL(AddWlanHeader::QoS::Voice, moved.tail.qos);
+}
+
+TEST(AddWlanTestsGroup, Item_move_assignment_steals_buffers) {
+    const uint8_t group_tsc[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
+    const uint8_t key[] = { 0x11, 0x22, 0x33 };
+
+    WritableAddWlanArray::Item src{ 2,
+                                    3,
+                                    0x0002,
+                                    1,
+                                    AddWlanHeader::KeyStatus::BeginRekeying,
+                                    key,
+                                    group_tsc,
+                                    AddWlanHeader::QoS::Video,
+                                    AddWlanHeader::AuthType::WpaEap,
+                                    AddWlanHeader::MACMode::LocalMAC,
+                                    AddWlanHeader::TunnelMode::Tunnel80211,
+                                    0,
+                                    "SrcSSID" };
+
+    WritableAddWlanArray::Item dst{ 5,
+                                    6,
+                                    0x0003,
+                                    2,
+                                    AddWlanHeader::KeyStatus::PerStationKeys,
+                                    {},
+                                    group_tsc,
+                                    AddWlanHeader::QoS::BestEffort,
+                                    AddWlanHeader::AuthType::OpenSystem,
+                                    AddWlanHeader::MACMode::LocalMAC,
+                                    AddWlanHeader::TunnelMode::LocalBridging,
+                                    0,
+                                    "DstSSID" };
+
+    dst = std::move(src);
+
+    CHECK_TRUE(src.key.empty());
+    CHECK_TRUE(src.ssid.empty());
+
+    CHECK_EQUAL(sizeof(key), dst.key.size());
+    MEMCMP_EQUAL(key, dst.key.data(), sizeof(key));
+    STRNCMP_EQUAL("SrcSSID", dst.ssid.data(), dst.ssid.size());
+    CHECK_EQUAL(2, dst.GetRadioID());
+    CHECK_EQUAL(3, dst.GetWlanID());
+}
+
+TEST(AddWlanTestsGroup, Item_copy_still_available) {
+    const uint8_t group_tsc[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
+    const uint8_t key[] = { 0x11, 0x22, 0x33 };
+
+    WritableAddWlanArray::Item src{ 4,
+                                    5,
+                                    0x0001,
+                                    0,
+                                    AddWlanHeader::KeyStatus::PerStationKeys,
+                                    key,
+                                    group_tsc,
+                                    AddWlanHeader::QoS::BestEffort,
+                                    AddWlanHeader::AuthType::OpenSystem,
+                                    AddWlanHeader::MACMode::LocalMAC,
+                                    AddWlanHeader::TunnelMode::LocalBridging,
+                                    0,
+                                    "KeepSSID" };
+
+    WritableAddWlanArray::Item copied{ src };
+    WritableAddWlanArray::Item assigned{ src };
+    assigned = src;
+
+    CHECK_EQUAL(sizeof(key), src.key.size());
+    STRNCMP_EQUAL("KeepSSID", src.ssid.data(), src.ssid.size());
+    MEMCMP_EQUAL(key, copied.key.data(), sizeof(key));
+    MEMCMP_EQUAL(key, assigned.key.data(), sizeof(key));
+}
+
+TEST(AddWlanTestsGroup, Item_move_is_noexcept) {
+    // the copy constructor allocates and is not noexcept; the defaulted move of two
+    // vectors and two PODs is - this is what tells a real move from a silent copy
+    CHECK_TRUE(std::is_nothrow_move_constructible<WritableAddWlanArray::Item>::value);
+    CHECK_TRUE(std::is_nothrow_move_assignable<WritableAddWlanArray::Item>::value);
+    CHECK_FALSE(std::is_nothrow_copy_constructible<WritableAddWlanArray::Item>::value);
+}
+
+TEST(AddWlanTestsGroup, Add_sinks_moved_item) {
+    const uint8_t group_tsc[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06 };
+    const uint8_t key[] = { 0xDE, 0xAD, 0xBE, 0xEF };
+
+    WritableAddWlanArray::Item wlan{ 1,
+                                     1,
+                                     0x0001,
+                                     0,
+                                     AddWlanHeader::KeyStatus::StaticWep,
+                                     key,
+                                     group_tsc,
+                                     AddWlanHeader::QoS::BestEffort,
+                                     AddWlanHeader::AuthType::OpenSystem,
+                                     AddWlanHeader::MACMode::LocalMAC,
+                                     AddWlanHeader::TunnelMode::LocalBridging,
+                                     0,
+                                     "SinkSSID" };
+
+    WritableAddWlanArray w_wlans;
+    w_wlans.Add(std::move(wlan));
+
+    // the by-value sink parameter must be move-constructed from the caller's item
+    CHECK_TRUE(wlan.key.empty());
+    CHECK_TRUE(wlan.ssid.empty());
+
+    // and the stored item must carry the payload
+    uint8_t buffer[256] = {};
+    RawData raw_data{ buffer, buffer + sizeof(buffer) };
+    w_wlans.Serialize(&raw_data);
+
+    auto data_size = raw_data.current - buffer;
+    raw_data = { buffer, buffer + data_size };
+
+    ReadableAddWlanArray r_wlans;
+    CHECK_TRUE(r_wlans.Deserialize(&raw_data));
+    CHECK_EQUAL(1, r_wlans.Get().size());
+    MEMCMP_EQUAL(key, r_wlans.Get()[0].key, sizeof(key));
+    STRNCMP_EQUAL("SinkSSID", r_wlans.Get()[0].ssid, r_wlans.Get()[0].ssid_length);
 }

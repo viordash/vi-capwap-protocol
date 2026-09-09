@@ -118,6 +118,9 @@ struct WritableAddWlanArray : IWritableWlanConfigurationRequestOptionalElement {
         std::vector<char> ssid;
 
         Item(const Item &) = default;
+        Item(Item &&) = default;
+        Item &operator=(const Item &) = default;
+        Item &operator=(Item &&) = default;
         Item(uint8_t radio_id,
              uint8_t wlan_id,
              uint16_t capability,
