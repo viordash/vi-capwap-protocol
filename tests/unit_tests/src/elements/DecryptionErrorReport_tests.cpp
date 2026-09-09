@@ -2,6 +2,8 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <unistd.h>
+#include <type_traits>
+#include <utility>
 
 #include "elements/DecryptionErrorReport.h"
 
@@ -156,4 +158,34 @@ TEST(DecryptionErrorReportTestsGroup, Add_array_of_items_is_unique) {
     CHECK_EQUAL(1, item1.Get().size());
     CHECK_EQUAL(6, item1.Get()[0]->Length);
     MEMCMP_EQUAL(mac_6_1, (char *)item1.Get()[0]->MACAddresses, sizeof(mac_6_1));
+}
+TEST(DecryptionErrorReportTestsGroup, Item_is_movable) {
+    const uint8_t mac_6[] = { 0x00, 0x1A, 0x2B, 0x3C, 0x4D, 0x5E };
+    const uint8_t mac_8[] = { 0xAA, 0xBB, 0xCC, 0xFF, 0xFE, 0xDD, 0xEE, 0xFF };
+
+    WritableDecryptionErrorReportArray::Item src{ 12, { { mac_6 }, { mac_8 } } };
+
+    WritableDecryptionErrorReportArray::Item moved{ std::move(src) };
+    CHECK_TRUE(src.MacAddresses.empty());
+    CHECK_EQUAL(2, moved.MacAddresses.size());
+    CHECK_TRUE(moved.MacAddresses[0] == MacAddress{ mac_6 });
+    CHECK_TRUE(moved.MacAddresses[1] == MacAddress{ mac_8 });
+    CHECK_EQUAL(12, moved.header.RadioID);
+    CHECK_EQUAL(2, moved.header.NumOfEntries);
+
+    WritableDecryptionErrorReportArray::Item dst{ 19, { { mac_6 } } };
+    dst = std::move(moved);
+    CHECK_TRUE(moved.MacAddresses.empty());
+    CHECK_EQUAL(2, dst.MacAddresses.size());
+    CHECK_TRUE(dst.MacAddresses[1] == MacAddress{ mac_8 });
+    CHECK_EQUAL(12, dst.header.RadioID);
+
+    // copying must stay available
+    WritableDecryptionErrorReportArray::Item copied{ dst };
+    copied = dst;
+    CHECK_EQUAL(2, dst.MacAddresses.size());
+    CHECK_TRUE(copied.MacAddresses[0] == MacAddress{ mac_6 });
+
+    CHECK_TRUE(std::is_nothrow_move_constructible<WritableDecryptionErrorReportArray::Item>::value);
+    CHECK_TRUE(std::is_nothrow_move_assignable<WritableDecryptionErrorReportArray::Item>::value);
 }
