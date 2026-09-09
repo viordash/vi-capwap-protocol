@@ -51,6 +51,9 @@ struct WritableVendorSpecificPayloadArray : IWritableConfigurationStatusRequestO
         std::vector<char> value;
         VendorSpecificPayload header;
         Item(const Item &) = default;
+        Item(Item &&) = default;
+        Item &operator=(const Item &) = default;
+        Item &operator=(Item &&) = default;
         Item(uint32_t vendor_identifier, uint16_t element_id, std::vector<char> &&val)
             : value{ std::move(val) },
               header{ vendor_identifier, element_id, (uint16_t)value.size() } {};
